@@ -8,6 +8,8 @@ import SwipeCard from '@/components/SwipeCard/SwipeCard';
 import SavedList from '@/components/SavedList/SavedList';
 import UniversityList from '@/components/UniversityList/UniversityList';
 import AdmissionsDeadlines from '@/components/AdmissionsDeadlines/AdmissionsDeadlines';
+import UniversityComparison from '@/components/UniversityComparison/UniversityComparison';
+import AdmissionPredictor from '@/components/AdmissionPredictor/AdmissionPredictor';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
 
@@ -167,6 +169,16 @@ export default function Home() {
       {/* Admissions Deadlines Section */}
       {isSwipeMode && (
         <AdmissionsDeadlines currentField={filters.field} />
+      )}
+
+      {/* University Comparison Tool */}
+      {isSwipeMode && (
+        <UniversityComparison />
+      )}
+
+      {/* Admission Chance Predictor */}
+      {isSwipeMode && (
+        <AdmissionPredictor />
       )}
 
       {showSaved && (
