@@ -7,31 +7,37 @@
 export function calculateMatchScore(university, filters) {
     let score = 0;
 
-    // 1. Field Category Match (30 points)
-    if (university.fields.includes(filters.field)) {
-        score += 30;
+    // 1. Field-specific ranking (40 points max)
+    // Use field-specific ranking if available
+    const fieldRanking = university.fieldRankings?.[filters.field];
+    if (fieldRanking) {
+        // Lower ranking number = higher score (rank 1 gets 40 points, rank 15 gets ~13 points)
+        score += Math.max(10, 45 - (fieldRanking * 2.5));
+    } else if (university.fields.includes(filters.field)) {
+        // Field is available but no specific ranking
+        score += 15;
     }
 
-    // 2. Exact Program Match (40 points)
+    // 2. Exact Program Match (30 points)
     if (filters.program !== "Any") {
         const fieldPrograms = university.programs[filters.field] || [];
         if (fieldPrograms.includes(filters.program)) {
-            score += 40;
+            score += 30;
         }
     } else {
         // If "Any" program, give partial points for having the field
         if (university.fields.includes(filters.field)) {
-            score += 20;
+            score += 15;
         }
     }
 
-    // 3. Campus/Hostel Match (15 points)
+    // 3. Campus/Hostel Match (10 points)
     if (filters.hostel !== "Any") {
         if (university.hostelAvailability === filters.hostel) {
-            score += 15;
+            score += 10;
         }
     } else {
-        score += 7; // Partial points for flexibility
+        score += 5; // Partial points for flexibility
     }
 
     // 4. City Match (10 points)
@@ -52,15 +58,12 @@ export function calculateMatchScore(university, filters) {
         score += 2; // Partial points for flexibility
     }
 
-    // 6. Degree Level Match (bonus points)
+    // 6. Degree Level Match (5 points)
     if (filters.degreeLevel !== "Any") {
         if (university.degreeLevel.includes(filters.degreeLevel)) {
-            score += 10;
+            score += 5;
         }
     }
-
-    // 7. Base score from university ranking (inverse - higher ranked = higher score)
-    score += Math.max(0, 20 - university.ranking);
 
     return score;
 }
@@ -109,8 +112,17 @@ export function rankUniversities(universities, filters) {
         matchScore: calculateMatchScore(uni, filters)
     }));
 
-    // Sort by score (highest first)
-    scored.sort((a, b) => b.matchScore - a.matchScore);
+    // Sort by score (highest first), then by field-specific ranking
+    scored.sort((a, b) => {
+        // First by score
+        if (b.matchScore !== a.matchScore) {
+            return b.matchScore - a.matchScore;
+        }
+        // Then by field-specific ranking
+        const aRank = a.fieldRankings?.[filters.field] || 999;
+        const bRank = b.fieldRankings?.[filters.field] || 999;
+        return aRank - bRank;
+    });
 
     return scored;
 }
@@ -119,8 +131,15 @@ export function rankUniversities(universities, filters) {
  * Get match percentage for display
  */
 export function getMatchPercentage(score) {
-    // Max possible score is approximately 120
-    const maxScore = 120;
+    // Max possible score is approximately 100
+    const maxScore = 100;
     const percentage = Math.min(100, Math.round((score / maxScore) * 100));
     return percentage;
+}
+
+/**
+ * Get field-specific rank for a university
+ */
+export function getFieldRank(university, field) {
+    return university.fieldRankings?.[field] || null;
 }

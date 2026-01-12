@@ -6,6 +6,8 @@ import Header from '@/components/Header/Header';
 import FilterSection from '@/components/FilterSection/FilterSection';
 import SwipeCard from '@/components/SwipeCard/SwipeCard';
 import SavedList from '@/components/SavedList/SavedList';
+import UniversityList from '@/components/UniversityList/UniversityList';
+import AdmissionsDeadlines from '@/components/AdmissionsDeadlines/AdmissionsDeadlines';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
 
@@ -26,6 +28,7 @@ export default function Home() {
 
   // Universities state
   const [rankedUniversities, setRankedUniversities] = useState([]);
+  const [allRankedUniversities, setAllRankedUniversities] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [savedUniversities, setSavedUniversities] = useState([]);
   const [skippedIds, setSkippedIds] = useState([]);
@@ -33,7 +36,8 @@ export default function Home() {
   // Rank universities when filters change
   useEffect(() => {
     const ranked = rankUniversities(universities, filters);
-    // Filter out already swiped universities
+    setAllRankedUniversities(ranked);
+    // Filter out already swiped universities for swipe mode
     const filtered = ranked.filter(uni =>
       !savedUniversities.some(s => s.id === uni.id) &&
       !skippedIds.includes(uni.id)
@@ -54,6 +58,13 @@ export default function Home() {
     setCurrentIndex(prev => prev + 1);
   };
 
+  // Handle save from list
+  const handleSaveFromList = (university) => {
+    if (!savedUniversities.some(s => s.id === university.id)) {
+      setSavedUniversities(prev => [...prev, university]);
+    }
+  };
+
   // Remove from saved
   const handleRemoveSaved = (id) => {
     setSavedUniversities(prev => prev.filter(uni => uni.id !== id));
@@ -69,6 +80,9 @@ export default function Home() {
   // Get visible cards (current + next for stacking effect)
   const visibleCards = rankedUniversities.slice(currentIndex, currentIndex + 2);
   const hasMoreCards = currentIndex < rankedUniversities.length;
+
+  // Get saved IDs for list
+  const savedIds = savedUniversities.map(u => u.id);
 
   return (
     <main className={styles.main}>
@@ -138,6 +152,21 @@ export default function Home() {
             </span>
           </div>
         </section>
+      )}
+
+      {/* University List Section */}
+      {isSwipeMode && (
+        <UniversityList
+          universities={allRankedUniversities}
+          field={filters.field}
+          onSave={handleSaveFromList}
+          savedIds={savedIds}
+        />
+      )}
+
+      {/* Admissions Deadlines Section */}
+      {isSwipeMode && (
+        <AdmissionsDeadlines currentField={filters.field} />
       )}
 
       {showSaved && (

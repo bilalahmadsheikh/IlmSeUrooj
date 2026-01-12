@@ -10,6 +10,12 @@ export const universities = [
     established: 1991,
     type: "Public",
     ranking: 1,
+    fieldRankings: {
+      "Pre-Engineering": 1,
+      "Computer Science": 2,
+      "Business": 3,
+      "Medical": 5
+    },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Pre-Engineering", "Computer Science", "Business", "Medical"],
@@ -23,7 +29,13 @@ export const universities = [
     highlights: ["Top Engineering School", "Strong Research", "Industry Connections"],
     description: "Pakistan's leading STEM university with world-class facilities and research programs.",
     website: "https://nust.edu.pk",
-    avgFee: "PKR 200,000 - 400,000 per semester"
+    avgFee: "PKR 200,000 - 400,000 per semester",
+    admissions: {
+      deadline: "2026-01-25",
+      testName: "NET Series II",
+      testDate: "2026-01-31",
+      applyUrl: "https://ugadmissions.nust.edu.pk"
+    }
   },
   {
     id: 2,
@@ -34,6 +46,11 @@ export const universities = [
     established: 1985,
     type: "Private",
     ranking: 2,
+    fieldRankings: {
+      "Business": 1,
+      "Computer Science": 3,
+      "Pre-Engineering": 8
+    },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Business", "Computer Science", "Pre-Engineering"],
@@ -46,7 +63,13 @@ export const universities = [
     highlights: ["Best Business School", "Need-Based Aid", "Diverse Community"],
     description: "Premier private university known for its business and computer science programs.",
     website: "https://lums.edu.pk",
-    avgFee: "PKR 350,000 - 600,000 per semester"
+    avgFee: "PKR 350,000 - 600,000 per semester",
+    admissions: {
+      deadline: "2026-01-27",
+      testName: "LCAT",
+      testDate: "2026-02-15",
+      applyUrl: "https://admissions.lums.edu.pk"
+    }
   },
   {
     id: 3,
@@ -57,6 +80,11 @@ export const universities = [
     established: 2000,
     type: "Private",
     ranking: 3,
+    fieldRankings: {
+      "Computer Science": 1,
+      "Pre-Engineering": 6,
+      "Business": 8
+    },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Business"],
@@ -69,7 +97,13 @@ export const universities = [
     highlights: ["Top CS University", "Multiple Campuses", "Strong Alumni Network"],
     description: "Known for producing top software engineers with campuses across Pakistan.",
     website: "https://nu.edu.pk",
-    avgFee: "PKR 180,000 - 280,000 per semester"
+    avgFee: "PKR 180,000 - 280,000 per semester",
+    admissions: {
+      deadline: "2026-01-10",
+      testName: "NAT/NTS",
+      testDate: "2026-01-15",
+      applyUrl: "https://nu.edu.pk/Admissions"
+    }
   },
   {
     id: 4,
@@ -80,6 +114,11 @@ export const universities = [
     established: 1998,
     type: "Public",
     ranking: 4,
+    fieldRankings: {
+      "Computer Science": 4,
+      "Pre-Engineering": 7,
+      "Business": 4
+    },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Business"],
@@ -92,7 +131,13 @@ export const universities = [
     highlights: ["Affordable Fees", "Multiple Campuses", "Research Focus"],
     description: "Quality education at affordable prices with campuses in major cities.",
     website: "https://comsats.edu.pk",
-    avgFee: "PKR 80,000 - 150,000 per semester"
+    avgFee: "PKR 80,000 - 150,000 per semester",
+    admissions: {
+      deadline: "2026-01-12",
+      testName: "Entry Test",
+      testDate: "2026-01-21",
+      applyUrl: "https://admissions.comsats.edu.pk"
+    }
   },
   {
     id: 5,
@@ -103,6 +148,10 @@ export const universities = [
     established: 1955,
     type: "Public",
     ranking: 5,
+    fieldRankings: {
+      "Business": 2,
+      "Computer Science": 5
+    },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Business", "Computer Science"],
@@ -114,7 +163,13 @@ export const universities = [
     highlights: ["Oldest Business School", "Strong Placement", "Merit Based"],
     description: "Asia's oldest business school with exceptional corporate connections.",
     website: "https://iba.edu.pk",
-    avgFee: "PKR 250,000 - 450,000 per semester"
+    avgFee: "PKR 250,000 - 450,000 per semester",
+    admissions: {
+      deadline: "2026-01-21",
+      testName: "IBA Aptitude Test",
+      testDate: "2026-02-01",
+      applyUrl: "https://iba.edu.pk/admissions"
+    }
   },
   {
     id: 6,
@@ -125,6 +180,9 @@ export const universities = [
     established: 1921,
     type: "Public",
     ranking: 6,
+    fieldRankings: {
+      "Pre-Engineering": 2
+    },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Pre-Engineering"],
@@ -135,7 +193,13 @@ export const universities = [
     highlights: ["Historic Institution", "Engineering Excellence", "Affordable"],
     description: "Pakistan's oldest and most prestigious engineering institution.",
     website: "https://uet.edu.pk",
-    avgFee: "PKR 50,000 - 100,000 per semester"
+    avgFee: "PKR 50,000 - 100,000 per semester",
+    admissions: {
+      deadline: "2026-08-15",
+      testName: "ECAT",
+      testDate: "2026-08-20",
+      applyUrl: "https://uet.edu.pk/admissions"
+    }
   },
   {
     id: 7,
@@ -146,6 +210,10 @@ export const universities = [
     established: 1993,
     type: "Private",
     ranking: 7,
+    fieldRankings: {
+      "Pre-Engineering": 3,
+      "Computer Science": 6
+    },
     campusType: "Strong Campus Life",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Pre-Engineering", "Computer Science"],
@@ -157,7 +225,13 @@ export const universities = [
     highlights: ["Residential Campus", "Beautiful Location", "Strong Bonding"],
     description: "Elite engineering institute with a unique residential campus experience.",
     website: "https://giki.edu.pk",
-    avgFee: "PKR 300,000 - 450,000 per semester"
+    avgFee: "PKR 300,000 - 450,000 per semester",
+    admissions: {
+      deadline: "2026-06-30",
+      testName: "GIKI Entry Test",
+      testDate: "2026-07-10",
+      applyUrl: "https://giki.edu.pk/admissions"
+    }
   },
   {
     id: 8,
@@ -168,6 +242,10 @@ export const universities = [
     established: 1967,
     type: "Public",
     ranking: 8,
+    fieldRankings: {
+      "Pre-Engineering": 4,
+      "Computer Science": 7
+    },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Pre-Engineering", "Computer Science"],
@@ -179,7 +257,13 @@ export const universities = [
     highlights: ["Nuclear Research", "High Security", "Elite Faculty"],
     description: "Premier research institute focusing on nuclear and advanced engineering.",
     website: "https://pieas.edu.pk",
-    avgFee: "PKR 100,000 - 200,000 per semester"
+    avgFee: "PKR 100,000 - 200,000 per semester",
+    admissions: {
+      deadline: "2026-07-15",
+      testName: "PIEAS Entry Test",
+      testDate: "2026-07-25",
+      applyUrl: "https://pieas.edu.pk/admissions"
+    }
   },
   {
     id: 9,
@@ -190,6 +274,11 @@ export const universities = [
     established: 2014,
     type: "Private",
     ranking: 9,
+    fieldRankings: {
+      "Computer Science": 8,
+      "Pre-Engineering": 10,
+      "Others": 1
+    },
     campusType: "Strong Campus Life",
     hostelAvailability: "On-Campus without Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Others"],
@@ -202,7 +291,13 @@ export const universities = [
     highlights: ["Liberal Arts Focus", "Modern Campus", "Innovative Curriculum"],
     description: "Pakistan's first liberal arts university with a focus on innovation.",
     website: "https://habib.edu.pk",
-    avgFee: "PKR 400,000 - 550,000 per semester"
+    avgFee: "PKR 400,000 - 550,000 per semester",
+    admissions: {
+      deadline: "2026-03-15",
+      testName: "Habib Test",
+      testDate: "2026-03-25",
+      applyUrl: "https://habib.edu.pk/admissions"
+    }
   },
   {
     id: 10,
@@ -213,6 +308,9 @@ export const universities = [
     established: 1983,
     type: "Private",
     ranking: 10,
+    fieldRankings: {
+      "Medical": 1
+    },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Medical"],
@@ -223,7 +321,13 @@ export const universities = [
     highlights: ["Top Medical School", "International Recognition", "Research Excellence"],
     description: "Premier medical institution with world-class healthcare training.",
     website: "https://aku.edu",
-    avgFee: "PKR 500,000 - 800,000 per semester"
+    avgFee: "PKR 500,000 - 800,000 per semester",
+    admissions: {
+      deadline: "2026-02-28",
+      testName: "AKU Test",
+      testDate: "2026-03-10",
+      applyUrl: "https://aku.edu/admissions"
+    }
   },
   {
     id: 11,
@@ -234,6 +338,10 @@ export const universities = [
     established: 1922,
     type: "Public",
     ranking: 11,
+    fieldRankings: {
+      "Pre-Engineering": 5,
+      "Computer Science": 9
+    },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Pre-Engineering", "Computer Science"],
@@ -245,7 +353,13 @@ export const universities = [
     highlights: ["Historic Excellence", "Affordable", "Strong Alumni"],
     description: "One of Pakistan's oldest engineering universities with strong legacy.",
     website: "https://neduet.edu.pk",
-    avgFee: "PKR 60,000 - 120,000 per semester"
+    avgFee: "PKR 60,000 - 120,000 per semester",
+    admissions: {
+      deadline: "2026-08-10",
+      testName: "NED Entry Test",
+      testDate: "2026-08-18",
+      applyUrl: "https://neduet.edu.pk/admissions"
+    }
   },
   {
     id: 12,
@@ -256,6 +370,11 @@ export const universities = [
     established: 2000,
     type: "Private",
     ranking: 12,
+    fieldRankings: {
+      "Computer Science": 10,
+      "Business": 5,
+      "Pre-Engineering": 11
+    },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Business", "Pre-Engineering"],
@@ -268,7 +387,13 @@ export const universities = [
     highlights: ["Navy Affiliated", "Multiple Campuses", "Disciplined Environment"],
     description: "Navy-affiliated university with strong discipline and quality education.",
     website: "https://bahria.edu.pk",
-    avgFee: "PKR 150,000 - 250,000 per semester"
+    avgFee: "PKR 150,000 - 250,000 per semester",
+    admissions: {
+      deadline: "2026-02-15",
+      testName: "Bahria Test",
+      testDate: "2026-02-25",
+      applyUrl: "https://bahria.edu.pk/admissions"
+    }
   },
   {
     id: 13,
@@ -279,6 +404,11 @@ export const universities = [
     established: 2002,
     type: "Public",
     ranking: 13,
+    fieldRankings: {
+      "Pre-Engineering": 9,
+      "Computer Science": 11,
+      "Business": 7
+    },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Pre-Engineering", "Computer Science", "Business"],
@@ -291,7 +421,13 @@ export const universities = [
     highlights: ["Air Force Affiliated", "Aerospace Focus", "Modern Facilities"],
     description: "Air Force university excelling in aerospace and related fields.",
     website: "https://au.edu.pk",
-    avgFee: "PKR 130,000 - 220,000 per semester"
+    avgFee: "PKR 130,000 - 220,000 per semester",
+    admissions: {
+      deadline: "2026-07-20",
+      testName: "Air University Test",
+      testDate: "2026-07-28",
+      applyUrl: "https://au.edu.pk/admissions"
+    }
   },
   {
     id: 14,
@@ -302,6 +438,11 @@ export const universities = [
     established: 1995,
     type: "Private",
     ranking: 14,
+    fieldRankings: {
+      "Computer Science": 12,
+      "Business": 6,
+      "Others": 2
+    },
     campusType: "Industry-Focused",
     hostelAvailability: "Hybrid/Partially Online",
     fields: ["Computer Science", "Business", "Others"],
@@ -314,7 +455,13 @@ export const universities = [
     highlights: ["Flexible Programs", "Media Focus", "Industry Links"],
     description: "Known for business and media programs with industry connections.",
     website: "https://szabist.edu.pk",
-    avgFee: "PKR 180,000 - 300,000 per semester"
+    avgFee: "PKR 180,000 - 300,000 per semester",
+    admissions: {
+      deadline: "2026-02-20",
+      testName: "SZABIST Test",
+      testDate: "2026-03-01",
+      applyUrl: "https://szabist.edu.pk/admissions"
+    }
   },
   {
     id: 15,
@@ -325,6 +472,10 @@ export const universities = [
     established: 2012,
     type: "Public",
     ranking: 15,
+    fieldRankings: {
+      "Computer Science": 13,
+      "Business": 9
+    },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus without Hostel",
     fields: ["Computer Science", "Business"],
@@ -336,7 +487,113 @@ export const universities = [
     highlights: ["Tech Focused", "Modern Curriculum", "Startup Culture"],
     description: "Modern IT-focused university promoting entrepreneurship and innovation.",
     website: "https://itu.edu.pk",
-    avgFee: "PKR 200,000 - 350,000 per semester"
+    avgFee: "PKR 200,000 - 350,000 per semester",
+    admissions: {
+      deadline: "2026-07-31",
+      testName: "ITU Admission Test",
+      testDate: "2026-08-05",
+      applyUrl: "https://itu.edu.pk/admissions"
+    }
+  }
+];
+
+// Upcoming admission deadlines (sorted by date)
+export const upcomingDeadlines = [
+  {
+    id: 1,
+    university: "FAST",
+    shortName: "FAST",
+    program: "All Programs",
+    field: "Computer Science",
+    deadline: "2026-01-10",
+    testName: "NAT/NTS",
+    testDate: "2026-01-15",
+    session: "Spring 2026",
+    applyUrl: "https://nu.edu.pk/Admissions"
+  },
+  {
+    id: 2,
+    university: "COMSATS",
+    shortName: "COMSATS",
+    program: "All Programs (Wah Campus)",
+    field: "Pre-Engineering",
+    deadline: "2026-01-12",
+    testName: "Entry Test",
+    testDate: "2026-01-21",
+    session: "Spring 2026",
+    applyUrl: "https://admissions.comsats.edu.pk"
+  },
+  {
+    id: 3,
+    university: "IBA Karachi",
+    shortName: "IBA",
+    program: "BBA, BS Programs",
+    field: "Business",
+    deadline: "2026-01-21",
+    testName: "IBA Aptitude Test",
+    testDate: "2026-02-01",
+    session: "Fall 2026 - Round 1",
+    applyUrl: "https://iba.edu.pk/admissions"
+  },
+  {
+    id: 4,
+    university: "NUST",
+    shortName: "NUST",
+    program: "Engineering & CS",
+    field: "Pre-Engineering",
+    deadline: "2026-01-25",
+    testName: "NET Series II",
+    testDate: "2026-01-31",
+    session: "Fall 2026",
+    applyUrl: "https://ugadmissions.nust.edu.pk"
+  },
+  {
+    id: 5,
+    university: "LUMS",
+    shortName: "LUMS",
+    program: "Undergraduate",
+    field: "Business",
+    deadline: "2026-01-27",
+    testName: "LCAT",
+    testDate: "2026-02-15",
+    session: "Fall 2026",
+    applyUrl: "https://admissions.lums.edu.pk"
+  },
+  {
+    id: 6,
+    university: "Bahria University",
+    shortName: "Bahria",
+    program: "All Programs",
+    field: "Business",
+    deadline: "2026-02-15",
+    testName: "Bahria Test",
+    testDate: "2026-02-25",
+    session: "Fall 2026",
+    applyUrl: "https://bahria.edu.pk/admissions"
+  },
+  {
+    id: 7,
+    university: "SZABIST",
+    shortName: "SZABIST",
+    program: "All Programs",
+    field: "Business",
+    deadline: "2026-02-20",
+    testName: "SZABIST Test",
+    testDate: "2026-03-01",
+    session: "Fall 2026",
+    applyUrl: "https://szabist.edu.pk/admissions"
+  },
+  {
+    id: 8,
+    university: "Aga Khan University",
+    shortName: "AKU",
+    program: "MBBS, Nursing",
+    field: "Medical",
+    deadline: "2026-02-28",
+    testName: "AKU Test",
+    testDate: "2026-03-10",
+    session: "Fall 2026",
+    applyUrl: "https://aku.edu/admissions"
   }
 ];
 
@@ -349,13 +606,13 @@ export const filterOptions = {
     { value: "Medical", label: "Medical" },
     { value: "Others", label: "Others" }
   ],
-  
+
   degreeLevel: [
     { value: "Any", label: "Any Level" },
     { value: "Undergraduate", label: "Undergraduate" },
     { value: "Associate", label: "Associate Degree" }
   ],
-  
+
   programs: {
     "Pre-Engineering": [
       { value: "Any", label: "Any Program" },
@@ -392,14 +649,14 @@ export const filterOptions = {
       { value: "Media Sciences", label: "Media Sciences" }
     ]
   },
-  
+
   hostelAvailability: [
     { value: "Any", label: "Any" },
     { value: "On-Campus with Hostel", label: "On-Campus with Hostel" },
     { value: "On-Campus without Hostel", label: "On-Campus without Hostel" },
     { value: "Hybrid/Partially Online", label: "Hybrid/Online" }
   ],
-  
+
   cities: [
     { value: "Any", label: "Any City" },
     { value: "Islamabad", label: "Islamabad" },
@@ -407,7 +664,7 @@ export const filterOptions = {
     { value: "Karachi", label: "Karachi" },
     { value: "Topi", label: "Topi" }
   ],
-  
+
   campusType: [
     { value: "Any", label: "Any Focus" },
     { value: "Research-Oriented", label: "Research-Oriented" },
