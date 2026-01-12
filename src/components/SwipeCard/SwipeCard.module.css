@@ -1,0 +1,297 @@
+.card {
+    position: absolute;
+    width: 100%;
+    max-width: 400px;
+    background: var(--gradient-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    transition: transform var(--transition-spring), box-shadow var(--transition-base);
+}
+
+.card:active {
+    cursor: grabbing;
+}
+
+.card:not(.top) {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.card.top {
+    z-index: 10;
+}
+
+/* Swipe Direction Feedback */
+.card.right {
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
+}
+
+.card.left {
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.4);
+}
+
+/* Swipe Overlays */
+.overlay {
+    position: absolute;
+    top: var(--space-6);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    font-family: var(--font-display);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    z-index: 20;
+    pointer-events: none;
+}
+
+.likeOverlay {
+    right: var(--space-6);
+    background: rgba(34, 197, 94, 0.9);
+    color: white;
+    transform: rotate(15deg);
+}
+
+.skipOverlay {
+    left: var(--space-6);
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    transform: rotate(-15deg);
+}
+
+.card.right .likeOverlay {
+    opacity: 1;
+}
+
+.card.left .skipOverlay {
+    opacity: 1;
+}
+
+/* Card Inner */
+.cardInner {
+    padding: var(--space-6);
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.logoContainer {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+}
+
+.logoPlaceholder {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: white;
+    font-family: var(--font-display);
+}
+
+.headerInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.name {
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.fullName {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.matchBadge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+}
+
+.matchPercent {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary-light);
+}
+
+.matchLabel {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+/* Tags */
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.tag {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.tagIcon {
+    font-size: var(--font-size-sm);
+}
+
+/* Programs & Highlights */
+.sectionTitle {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.programs,
+.highlights {
+    margin-bottom: var(--space-4);
+}
+
+.programList,
+.highlightList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.programTag {
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-primary-dark);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+}
+
+.highlightTag {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* Details Section */
+.details {
+    padding: var(--space-4);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+    animation: fadeIn var(--transition-base) ease;
+}
+
+.description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-3);
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--glass-border);
+    font-size: var(--font-size-sm);
+}
+
+.detailRow span:first-child {
+    color: var(--color-text-muted);
+}
+
+.detailRow span:last-child {
+    color: var(--color-text-primary);
+    text-align: right;
+}
+
+/* Details Button */
+.detailsBtn {
+    width: 100%;
+    padding: var(--space-2);
+    background: transparent;
+    border: 1px dashed var(--glass-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-4);
+    transition: all var(--transition-fast);
+}
+
+.detailsBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary-light);
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-8);
+}
+
+.actionBtn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xl);
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+}
+
+.skipBtn {
+    background: var(--color-bg-tertiary);
+    color: var(--color-danger);
+    border: 2px solid var(--color-danger);
+}
+
+.skipBtn:hover {
+    background: var(--color-danger);
+    color: white;
+    transform: scale(1.1);
+}
+
+.saveBtn {
+    background: var(--color-bg-tertiary);
+    border: 2px solid var(--color-success);
+}
+
+.saveBtn:hover {
+    background: var(--color-success);
+    transform: scale(1.1);
+}

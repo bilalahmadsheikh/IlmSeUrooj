@@ -1,0 +1,212 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    justify-content: flex-end;
+    animation: fadeIn var(--transition-fast) ease;
+}
+
+.panel {
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+    background: var(--color-bg-primary);
+    border-left: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn var(--transition-base) ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.titleIcon {
+    font-size: var(--font-size-2xl);
+}
+
+.closeBtn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-tertiary);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+    transition: all var(--transition-fast);
+}
+
+.closeBtn:hover {
+    background: var(--color-danger);
+    color: white;
+}
+
+/* Empty State */
+.empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    text-align: center;
+}
+
+.emptyIcon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+}
+
+.emptyText {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.emptyHint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* List */
+.list {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-3);
+    transition: all var(--transition-fast);
+}
+
+.item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.itemLogo {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: white;
+}
+
+.itemInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.itemName {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.itemDetails {
+    display: flex;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.removeBtn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.removeBtn:hover {
+    background: var(--color-danger);
+    color: white;
+}
+
+/* Footer */
+.footer {
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.count {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.applyBtn {
+    width: 100%;
+    padding: var(--space-4);
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    color: white;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-glow);
+}
+
+.applyBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(0, 135, 90, 0.4);
+}
