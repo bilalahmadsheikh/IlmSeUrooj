@@ -295,3 +295,116 @@
     background: var(--color-success);
     transform: scale(1.1);
 }
+
+/* Full Details Button */
+.fullDetailsBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    background: var(--color-bg-tertiary);
+    border: 1px dashed var(--glass-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    cursor: not-allowed;
+    opacity: 0.8;
+    transition: all var(--transition-fast);
+}
+
+.comingSoon {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+}
+
+/* Responsive Styles */
+@media (max-width: 480px) {
+    .card {
+        max-width: 100%;
+        border-radius: var(--radius-xl);
+    }
+
+    .cardInner {
+        padding: var(--space-4);
+    }
+
+    .header {
+        gap: var(--space-3);
+    }
+
+    .logoContainer {
+        width: 48px;
+        height: 48px;
+    }
+
+    .logoPlaceholder {
+        font-size: var(--font-size-xl);
+    }
+
+    .name {
+        font-size: var(--font-size-lg);
+    }
+
+    .fullName {
+        font-size: 10px;
+    }
+
+    .matchBadge {
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .matchPercent {
+        font-size: var(--font-size-base);
+    }
+
+    .tag {
+        padding: var(--space-1) var(--space-2);
+        font-size: var(--font-size-xs);
+    }
+
+    .tagIcon {
+        font-size: var(--font-size-xs);
+    }
+
+    .sectionTitle {
+        font-size: var(--font-size-xs);
+    }
+
+    .programTag {
+        font-size: 10px;
+        padding: 2px var(--space-2);
+    }
+
+    .highlightTag {
+        font-size: var(--font-size-xs);
+    }
+
+    .description {
+        font-size: var(--font-size-xs);
+    }
+
+    .detailRow {
+        font-size: var(--font-size-xs);
+    }
+
+    .actions {
+        gap: var(--space-6);
+    }
+
+    .actionBtn {
+        width: 48px;
+        height: 48px;
+        font-size: var(--font-size-lg);
+    }
+
+    .overlay {
+        font-size: var(--font-size-lg);
+        padding: var(--space-2) var(--space-4);
+    }
+}

@@ -154,6 +154,12 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                             <span>🎯 Focus:</span>
                             <span>{university.campusType}</span>
                         </div>
+
+                        {/* View Full Details Button */}
+                        <button className={styles.fullDetailsBtn} disabled>
+                            View Full Details →
+                            <span className={styles.comingSoon}>Coming Soon</span>
+                        </button>
                     </div>
                 )}
 

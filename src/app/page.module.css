@@ -141,6 +141,46 @@
 }
 
 /* Responsive */
+@media (max-width: 480px) {
+  .swipeSection {
+    padding: var(--space-2);
+  }
+
+  .cardContainer {
+    min-height: 420px;
+    max-width: 100%;
+    padding: 0 var(--space-2);
+  }
+
+  .swipeHint {
+    max-width: 100%;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-xs);
+  }
+
+  .progress {
+    max-width: 100%;
+    padding: 0 var(--space-4);
+  }
+
+  .noMore {
+    padding: var(--space-6);
+    margin: 0 var(--space-4);
+  }
+
+  .noMoreIcon {
+    font-size: 3rem;
+  }
+
+  .noMoreTitle {
+    font-size: var(--font-size-xl);
+  }
+
+  .noMoreText {
+    font-size: var(--font-size-sm);
+  }
+}
+
 @media (min-width: 768px) {
   .swipeSection {
     padding: var(--space-8);
