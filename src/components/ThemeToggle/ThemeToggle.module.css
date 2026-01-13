@@ -1,0 +1,120 @@
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.toggle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.toggle:hover {
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.toggle:hover::before {
+    opacity: 0.1;
+}
+
+.toggle:active {
+    transform: scale(0.95);
+}
+
+.iconWrapper {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+
+.icon {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transition: all var(--transition-spring);
+}
+
+/* Sun icon styles */
+.sun {
+    color: var(--color-accent-2);
+    transform: rotate(90deg) scale(0);
+    opacity: 0;
+}
+
+.sun.active {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+}
+
+/* Moon icon styles */
+.moon {
+    color: var(--color-accent-3);
+    transform: rotate(-90deg) scale(0);
+    opacity: 0;
+}
+
+.moon.active {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+}
+
+/* Star twinkle animation */
+.star {
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+.star:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+}
+
+.label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+    position: relative;
+    z-index: 1;
+}
+
+.toggle:hover .label {
+    color: var(--color-text-primary);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .label {
+        display: none;
+    }
+
+    .toggle {
+        padding: var(--space-2);
+    }
+}

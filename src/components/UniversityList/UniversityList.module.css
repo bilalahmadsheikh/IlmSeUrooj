@@ -1,7 +1,9 @@
 .section {
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-12) var(--space-6);
     max-width: 900px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .header {
@@ -13,7 +15,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     font-family: var(--font-display);
     font-size: var(--font-size-2xl);
     font-weight: 700;
@@ -22,6 +24,19 @@
 
 .titleIcon {
     font-size: var(--font-size-3xl);
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
 .count {
@@ -40,12 +55,28 @@
     text-align: center;
     padding: var(--space-12);
     color: var(--color-text-muted);
+    background: var(--glass-bg);
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--glass-border);
 }
 
 .emptyIcon {
     font-size: 3rem;
     display: block;
     margin-bottom: var(--space-4);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 /* List */
@@ -58,20 +89,42 @@
 /* Card */
 .card {
     background: var(--glass-bg);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: all var(--transition-base);
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    pointer-events: none;
 }
 
 .card:hover {
     border-color: var(--color-primary);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+}
+
+.card:hover::before {
+    opacity: 0.03;
 }
 
 .card.saved {
-    border-color: var(--color-success);
+    border-color: var(--color-accent-1);
+}
+
+.card.saved::before {
+    background: var(--gradient-success);
+    opacity: 0.03;
 }
 
 .card.expanded {
@@ -84,6 +137,8 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-4);
+    position: relative;
+    z-index: 1;
 }
 
 .rank {
@@ -116,6 +171,27 @@
     font-size: var(--font-size-xl);
     font-weight: 700;
     color: white;
+    box-shadow: var(--shadow-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.logo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.2) 50%, transparent 60%);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .info {
@@ -164,26 +240,55 @@
     flex-direction: column;
     align-items: center;
     padding: var(--space-2) var(--space-3);
-    background: var(--color-bg-tertiary);
+    background: var(--glass-bg-light);
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.matchBadge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0.1;
 }
 
 .matchPercent {
     font-size: var(--font-size-lg);
     font-weight: 700;
-    color: var(--color-primary-light);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
 }
 
 .matchLabel {
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
+    position: relative;
+    z-index: 1;
 }
 
 /* Details (Expanded) */
 .details {
     padding: 0 var(--space-4) var(--space-4);
     animation: fadeIn var(--transition-base) ease;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .description {
@@ -194,6 +299,7 @@
     padding: var(--space-3);
     background: var(--color-bg-secondary);
     border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
 }
 
 .detailsGrid {
@@ -216,6 +322,12 @@
     padding: var(--space-2);
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    transition: all var(--transition-fast);
+}
+
+.detailItem:hover {
+    border-color: var(--color-primary);
 }
 
 .detailLabel {
@@ -253,10 +365,17 @@
 
 .programTag {
     padding: var(--space-1) var(--space-3);
-    background: var(--color-primary-dark);
+    background: var(--glass-bg-light);
+    border: 1px solid var(--color-primary);
     border-radius: var(--radius-md);
     font-size: var(--font-size-xs);
-    color: var(--color-text-primary);
+    color: var(--color-primary-light);
+    transition: all var(--transition-fast);
+}
+
+.programTag:hover {
+    background: var(--color-primary);
+    color: white;
 }
 
 .highlightTag {
@@ -284,9 +403,10 @@
 .comingSoon {
     font-size: var(--font-size-xs);
     padding: var(--space-1) var(--space-2);
-    background: var(--color-bg-secondary);
+    background: var(--glass-bg-light);
     border-radius: var(--radius-full);
-    color: var(--color-text-muted);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
 }
 
 /* Card Footer */
@@ -295,6 +415,8 @@
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
     border-top: 1px solid var(--glass-border);
+    position: relative;
+    z-index: 1;
 }
 
 .expandBtn {
@@ -309,7 +431,7 @@
 
 .expandBtn:hover {
     color: var(--color-primary-light);
-    background: var(--color-bg-tertiary);
+    background: var(--glass-bg-light);
 }
 
 .saveBtn {
@@ -320,13 +442,19 @@
     font-size: var(--font-size-sm);
     font-weight: 500;
     transition: all var(--transition-base);
+    border: 1px solid var(--glass-border);
 }
 
 .saveBtn:hover:not(:disabled) {
-    background: var(--color-success);
+    background: var(--gradient-success);
+    border-color: transparent;
+    color: white;
+    transform: scale(1.05);
 }
 
 .savedBtn {
-    background: var(--color-success);
+    background: var(--gradient-success);
+    border-color: transparent;
+    color: white;
     cursor: default;
 }

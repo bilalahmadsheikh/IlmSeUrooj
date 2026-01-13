@@ -10,6 +10,7 @@ import UniversityList from '@/components/UniversityList/UniversityList';
 import AdmissionsDeadlines from '@/components/AdmissionsDeadlines/AdmissionsDeadlines';
 import UniversityComparison from '@/components/UniversityComparison/UniversityComparison';
 import AdmissionPredictor from '@/components/AdmissionPredictor/AdmissionPredictor';
+import AnimatedBackground from '@/components/Background/AnimatedBackground';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
 
@@ -88,6 +89,8 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      <AnimatedBackground />
+
       <Header
         savedCount={savedUniversities.length}
         onShowSaved={() => setShowSaved(true)}

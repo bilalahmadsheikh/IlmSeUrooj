@@ -3,6 +3,8 @@
     max-width: 900px;
     margin: 0 auto;
     border-top: 1px solid var(--glass-border);
+    position: relative;
+    z-index: 1;
 }
 
 .header {
@@ -14,7 +16,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     font-family: var(--font-display);
     font-size: var(--font-size-2xl);
     font-weight: 700;
@@ -23,6 +25,19 @@
 
 .titleIcon {
     font-size: var(--font-size-3xl);
+    animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.3);
+    }
 }
 
 .subtitle {
@@ -33,16 +48,31 @@
 /* Input Card */
 .inputCard {
     background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
     margin-bottom: var(--space-6);
+    position: relative;
+    overflow: hidden;
+}
+
+.inputCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0.03;
+    pointer-events: none;
 }
 
 .inputGrid {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--space-6);
+    position: relative;
+    z-index: 1;
 }
 
 @media (min-width: 640px) {
@@ -69,7 +99,10 @@
 .label .value {
     font-size: var(--font-size-lg);
     font-weight: 700;
-    color: var(--color-primary-light);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .slider {
@@ -89,7 +122,12 @@
     background: var(--gradient-primary);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-glow);
+    transition: transform var(--transition-fast);
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
 }
 
 .slider::-moz-range-thumb {
@@ -117,16 +155,19 @@
     color: var(--color-text-primary);
     font-size: var(--font-size-base);
     cursor: pointer;
+    transition: all var(--transition-fast);
 }
 
 .select:focus {
     outline: none;
     border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 /* Methodology */
 .methodology {
-    background: var(--color-bg-secondary);
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
@@ -158,6 +199,12 @@
     padding: var(--space-3);
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    transition: all var(--transition-fast);
+}
+
+.methodItem:hover {
+    border-color: var(--color-primary);
 }
 
 .methodIcon {
@@ -198,9 +245,17 @@
 
 .predictionCard {
     background: var(--glass-bg);
+    backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     overflow: hidden;
+    transition: all var(--transition-base);
+}
+
+.predictionCard:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
 }
 
 .predictionHeader {
@@ -222,6 +277,7 @@
     font-size: var(--font-size-xl);
     font-weight: 700;
     color: white;
+    box-shadow: var(--shadow-glow);
 }
 
 .uniInfo {
@@ -247,15 +303,28 @@
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-lg);
     min-width: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.chanceBadge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
 }
 
 .chanceBadge.green {
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid var(--color-success);
+    background: rgba(52, 211, 153, 0.15);
+    border: 1px solid var(--color-accent-1);
+}
+
+.chanceBadge.green::before {
+    background: var(--gradient-success);
 }
 
 .chanceBadge.yellow {
-    background: rgba(234, 179, 8, 0.15);
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid var(--color-warning);
 }
 
@@ -272,10 +341,12 @@
 .chanceText {
     font-size: var(--font-size-sm);
     font-weight: 700;
+    position: relative;
+    z-index: 1;
 }
 
 .green .chanceText {
-    color: var(--color-success);
+    color: var(--color-accent-1);
 }
 
 .yellow .chanceText {
@@ -293,6 +364,8 @@
 .chanceScore {
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
+    position: relative;
+    z-index: 1;
 }
 
 .predictionBody {
@@ -306,6 +379,7 @@
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-2);
+    border: 1px solid var(--glass-border);
 }
 
 .formula strong {
@@ -327,13 +401,16 @@
 }
 
 .progressBar {
-    height: 4px;
+    height: 6px;
     background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
 }
 
 .progressFill {
     height: 100%;
     transition: width var(--transition-base);
+    border-radius: var(--radius-full);
 }
 
 /* Disclaimer */
@@ -342,8 +419,8 @@
     align-items: flex-start;
     gap: var(--space-2);
     padding: var(--space-4);
-    background: rgba(234, 179, 8, 0.1);
-    border: 1px solid rgba(234, 179, 8, 0.3);
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
     border-radius: var(--radius-lg);
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);

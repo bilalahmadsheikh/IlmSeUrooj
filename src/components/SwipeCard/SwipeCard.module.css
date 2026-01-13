@@ -9,7 +9,21 @@
     overflow: hidden;
     cursor: grab;
     user-select: none;
-    transition: transform var(--transition-spring), box-shadow var(--transition-base);
+    transition: transform var(--transition-spring), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    pointer-events: none;
+}
+
+.card:hover::before {
+    opacity: 0.03;
 }
 
 .card:active {
@@ -28,11 +42,13 @@
 
 /* Swipe Direction Feedback */
 .card.right {
-    box-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 60px rgba(52, 211, 153, 0.5);
+    border-color: var(--color-accent-1);
 }
 
 .card.left {
-    box-shadow: 0 0 40px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 60px rgba(239, 68, 68, 0.5);
+    border-color: var(--color-danger);
 }
 
 /* Swipe Overlays */
@@ -48,20 +64,23 @@
     transition: opacity var(--transition-fast);
     z-index: 20;
     pointer-events: none;
+    backdrop-filter: blur(8px);
 }
 
 .likeOverlay {
     right: var(--space-6);
-    background: rgba(34, 197, 94, 0.9);
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.95), rgba(34, 211, 238, 0.95));
     color: white;
     transform: rotate(15deg);
+    box-shadow: 0 4px 20px rgba(52, 211, 153, 0.4);
 }
 
 .skipOverlay {
     left: var(--space-6);
-    background: rgba(239, 68, 68, 0.9);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(244, 114, 182, 0.95));
     color: white;
     transform: rotate(-15deg);
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
 }
 
 .card.right .likeOverlay {
@@ -75,6 +94,8 @@
 /* Card Inner */
 .cardInner {
     padding: var(--space-6);
+    position: relative;
+    z-index: 1;
 }
 
 /* Header */
@@ -94,7 +115,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.logoContainer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.2) 50%, transparent 60%);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .logoPlaceholder {
@@ -102,6 +143,8 @@
     font-weight: 700;
     color: white;
     font-family: var(--font-display);
+    position: relative;
+    z-index: 1;
 }
 
 .headerInfo {
@@ -130,20 +173,37 @@
     flex-direction: column;
     align-items: center;
     padding: var(--space-2) var(--space-3);
-    background: var(--color-bg-tertiary);
+    background: var(--glass-bg-light);
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.matchBadge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0.1;
 }
 
 .matchPercent {
     font-size: var(--font-size-lg);
     font-weight: 700;
-    color: var(--color-primary-light);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
 }
 
 .matchLabel {
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
+    position: relative;
+    z-index: 1;
 }
 
 /* Tags */
@@ -163,6 +223,13 @@
     border-radius: var(--radius-full);
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
+    border: 1px solid var(--glass-border);
+    transition: all var(--transition-fast);
+}
+
+.tag:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 .tagIcon {
@@ -193,10 +260,17 @@
 
 .programTag {
     padding: var(--space-1) var(--space-3);
-    background: var(--color-primary-dark);
+    background: var(--glass-bg-light);
+    border: 1px solid var(--color-primary);
     border-radius: var(--radius-md);
     font-size: var(--font-size-xs);
-    color: var(--color-text-primary);
+    color: var(--color-primary-light);
+    transition: all var(--transition-fast);
+}
+
+.programTag:hover {
+    background: var(--color-primary);
+    color: white;
 }
 
 .highlightTag {
@@ -211,6 +285,7 @@
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-4);
     animation: fadeIn var(--transition-base) ease;
+    border: 1px solid var(--glass-border);
 }
 
 .description {
@@ -253,6 +328,7 @@
 .detailsBtn:hover {
     border-color: var(--color-primary);
     color: var(--color-primary-light);
+    background: var(--glass-bg-light);
 }
 
 /* Action Buttons */
@@ -263,8 +339,8 @@
 }
 
 .actionBtn {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -272,6 +348,21 @@
     font-size: var(--font-size-xl);
     transition: all var(--transition-base);
     box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.actionBtn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    transform: scale(0);
+    transition: transform 0.3s;
+}
+
+.actionBtn:active::before {
+    transform: scale(1);
 }
 
 .skipBtn {
@@ -281,19 +372,25 @@
 }
 
 .skipBtn:hover {
-    background: var(--color-danger);
+    background: linear-gradient(135deg, var(--color-danger), #F472B6);
     color: white;
-    transform: scale(1.1);
+    border-color: transparent;
+    transform: scale(1.15) rotate(-5deg);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
 }
 
 .saveBtn {
     background: var(--color-bg-tertiary);
-    border: 2px solid var(--color-success);
+    border: 2px solid var(--color-accent-1);
+    color: var(--color-accent-1);
 }
 
 .saveBtn:hover {
-    background: var(--color-success);
-    transform: scale(1.1);
+    background: linear-gradient(135deg, var(--color-accent-1), #22D3EE);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 8px 25px rgba(52, 211, 153, 0.4);
 }
 
 /* Full Details Button */
@@ -318,9 +415,10 @@
 .comingSoon {
     font-size: var(--font-size-xs);
     padding: var(--space-1) var(--space-2);
-    background: var(--color-bg-secondary);
+    background: var(--glass-bg-light);
     border-radius: var(--radius-full);
-    color: var(--color-text-muted);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
 }
 
 /* Responsive Styles */
@@ -398,13 +496,24 @@
     }
 
     .actionBtn {
-        width: 48px;
-        height: 48px;
+        width: 52px;
+        height: 52px;
         font-size: var(--font-size-lg);
     }
 
     .overlay {
         font-size: var(--font-size-lg);
         padding: var(--space-2) var(--space-4);
+    }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
     }
 }

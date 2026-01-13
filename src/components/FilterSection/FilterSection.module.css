@@ -3,9 +3,11 @@
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 var(--space-6);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Hero Section */
@@ -55,12 +57,16 @@
     padding: var(--space-8);
     box-shadow: var(--glass-shadow);
     animation: slideUp var(--transition-slow) ease 0.1s backwards;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .filtersWrapper.compact {
     padding: var(--space-4);
     border-radius: var(--radius-xl);
     margin-bottom: var(--space-6);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 @media (max-width: 480px) {
