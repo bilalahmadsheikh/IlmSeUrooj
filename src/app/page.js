@@ -11,6 +11,7 @@ import AdmissionsDeadlines from '@/components/AdmissionsDeadlines/AdmissionsDead
 import UniversityComparison from '@/components/UniversityComparison/UniversityComparison';
 import AdmissionPredictor from '@/components/AdmissionPredictor/AdmissionPredictor';
 import AnimatedBackground from '@/components/Background/AnimatedBackground';
+import DecorativeImages from '@/components/Background/DecorativeImages';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
 
@@ -104,84 +105,79 @@ export default function Home() {
       />
 
       {isSwipeMode && (
-        <section className={styles.swipeSection}>
-          <div className={styles.cardContainer}>
-            {hasMoreCards ? (
-              visibleCards.map((uni, index) => (
-                <SwipeCard
-                  key={uni.id}
-                  university={uni}
-                  isTop={index === 0}
-                  onSwipe={handleSwipe}
-                />
-              )).reverse()
-            ) : (
-              <div className={styles.noMore}>
-                <span className={styles.noMoreIcon}>🎉</span>
-                <h3 className={styles.noMoreTitle}>All Done!</h3>
-                <p className={styles.noMoreText}>
-                  You've seen all {rankedUniversities.length + savedUniversities.length + skippedIds.length} matching universities.
-                </p>
-                <button
-                  className={styles.resetBtn}
-                  onClick={() => {
-                    setSkippedIds([]);
-                    setCurrentIndex(0);
-                  }}
-                >
-                  Start Over
-                </button>
+        <div className={styles.swipeModeContainer}>
+          <DecorativeImages />
+          <section className={styles.swipeSection}>
+            <div className={styles.cardContainer}>
+              {hasMoreCards ? (
+                visibleCards.map((uni, index) => (
+                  <SwipeCard
+                    key={uni.id}
+                    university={uni}
+                    isTop={index === 0}
+                    onSwipe={handleSwipe}
+                  />
+                )).reverse()
+              ) : (
+                <div className={styles.noMore}>
+                  <span className={styles.noMoreIcon}>🎉</span>
+                  <h3 className={styles.noMoreTitle}>All Done!</h3>
+                  <p className={styles.noMoreText}>
+                    You've seen all {rankedUniversities.length + savedUniversities.length + skippedIds.length} matching universities.
+                  </p>
+                  <button
+                    className={styles.resetBtn}
+                    onClick={() => {
+                      setSkippedIds([]);
+                      setCurrentIndex(0);
+                    }}
+                  >
+                    Start Over
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {hasMoreCards && (
+              <div className={styles.swipeHint}>
+                <span className={styles.hintLeft}>← Skip</span>
+                <span className={styles.hintCenter}>Swipe or tap buttons</span>
+                <span className={styles.hintRight}>Save →</span>
               </div>
             )}
-          </div>
 
-          {hasMoreCards && (
-            <div className={styles.swipeHint}>
-              <span className={styles.hintLeft}>← Skip</span>
-              <span className={styles.hintCenter}>Swipe or tap buttons</span>
-              <span className={styles.hintRight}>Save →</span>
+            <div className={styles.progress}>
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{
+                    width: `${((currentIndex + savedUniversities.length) / (rankedUniversities.length + savedUniversities.length + skippedIds.length)) * 100}%`
+                  }}
+                />
+              </div>
+              <span className={styles.progressText}>
+                {currentIndex + 1} of {rankedUniversities.length + skippedIds.length} remaining
+              </span>
             </div>
-          )}
+          </section>
 
-          <div className={styles.progress}>
-            <div className={styles.progressBar}>
-              <div
-                className={styles.progressFill}
-                style={{
-                  width: `${((currentIndex + savedUniversities.length) / (rankedUniversities.length + savedUniversities.length + skippedIds.length)) * 100}%`
-                }}
-              />
-            </div>
-            <span className={styles.progressText}>
-              {currentIndex + 1} of {rankedUniversities.length + skippedIds.length} remaining
-            </span>
-          </div>
-        </section>
-      )}
+          {/* University List Section */}
+          <UniversityList
+            universities={allRankedUniversities}
+            field={filters.field}
+            onSave={handleSaveFromList}
+            savedIds={savedIds}
+          />
 
-      {/* University List Section */}
-      {isSwipeMode && (
-        <UniversityList
-          universities={allRankedUniversities}
-          field={filters.field}
-          onSave={handleSaveFromList}
-          savedIds={savedIds}
-        />
-      )}
+          {/* Admissions Deadlines Section */}
+          <AdmissionsDeadlines currentField={filters.field} />
 
-      {/* Admissions Deadlines Section */}
-      {isSwipeMode && (
-        <AdmissionsDeadlines currentField={filters.field} />
-      )}
+          {/* University Comparison Tool */}
+          <UniversityComparison />
 
-      {/* University Comparison Tool */}
-      {isSwipeMode && (
-        <UniversityComparison />
-      )}
-
-      {/* Admission Chance Predictor */}
-      {isSwipeMode && (
-        <AdmissionPredictor />
+          {/* Admission Chance Predictor */}
+          <AdmissionPredictor />
+        </div>
       )}
 
       {showSaved && (

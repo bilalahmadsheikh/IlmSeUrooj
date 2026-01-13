@@ -4,9 +4,30 @@ import { useState, useEffect } from 'react';
 import styles from './AdmissionsDeadlines.module.css';
 import { upcomingDeadlines } from '@/data/universities';
 
+// Responsive visibility limits
+const DESKTOP_LIMITS = [6, 15];
+const MOBILE_LIMITS = [3, 10];
+const MOBILE_BREAKPOINT = 768;
+
 export default function AdmissionsDeadlines({ currentField }) {
     const [filter, setFilter] = useState('all');
     const [now, setNow] = useState(new Date());
+    const [visibleCount, setVisibleCount] = useState(DESKTOP_LIMITS[0]);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Check if mobile on mount and resize
+    useEffect(() => {
+        const checkMobile = () => {
+            const mobile = window.innerWidth < MOBILE_BREAKPOINT;
+            setIsMobile(mobile);
+            // Reset visible count when switching between mobile/desktop
+            setVisibleCount(mobile ? MOBILE_LIMITS[0] : DESKTOP_LIMITS[0]);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Update time every minute for countdown
     useEffect(() => {
@@ -14,11 +35,38 @@ export default function AdmissionsDeadlines({ currentField }) {
         return () => clearInterval(timer);
     }, []);
 
+    // Get current limits based on device
+    const currentLimits = isMobile ? MOBILE_LIMITS : DESKTOP_LIMITS;
+
     // Filter deadlines
     const filteredDeadlines = upcomingDeadlines.filter(d => {
         if (filter === 'all') return true;
         return d.field === filter;
     });
+
+    // Handle View More
+    const handleViewMore = () => {
+        const currentLimitIndex = currentLimits.findIndex(limit => limit >= visibleCount);
+        if (currentLimitIndex < currentLimits.length - 1) {
+            setVisibleCount(currentLimits[currentLimitIndex + 1]);
+        } else {
+            setVisibleCount(filteredDeadlines.length);
+        }
+    };
+
+    // Get next limit
+    const getNextLimit = () => {
+        const currentLimitIndex = currentLimits.findIndex(limit => limit >= visibleCount);
+        if (currentLimitIndex < currentLimits.length - 1) {
+            return Math.min(currentLimits[currentLimitIndex + 1], filteredDeadlines.length);
+        }
+        return filteredDeadlines.length;
+    };
+
+    // Visible deadlines
+    const visibleDeadlines = filteredDeadlines.slice(0, visibleCount);
+    const hasMore = visibleCount < filteredDeadlines.length;
+    const remainingCount = filteredDeadlines.length - visibleCount;
 
     // Calculate days remaining
     const getDaysRemaining = (deadline) => {
@@ -94,7 +142,7 @@ export default function AdmissionsDeadlines({ currentField }) {
 
             {/* Deadline Cards */}
             <div className={styles.grid}>
-                {filteredDeadlines.map((deadline) => {
+                {visibleDeadlines.map((deadline) => {
                     const daysLeft = getDaysRemaining(deadline.deadline);
                     const isPast = daysLeft < 0;
 
@@ -152,6 +200,27 @@ export default function AdmissionsDeadlines({ currentField }) {
                     );
                 })}
             </div>
+
+            {/* View More Button */}
+            {hasMore && (
+                <div className={styles.viewMoreContainer}>
+                    <button
+                        className={styles.viewMoreBtn}
+                        onClick={handleViewMore}
+                    >
+                        <span className={styles.viewMoreIcon}>⏰</span>
+                        <span className={styles.viewMoreText}>
+                            View More Deadlines
+                        </span>
+                        <span className={styles.viewMoreCount}>
+                            +{Math.min(getNextLimit() - visibleCount, remainingCount)} more
+                        </span>
+                    </button>
+                    <p className={styles.viewMoreHint}>
+                        {remainingCount} deadlines remaining
+                    </p>
+                </div>
+            )}
 
             {filteredDeadlines.length === 0 && (
                 <div className={styles.empty}>

@@ -6,6 +6,12 @@
   transition: background var(--transition-base);
 }
 
+/* Swipe Mode Container - holds all swipe content + decorative images */
+.swipeModeContainer {
+  position: relative;
+  z-index: 1;
+}
+
 /* Swipe Section */
 .swipeSection {
   position: relative;

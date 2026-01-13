@@ -1,0 +1,153 @@
+/* Decorative Images Container - positioned within content flow */
+.decorativeContainer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    contain: paint;
+}
+
+/* Base image wrapper styling */
+.imageWrapper {
+    position: absolute;
+    opacity: 0.20;
+    transition: opacity 0.3s ease;
+    will-change: opacity;
+}
+
+/* Decorative image base */
+.decorativeImage {
+    width: 400px;
+    height: auto;
+    object-fit: contain;
+    filter: grayscale(30%) blur(0.5px);
+    opacity: 0.9;
+}
+
+/* ===== POSITION CLASSES ===== */
+
+/* Swipe Section Images */
+.swipe-left {
+    left: 2%;
+    top: 5%;
+}
+
+.swipe-right {
+    right: 2%;
+    top: 8%;
+}
+
+/* Universities List Images */
+.list-left {
+    left: 1%;
+    top: 25%;
+}
+
+/* Deadlines Section Images */
+.deadlines-right {
+    right: 1%;
+    top: 40%;
+}
+
+/* Comparison Section Images */
+.comparison-left {
+    left: 2%;
+    top: 55%;
+}
+
+.comparison-right {
+    right: 2%;
+    top: 58%;
+}
+
+/* ===== THEME ADJUSTMENTS ===== */
+
+/* Light theme - slightly less visible */
+[data-theme="light"] .imageWrapper {
+    opacity: 0.10;
+}
+
+[data-theme="light"] .decorativeImage {
+    filter: grayscale(40%) blur(0.5px);
+}
+
+/* Dark theme - subtle glow effect */
+[data-theme="dark"] .decorativeImage {
+    filter: grayscale(20%) blur(0.5px) brightness(0.9);
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/* Tablets - reduce size and opacity */
+@media (max-width: 1024px) {
+    .decorativeImage {
+        width: 240px;
+    }
+
+    .imageWrapper {
+        opacity: 0.15;
+    }
+}
+
+/* Mobile - smaller images on edges */
+@media (max-width: 768px) {
+    .decorativeImage {
+        width: 160px;
+    }
+
+    .imageWrapper {
+        opacity: 0.15;
+    }
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .imageWrapper {
+        transition: none;
+    }
+}
+
+/* ===== TREASURE THEME MAP BACKGROUNDS ===== */
+
+/* Container for stacked map backgrounds */
+.treasureContainer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Each map background wrapper */
+.mapBackgroundWrapper {
+    position: relative;
+    width: 100%;
+    height: 800px;
+    opacity: 0.15;
+    overflow: hidden;
+}
+
+/* The actual map image */
+.mapBackgroundImage {
+    object-fit: cover;
+    object-position: center;
+    filter: sepia(0.3) brightness(0.9);
+}
+
+/* Tablets - shorter sections */
+@media (max-width: 1024px) {
+    .mapBackgroundWrapper {
+        height: 600px;
+        opacity: 0.12;
+    }
+}
+
+/* Mobile - even shorter, still visible */
+@media (max-width: 768px) {
+    .mapBackgroundWrapper {
+        height: 500px;
+        opacity: 0.10;
+    }
+}

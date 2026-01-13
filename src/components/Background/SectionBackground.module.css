@@ -1,0 +1,82 @@
+.backgroundWrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.backgroundImage {
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+/* Dark theme - subtle decorative images */
+.dark .backgroundImage {
+    opacity: 0.06;
+    filter: brightness(0.5) saturate(0.7);
+}
+
+/* Light theme - very subtle decorative images */
+.light .backgroundImage {
+    opacity: 0.08;
+    filter: brightness(1.1) saturate(0.6);
+}
+
+/* Treasure theme - prominent map backgrounds */
+.treasure .backgroundImage {
+    opacity: 0.15;
+    filter: sepia(0.4) contrast(0.9) brightness(1.05);
+}
+
+/* Overlay for text readability */
+.overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.dark .overlay {
+    background: linear-gradient(180deg,
+            rgba(10, 31, 28, 0.85) 0%,
+            rgba(10, 31, 28, 0.7) 50%,
+            rgba(10, 31, 28, 0.85) 100%);
+}
+
+.light .overlay {
+    background: linear-gradient(180deg,
+            rgba(250, 248, 243, 0.9) 0%,
+            rgba(250, 248, 243, 0.75) 50%,
+            rgba(250, 248, 243, 0.9) 100%);
+}
+
+.treasure .overlay {
+    background: linear-gradient(180deg,
+            rgba(212, 196, 168, 0.75) 0%,
+            rgba(212, 196, 168, 0.5) 50%,
+            rgba(212, 196, 168, 0.75) 100%);
+}
+
+/* Reduce image quality on mobile for performance */
+@media (max-width: 768px) {
+    .dark .backgroundImage {
+        opacity: 0.04;
+    }
+
+    .light .backgroundImage {
+        opacity: 0.05;
+    }
+
+    .treasure .backgroundImage {
+        opacity: 0.1;
+    }
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .backgroundImage {
+        transition: none;
+    }
+}

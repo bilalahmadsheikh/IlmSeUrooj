@@ -4,11 +4,34 @@ import { useState } from 'react';
 import styles from './UniversityList.module.css';
 import { getMatchPercentage, getFieldRank } from '@/utils/ranking';
 
+// Progressive visibility limits
+const VISIBILITY_LIMITS = [5, 15, 50];
+
 export default function UniversityList({ universities, field, onSave, savedIds }) {
     const [expandedId, setExpandedId] = useState(null);
+    const [visibleCount, setVisibleCount] = useState(VISIBILITY_LIMITS[0]);
 
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
+    };
+
+    const handleViewMore = () => {
+        // Find the next limit
+        const currentLimitIndex = VISIBILITY_LIMITS.findIndex(limit => limit >= visibleCount);
+        if (currentLimitIndex < VISIBILITY_LIMITS.length - 1) {
+            setVisibleCount(VISIBILITY_LIMITS[currentLimitIndex + 1]);
+        } else {
+            // Show all
+            setVisibleCount(universities.length);
+        }
+    };
+
+    const getNextLimit = () => {
+        const currentLimitIndex = VISIBILITY_LIMITS.findIndex(limit => limit >= visibleCount);
+        if (currentLimitIndex < VISIBILITY_LIMITS.length - 1) {
+            return Math.min(VISIBILITY_LIMITS[currentLimitIndex + 1], universities.length);
+        }
+        return universities.length;
     };
 
     if (universities.length === 0) {
@@ -22,6 +45,10 @@ export default function UniversityList({ universities, field, onSave, savedIds }
         );
     }
 
+    const visibleUniversities = universities.slice(0, visibleCount);
+    const hasMore = visibleCount < universities.length;
+    const remainingCount = universities.length - visibleCount;
+
     return (
         <section className={styles.section}>
             <div className={styles.header}>
@@ -31,12 +58,12 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                     <span className={styles.count}>({universities.length})</span>
                 </h2>
                 <p className={styles.subtitle}>
-                    Ranked by {field} programs
+                    Ranked by {field} programs • Showing {visibleUniversities.length} of {universities.length}
                 </p>
             </div>
 
             <div className={styles.list}>
-                {universities.map((uni, index) => {
+                {visibleUniversities.map((uni, index) => {
                     const isExpanded = expandedId === uni.id;
                     const isSaved = savedIds.includes(uni.id);
                     const fieldRank = getFieldRank(uni, field);
@@ -152,6 +179,27 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                     );
                 })}
             </div>
+
+            {/* View More Button */}
+            {hasMore && (
+                <div className={styles.viewMoreContainer}>
+                    <button
+                        className={styles.viewMoreBtn}
+                        onClick={handleViewMore}
+                    >
+                        <span className={styles.viewMoreIcon}>📚</span>
+                        <span className={styles.viewMoreText}>
+                            View More Universities
+                        </span>
+                        <span className={styles.viewMoreCount}>
+                            +{Math.min(getNextLimit() - visibleCount, remainingCount)} more
+                        </span>
+                    </button>
+                    <p className={styles.viewMoreHint}>
+                        {remainingCount} universities remaining
+                    </p>
+                </div>
+            )}
         </section>
     );
 }

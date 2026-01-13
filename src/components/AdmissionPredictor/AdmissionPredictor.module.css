@@ -7,6 +7,39 @@
     z-index: 1;
 }
 
+/* Treasure Theme - Map Background */
+:global([data-theme="treasure"]) .section {
+    overflow: hidden;
+}
+
+:global([data-theme="treasure"]) .section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        url('/images/map_pakistan.png'),
+        url('/images/map_newspaper.png'),
+        url('/images/map_writing1.png'),
+        url('/images/map_newspaper2.png'),
+        url('/images/map_newspaper3.png');
+    background-position:
+        top left,
+        top right,
+        center center,
+        bottom left,
+        bottom right;
+    background-size:
+        300px auto,
+        250px auto,
+        280px auto,
+        260px auto,
+        240px auto;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: -1;
+}
+
 .header {
     text-align: center;
     margin-bottom: var(--space-8);
