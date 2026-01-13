@@ -8,6 +8,9 @@ const ThemeContext = createContext({
     setTheme: () => { },
 });
 
+// Theme cycle order
+const THEMES = ['dark', 'light', 'treasure'];
+
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState('dark');
     const [mounted, setMounted] = useState(false);
@@ -16,7 +19,7 @@ export function ThemeProvider({ children }) {
     useEffect(() => {
         setMounted(true);
         const savedTheme = localStorage.getItem('unimatch-theme');
-        if (savedTheme) {
+        if (savedTheme && THEMES.includes(savedTheme)) {
             setTheme(savedTheme);
         } else {
             // Check system preference
@@ -33,8 +36,13 @@ export function ThemeProvider({ children }) {
         }
     }, [theme, mounted]);
 
+    // Cycle through themes: dark -> light -> treasure -> dark
     const toggleTheme = () => {
-        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+        setTheme(prev => {
+            const currentIndex = THEMES.indexOf(prev);
+            const nextIndex = (currentIndex + 1) % THEMES.length;
+            return THEMES[nextIndex];
+        });
     };
 
     // Prevent flash of wrong theme
@@ -58,3 +66,4 @@ export function useTheme() {
 }
 
 export default ThemeContext;
+

@@ -72,6 +72,29 @@
     opacity: 1;
 }
 
+/* Compass icon styles - Treasure Theme */
+.compass {
+    color: var(--color-secondary);
+    transform: rotate(45deg) scale(0);
+    opacity: 0;
+}
+
+.compass.active {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+    animation: compassSpin 0.5s ease-out;
+}
+
+@keyframes compassSpin {
+    0% {
+        transform: rotate(180deg) scale(0.5);
+    }
+
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
 /* Star twinkle animation */
 .star {
     animation: twinkle 2s ease-in-out infinite;

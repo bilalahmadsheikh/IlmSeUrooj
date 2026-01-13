@@ -194,6 +194,93 @@
 }
 
 /* ========================================
+   TREASURE MAP THEME - Vintage Parchment
+   ======================================== */
+[data-theme="treasure"] {
+  /* Treasure Map Color Palette */
+  --color-primary: #8B4513;
+  /* Saddle brown - Old leather */
+  --color-primary-light: #A0522D;
+  /* Sienna */
+  --color-primary-dark: #6B3410;
+  /* Dark saddle brown */
+
+  --color-secondary: #B8860B;
+  /* Dark goldenrod - Treasure gold */
+  --color-secondary-light: #DAA520;
+  /* Goldenrod */
+
+  --color-accent-1: #8B7355;
+  /* Burly wood - Aged paper */
+  --color-accent-2: #CD853F;
+  /* Peru - Copper compass */
+  --color-accent-3: #D2691E;
+  /* Chocolate - Ink accent */
+
+  /* Semantic Colors - Treasure themed */
+  --color-success: #228B22;
+  /* Forest green - Found treasure */
+  --color-danger: #B22222;
+  /* Firebrick - Warning */
+  --color-warning: #DAA520;
+  /* Goldenrod - Caution */
+  --color-info: #8B4513;
+  /* Saddle brown */
+
+  /* Parchment Background - Aged paper feel */
+  --color-bg-primary: #D4C4A8;
+  /* Main parchment */
+  --color-bg-secondary: #C9B896;
+  /* Darker parchment edge */
+  --color-bg-tertiary: #BEA97A;
+  /* Weathered spots */
+  --color-bg-card: rgba(222, 210, 185, 0.95);
+  --color-bg-elevated: #E8DCC8;
+
+  /* Text Colors - Old ink */
+  --color-text-primary: #3D2914;
+  /* Dark brown ink */
+  --color-text-secondary: #5C4023;
+  /* Faded ink */
+  --color-text-muted: #7A6548;
+  /* Very faded */
+  --color-text-inverse: #F5F0E6;
+
+  /* Glass Effect - Parchment style */
+  --glass-bg: rgba(212, 196, 168, 0.9);
+  --glass-bg-light: rgba(139, 69, 19, 0.1);
+  --glass-border: rgba(139, 69, 19, 0.25);
+  --glass-shadow: 0 8px 32px rgba(61, 41, 20, 0.2);
+
+  /* Gradients - Treasure map style */
+  --gradient-primary: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #B8860B 100%);
+  --gradient-secondary: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
+  --gradient-success: linear-gradient(135deg, #228B22 0%, #2E8B57 100%);
+  --gradient-card: linear-gradient(180deg, rgba(222, 210, 185, 0.98) 0%, rgba(201, 184, 150, 0.95) 100%);
+  --gradient-hero: radial-gradient(ellipse at top, #E8DCC8 0%, #D4C4A8 50%, #C9B896 100%);
+  --gradient-mesh:
+    radial-gradient(at 40% 20%, rgba(139, 69, 19, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(184, 134, 11, 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(210, 105, 30, 0.06) 0px, transparent 50%);
+
+  /* Orb Colors - Subtle treasure glow */
+  --orb-1: rgba(184, 134, 11, 0.12);
+  /* Gold glow */
+  --orb-2: rgba(139, 69, 19, 0.08);
+  /* Brown accent */
+  --orb-3: rgba(205, 133, 63, 0.1);
+  /* Copper shine */
+
+  /* Border colors */
+  --color-border: rgba(139, 69, 19, 0.2);
+  --color-border-focus: var(--color-primary);
+
+  /* Shadow colors - Aged paper shadows */
+  --shadow-color: rgba(61, 41, 20, 0.15);
+  --glow-color: rgba(184, 134, 11, 0.3);
+}
+
+/* ========================================
    RESET & BASE STYLES
    ======================================== */
 *,
