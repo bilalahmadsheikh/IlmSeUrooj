@@ -135,62 +135,88 @@
 }
 
 /* ========================================
-   LIGHT MODE - Warm Cream Theme
+   LIGHT MODE - Warm Streetlight Theme
    ======================================== */
 [data-theme="light"] {
-  /* Light Mode Colors */
-  --color-primary: #059669;
-  /* Deep Emerald for contrast */
-  --color-primary-light: #10B981;
-  --color-primary-dark: #047857;
+  /* Warm Amber/Gold Color Palette */
+  --color-primary: #B8860B;
+  /* Dark Goldenrod - Warm street light */
+  --color-primary-light: #DAA520;
+  /* Goldenrod */
+  --color-primary-dark: #996600;
+  /* Deep amber */
 
-  --color-secondary: #B8956B;
-  /* Warm gold/brown */
-  --color-secondary-light: #D4A574;
+  --color-secondary: #CD853F;
+  /* Peru - Warm brown */
+  --color-secondary-light: #DEB887;
+  /* Burlywood */
 
-  /* Light Cream Theme Base */
-  --color-bg-primary: #FAF8F3;
-  /* Warm cream */
-  --color-bg-secondary: #F5F0E6;
-  /* Soft beige */
-  --color-bg-tertiary: #EDE6D9;
-  /* Warm taupe */
-  --color-bg-card: rgba(255, 253, 248, 0.95);
-  --color-bg-elevated: #FFFDF8;
+  --color-accent-1: #D4A574;
+  /* Warm tan */
+  --color-accent-2: #E6B800;
+  /* Golden yellow */
+  --color-accent-3: #CC9933;
+  /* Old gold */
 
-  /* Text Colors */
-  --color-text-primary: #1C2B28;
-  /* Deep forest for text */
-  --color-text-secondary: #3D5A52;
-  /* Muted green-gray */
-  --color-text-muted: #7A8A85;
-  --color-text-inverse: #FAF8F3;
+  /* Semantic Colors - Warm tinted */
+  --color-success: #6B8E23;
+  /* Olive drab */
+  --color-danger: #CD5C5C;
+  /* Indian red */
+  --color-warning: #DAA520;
+  /* Goldenrod */
+  --color-info: #B8860B;
+  /* Dark goldenrod */
 
-  /* Glass Effect - Light */
-  --glass-bg: rgba(255, 253, 248, 0.85);
-  --glass-bg-light: rgba(5, 150, 105, 0.08);
-  --glass-border: rgba(5, 150, 105, 0.15);
-  --glass-shadow: 0 8px 32px rgba(28, 43, 40, 0.08);
+  /* Warm Cream/Yellow Background Base */
+  --color-bg-primary: #FDF5E6;
+  /* Old lace - Warm cream */
+  --color-bg-secondary: #FAF0DC;
+  /* Light cream with yellow tint */
+  --color-bg-tertiary: #F5E6C8;
+  /* Warmer cream */
+  --color-bg-card: rgba(253, 245, 230, 0.95);
+  --color-bg-elevated: #FFFAF0;
+  /* Floral white */
 
-  /* Gradients - Light */
-  --gradient-card: linear-gradient(180deg, rgba(255, 253, 248, 0.98) 0%, rgba(245, 240, 230, 0.95) 100%);
-  --gradient-hero: radial-gradient(ellipse at top, #F5F0E6 0%, #FAF8F3 50%, #FFFDF8 100%);
+  /* Text Colors - Warm brown tones */
+  --color-text-primary: #4A3728;
+  /* Dark warm brown */
+  --color-text-secondary: #6B5344;
+  /* Muted brown */
+  --color-text-muted: #8B7355;
+  /* Burlywood dark */
+  --color-text-inverse: #FDF5E6;
+
+  /* Glass Effect - Warm cream */
+  --glass-bg: rgba(253, 245, 230, 0.9);
+  --glass-bg-light: rgba(184, 134, 11, 0.08);
+  --glass-border: rgba(184, 134, 11, 0.2);
+  --glass-shadow: 0 8px 32px rgba(74, 55, 40, 0.1);
+
+  /* Gradients - Warm streetlight glow */
+  --gradient-primary: linear-gradient(135deg, #B8860B 0%, #DAA520 50%, #E6B800 100%);
+  --gradient-secondary: linear-gradient(135deg, #CD853F 0%, #DEB887 100%);
+  --gradient-success: linear-gradient(135deg, #6B8E23 0%, #8FBC8F 100%);
+  --gradient-card: linear-gradient(180deg, rgba(253, 245, 230, 0.98) 0%, rgba(250, 240, 220, 0.95) 100%);
+  --gradient-hero: radial-gradient(ellipse at top, #FAF0DC 0%, #FDF5E6 50%, #FFFAF0 100%);
   --gradient-mesh:
-    radial-gradient(at 40% 20%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, rgba(212, 165, 116, 0.05) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.05) 0px, transparent 50%);
+    radial-gradient(at 40% 20%, rgba(218, 165, 32, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(230, 184, 0, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(205, 133, 63, 0.08) 0px, transparent 50%);
 
-  /* Orb Colors - Light (very subtle) */
-  --orb-1: rgba(16, 185, 129, 0.08);
-  --orb-2: rgba(212, 165, 116, 0.06);
-  --orb-3: rgba(20, 184, 166, 0.06);
+  /* Orb Colors - Warm glow */
+  --orb-1: rgba(218, 165, 32, 0.12);
+  --orb-2: rgba(230, 184, 0, 0.1);
+  --orb-3: rgba(205, 133, 63, 0.1);
 
   /* Border colors */
-  --color-border: rgba(5, 150, 105, 0.12);
+  --color-border: rgba(184, 134, 11, 0.15);
+  --color-border-focus: var(--color-primary);
 
-  /* Shadow colors */
-  --shadow-color: rgba(28, 43, 40, 0.08);
-  --glow-color: rgba(16, 185, 129, 0.2);
+  /* Shadow colors - Warm amber glow */
+  --shadow-color: rgba(74, 55, 40, 0.1);
+  --glow-color: rgba(218, 165, 32, 0.3);
 }
 
 /* ========================================

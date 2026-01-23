@@ -9,7 +9,7 @@
 
 .header {
     text-align: center;
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
 }
 
 .title {
@@ -47,6 +47,62 @@
 .subtitle {
     color: var(--color-text-secondary);
     margin-top: var(--space-2);
+}
+
+/* Filter Section */
+.filterSection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 200px;
+}
+
+.filterLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.filterIcon {
+    font-size: var(--font-size-base);
+}
+
+.filterSelect {
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.filterSelect:hover {
+    border-color: var(--color-primary);
 }
 
 /* Selectors */
@@ -98,13 +154,14 @@
 .selectedInfo {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: var(--space-3);
     margin-top: var(--space-3);
     padding: var(--space-3);
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-lg);
     border: 1px solid var(--glass-border);
+    flex-wrap: wrap;
 }
 
 .uniLogo {
@@ -119,11 +176,34 @@
     color: white;
     font-size: var(--font-size-lg);
     box-shadow: var(--shadow-glow);
+    flex-shrink: 0;
+}
+
+.uniDetails {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
 }
 
 .uniName {
     font-weight: 600;
     color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.uniCity {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.deptRank {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-2);
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    font-weight: 600;
 }
 
 /* Comparison Table */
@@ -135,23 +215,34 @@
     overflow: hidden;
 }
 
-.methodology {
+.criteriaHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     padding: var(--space-4);
     background: var(--color-bg-secondary);
     border-bottom: 1px solid var(--glass-border);
 }
 
-.methodology h4 {
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: var(--space-2);
+.criteriaIcon {
+    font-size: var(--font-size-2xl);
 }
 
-.methodology p {
+.criteriaTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    flex: 1;
+}
+
+.deptBadge {
     font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    line-height: 1.6;
+    padding: var(--space-1) var(--space-3);
+    background: var(--glass-bg-light);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-full);
+    color: var(--color-primary-light);
+    font-weight: 600;
 }
 
 .row {
@@ -178,26 +269,21 @@
 .rowLabel {
     padding: var(--space-4);
     background: var(--color-bg-tertiary);
-    min-width: 200px;
+    min-width: 180px;
+    display: flex;
+    align-items: center;
 }
 
 @media (min-width: 640px) {
     .rowLabel {
-        width: 30%;
+        width: 25%;
     }
 }
 
 .fieldLabel {
-    display: block;
     font-weight: 600;
     color: var(--color-text-primary);
     font-size: var(--font-size-sm);
-    margin-bottom: var(--space-1);
-}
-
-.fieldDesc {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
 }
 
 .rowValues {
@@ -226,34 +312,43 @@
     font-weight: 600;
 }
 
+.valueText {
+    word-break: break-word;
+}
+
 .bestBadge {
-    font-size: var(--font-size-xs);
+    font-size: 10px;
     padding: 2px var(--space-2);
     background: var(--gradient-success);
     color: white;
     border-radius: var(--radius-full);
+    font-weight: 600;
 }
 
-/* Programs Section */
-.programsSection {
+/* Facilities Section */
+.facilitiesSection,
+.recruitersSection {
     padding: var(--space-4);
     border-top: 1px solid var(--glass-border);
 }
 
-.programsTitle {
+.facilitiesTitle,
+.recruitersTitle {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text-primary);
     margin-bottom: var(--space-4);
 }
 
-.programsGrid {
+.facilitiesGrid,
+.recruitersGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-3);
 }
 
-.programsCard {
+.facilitiesCard,
+.recruitersCard {
     padding: var(--space-3);
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-lg);
@@ -262,25 +357,37 @@
     transition: all var(--transition-fast);
 }
 
-.programsCard:hover {
+.facilitiesCard:hover,
+.recruitersCard:hover {
     border-color: var(--color-primary);
 }
 
-.programsCard h5 {
+.facilitiesCard h5,
+.recruitersCard h5 {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text-primary);
     margin-bottom: var(--space-2);
 }
 
-.fieldsList {
+.facilitiesList,
+.recruitersList {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-1);
 }
 
-.fieldTag {
+.facilityTag {
+    font-size: 10px;
+    padding: 2px var(--space-2);
+    background: var(--glass-bg-light);
+    border: 1px solid var(--color-accent-2);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-2);
+}
+
+.recruiterTag {
     font-size: 10px;
     padding: 2px var(--space-2);
     background: var(--glass-bg-light);
@@ -311,6 +418,13 @@
     animation: float 3s ease-in-out infinite;
 }
 
+.emptyHint {
+    display: block;
+    margin-top: var(--space-2);
+    font-size: var(--font-size-xs);
+    color: var(--color-primary);
+}
+
 @keyframes float {
 
     0%,
@@ -324,12 +438,17 @@
 }
 
 /* Mobile Responsive */
-@media (max-width: 480px) {
-    .section {
-        padding: var(--space-8) var(--space-3);
+@media (max-width: 640px) {
+    .filterSection {
+        flex-direction: column;
     }
 
-    .programsGrid {
+    .filterGroup {
+        min-width: 100%;
+    }
+
+    .facilitiesGrid,
+    .recruitersGrid {
         grid-template-columns: 1fr;
     }
 
@@ -340,5 +459,20 @@
     .value {
         border-left: none;
         border-top: 1px solid var(--glass-border);
+    }
+}
+
+@media (max-width: 480px) {
+    .section {
+        padding: var(--space-8) var(--space-3);
+    }
+
+    .selectedInfo {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .uniDetails {
+        align-items: center;
     }
 }

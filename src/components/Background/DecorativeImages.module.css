@@ -110,14 +110,18 @@
 
 /* ===== TREASURE THEME MAP BACKGROUNDS ===== */
 
-/* Container for stacked map backgrounds */
+/* Container for stacked map backgrounds - clips to content area */
 .treasureContainer {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     pointer-events: none;
     z-index: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 /* Each map background wrapper */

@@ -21,31 +21,40 @@ const decorativeImages = [
     { src: '/images/scenery1.png', alt: 'Pakistan', position: 'comparison-right', section: 'comparison' },
 ];
 
-// Treasure theme map backgrounds - full-width section backgrounds
-const treasureMapBackgrounds = [
-    // Swipe Section - Old newspaper/parchment feel
-    { src: '/images/map_newspaper.png', alt: 'Treasure Map', section: 'swipe' },
-
-    // Universities List - Pakistan map for exploration
-    { src: '/images/map_pakistan.png', alt: 'Pakistan Map', section: 'universities' },
-
-    // Deadlines Section - Writing/letter style
-    { src: '/images/map_writing1.png', alt: 'Ancient Writing', section: 'deadlines' },
-
-    // Comparison Section - Second newspaper style
-    { src: '/images/map_newspaper2.png', alt: 'Old Newspaper', section: 'comparison' },
+// Treasure theme map backgrounds - base images to repeat
+const treasureMapImages = [
+    '/images/map_newspaper.png',
+    '/images/map_writing1.png',
+    '/images/map_newspaper2.png',
 ];
+
+// Generate repeated backgrounds to fill entire page (circular linked list pattern)
+const generateRepeatedBackgrounds = () => {
+    const repeated = [];
+    const repeatCount = 10; // Repeat enough times to cover full page
+    for (let i = 0; i < repeatCount; i++) {
+        treasureMapImages.forEach((src, imgIndex) => {
+            repeated.push({
+                src,
+                alt: `Map Background ${i * treasureMapImages.length + imgIndex + 1}`,
+                key: `map-${i}-${imgIndex}`
+            });
+        });
+    }
+    return repeated;
+};
 
 export default function DecorativeImages() {
     const { theme } = useTheme();
 
-    // Treasure theme - show map backgrounds
+    // Treasure theme - show repeating map backgrounds
     if (theme === 'treasure') {
+        const repeatedBackgrounds = generateRepeatedBackgrounds();
         return (
             <div className={styles.treasureContainer} aria-hidden="true">
-                {treasureMapBackgrounds.map((bg, index) => (
+                {repeatedBackgrounds.map((bg) => (
                     <div
-                        key={index}
+                        key={bg.key}
                         className={styles.mapBackgroundWrapper}
                     >
                         <Image

@@ -91,6 +91,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <AnimatedBackground />
+      <DecorativeImages />
 
       <Header
         savedCount={savedUniversities.length}
@@ -106,7 +107,6 @@ export default function Home() {
 
       {isSwipeMode && (
         <div className={styles.swipeModeContainer}>
-          <DecorativeImages />
           <section className={styles.swipeSection}>
             <div className={styles.cardContainer}>
               {hasMoreCards ? (
