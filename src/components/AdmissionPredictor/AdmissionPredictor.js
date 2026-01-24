@@ -115,13 +115,14 @@ const admissionCriteria = {
             { component: 'GIKI Entry Test', weight: 85, icon: '📝' },
             { component: 'FSc Part-I Marks', weight: 15, icon: '📚' }
         ],
-        description: 'Elite residential engineering institute. Beautiful campus in Topi.',
+        description: 'Elite residential engineering institute. Merit positions are announced, not percentages.',
         cutoffs: { engineering: 75, cs: 78 },
+        meritType: 'position', // GIKI only releases position numbers, not percentages
         meritHistory: {
-            2024: { cs: 77, mechanical: 76, ce: 78 },
-            2023: { cs: 78, mechanical: 77, ce: 80 }
+            2024: { 'CS (seats)': '~120', 'ME (seats)': '~180', 'EE (seats)': '~150' },
+            2023: { 'CS (seats)': '~115', 'ME (seats)': '~175', 'EE (seats)': '~145' }
         },
-        tips: 'Entry test is 85% of merit - test prep is key. Residential campus experience.'
+        tips: 'GIKI only releases merit positions, not percentages. Entry test is 85% of merit - focus on test prep!'
     },
     PIEAS: {
         minFsc: 60,
@@ -426,12 +427,12 @@ export default function AdmissionPredictor() {
                         {/* Historical Merit Data */}
                         {admissionCriteria[selectedUniversity].meritHistory && (
                             <div className={styles.meritHistorySection}>
-                                <h5>📈 Last 2 Years Merit Cutoffs</h5>
+                                <h5>📈 Last 2 Years Merit {admissionCriteria[selectedUniversity].meritType === 'position' ? 'Seats' : 'Cutoffs'}</h5>
                                 <div className={styles.meritTable}>
                                     <div className={styles.meritTableHeader}>
                                         <span>Year</span>
                                         <span>Program</span>
-                                        <span>Cutoff %</span>
+                                        <span>{admissionCriteria[selectedUniversity].meritType === 'position' ? 'Seats' : 'Cutoff %'}</span>
                                     </div>
                                     {Object.entries(admissionCriteria[selectedUniversity].meritHistory).map(([year, programs]) => (
                                         Object.entries(programs).map(([program, cutoff], idx) => (
@@ -443,7 +444,9 @@ export default function AdmissionPredictor() {
                                                     </span>
                                                 )}
                                                 <span className={styles.meritProgram}>{program.toUpperCase()}</span>
-                                                <span className={styles.meritCutoff}>{cutoff}%</span>
+                                                <span className={styles.meritCutoff}>
+                                                    {cutoff}{admissionCriteria[selectedUniversity].meritType !== 'position' && '%'}
+                                                </span>
                                             </div>
                                         ))
                                     ))}
