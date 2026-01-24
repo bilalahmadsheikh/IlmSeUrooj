@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import styles from './AdmissionPredictor.module.css';
 import { universities } from '@/data/universities';
 
-// Real admission criteria with 2023-2024 merit data from official sources
+// Real admission criteria with 2023-2024 merit data from official/researched sources
 const admissionCriteria = {
     NUST: {
         minFsc: 60,
@@ -15,30 +15,32 @@ const admissionCriteria = {
             { component: 'FSc/A-Level Marks', weight: 15, icon: '📚' },
             { component: 'Matric/O-Level', weight: 10, icon: '📖' }
         ],
-        description: 'Highly competitive. Top engineering university. Merit based on NET score primarily.',
-        cutoffs: { engineering: 74, cs: 75, business: 70 },
+        description: 'Top engineering university. NUST does not officially release cutoffs, but aggregates are estimated from merit lists.',
+        cutoffs: { engineering: 72, cs: 78, business: 65 },
+        meritType: 'estimated', // Cutoffs are estimated from merit list analysis
         meritHistory: {
-            2024: { cs: 73, engineering: 71, se: 74 },
-            2023: { cs: 78.5, engineering: 72, se: 78.2 }
+            2024: { 'CS (SEECS)': '~73', 'SE (SEECS)': '~74', 'EE (SEECS)': '~68' },
+            2023: { 'CS (SEECS)': '78.5', 'SE (SEECS)': '78.2', 'Data Science': '76.3' }
         },
-        tips: 'NET score is crucial. Aim for 150+ out of 200. SEECS programs are most competitive.'
+        tips: 'NUST doesn\'t publish official cutoffs. Aim for NET 150+/200 and 80%+ aggregate for SEECS programs.'
     },
     LUMS: {
         minFsc: 70,
         competitiveFsc: 88,
-        formula: 'LCAT/SAT (50%) + FSc (30%) + Interview (20%)',
+        formula: 'Holistic (LCAT/SAT + Academics + Essays)',
         formulaBreakdown: [
-            { component: 'LCAT or SAT', weight: 50, icon: '📝' },
-            { component: 'FSc/A-Level', weight: 30, icon: '📚' },
-            { component: 'Interview', weight: 20, icon: '🎤' }
+            { component: 'LCAT or SAT Score', weight: 40, icon: '📝' },
+            { component: 'Academic Record', weight: 35, icon: '📚' },
+            { component: 'Essays & Interview', weight: 25, icon: '✍️' }
         ],
-        description: 'Holistic admissions. Average admitted FSc is 88%. Need-based financial aid available.',
+        description: 'NO cutoffs published - holistic admissions. Considers test scores, academics, essays, and interviews together.',
         cutoffs: { business: 85, cs: 82 },
+        meritType: 'holistic', // LUMS uses holistic admissions, no cutoffs
         meritHistory: {
-            2024: { business: 84, cs: 81 },
-            2023: { business: 86, cs: 83 }
+            2024: { 'Min FSc': '70%', 'Avg Admitted': '~88%', 'Min A-Level': '2Bs+1C' },
+            2023: { 'Min FSc': '70%', 'Avg Admitted': '~87%', 'Min A-Level': '2Bs+1C' }
         },
-        tips: 'Strong essays and interview performance can compensate for lower test scores.'
+        tips: 'LUMS uses holistic admissions - no fixed cutoffs exist. Strong essays and interview can compensate for lower scores.'
     },
     FAST: {
         minFsc: 60,
@@ -48,64 +50,64 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '📝' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '📚' }
         ],
-        description: 'Best for Computer Science. Multiple campuses across Pakistan.',
-        cutoffs: { cs: 68, engineering: 62, se: 75 },
+        description: 'Best for CS. Cutoffs vary significantly by campus - Islamabad/Lahore highest, Peshawar/Faisalabad lowest.',
+        cutoffs: { cs: 70, engineering: 65, se: 73 },
         meritHistory: {
-            2024: { cs: 68, se: 75.6, ai: 72 },
-            2023: { cs: 76.8, se: 75.6, ai: 74 }
+            2024: { 'CS (Isb)': '73', 'CS (Lhr)': '70', 'CS (Khi)': '69', 'CS (Psh)': '53' },
+            2023: { 'CS (Isb)': '70', 'SE (Isb)': '69.5', 'DS (Isb)': '68' }
         },
-        tips: 'Lahore and Islamabad have highest cutoffs. Faisalabad/Peshawar are easier to get into.'
+        tips: 'Cutoffs vary by campus! Islamabad/Lahore: 70%+, Faisalabad/Peshawar: 50-55% for same programs.'
     },
     COMSATS: {
         minFsc: 60,
-        competitiveFsc: 70,
-        formula: 'Entry Test (40%) + FSc (40%) + Matric (20%)',
+        competitiveFsc: 75,
+        formula: 'NTS NAT (50%) + FSc (40%) + Matric (10%)',
         formulaBreakdown: [
-            { component: 'COMSATS Test', weight: 40, icon: '📝' },
+            { component: 'NTS NAT Test', weight: 50, icon: '📝' },
             { component: 'FSc Marks', weight: 40, icon: '📚' },
-            { component: 'Matric Marks', weight: 20, icon: '📖' }
+            { component: 'Matric Marks', weight: 10, icon: '📖' }
         ],
-        description: 'Affordable public university. Good for CS and Engineering.',
-        cutoffs: { cs: 65, engineering: 60 },
+        description: 'Affordable federal university. Islamabad campus is most competitive. Uses NTS NAT score.',
+        cutoffs: { cs: 82, se: 81, ai: 80 },
         meritHistory: {
-            2024: { cs: 64, engineering: 58 },
-            2023: { cs: 66, engineering: 61 }
+            2024: { 'CS (Isb)': '82.7', 'SE (Isb)': '81.6', 'AI (Isb)': '80.2', 'CS (Lhr)': '84' },
+            2023: { 'CS (Isb)': '~80', 'Cyber Sec': '79.2', 'BBA (Isb)': '58.6' }
         },
-        tips: 'Very affordable. Multiple campuses - Islamabad and Lahore are most competitive.'
+        tips: 'Very affordable. Lahore CS cutoff is higher than Islamabad! Multiple campuses available.'
     },
     IBA: {
         minFsc: 65,
         competitiveFsc: 80,
-        formula: 'IBA Test (60%) + FSc (25%) + Matric (15%)',
+        formula: 'Test-Based Merit (Entry Test Score)',
         formulaBreakdown: [
-            { component: 'IBA Aptitude Test', weight: 60, icon: '📝' },
-            { component: 'FSc/A-Level', weight: 25, icon: '📚' },
-            { component: 'Matric/O-Level', weight: 15, icon: '📖' }
+            { component: 'IBA Aptitude Test', weight: 100, icon: '📝' },
+            { component: 'Min FSc for eligibility', weight: 0, icon: '📚' }
         ],
-        description: 'Asia\'s oldest business school. Very competitive for BBA.',
+        description: 'Asia\'s oldest business school. Publishes official TEST SCORE cutoffs, not aggregate percentages.',
         cutoffs: { business: 75, cs: 70 },
+        meritType: 'test_score', // IBA publishes test score cutoffs, not aggregates
         meritHistory: {
-            2024: { business: 74, cs: 69 },
-            2023: { business: 76, cs: 71 }
+            2024: { 'IBA Test Min': '180/360', 'Math Min': '80', 'English Min': '80' },
+            2023: { 'IBA Test Min': '220/356', 'Math Min': '92', 'English Min': '92' }
         },
-        tips: 'IBA test is notoriously difficult. Focus on verbal and quantitative sections.'
+        tips: 'IBA publishes test score cutoffs, not aggregates. 2024 cutoff was 180/360 total. Focus on verbal & quant sections.'
     },
     'UET Lahore': {
         minFsc: 60,
-        competitiveFsc: 75,
+        competitiveFsc: 78,
         formula: 'ECAT (30%) + FSc (45%) + Matric (25%)',
         formulaBreakdown: [
             { component: 'ECAT Test', weight: 30, icon: '📝' },
             { component: 'FSc Marks', weight: 45, icon: '📚' },
             { component: 'Matric Marks', weight: 25, icon: '📖' }
         ],
-        description: 'Premier public engineering university. Very affordable.',
-        cutoffs: { engineering: 72 },
+        description: 'Premier public engineering university. Publishes official aggregate cutoffs. Very affordable fees.',
+        cutoffs: { engineering: 77, cs: 80 },
         meritHistory: {
-            2024: { mechanical: 77, electrical: 74, civil: 75 },
-            2023: { mechanical: 77.73, electrical: 74.4, civil: 75.5 }
+            2024: { 'Mechanical': '81.65', 'Computer Eng': '80.52', 'CS': '80.45', 'Electrical': '80.08' },
+            2023: { 'Architecture': '80.6', 'Mechanical': '77.7', 'Automotive': '73.9' }
         },
-        tips: 'ECAT conducted by UET. Very affordable fees. Strong alumni network in industry.'
+        tips: 'UET publishes official aggregates. Very competitive - Mechanical/CS need 80%+. Min 132/400 in ECAT required.'
     },
     GIKI: {
         minFsc: 60,
@@ -115,64 +117,64 @@ const admissionCriteria = {
             { component: 'GIKI Entry Test', weight: 85, icon: '📝' },
             { component: 'FSc Part-I Marks', weight: 15, icon: '📚' }
         ],
-        description: 'Elite residential engineering institute. Merit positions are announced, not percentages.',
+        description: 'Elite residential institute. ONLY releases merit POSITIONS, not percentage cutoffs.',
         cutoffs: { engineering: 75, cs: 78 },
-        meritType: 'position', // GIKI only releases position numbers, not percentages
+        meritType: 'position',
         meritHistory: {
             2024: { 'CS (seats)': '~120', 'ME (seats)': '~180', 'EE (seats)': '~150' },
             2023: { 'CS (seats)': '~115', 'ME (seats)': '~175', 'EE (seats)': '~145' }
         },
-        tips: 'GIKI only releases merit positions, not percentages. Entry test is 85% of merit - focus on test prep!'
+        tips: 'GIKI only announces positions, not percentages. Entry test is 85% weight - test prep is crucial!'
     },
     PIEAS: {
         minFsc: 60,
         competitiveFsc: 80,
-        formula: 'Written Test (70%) + Interview (30%)',
+        formula: 'PIEAS Test (60%) + FSc (25%) + Matric (15%)',
         formulaBreakdown: [
-            { component: 'PIEAS Written Test', weight: 70, icon: '📝' },
-            { component: 'Interview', weight: 30, icon: '🎤' }
+            { component: 'PIEAS Written Test', weight: 60, icon: '📝' },
+            { component: 'FSc Marks', weight: 25, icon: '📚' },
+            { component: 'Matric Marks', weight: 15, icon: '📖' }
         ],
-        description: 'Premier nuclear research institute. Very selective. Government job guarantee.',
-        cutoffs: { engineering: 78 },
+        description: 'Nuclear research institute. Publishes merit POSITIONS. Estimated aggregates from third-party analysis.',
+        cutoffs: { engineering: 75, cs: 78 },
+        meritType: 'estimated',
         meritHistory: {
-            2024: { engineering: 77 },
-            2023: { engineering: 79 }
+            2024: { 'CS (pos)': '~360', 'ME (pos)': '~1220', 'EE (pos)': '~1741' },
+            2023: { 'CS': '~78.6%', 'ME': '~72.2%', 'EE': '~65.6%' }
         },
-        tips: 'Only nuclear/strategic programs. Guaranteed government job after graduation.'
+        tips: 'PIEAS releases positions, aggregates are estimated. Top 1400 positions have good chances. Govt job guarantee!'
     },
     NED: {
         minFsc: 60,
-        competitiveFsc: 72,
-        formula: 'NED Test (50%) + FSc (30%) + Matric (20%)',
+        competitiveFsc: 80,
+        formula: 'NED Test (60%) + Academics (40%)',
         formulaBreakdown: [
-            { component: 'NED Entry Test', weight: 50, icon: '📝' },
-            { component: 'FSc Marks', weight: 30, icon: '📚' },
-            { component: 'Matric Marks', weight: 20, icon: '📖' }
+            { component: 'NED Entry Test', weight: 60, icon: '📝' },
+            { component: 'Academic Record', weight: 40, icon: '📚' }
         ],
-        description: 'Historic engineering university in Karachi. Very affordable.',
-        cutoffs: { engineering: 68, cs: 65 },
+        description: 'Historic Karachi engineering university. Formula updated in 2024 to 60% test + 40% academics.',
+        cutoffs: { se: 86, cs: 84, ee: 76 },
         meritHistory: {
-            2024: { petroleum: 70, electrical: 68, cs: 66 },
-            2023: { petroleum: 72, electrical: 69, cs: 67 }
+            2024: { 'Software Eng': '86.86', 'CS': '84.2', 'Computer Sys': '83.9', 'Electronic': '76' },
+            2023: { 'Formula': '50% Test + 50% FSc Part-I (different from 2024)' }
         },
-        tips: 'Karachi\'s premier engineering school. Strong in petroleum and civil engineering.'
+        tips: 'NED changed formula in 2024! Now 60% test weight. Software Eng is most competitive at 87%.'
     },
     Bahria: {
         minFsc: 50,
-        competitiveFsc: 65,
-        formula: 'Bahria Test (50%) + FSc (30%) + Matric (20%)',
+        competitiveFsc: 70,
+        formula: 'Entry Test (50%) + Intermediate (50%)',
         formulaBreakdown: [
             { component: 'Bahria Entry Test', weight: 50, icon: '📝' },
-            { component: 'FSc Marks', weight: 30, icon: '📚' },
-            { component: 'Matric Marks', weight: 20, icon: '📖' }
+            { component: 'Intermediate Marks', weight: 50, icon: '📚' }
         ],
-        description: 'Navy-affiliated. Disciplined environment. Multiple campuses.',
-        cutoffs: { business: 60, cs: 62 },
+        description: 'Navy-affiliated university. Islamabad campus most competitive. Publishes aggregates.',
+        cutoffs: { cs: 80, se: 78, bba: 65 },
         meritHistory: {
-            2024: { cs: 61, business: 59 },
-            2023: { cs: 63, business: 61 }
+            2024: { 'CS/SE (Isb)': '>80%', 'BBA (Isb)': '~65%', 'Other campuses': '65-70%' },
+            2023: { 'Merit lists': 'Published Aug 24', 'Top programs': '>75%' }
         },
-        tips: 'Navy affiliation means disciplined campus. Reserved seats for Navy dependents.'
+        tips: 'Islamabad campus is very competitive (80%+ for CS). Other campuses have lower cutoffs. Navy dependents get reserved seats.'
     },
 };
 
@@ -427,12 +429,24 @@ export default function AdmissionPredictor() {
                         {/* Historical Merit Data */}
                         {admissionCriteria[selectedUniversity].meritHistory && (
                             <div className={styles.meritHistorySection}>
-                                <h5>📈 Last 2 Years Merit {admissionCriteria[selectedUniversity].meritType === 'position' ? 'Seats' : 'Cutoffs'}</h5>
+                                <h5>📈 Last 2 Years {
+                                    admissionCriteria[selectedUniversity].meritType === 'position' ? 'Merit Seats' :
+                                        admissionCriteria[selectedUniversity].meritType === 'test_score' ? 'Test Score Cutoffs' :
+                                            admissionCriteria[selectedUniversity].meritType === 'holistic' ? 'Eligibility Requirements' :
+                                                admissionCriteria[selectedUniversity].meritType === 'estimated' ? 'Estimated Merit Data' :
+                                                    'Merit Cutoffs'
+                                }</h5>
                                 <div className={styles.meritTable}>
                                     <div className={styles.meritTableHeader}>
                                         <span>Year</span>
-                                        <span>Program</span>
-                                        <span>{admissionCriteria[selectedUniversity].meritType === 'position' ? 'Seats' : 'Cutoff %'}</span>
+                                        <span>Program/Criteria</span>
+                                        <span>{
+                                            admissionCriteria[selectedUniversity].meritType === 'position' ? 'Seats' :
+                                                admissionCriteria[selectedUniversity].meritType === 'test_score' ? 'Score' :
+                                                    admissionCriteria[selectedUniversity].meritType === 'holistic' ? 'Requirement' :
+                                                        admissionCriteria[selectedUniversity].meritType === 'estimated' ? 'Estimate' :
+                                                            'Cutoff'
+                                        }</span>
                                     </div>
                                     {Object.entries(admissionCriteria[selectedUniversity].meritHistory).map(([year, programs]) => (
                                         Object.entries(programs).map(([program, cutoff], idx) => (
@@ -443,9 +457,9 @@ export default function AdmissionPredictor() {
                                                         {year}
                                                     </span>
                                                 )}
-                                                <span className={styles.meritProgram}>{program.toUpperCase()}</span>
+                                                <span className={styles.meritProgram}>{program}</span>
                                                 <span className={styles.meritCutoff}>
-                                                    {cutoff}{admissionCriteria[selectedUniversity].meritType !== 'position' && '%'}
+                                                    {cutoff}{!admissionCriteria[selectedUniversity].meritType && typeof cutoff === 'number' && '%'}
                                                 </span>
                                             </div>
                                         ))
