@@ -178,6 +178,53 @@ const admissionCriteria = {
     },
 };
 
+// Calculate user's aggregate based on university-specific merit formula
+function calculateUserAggregate(fsc, matric, testScore, uniName) {
+    const criteria = admissionCriteria[uniName];
+    if (!criteria?.formulaBreakdown) return null;
+
+    let aggregate = 0;
+    let hasTestComponent = false;
+    let totalWeight = 0;
+
+    criteria.formulaBreakdown.forEach(component => {
+        const name = component.component.toLowerCase();
+        const weight = component.weight;
+        totalWeight += weight;
+
+        // Entry test components
+        if (name.includes('test') || name.includes('lcat') || name.includes('sat') ||
+            name.includes('net') || name.includes('ecat') || name.includes('nat') ||
+            name.includes('aptitude')) {
+            aggregate += (testScore * weight) / 100;
+            hasTestComponent = true;
+        }
+        // FSc / A-Level / Academic components
+        else if (name.includes('fsc') || name.includes('f.sc') || name.includes('a-level') ||
+            name.includes('academic') || name.includes('intermediate') || name.includes('hssc')) {
+            aggregate += (fsc * weight) / 100;
+        }
+        // Matric / O-Level components
+        else if (name.includes('matric') || name.includes('o-level') || name.includes('ssc')) {
+            aggregate += (matric * weight) / 100;
+        }
+        // Essay / Interview components (assume 70% for subjective - conservative)
+        else if (name.includes('essay') || name.includes('interview')) {
+            aggregate += (70 * weight) / 100;
+        }
+    });
+
+    // If formula doesn't total 100%, scale appropriately
+    if (totalWeight > 0 && totalWeight !== 100) {
+        aggregate = (aggregate / totalWeight) * 100;
+    }
+
+    return {
+        aggregate: aggregate.toFixed(1),
+        hasTestComponent
+    };
+}
+
 function calculateChance(fsc, matric, field, testScore, uniName) {
     const criteria = admissionCriteria[uniName];
     if (!criteria) return { chance: 'Unknown', color: 'gray', score: 0 };
@@ -424,6 +471,46 @@ export default function AdmissionPredictor() {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* User's Calculated Aggregate */}
+                            {(() => {
+                                const result = calculateUserAggregate(fscMarks, matricMarks, expectedTestScore, selectedUniversity);
+                                if (!result) return null;
+                                const meritType = admissionCriteria[selectedUniversity]?.meritType;
+
+                                // Don't show aggregate for position-based or test-score-based universities
+                                if (meritType === 'position' || meritType === 'test_score') {
+                                    return (
+                                        <div className={styles.userAggregateSection}>
+                                            <div className={styles.aggregateNote}>
+                                                ⚠️ {selectedUniversity} uses {meritType === 'position' ? 'merit positions' : 'test scores'}, not percentage aggregates
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className={styles.userAggregateSection}>
+                                        <div className={styles.aggregateHeader}>
+                                            <span className={styles.aggregateLabel}>📊 Your Calculated Aggregate:</span>
+                                            <span className={styles.aggregateValue}>{result.aggregate}%</span>
+                                        </div>
+                                        <div className={styles.aggregateBreakdown}>
+                                            Based on: FSc {fscMarks}% | Matric {matricMarks}% | Expected Test {expectedTestScore}%
+                                        </div>
+                                        {meritType === 'holistic' && (
+                                            <div className={styles.aggregateNote}>
+                                                Note: LUMS uses holistic admissions - this aggregate is just for reference
+                                            </div>
+                                        )}
+                                        {result.hasTestComponent && (
+                                            <div className={styles.aggregateNote}>
+                                                💡 Your actual aggregate will depend on your entry test performance
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {/* Historical Merit Data */}
