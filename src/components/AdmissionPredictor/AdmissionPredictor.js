@@ -179,13 +179,14 @@ const admissionCriteria = {
 };
 
 // Calculate user's aggregate based on university-specific merit formula
-function calculateUserAggregate(fsc, matric, testScore, uniName) {
+function calculateUserAggregate(fsc, matric, testScore, uniName, educationStatus = 'fsc_complete') {
     const criteria = admissionCriteria[uniName];
     if (!criteria?.formulaBreakdown) return null;
 
     let aggregate = 0;
     let hasTestComponent = false;
     let totalWeight = 0;
+    let adjustedFormula = null;
 
     criteria.formulaBreakdown.forEach(component => {
         const name = component.component.toLowerCase();
@@ -202,7 +203,13 @@ function calculateUserAggregate(fsc, matric, testScore, uniName) {
         // FSc / A-Level / Academic components
         else if (name.includes('fsc') || name.includes('f.sc') || name.includes('a-level') ||
             name.includes('academic') || name.includes('intermediate') || name.includes('hssc')) {
-            aggregate += (fsc * weight) / 100;
+            if (educationStatus === 'alevel_incomplete') {
+                // A-Level incomplete: HSSC weight goes to O-Level instead
+                aggregate += (matric * weight) / 100;
+                adjustedFormula = 'Using O-Level equivalence only (A-Level pending)';
+            } else {
+                aggregate += (fsc * weight) / 100;
+            }
         }
         // Matric / O-Level components
         else if (name.includes('matric') || name.includes('o-level') || name.includes('ssc')) {
@@ -214,6 +221,11 @@ function calculateUserAggregate(fsc, matric, testScore, uniName) {
         }
     });
 
+    // Set adjusted formula note for FSc incomplete
+    if (educationStatus === 'fsc_incomplete') {
+        adjustedFormula = 'Using FSc Part-I marks (provisional)';
+    }
+
     // If formula doesn't total 100%, scale appropriately
     if (totalWeight > 0 && totalWeight !== 100) {
         aggregate = (aggregate / totalWeight) * 100;
@@ -221,7 +233,10 @@ function calculateUserAggregate(fsc, matric, testScore, uniName) {
 
     return {
         aggregate: aggregate.toFixed(1),
-        hasTestComponent
+        hasTestComponent,
+        adjustedFormula,
+        educationStatus,
+        isIncomplete: educationStatus.includes('incomplete')
     };
 }
 
@@ -290,6 +305,7 @@ export default function AdmissionPredictor() {
     const [expectedTestScore, setExpectedTestScore] = useState(70);
     const [selectedField, setSelectedField] = useState('Pre-Engineering');
     const [selectedUniversity, setSelectedUniversity] = useState('GIKI'); // Default to GIKI
+    const [educationStatus, setEducationStatus] = useState('fsc_complete'); // fsc_complete, fsc_incomplete, alevel_complete, alevel_incomplete
 
     // Get universities that offer the selected field and have admission criteria
     const availableUniversities = useMemo(() => {
@@ -421,6 +437,20 @@ export default function AdmissionPredictor() {
                     </div>
 
                     <div className={styles.inputGroup}>
+                        <label className={styles.label}>📋 Education Status</label>
+                        <select
+                            value={educationStatus}
+                            onChange={(e) => setEducationStatus(e.target.value)}
+                            className={styles.select}
+                        >
+                            <option value="fsc_complete">FSc / Inter Complete</option>
+                            <option value="fsc_incomplete">FSc Part-I Only (Incomplete)</option>
+                            <option value="alevel_complete">A-Level Complete</option>
+                            <option value="alevel_incomplete">A-Level Incomplete (O-Level Only)</option>
+                        </select>
+                    </div>
+
+                    <div className={styles.inputGroup}>
                         <label className={styles.label}>🏛️ University</label>
                         <select
                             value={selectedUniversity}
@@ -474,9 +504,11 @@ export default function AdmissionPredictor() {
 
                             {/* User's Calculated Aggregate */}
                             {(() => {
-                                const result = calculateUserAggregate(fscMarks, matricMarks, expectedTestScore, selectedUniversity);
+                                const result = calculateUserAggregate(fscMarks, matricMarks, expectedTestScore, selectedUniversity, educationStatus);
                                 if (!result) return null;
                                 const meritType = admissionCriteria[selectedUniversity]?.meritType;
+                                const isALevel = educationStatus.includes('alevel');
+                                const isIncomplete = educationStatus.includes('incomplete');
 
                                 // Don't show aggregate for position-based or test-score-based universities
                                 if (meritType === 'position' || meritType === 'test_score') {
@@ -492,18 +524,25 @@ export default function AdmissionPredictor() {
                                 return (
                                     <div className={styles.userAggregateSection}>
                                         <div className={styles.aggregateHeader}>
-                                            <span className={styles.aggregateLabel}>📊 Your Calculated Aggregate:</span>
+                                            <span className={styles.aggregateLabel}>
+                                                📊 Your Calculated Aggregate{isIncomplete ? ' (Provisional)' : ''}:
+                                            </span>
                                             <span className={styles.aggregateValue}>{result.aggregate}%</span>
                                         </div>
                                         <div className={styles.aggregateBreakdown}>
-                                            Based on: FSc {fscMarks}% | Matric {matricMarks}% | Expected Test {expectedTestScore}%
+                                            Based on: {isALevel ? 'A-Level' : 'FSc'} {fscMarks}% | {isALevel ? 'O-Level' : 'Matric'} {matricMarks}% | Expected Test {expectedTestScore}%
                                         </div>
+                                        {result.adjustedFormula && (
+                                            <div className={styles.aggregateNote} style={{ background: 'rgba(251, 146, 60, 0.15)' }}>
+                                                ⚠️ {result.adjustedFormula}
+                                            </div>
+                                        )}
                                         {meritType === 'holistic' && (
                                             <div className={styles.aggregateNote}>
                                                 Note: LUMS uses holistic admissions - this aggregate is just for reference
                                             </div>
                                         )}
-                                        {result.hasTestComponent && (
+                                        {result.hasTestComponent && !isIncomplete && (
                                             <div className={styles.aggregateNote}>
                                                 💡 Your actual aggregate will depend on your entry test performance
                                             </div>
