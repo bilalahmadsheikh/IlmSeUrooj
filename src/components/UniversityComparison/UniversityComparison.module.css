@@ -61,6 +61,8 @@
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
+    position: relative;
+    z-index: 100;
 }
 
 .filterGroup {
@@ -111,6 +113,8 @@
     grid-template-columns: 1fr;
     gap: var(--space-4);
     margin-bottom: var(--space-8);
+    position: relative;
+    z-index: 50;
 }
 
 @media (min-width: 640px) {
@@ -127,6 +131,12 @@
     padding: var(--space-4);
     text-align: center;
     transition: all var(--transition-base);
+    position: relative;
+    z-index: 1;
+}
+
+.selectorCard:focus-within {
+    z-index: 100;
 }
 
 .selectorCard:hover {
@@ -212,7 +222,8 @@
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
-    overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 
 .criteriaHeader {

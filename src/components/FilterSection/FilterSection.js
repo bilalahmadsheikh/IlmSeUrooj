@@ -2,21 +2,21 @@
 
 import styles from './FilterSection.module.css';
 import { filterOptions } from '@/data/universities';
+import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
 
 export default function FilterSection({ filters, setFilters, onStartSwiping, isSwipeMode }) {
-    const handleFieldChange = (e) => {
-        const newField = e.target.value;
+    const handleFieldChange = (value) => {
         setFilters(prev => ({
             ...prev,
-            field: newField,
+            field: value,
             program: "Any" // Reset program when field changes
         }));
     };
 
-    const handleFilterChange = (key) => (e) => {
+    const handleFilterChange = (key) => (value) => {
         setFilters(prev => ({
             ...prev,
-            [key]: e.target.value
+            [key]: value
         }));
     };
 
@@ -45,17 +45,12 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                                 <span className={styles.labelIcon}>📚</span>
                                 Field / Category
                             </label>
-                            <select
-                                className={styles.select}
+                            <SearchableSelect
                                 value={filters.field}
                                 onChange={handleFieldChange}
-                            >
-                                {filterOptions.fields.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                options={filterOptions.fields}
+                                placeholder="Select field..."
+                            />
                         </div>
 
                         {/* Degree Level */}
@@ -64,17 +59,12 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                                 <span className={styles.labelIcon}>🎓</span>
                                 Degree Level
                             </label>
-                            <select
-                                className={styles.select}
+                            <SearchableSelect
                                 value={filters.degreeLevel}
                                 onChange={handleFilterChange('degreeLevel')}
-                            >
-                                {filterOptions.degreeLevel.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                options={filterOptions.degreeLevel}
+                                placeholder="Select degree..."
+                            />
                         </div>
 
                         {/* Exact Program */}
@@ -83,17 +73,12 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                                 <span className={styles.labelIcon}>💻</span>
                                 Exact Program
                             </label>
-                            <select
-                                className={styles.select}
+                            <SearchableSelect
                                 value={filters.program}
                                 onChange={handleFilterChange('program')}
-                            >
-                                {currentPrograms.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                options={currentPrograms}
+                                placeholder="Select program..."
+                            />
                         </div>
 
                         {/* Campus/Hostel */}
@@ -102,17 +87,12 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                                 <span className={styles.labelIcon}>🏠</span>
                                 Campus / Hostel
                             </label>
-                            <select
-                                className={styles.select}
+                            <SearchableSelect
                                 value={filters.hostel}
                                 onChange={handleFilterChange('hostel')}
-                            >
-                                {filterOptions.hostelAvailability.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                options={filterOptions.hostelAvailability}
+                                placeholder="Select hostel..."
+                            />
                         </div>
 
                         {/* City */}
@@ -121,17 +101,12 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                                 <span className={styles.labelIcon}>📍</span>
                                 City / Location
                             </label>
-                            <select
-                                className={styles.select}
+                            <SearchableSelect
                                 value={filters.city}
                                 onChange={handleFilterChange('city')}
-                            >
-                                {filterOptions.cities.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                options={filterOptions.cities}
+                                placeholder="Select city..."
+                            />
                         </div>
 
                         {/* Campus Type */}
@@ -140,17 +115,12 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                                 <span className={styles.labelIcon}>🎯</span>
                                 Campus Focus
                             </label>
-                            <select
-                                className={styles.select}
+                            <SearchableSelect
                                 value={filters.campusType}
                                 onChange={handleFilterChange('campusType')}
-                            >
-                                {filterOptions.campusType.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                options={filterOptions.campusType}
+                                placeholder="Select type..."
+                            />
                         </div>
                     </div>
 

@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import styles from './UniversityComparison.module.css';
 import { universities } from '@/data/universities';
 import { departmentDetails, comparisonCriteria, departmentOptions } from '@/data/departmentData';
+import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
 
 export default function UniversityComparison() {
     const [selectedUnis, setSelectedUnis] = useState([null, null, null]);
@@ -22,6 +23,11 @@ export default function UniversityComparison() {
         const newSelected = [...selectedUnis];
         newSelected[index] = uniId ? universities.find(u => u.id === parseInt(uniId)) : null;
         setSelectedUnis(newSelected);
+    };
+
+    const handleDepartmentChange = (value) => {
+        setSelectedDepartment(value);
+        setSelectedUnis([null, null, null]); // Reset selection
     };
 
     // Get department data for a university
@@ -120,20 +126,15 @@ export default function UniversityComparison() {
                         <span className={styles.filterIcon}>🎓</span>
                         Department
                     </label>
-                    <select
-                        className={styles.filterSelect}
+                    <SearchableSelect
                         value={selectedDepartment}
-                        onChange={(e) => {
-                            setSelectedDepartment(e.target.value);
-                            setSelectedUnis([null, null, null]); // Reset selection
-                        }}
-                    >
-                        {departmentOptions.map(opt => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.icon} {opt.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={handleDepartmentChange}
+                        options={departmentOptions.map(opt => ({
+                            value: opt.value,
+                            label: `${opt.icon} ${opt.label}`
+                        }))}
+                        placeholder="Select department..."
+                    />
                 </div>
 
                 <div className={styles.filterGroup}>
@@ -141,59 +142,56 @@ export default function UniversityComparison() {
                         <span className={styles.filterIcon}>📋</span>
                         Compare By
                     </label>
-                    <select
-                        className={styles.filterSelect}
+                    <SearchableSelect
                         value={selectedCriteria}
-                        onChange={(e) => setSelectedCriteria(e.target.value)}
-                    >
-                        {comparisonCriteria.map(criteria => (
-                            <option key={criteria.id} value={criteria.id}>
-                                {criteria.icon} {criteria.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={setSelectedCriteria}
+                        options={comparisonCriteria.map(criteria => ({
+                            value: criteria.id,
+                            label: `${criteria.icon} ${criteria.label}`
+                        }))}
+                        placeholder="Select criteria..."
+                    />
                 </div>
             </div>
 
             {/* University Selectors */}
             <div className={styles.selectors}>
-                {[0, 1, 2].map((index) => (
-                    <div key={index} className={styles.selectorCard}>
-                        <select
-                            className={styles.select}
-                            value={selectedUnis[index]?.id || ''}
-                            onChange={(e) => handleSelect(index, e.target.value)}
-                        >
-                            <option value="">Select University {index + 1}</option>
-                            {filteredUniversities.map((uni) => (
-                                <option
-                                    key={uni.id}
-                                    value={uni.id}
-                                    disabled={selectedUnis.some((s, i) => i !== index && s?.id === uni.id)}
-                                >
-                                    {uni.shortName}
-                                </option>
-                            ))}
-                        </select>
+                {[0, 1, 2].map((index) => {
+                    const availableOptions = filteredUniversities
+                        .filter(uni => !selectedUnis.some((s, i) => i !== index && s?.id === uni.id))
+                        .map(uni => ({ value: String(uni.id), label: uni.shortName }));
 
-                        {selectedUnis[index] && (
-                            <div className={styles.selectedInfo}>
-                                <div className={styles.uniLogo}>
-                                    {selectedUnis[index].shortName.charAt(0)}
+                    return (
+                        <div key={index} className={styles.selectorCard}>
+                            <SearchableSelect
+                                value={selectedUnis[index]?.id ? String(selectedUnis[index].id) : ''}
+                                onChange={(value) => handleSelect(index, value)}
+                                options={[
+                                    { value: '', label: `Select University ${index + 1}` },
+                                    ...availableOptions
+                                ]}
+                                placeholder={`University ${index + 1}...`}
+                            />
+
+                            {selectedUnis[index] && (
+                                <div className={styles.selectedInfo}>
+                                    <div className={styles.uniLogo}>
+                                        {selectedUnis[index].shortName.charAt(0)}
+                                    </div>
+                                    <div className={styles.uniDetails}>
+                                        <span className={styles.uniName}>{selectedUnis[index].shortName}</span>
+                                        <span className={styles.uniCity}>{selectedUnis[index].city}</span>
+                                    </div>
+                                    {getDeptData(selectedUnis[index]) && (
+                                        <span className={styles.deptRank}>
+                                            #{getDeptData(selectedUnis[index]).ranking} in {selectedDepartment}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className={styles.uniDetails}>
-                                    <span className={styles.uniName}>{selectedUnis[index].shortName}</span>
-                                    <span className={styles.uniCity}>{selectedUnis[index].city}</span>
-                                </div>
-                                {getDeptData(selectedUnis[index]) && (
-                                    <span className={styles.deptRank}>
-                                        #{getDeptData(selectedUnis[index]).ranking} in {selectedDepartment}
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                ))}
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Comparison Table */}

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import styles from './AdmissionPredictor.module.css';
 import { universities } from '@/data/universities';
+import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
 
 // Real admission criteria with 2023-2024 merit data from official/researched sources
 const admissionCriteria = {
@@ -424,46 +425,48 @@ export default function AdmissionPredictor() {
 
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>🎓 Field of Study</label>
-                        <select
+                        <SearchableSelect
                             value={selectedField}
-                            onChange={(e) => handleFieldChange(e.target.value)}
-                            className={styles.select}
-                        >
-                            <option value="Pre-Engineering">Pre-Engineering</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Business">Business</option>
-                            <option value="Medical">Medical</option>
-                        </select>
+                            onChange={handleFieldChange}
+                            options={[
+                                { value: 'Pre-Engineering', label: 'Pre-Engineering' },
+                                { value: 'Computer Science', label: 'Computer Science' },
+                                { value: 'Business', label: 'Business' },
+                                { value: 'Medical', label: 'Medical' }
+                            ]}
+                            placeholder="Select field..."
+                        />
                     </div>
 
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>📋 Education Status</label>
-                        <select
+                        <SearchableSelect
                             value={educationStatus}
-                            onChange={(e) => setEducationStatus(e.target.value)}
-                            className={styles.select}
-                        >
-                            <option value="fsc_complete">FSc / Inter Complete</option>
-                            <option value="fsc_incomplete">FSc Part-I Only (Incomplete)</option>
-                            <option value="alevel_complete">A-Level Complete</option>
-                            <option value="alevel_incomplete">A-Level Incomplete (O-Level Only)</option>
-                        </select>
+                            onChange={setEducationStatus}
+                            options={[
+                                { value: 'fsc_complete', label: 'FSc / Inter Complete' },
+                                { value: 'fsc_incomplete', label: 'FSc Part-I Only (Incomplete)' },
+                                { value: 'alevel_complete', label: 'A-Level Complete' },
+                                { value: 'alevel_incomplete', label: 'A-Level Incomplete (O-Level Only)' }
+                            ]}
+                            placeholder="Select status..."
+                        />
                     </div>
 
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>🏛️ University</label>
-                        <select
+                        <SearchableSelect
                             value={selectedUniversity}
-                            onChange={(e) => setSelectedUniversity(e.target.value)}
-                            className={styles.select}
-                        >
-                            <option value="All">All Universities</option>
-                            {availableUniversities.map(uni => (
-                                <option key={uni.id} value={uni.shortName}>
-                                    {uni.shortName} - {uni.city}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={setSelectedUniversity}
+                            options={[
+                                { value: 'All', label: 'All Universities' },
+                                ...availableUniversities.map(uni => ({
+                                    value: uni.shortName,
+                                    label: `${uni.shortName} - ${uni.city}`
+                                }))
+                            ]}
+                            placeholder="Select university..."
+                        />
                     </div>
                 </div>
             </div>

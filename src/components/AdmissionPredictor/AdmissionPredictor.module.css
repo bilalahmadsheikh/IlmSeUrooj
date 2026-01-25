@@ -9,7 +9,7 @@
 
 /* Treasure Theme - Map Background */
 :global([data-theme="treasure"]) .section {
-    overflow: hidden;
+    overflow: visible;
 }
 
 :global([data-theme="treasure"]) .section::before {
@@ -88,7 +88,7 @@
     padding: var(--space-6);
     margin-bottom: var(--space-6);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .inputCard::before {
