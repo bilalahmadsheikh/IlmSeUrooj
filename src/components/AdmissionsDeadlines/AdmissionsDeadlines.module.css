@@ -445,3 +445,110 @@
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
 }
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    .section {
+        padding: var(--space-6) var(--space-3);
+    }
+
+    .header {
+        margin-bottom: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--font-size-lg);
+        gap: var(--space-2);
+    }
+
+    .titleIcon {
+        font-size: var(--font-size-2xl);
+    }
+
+    .filters {
+        gap: var(--space-1);
+        margin-bottom: var(--space-4);
+    }
+
+    .filterBtn {
+        padding: var(--space-1) var(--space-2);
+        font-size: var(--font-size-xs);
+    }
+
+    .grid {
+        gap: var(--space-2);
+    }
+
+    .cardHeader {
+        gap: var(--space-2);
+        padding: var(--space-2);
+    }
+
+    .uniLogo {
+        width: 32px;
+        height: 32px;
+        font-size: var(--font-size-base);
+    }
+
+    .uniName {
+        font-size: var(--font-size-base);
+    }
+
+    .program {
+        font-size: 10px;
+    }
+
+    .countdown {
+        padding: var(--space-1) var(--space-2);
+        min-width: 45px;
+    }
+
+    .daysNumber {
+        font-size: var(--font-size-base);
+    }
+
+    .daysLabel {
+        font-size: 10px;
+    }
+
+    .cardBody {
+        padding: 0 var(--space-2) var(--space-2);
+    }
+
+    .dateRow {
+        padding: var(--space-1) 0;
+        font-size: var(--font-size-xs);
+    }
+
+    .session {
+        margin-top: var(--space-2);
+        gap: var(--space-1);
+    }
+
+    .sessionBadge,
+    .fieldBadge {
+        padding: 2px var(--space-1);
+        font-size: 10px;
+    }
+
+    .applyBtn {
+        padding: var(--space-2);
+        font-size: var(--font-size-xs);
+    }
+
+    .disclaimer {
+        margin-top: var(--space-4);
+        padding: var(--space-2);
+        font-size: var(--font-size-xs);
+    }
+
+    .viewMoreContainer {
+        padding: var(--space-2);
+        margin-top: var(--space-4);
+    }
+
+    .viewMoreBtn {
+        padding: var(--space-2) var(--space-4);
+        font-size: var(--font-size-sm);
+    }
+}

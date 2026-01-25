@@ -110,8 +110,8 @@
 /* Selectors */
 .selectors {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
     margin-bottom: var(--space-8);
     position: relative;
     z-index: 50;
@@ -120,6 +120,7 @@
 @media (min-width: 640px) {
     .selectors {
         grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-4);
     }
 }
 
@@ -451,20 +452,59 @@
 /* Mobile Responsive */
 @media (max-width: 640px) {
     .filterSection {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+        padding: var(--space-3);
     }
 
     .filterGroup {
-        min-width: 100%;
+        min-width: 0;
+    }
+
+    .filterLabel {
+        font-size: var(--font-size-xs);
+        gap: var(--space-1);
+    }
+
+    .filterIcon {
+        font-size: var(--font-size-sm);
+    }
+
+    .filterSelect {
+        padding: var(--space-2);
+        font-size: var(--font-size-xs);
+    }
+
+    .selectorCard {
+        padding: var(--space-2);
+    }
+
+    .selectorCard:nth-child(3) {
+        display: none;
+    }
+
+    .select {
+        padding: var(--space-2);
+        font-size: var(--font-size-xs);
     }
 
     .facilitiesGrid,
     .recruitersGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .facilitiesCard:nth-child(3),
+    .recruitersCard:nth-child(3) {
+        display: none;
     }
 
     .rowValues {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .value:nth-child(3) {
+        display: none;
     }
 
     .value {
@@ -475,12 +515,46 @@
 
 @media (max-width: 480px) {
     .section {
-        padding: var(--space-8) var(--space-3);
+        padding: var(--space-6) var(--space-3);
+    }
+
+    .header {
+        margin-bottom: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--font-size-lg);
+        gap: var(--space-2);
+    }
+
+    .titleIcon {
+        font-size: var(--font-size-2xl);
     }
 
     .selectedInfo {
         justify-content: center;
         text-align: center;
+        padding: var(--space-2);
+        gap: var(--space-2);
+    }
+
+    .uniLogo {
+        width: 32px;
+        height: 32px;
+        font-size: var(--font-size-base);
+    }
+
+    .uniName {
+        font-size: var(--font-size-xs);
+    }
+
+    .uniCity {
+        font-size: 10px;
+    }
+
+    .deptRank {
+        font-size: 10px;
+        padding: 2px var(--space-1);
     }
 
     .uniDetails {

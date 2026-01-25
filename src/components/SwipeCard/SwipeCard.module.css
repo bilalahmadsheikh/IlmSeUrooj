@@ -429,24 +429,25 @@
     }
 
     .cardInner {
-        padding: var(--space-4);
+        padding: var(--space-3);
     }
 
     .header {
-        gap: var(--space-3);
+        gap: var(--space-2);
+        margin-bottom: var(--space-2);
     }
 
     .logoContainer {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
     }
 
     .logoPlaceholder {
-        font-size: var(--font-size-xl);
+        font-size: var(--font-size-lg);
     }
 
     .name {
-        font-size: var(--font-size-lg);
+        font-size: var(--font-size-base);
     }
 
     .fullName {
@@ -458,20 +459,40 @@
     }
 
     .matchPercent {
-        font-size: var(--font-size-base);
+        font-size: var(--font-size-sm);
+    }
+
+    .matchLabel {
+        font-size: 10px;
+    }
+
+    .tags {
+        gap: var(--space-1);
+        margin-bottom: var(--space-2);
     }
 
     .tag {
-        padding: var(--space-1) var(--space-2);
-        font-size: var(--font-size-xs);
+        padding: 2px var(--space-2);
+        font-size: 10px;
     }
 
     .tagIcon {
-        font-size: var(--font-size-xs);
+        font-size: 10px;
     }
 
     .sectionTitle {
-        font-size: var(--font-size-xs);
+        font-size: 10px;
+        margin-bottom: var(--space-1);
+    }
+
+    .programs,
+    .highlights {
+        margin-bottom: var(--space-2);
+    }
+
+    .programList,
+    .highlightList {
+        gap: var(--space-1);
     }
 
     .programTag {
@@ -480,30 +501,50 @@
     }
 
     .highlightTag {
-        font-size: var(--font-size-xs);
+        font-size: 10px;
+    }
+
+    .details {
+        padding: var(--space-2);
+        margin-bottom: var(--space-2);
     }
 
     .description {
-        font-size: var(--font-size-xs);
+        font-size: 10px;
+        margin-bottom: var(--space-2);
     }
 
     .detailRow {
+        font-size: 10px;
+        padding: var(--space-1) 0;
+    }
+
+    .detailsBtn {
+        padding: var(--space-1);
+        margin-bottom: var(--space-2);
         font-size: var(--font-size-xs);
     }
 
     .actions {
-        gap: var(--space-6);
+        gap: var(--space-4);
     }
 
     .actionBtn {
-        width: 52px;
-        height: 52px;
-        font-size: var(--font-size-lg);
+        width: 44px;
+        height: 44px;
+        font-size: var(--font-size-base);
+    }
+
+    .fullDetailsBtn {
+        margin-top: var(--space-2);
+        padding: var(--space-2);
+        font-size: var(--font-size-xs);
     }
 
     .overlay {
-        font-size: var(--font-size-lg);
-        padding: var(--space-2) var(--space-4);
+        font-size: var(--font-size-base);
+        padding: var(--space-2) var(--space-3);
+        top: var(--space-3);
     }
 }
 

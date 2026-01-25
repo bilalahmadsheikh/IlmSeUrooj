@@ -365,10 +365,11 @@ export default function AdmissionPredictor() {
 
             {/* Input Form */}
             <div className={styles.inputCard}>
-                <div className={styles.inputGrid}>
+                {/* Sliders Row - 3 columns on mobile */}
+                <div className={styles.slidersRow}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>
-                            📚 FSc / Inter Percentage
+                            FSc / Inter Percentage
                             <span className={styles.value}>{fscMarks}%</span>
                         </label>
                         <input
@@ -387,7 +388,7 @@ export default function AdmissionPredictor() {
 
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>
-                            📖 Matric / SSC Percentage
+                            Matric / SSC Percentage
                             <span className={styles.value}>{matricMarks}%</span>
                         </label>
                         <input
@@ -406,7 +407,7 @@ export default function AdmissionPredictor() {
 
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>
-                            📝 Expected Entry Test Score
+                            Entry Test Score
                             <span className={styles.value}>{expectedTestScore}%</span>
                         </label>
                         <input
@@ -422,7 +423,10 @@ export default function AdmissionPredictor() {
                             <span>100%</span>
                         </div>
                     </div>
+                </div>
 
+                {/* Field Row - centered single column on mobile */}
+                <div className={styles.fieldRow}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>🎓 Field of Study</label>
                         <SearchableSelect
@@ -437,7 +441,10 @@ export default function AdmissionPredictor() {
                             placeholder="Select field..."
                         />
                     </div>
+                </div>
 
+                {/* Selectors Row - 2 columns on mobile */}
+                <div className={styles.selectorsRow}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>📋 Education Status</label>
                         <SearchableSelect

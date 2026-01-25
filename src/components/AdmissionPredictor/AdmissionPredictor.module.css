@@ -100,23 +100,58 @@
     pointer-events: none;
 }
 
-.inputGrid {
+/* Sliders Row - 3 columns on all screens */
+.slidersRow {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-5);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
     position: relative;
     z-index: 1;
 }
 
-@media (min-width: 640px) {
-    .inputGrid {
-        grid-template-columns: repeat(2, 1fr);
+@media (max-width: 480px) {
+    .slidersRow {
+        gap: var(--space-1);
     }
 }
 
-@media (min-width: 768px) {
-    .inputGrid {
-        grid-template-columns: repeat(3, 1fr);
+/* Field Row - centered single column */
+.fieldRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    position: relative;
+    z-index: 10;
+}
+
+.fieldRow:focus-within {
+    z-index: 100;
+}
+
+.fieldRow .inputGroup {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+}
+
+.fieldRow .label {
+    justify-content: center;
+}
+
+/* Selectors Row - 2 columns */
+.selectorsRow {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 480px) {
+    .selectorsRow {
+        gap: var(--space-2);
     }
 }
 
@@ -179,11 +214,81 @@
 }
 
 .sliderLabels {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    margin-top: var(--space-1);
+    display: none;
+}
+
+/* Mobile styles for compact sliders */
+@media (max-width: 480px) {
+    .slidersRow {
+        align-items: stretch;
+    }
+
+    .slidersRow .inputGroup {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .slidersRow .label {
+        flex-direction: column;
+        align-items: center;
+        font-size: 6px;
+        margin-bottom: 4px;
+        gap: 1px;
+        text-align: center;
+        min-height: 45px;
+        justify-content: flex-end;
+        line-height: 1.2;
+    }
+
+    .slidersRow .label .value {
+        font-size: 10px;
+    }
+
+    .slidersRow .slider {
+        height: 3px;
+        margin-top: auto;
+    }
+
+    .slidersRow .slider::-webkit-slider-thumb {
+        width: 12px;
+        height: 12px;
+    }
+
+    .slidersRow .slider::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+    }
+
+    .slidersRow .sliderLabels {
+        display: none;
+    }
+
+    .slidersRow .inputGroup:nth-child(3) {
+        margin-top: -8px;
+    }
+
+    .slidersRow .inputGroup:nth-child(3) .label {
+        font-size: 4.5px;
+    }
+
+    .fieldRow {
+        margin-bottom: var(--space-3);
+    }
+
+    .fieldRow .inputGroup {
+        max-width: 200px;
+    }
+
+    .fieldRow .label {
+        font-size: 10px;
+        margin-bottom: var(--space-1);
+    }
+
+    .selectorsRow .label {
+        font-size: 10px;
+        margin-bottom: var(--space-1);
+    }
 }
 
 .select {

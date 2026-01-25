@@ -59,49 +59,47 @@ export default function UniversityComparison() {
         const selected = selectedUnis.filter(u => u !== null && getDeptData(u));
         if (selected.length < 2) return null;
 
-        if (fieldType === 'rank' || fieldType === 'number') {
-            // For ranking, lower is better. For research papers, higher is better.
-            if (fieldKey === 'ranking') {
-                return selected.reduce((best, u) => {
-                    const current = getDeptData(u)?.[fieldKey];
-                    const bestVal = getDeptData(best)?.[fieldKey];
-                    return current < bestVal ? u : best;
-                }, selected[0])?.id;
+        // Helper to get comparable value
+        const getValue = (u) => {
+            const deptData = getDeptData(u);
+            if (!deptData) return null;
+            const val = deptData[fieldKey];
+
+            if (fieldType === 'percentage') {
+                return parseInt(val) || 0;
             }
-            // For numbers like research papers, higher is better
-            return selected.reduce((best, u) => {
-                const current = getDeptData(u)?.[fieldKey];
-                const bestVal = getDeptData(best)?.[fieldKey];
-                return current > bestVal ? u : best;
-            }, selected[0])?.id;
+            if (fieldType === 'salary') {
+                return parseInt(val?.replace(/[^0-9]/g, '')) || 0;
+            }
+            if (fieldType === 'quality') {
+                const qualityOrder = ['Exceptional', 'World-Class', 'Excellent', 'Very High', 'High', 'Good', 'Medium', 'Average', 'Low'];
+                const idx = qualityOrder.indexOf(val);
+                return idx === -1 ? 999 : idx;
+            }
+            return val;
+        };
+
+        const values = selected.map(u => ({ uni: u, value: getValue(u) }));
+
+        // Sort values to find best
+        let sorted;
+        if (fieldType === 'rank' || fieldKey === 'ranking') {
+            // Lower is better for rankings
+            sorted = [...values].sort((a, b) => (a.value || 999) - (b.value || 999));
+        } else if (fieldType === 'quality') {
+            // Lower index is better (Exceptional = 0 is best)
+            sorted = [...values].sort((a, b) => (a.value || 999) - (b.value || 999));
+        } else {
+            // Higher is better for most metrics
+            sorted = [...values].sort((a, b) => (b.value || 0) - (a.value || 0));
         }
 
-        if (fieldType === 'percentage') {
-            return selected.reduce((best, u) => {
-                const current = parseInt(getDeptData(u)?.[fieldKey]) || 0;
-                const bestVal = parseInt(getDeptData(best)?.[fieldKey]) || 0;
-                return current > bestVal ? u : best;
-            }, selected[0])?.id;
+        // Check if top value is unique (not tied)
+        if (sorted.length >= 2 && sorted[0].value === sorted[1].value) {
+            return null; // Tie - no best
         }
 
-        if (fieldType === 'salary') {
-            return selected.reduce((best, u) => {
-                const current = parseInt(getDeptData(u)?.[fieldKey]?.replace(/[^0-9]/g, '')) || 0;
-                const bestVal = parseInt(getDeptData(best)?.[fieldKey]?.replace(/[^0-9]/g, '')) || 0;
-                return current > bestVal ? u : best;
-            }, selected[0])?.id;
-        }
-
-        if (fieldType === 'quality') {
-            const qualityOrder = ['Exceptional', 'World-Class', 'Excellent', 'Very High', 'High', 'Good', 'Medium', 'Average', 'Low'];
-            return selected.reduce((best, u) => {
-                const currentIdx = qualityOrder.indexOf(getDeptData(u)?.[fieldKey]) || 999;
-                const bestIdx = qualityOrder.indexOf(getDeptData(best)?.[fieldKey]) || 999;
-                return currentIdx < bestIdx ? u : best;
-            }, selected[0])?.id;
-        }
-
-        return null;
+        return sorted[0]?.uni?.id || null;
     };
 
     const currentCriteria = comparisonCriteria.find(c => c.id === selectedCriteria);

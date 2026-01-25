@@ -551,3 +551,141 @@
         opacity: 1;
     }
 }
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    .section {
+        padding: var(--space-6) var(--space-3);
+    }
+
+    .header {
+        margin-bottom: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--font-size-lg);
+        gap: var(--space-2);
+    }
+
+    .titleIcon {
+        font-size: var(--font-size-2xl);
+    }
+
+    .count {
+        font-size: var(--font-size-base);
+    }
+
+    .list {
+        gap: var(--space-2);
+    }
+
+    .cardHeader {
+        gap: var(--space-2);
+        padding: var(--space-2);
+    }
+
+    .rank {
+        min-width: 30px;
+    }
+
+    .rankNumber {
+        font-size: var(--font-size-base);
+    }
+
+    .logo {
+        width: 36px;
+        height: 36px;
+        font-size: var(--font-size-base);
+    }
+
+    .name {
+        font-size: var(--font-size-base);
+    }
+
+    .fullName {
+        font-size: 10px;
+    }
+
+    .tag,
+    .tagHighlight {
+        font-size: 10px;
+    }
+
+    .matchBadge {
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .matchPercent {
+        font-size: var(--font-size-sm);
+    }
+
+    .matchLabel {
+        font-size: 10px;
+    }
+
+    .details {
+        padding: 0 var(--space-2) var(--space-2);
+    }
+
+    .description {
+        font-size: var(--font-size-xs);
+        padding: var(--space-2);
+        margin-bottom: var(--space-2);
+    }
+
+    .detailsGrid {
+        gap: var(--space-2);
+        margin-bottom: var(--space-2);
+    }
+
+    .detailItem {
+        padding: var(--space-1);
+    }
+
+    .detailLabel {
+        font-size: 10px;
+    }
+
+    .detailValue {
+        font-size: var(--font-size-xs);
+    }
+
+    .programs,
+    .highlights {
+        margin-bottom: var(--space-2);
+    }
+
+    .programsTitle,
+    .highlightsTitle {
+        font-size: var(--font-size-xs);
+    }
+
+    .programTag {
+        padding: 2px var(--space-2);
+        font-size: 10px;
+    }
+
+    .highlightTag {
+        font-size: var(--font-size-xs);
+    }
+
+    .cardFooter {
+        padding: var(--space-2);
+    }
+
+    .expandBtn,
+    .saveBtn {
+        padding: var(--space-1) var(--space-2);
+        font-size: var(--font-size-xs);
+    }
+
+    .viewMoreContainer {
+        padding: var(--space-2);
+        margin-top: var(--space-4);
+    }
+
+    .viewMoreBtn {
+        padding: var(--space-2) var(--space-4);
+        font-size: var(--font-size-sm);
+    }
+}
