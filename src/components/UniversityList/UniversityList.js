@@ -38,7 +38,7 @@ export default function UniversityList({ universities, field, onSave, savedIds }
         return (
             <section className={styles.section}>
                 <div className={styles.empty}>
-                    <span className={styles.emptyIcon}>🔍</span>
+                    <span className={styles.emptyIcon}></span>
                     <p>No universities match your current filters.</p>
                 </div>
             </section>
@@ -53,7 +53,7 @@ export default function UniversityList({ universities, field, onSave, savedIds }
         <section className={styles.section}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    <span className={styles.titleIcon}>🏛️</span>
+                    <span className={styles.titleIcon}></span>
                     All Universities
                     <span className={styles.count}>({universities.length})</span>
                 </h2>
@@ -78,7 +78,7 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                                 <div className={styles.rank}>
                                     <span className={styles.rankNumber}>#{index + 1}</span>
                                     {fieldRank && fieldRank <= 3 && (
-                                        <span className={styles.topBadge}>🏆</span>
+                                        <span className={styles.topBadge}>TOP</span>
                                     )}
                                 </div>
 
@@ -90,8 +90,8 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                                     <h3 className={styles.name}>{uni.shortName}</h3>
                                     <p className={styles.fullName}>{uni.name}</p>
                                     <div className={styles.tags}>
-                                        <span className={styles.tag}>📍 {uni.city}</span>
-                                        <span className={styles.tag}>🏛️ {uni.type}</span>
+                                        <span className={styles.tag}>{uni.city}</span>
+                                        <span className={styles.tag}>{uni.type}</span>
                                         {fieldRank && (
                                             <span className={styles.tagHighlight}>
                                                 #{fieldRank} in {field}
@@ -115,19 +115,19 @@ export default function UniversityList({ universities, field, onSave, savedIds }
 
                                     <div className={styles.detailsGrid}>
                                         <div className={styles.detailItem}>
-                                            <span className={styles.detailLabel}>💰 Avg Fee</span>
+                                            <span className={styles.detailLabel}>Avg Fee</span>
                                             <span className={styles.detailValue}>{uni.avgFee}</span>
                                         </div>
                                         <div className={styles.detailItem}>
-                                            <span className={styles.detailLabel}>📅 Established</span>
+                                            <span className={styles.detailLabel}>Established</span>
                                             <span className={styles.detailValue}>{uni.established}</span>
                                         </div>
                                         <div className={styles.detailItem}>
-                                            <span className={styles.detailLabel}>🏠 Campus</span>
+                                            <span className={styles.detailLabel}>Campus</span>
                                             <span className={styles.detailValue}>{uni.hostelAvailability}</span>
                                         </div>
                                         <div className={styles.detailItem}>
-                                            <span className={styles.detailLabel}>🎯 Focus</span>
+                                            <span className={styles.detailLabel}>Focus</span>
                                             <span className={styles.detailValue}>{uni.campusType}</span>
                                         </div>
                                     </div>
@@ -145,7 +145,7 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                                         <h4 className={styles.highlightsTitle}>Highlights</h4>
                                         <div className={styles.highlightTags}>
                                             {uni.highlights.map((h, idx) => (
-                                                <span key={idx} className={styles.highlightTag}>✨ {h}</span>
+                                                <span key={idx} className={styles.highlightTag}>{h}</span>
                                             ))}
                                         </div>
                                     </div>
@@ -172,7 +172,7 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                                     onClick={() => onSave(uni)}
                                     disabled={isSaved}
                                 >
-                                    {isSaved ? '✓ Saved' : '💚 Save'}
+                                    {isSaved ? '✓ Saved' : 'Save'}
                                 </button>
                             </div>
                         </div>
@@ -187,7 +187,7 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                         className={styles.viewMoreBtn}
                         onClick={handleViewMore}
                     >
-                        <span className={styles.viewMoreIcon}>📚</span>
+                        <span className={styles.viewMoreIcon}></span>
                         <span className={styles.viewMoreText}>
                             View More Universities
                         </span>

@@ -87,7 +87,7 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                 <span>💚 SAVE</span>
             </div>
             <div className={`${styles.overlay} ${styles.skipOverlay}`}>
-                <span>❌ SKIP</span>
+                <span>SKIP</span>
             </div>
 
             {/* Card Content */}
@@ -108,15 +108,15 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
 
                 <div className={styles.tags}>
                     <span className={styles.tag}>
-                        <span className={styles.tagIcon}>📍</span>
+                        <span className={styles.tagIcon}></span>
                         {university.city}
                     </span>
                     <span className={styles.tag}>
-                        <span className={styles.tagIcon}>🏛️</span>
+                        <span className={styles.tagIcon}></span>
                         {university.type}
                     </span>
                     <span className={styles.tag}>
-                        <span className={styles.tagIcon}>🏠</span>
+                        <span className={styles.tagIcon}></span>
                         {university.hostelAvailability.split(' ')[0]}
                     </span>
                 </div>
@@ -134,7 +134,7 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                     <h3 className={styles.sectionTitle}>Highlights</h3>
                     <div className={styles.highlightList}>
                         {university.highlights.map((highlight, idx) => (
-                            <span key={idx} className={styles.highlightTag}>✨ {highlight}</span>
+                            <span key={idx} className={styles.highlightTag}>{highlight}</span>
                         ))}
                     </div>
                 </div>
@@ -143,15 +143,15 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                     <div className={styles.details}>
                         <p className={styles.description}>{university.description}</p>
                         <div className={styles.detailRow}>
-                            <span>💰 Avg Fee:</span>
+                            <span>Avg Fee:</span>
                             <span>{university.avgFee}</span>
                         </div>
                         <div className={styles.detailRow}>
-                            <span>📅 Established:</span>
+                            <span>Established:</span>
                             <span>{university.established}</span>
                         </div>
                         <div className={styles.detailRow}>
-                            <span>🎯 Focus:</span>
+                            <span>Focus:</span>
                             <span>{university.campusType}</span>
                         </div>
 

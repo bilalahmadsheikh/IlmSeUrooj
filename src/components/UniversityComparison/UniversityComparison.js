@@ -109,7 +109,7 @@ export default function UniversityComparison() {
         <section className={styles.section}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    <span className={styles.titleIcon}>⚖️</span>
+                    <span className={styles.titleIcon}></span>
                     Compare Universities
                 </h2>
                 <p className={styles.subtitle}>
@@ -121,7 +121,7 @@ export default function UniversityComparison() {
             <div className={styles.filterSection}>
                 <div className={styles.filterGroup}>
                     <label className={styles.filterLabel}>
-                        <span className={styles.filterIcon}>🎓</span>
+                        <span className={styles.filterIcon}></span>
                         Department
                     </label>
                     <SearchableSelect
@@ -129,7 +129,7 @@ export default function UniversityComparison() {
                         onChange={handleDepartmentChange}
                         options={departmentOptions.map(opt => ({
                             value: opt.value,
-                            label: `${opt.icon} ${opt.label}`
+                            label: opt.label
                         }))}
                         placeholder="Select department..."
                     />
@@ -137,7 +137,7 @@ export default function UniversityComparison() {
 
                 <div className={styles.filterGroup}>
                     <label className={styles.filterLabel}>
-                        <span className={styles.filterIcon}>📋</span>
+                        <span className={styles.filterIcon}></span>
                         Compare By
                     </label>
                     <SearchableSelect
@@ -145,7 +145,7 @@ export default function UniversityComparison() {
                         onChange={setSelectedCriteria}
                         options={comparisonCriteria.map(criteria => ({
                             value: criteria.id,
-                            label: `${criteria.icon} ${criteria.label}`
+                            label: criteria.label
                         }))}
                         placeholder="Select criteria..."
                     />
@@ -229,7 +229,7 @@ export default function UniversityComparison() {
 
                     {/* Key Facilities Section */}
                     <div className={styles.facilitiesSection}>
-                        <h4 className={styles.facilitiesTitle}>🔧 Key Facilities & Labs</h4>
+                        <h4 className={styles.facilitiesTitle}>Key Facilities & Labs</h4>
                         <div className={styles.facilitiesGrid}>
                             {selectedUnis.map((uni, index) => (
                                 <div key={index} className={styles.facilitiesCard}>
@@ -256,7 +256,7 @@ export default function UniversityComparison() {
 
                     {/* Top Recruiters Section */}
                     <div className={styles.recruitersSection}>
-                        <h4 className={styles.recruitersTitle}>🏢 Top Recruiters & Partners</h4>
+                        <h4 className={styles.recruitersTitle}>Top Recruiters & Partners</h4>
                         <div className={styles.recruitersGrid}>
                             {selectedUnis.map((uni, index) => (
                                 <div key={index} className={styles.recruitersCard}>
@@ -285,7 +285,7 @@ export default function UniversityComparison() {
 
             {!hasSelection && (
                 <div className={styles.emptyState}>
-                    <span className={styles.emptyIcon}>📊</span>
+                    <span className={styles.emptyIcon}></span>
                     <p>Select universities above to compare {selectedDepartment} departments</p>
                     <span className={styles.emptyHint}>
                         {filteredUniversities.length} universities offer {selectedDepartment}

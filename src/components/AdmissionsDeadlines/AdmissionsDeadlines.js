@@ -11,6 +11,7 @@ const MOBILE_BREAKPOINT = 768;
 
 export default function AdmissionsDeadlines({ currentField }) {
     const [filter, setFilter] = useState('all');
+    const [showElapsed, setShowElapsed] = useState(false);
     const [now, setNow] = useState(new Date());
     const [visibleCount, setVisibleCount] = useState(DESKTOP_LIMITS[0]);
     const [isMobile, setIsMobile] = useState(false);
@@ -38,10 +39,26 @@ export default function AdmissionsDeadlines({ currentField }) {
     // Get current limits based on device
     const currentLimits = isMobile ? MOBILE_LIMITS : DESKTOP_LIMITS;
 
-    // Filter deadlines
+    // Calculate days remaining
+    const getDaysRemaining = (deadline) => {
+        const deadlineDate = new Date(deadline);
+        const diffTime = deadlineDate - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
+
+    // Filter deadlines by field and upcoming/elapsed
     const filteredDeadlines = upcomingDeadlines.filter(d => {
-        if (filter === 'all') return true;
-        return d.field === filter;
+        // Field filter
+        if (filter !== 'all' && d.field !== filter) return false;
+
+        // Upcoming/Elapsed filter
+        const daysLeft = getDaysRemaining(d.deadline);
+        if (showElapsed) {
+            return daysLeft < 0; // Show only elapsed
+        } else {
+            return daysLeft >= 0; // Show only upcoming
+        }
     });
 
     // Handle View More
@@ -63,19 +80,6 @@ export default function AdmissionsDeadlines({ currentField }) {
         return filteredDeadlines.length;
     };
 
-    // Visible deadlines
-    const visibleDeadlines = filteredDeadlines.slice(0, visibleCount);
-    const hasMore = visibleCount < filteredDeadlines.length;
-    const remainingCount = filteredDeadlines.length - visibleCount;
-
-    // Calculate days remaining
-    const getDaysRemaining = (deadline) => {
-        const deadlineDate = new Date(deadline);
-        const diffTime = deadlineDate - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-    };
-
     // Get urgency class
     const getUrgencyClass = (days) => {
         if (days <= 3) return styles.urgent;
@@ -94,20 +98,50 @@ export default function AdmissionsDeadlines({ currentField }) {
         });
     };
 
+    // Reset visible count when toggle changes
+    useEffect(() => {
+        setVisibleCount(isMobile ? MOBILE_LIMITS[0] : DESKTOP_LIMITS[0]);
+    }, [showElapsed, filter, isMobile]);
+
+    // Visible deadlines
+    const visibleDeadlines = filteredDeadlines.slice(0, visibleCount);
+    const hasMore = visibleCount < filteredDeadlines.length;
+    const remainingCount = filteredDeadlines.length - visibleCount;
+
     return (
         <section className={styles.section}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    <span className={styles.titleIcon}>📅</span>
-                    Upcoming Admission Deadlines
+                    <span className={styles.titleIcon}></span>
+                    {showElapsed ? 'Elapsed Deadlines' : 'Upcoming Admission Deadlines'}
                 </h2>
                 <p className={styles.subtitle}>
-                    Don't miss your chance! Real 2026 deadlines from official sources.
+                    {showElapsed
+                        ? 'Past deadlines for reference. Applications are closed.'
+                        : "Don't miss your chance! Real 2026 deadlines from official sources."
+                    }
                 </p>
             </div>
 
-            {/* Filter Tabs */}
+            {/* Toggle and Filter Tabs */}
             <div className={styles.filters}>
+                {/* Upcoming/Elapsed Toggle */}
+                <div className={styles.toggleWrapper}>
+                    <button
+                        className={`${styles.toggleBtn} ${!showElapsed ? styles.active : ''}`}
+                        onClick={() => setShowElapsed(false)}
+                    >
+                        Upcoming
+                    </button>
+                    <button
+                        className={`${styles.toggleBtn} ${showElapsed ? styles.active : ''}`}
+                        onClick={() => setShowElapsed(true)}
+                    >
+                        Elapsed
+                    </button>
+                </div>
+
+                {/* Field Filters */}
                 <button
                     className={`${styles.filterBtn} ${filter === 'all' ? styles.active : ''}`}
                     onClick={() => setFilter('all')}
@@ -173,12 +207,12 @@ export default function AdmissionsDeadlines({ currentField }) {
 
                             <div className={styles.cardBody}>
                                 <div className={styles.dateRow}>
-                                    <span className={styles.dateLabel}>📝 Apply by:</span>
+                                    <span className={styles.dateLabel}>Apply by:</span>
                                     <span className={styles.dateValue}>{formatDate(deadline.deadline)}</span>
                                 </div>
                                 {deadline.testDate && (
                                     <div className={styles.dateRow}>
-                                        <span className={styles.dateLabel}>📝 {deadline.testName}:</span>
+                                        <span className={styles.dateLabel}>{deadline.testName}:</span>
                                         <span className={styles.dateValue}>{formatDate(deadline.testDate)}</span>
                                     </div>
                                 )}
@@ -208,7 +242,7 @@ export default function AdmissionsDeadlines({ currentField }) {
                         className={styles.viewMoreBtn}
                         onClick={handleViewMore}
                     >
-                        <span className={styles.viewMoreIcon}>⏰</span>
+                        <span className={styles.viewMoreIcon}></span>
                         <span className={styles.viewMoreText}>
                             View More Deadlines
                         </span>
@@ -224,13 +258,13 @@ export default function AdmissionsDeadlines({ currentField }) {
 
             {filteredDeadlines.length === 0 && (
                 <div className={styles.empty}>
-                    <span className={styles.emptyIcon}>📭</span>
+                    <span className={styles.emptyIcon}></span>
                     <p>No upcoming deadlines for this field.</p>
                 </div>
             )}
 
             <div className={styles.disclaimer}>
-                <span className={styles.disclaimerIcon}>ℹ️</span>
+                <span className={styles.disclaimerIcon}></span>
                 Deadlines sourced from official university websites. Always verify on the official portal.
             </div>
         </section>

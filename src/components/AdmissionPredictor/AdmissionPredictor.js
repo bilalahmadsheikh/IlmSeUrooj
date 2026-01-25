@@ -12,9 +12,9 @@ const admissionCriteria = {
         competitiveFsc: 80,
         formula: 'NET (75%) + FSc (15%) + Matric (10%)',
         formulaBreakdown: [
-            { component: 'NET Entry Test', weight: 75, icon: '📝' },
-            { component: 'FSc/A-Level Marks', weight: 15, icon: '📚' },
-            { component: 'Matric/O-Level', weight: 10, icon: '📖' }
+            { component: 'NET Entry Test', weight: 75, icon: '' },
+            { component: 'FSc/A-Level Marks', weight: 15, icon: '' },
+            { component: 'Matric/O-Level', weight: 10, icon: '' }
         ],
         description: 'Top engineering university. NUST does not officially release cutoffs, but aggregates are estimated from merit lists.',
         cutoffs: { engineering: 72, cs: 78, business: 65 },
@@ -30,9 +30,9 @@ const admissionCriteria = {
         competitiveFsc: 88,
         formula: 'Holistic (LCAT/SAT + Academics + Essays)',
         formulaBreakdown: [
-            { component: 'LCAT or SAT Score', weight: 40, icon: '📝' },
-            { component: 'Academic Record', weight: 35, icon: '📚' },
-            { component: 'Essays & Interview', weight: 25, icon: '✍️' }
+            { component: 'LCAT or SAT Score', weight: 40, icon: '' },
+            { component: 'Academic Record', weight: 35, icon: '' },
+            { component: 'Essays & Interview', weight: 25, icon: '' }
         ],
         description: 'NO cutoffs published - holistic admissions. Considers test scores, academics, essays, and interviews together.',
         cutoffs: { business: 85, cs: 82 },
@@ -48,8 +48,8 @@ const admissionCriteria = {
         competitiveFsc: 70,
         formula: 'NU Test (50%) + FSc Part-I (50%)',
         formulaBreakdown: [
-            { component: 'FAST NU Test', weight: 50, icon: '📝' },
-            { component: 'FSc Part-I Marks', weight: 50, icon: '📚' }
+            { component: 'FAST NU Test', weight: 50, icon: '' },
+            { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
         description: 'Best for CS. Cutoffs vary significantly by campus - Islamabad/Lahore highest, Peshawar/Faisalabad lowest.',
         cutoffs: { cs: 70, engineering: 65, se: 73 },
@@ -64,9 +64,9 @@ const admissionCriteria = {
         competitiveFsc: 75,
         formula: 'NTS NAT (50%) + FSc (40%) + Matric (10%)',
         formulaBreakdown: [
-            { component: 'NTS NAT Test', weight: 50, icon: '📝' },
-            { component: 'FSc Marks', weight: 40, icon: '📚' },
-            { component: 'Matric Marks', weight: 10, icon: '📖' }
+            { component: 'NTS NAT Test', weight: 50, icon: '' },
+            { component: 'FSc Marks', weight: 40, icon: '' },
+            { component: 'Matric Marks', weight: 10, icon: '' }
         ],
         description: 'Affordable federal university. Islamabad campus is most competitive. Uses NTS NAT score.',
         cutoffs: { cs: 82, se: 81, ai: 80 },
@@ -81,8 +81,8 @@ const admissionCriteria = {
         competitiveFsc: 80,
         formula: 'Test-Based Merit (Entry Test Score)',
         formulaBreakdown: [
-            { component: 'IBA Aptitude Test', weight: 100, icon: '📝' },
-            { component: 'Min FSc for eligibility', weight: 0, icon: '📚' }
+            { component: 'IBA Aptitude Test', weight: 100, icon: '' },
+            { component: 'Min FSc for eligibility', weight: 0, icon: '' }
         ],
         description: 'Asia\'s oldest business school. Publishes official TEST SCORE cutoffs, not aggregate percentages.',
         cutoffs: { business: 75, cs: 70 },
@@ -98,9 +98,9 @@ const admissionCriteria = {
         competitiveFsc: 78,
         formula: 'ECAT (30%) + FSc (45%) + Matric (25%)',
         formulaBreakdown: [
-            { component: 'ECAT Test', weight: 30, icon: '📝' },
-            { component: 'FSc Marks', weight: 45, icon: '📚' },
-            { component: 'Matric Marks', weight: 25, icon: '📖' }
+            { component: 'ECAT Test', weight: 30, icon: '' },
+            { component: 'FSc Marks', weight: 45, icon: '' },
+            { component: 'Matric Marks', weight: 25, icon: '' }
         ],
         description: 'Premier public engineering university. Publishes official aggregate cutoffs. Very affordable fees.',
         cutoffs: { engineering: 77, cs: 80 },
@@ -115,8 +115,8 @@ const admissionCriteria = {
         competitiveFsc: 78,
         formula: 'GIKI Test (85%) + FSc Part-I (15%)',
         formulaBreakdown: [
-            { component: 'GIKI Entry Test', weight: 85, icon: '📝' },
-            { component: 'FSc Part-I Marks', weight: 15, icon: '📚' }
+            { component: 'GIKI Entry Test', weight: 85, icon: '' },
+            { component: 'FSc Part-I Marks', weight: 15, icon: '' }
         ],
         description: 'Elite residential institute. ONLY releases merit POSITIONS, not percentage cutoffs.',
         cutoffs: { engineering: 75, cs: 78 },
@@ -132,9 +132,9 @@ const admissionCriteria = {
         competitiveFsc: 80,
         formula: 'PIEAS Test (60%) + FSc (25%) + Matric (15%)',
         formulaBreakdown: [
-            { component: 'PIEAS Written Test', weight: 60, icon: '📝' },
-            { component: 'FSc Marks', weight: 25, icon: '📚' },
-            { component: 'Matric Marks', weight: 15, icon: '📖' }
+            { component: 'PIEAS Written Test', weight: 60, icon: '' },
+            { component: 'FSc Marks', weight: 25, icon: '' },
+            { component: 'Matric Marks', weight: 15, icon: '' }
         ],
         description: 'Nuclear research institute. Publishes merit POSITIONS. Estimated aggregates from third-party analysis.',
         cutoffs: { engineering: 75, cs: 78 },
@@ -150,8 +150,8 @@ const admissionCriteria = {
         competitiveFsc: 80,
         formula: 'NED Test (60%) + Academics (40%)',
         formulaBreakdown: [
-            { component: 'NED Entry Test', weight: 60, icon: '📝' },
-            { component: 'Academic Record', weight: 40, icon: '📚' }
+            { component: 'NED Entry Test', weight: 60, icon: '' },
+            { component: 'Academic Record', weight: 40, icon: '' }
         ],
         description: 'Historic Karachi engineering university. Formula updated in 2024 to 60% test + 40% academics.',
         cutoffs: { se: 86, cs: 84, ee: 76 },
@@ -166,8 +166,8 @@ const admissionCriteria = {
         competitiveFsc: 70,
         formula: 'Entry Test (50%) + Intermediate (50%)',
         formulaBreakdown: [
-            { component: 'Bahria Entry Test', weight: 50, icon: '📝' },
-            { component: 'Intermediate Marks', weight: 50, icon: '📚' }
+            { component: 'Bahria Entry Test', weight: 50, icon: '' },
+            { component: 'Intermediate Marks', weight: 50, icon: '' }
         ],
         description: 'Navy-affiliated university. Islamabad campus most competitive. Publishes aggregates.',
         cutoffs: { cs: 80, se: 78, bba: 65 },
@@ -355,7 +355,7 @@ export default function AdmissionPredictor() {
         <section className={styles.section}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    <span className={styles.titleIcon}>🎯</span>
+                    <span className={styles.titleIcon}></span>
                     Admission Chance Predictor
                 </h2>
                 <p className={styles.subtitle}>
@@ -428,7 +428,7 @@ export default function AdmissionPredictor() {
                 {/* Field Row - centered single column on mobile */}
                 <div className={styles.fieldRow}>
                     <div className={styles.inputGroup}>
-                        <label className={styles.label}>🎓 Field of Study</label>
+                        <label className={styles.label}>Field of Study</label>
                         <SearchableSelect
                             value={selectedField}
                             onChange={handleFieldChange}
@@ -446,7 +446,7 @@ export default function AdmissionPredictor() {
                 {/* Selectors Row - 2 columns on mobile */}
                 <div className={styles.selectorsRow}>
                     <div className={styles.inputGroup}>
-                        <label className={styles.label}>📋 Education Status</label>
+                        <label className={styles.label}>Education Status</label>
                         <SearchableSelect
                             value={educationStatus}
                             onChange={setEducationStatus}
@@ -461,7 +461,7 @@ export default function AdmissionPredictor() {
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label className={styles.label}>🏛️ University</label>
+                        <label className={styles.label}>University</label>
                         <SearchableSelect
                             value={selectedUniversity}
                             onChange={setSelectedUniversity}
@@ -481,7 +481,7 @@ export default function AdmissionPredictor() {
             {/* Methodology - Dynamic based on selected university */}
             <div className={styles.methodology}>
                 <h4>
-                    📋 {selectedUniversity !== 'All'
+                    {selectedUniversity !== 'All'
                         ? `How ${selectedUniversity} Calculates Merit`
                         : 'How We Calculate Chances'}
                 </h4>
@@ -525,7 +525,7 @@ export default function AdmissionPredictor() {
                                     return (
                                         <div className={styles.userAggregateSection}>
                                             <div className={styles.aggregateNote}>
-                                                ⚠️ {selectedUniversity} uses {meritType === 'position' ? 'merit positions' : 'test scores'}, not percentage aggregates
+                                                {selectedUniversity} uses {meritType === 'position' ? 'merit positions' : 'test scores'}, not percentage aggregates
                                             </div>
                                         </div>
                                     );
@@ -535,7 +535,7 @@ export default function AdmissionPredictor() {
                                     <div className={styles.userAggregateSection}>
                                         <div className={styles.aggregateHeader}>
                                             <span className={styles.aggregateLabel}>
-                                                📊 Your Calculated Aggregate{isIncomplete ? ' (Provisional)' : ''}:
+                                                Your Calculated Aggregate{isIncomplete ? ' (Provisional)' : ''}:
                                             </span>
                                             <span className={styles.aggregateValue}>{result.aggregate}%</span>
                                         </div>
@@ -544,7 +544,7 @@ export default function AdmissionPredictor() {
                                         </div>
                                         {result.adjustedFormula && (
                                             <div className={styles.aggregateNote} style={{ background: 'rgba(251, 146, 60, 0.15)' }}>
-                                                ⚠️ {result.adjustedFormula}
+                                                {result.adjustedFormula}
                                             </div>
                                         )}
                                         {meritType === 'holistic' && (
@@ -554,7 +554,7 @@ export default function AdmissionPredictor() {
                                         )}
                                         {result.hasTestComponent && !isIncomplete && (
                                             <div className={styles.aggregateNote}>
-                                                💡 Your actual aggregate will depend on your entry test performance
+                                                Your actual aggregate will depend on your entry test performance
                                             </div>
                                         )}
                                     </div>
@@ -565,7 +565,7 @@ export default function AdmissionPredictor() {
                         {/* Historical Merit Data */}
                         {admissionCriteria[selectedUniversity].meritHistory && (
                             <div className={styles.meritHistorySection}>
-                                <h5>📈 Last 2 Years {
+                                <h5>Last 2 Years {
                                     admissionCriteria[selectedUniversity].meritType === 'position' ? 'Merit Seats' :
                                         admissionCriteria[selectedUniversity].meritType === 'test_score' ? 'Test Score Cutoffs' :
                                             admissionCriteria[selectedUniversity].meritType === 'holistic' ? 'Eligibility Requirements' :
@@ -607,7 +607,7 @@ export default function AdmissionPredictor() {
                         {/* Tips */}
                         {admissionCriteria[selectedUniversity].tips && (
                             <div className={styles.tipSection}>
-                                <span className={styles.tipIcon}>💡</span>
+                                <span className={styles.tipIcon}></span>
                                 <p>{admissionCriteria[selectedUniversity].tips}</p>
                             </div>
                         )}
@@ -620,28 +620,28 @@ export default function AdmissionPredictor() {
                     /* Generic methodology for All Universities */
                     <div className={styles.methodologyGrid}>
                         <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}>📝</span>
+                            <span className={styles.methodIcon}></span>
                             <div>
                                 <strong>Entry Test (40-85%)</strong>
                                 <p>NET, LCAT, ECAT, or university tests. Often the deciding factor.</p>
                             </div>
                         </div>
                         <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}>📚</span>
+                            <span className={styles.methodIcon}></span>
                             <div>
                                 <strong>FSc/A-Level (15-50%)</strong>
                                 <p>Intermediate marks baseline. Most require 60-70% minimum.</p>
                             </div>
                         </div>
                         <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}>📖</span>
+                            <span className={styles.methodIcon}></span>
                             <div>
                                 <strong>Matric/O-Level (10-25%)</strong>
                                 <p>SSC marks contribute to aggregate calculation.</p>
                             </div>
                         </div>
                         <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}>🎤</span>
+                            <span className={styles.methodIcon}></span>
                             <div>
                                 <strong>Interview (0-30%)</strong>
                                 <p>LUMS, PIEAS require interviews. Others are test-only.</p>
@@ -707,7 +707,7 @@ export default function AdmissionPredictor() {
             </div>
 
             <div className={styles.disclaimer}>
-                <span>⚠️</span>
+                <span></span>
                 These predictions are estimates based on historical data. Actual admission depends on
                 test performance, seat availability, and university policies. Always check official sources.
             </div>

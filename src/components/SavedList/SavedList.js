@@ -16,7 +16,7 @@ export default function SavedList({ savedUniversities, onRemove, onClose }) {
 
                 {savedUniversities.length === 0 ? (
                     <div className={styles.empty}>
-                        <span className={styles.emptyIcon}>🎓</span>
+                        <span className={styles.emptyIcon}></span>
                         <p className={styles.emptyText}>No universities saved yet!</p>
                         <p className={styles.emptyHint}>Swipe right on universities you like to save them here.</p>
                     </div>
@@ -30,7 +30,7 @@ export default function SavedList({ savedUniversities, onRemove, onClose }) {
                                 <div className={styles.itemInfo}>
                                     <h3 className={styles.itemName}>{uni.shortName}</h3>
                                     <p className={styles.itemDetails}>
-                                        <span>📍 {uni.city}</span>
+                                        <span>{uni.city}</span>
                                         <span>•</span>
                                         <span>{uni.type}</span>
                                     </p>

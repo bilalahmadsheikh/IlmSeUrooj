@@ -42,7 +42,7 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                         {/* Field/Category - Primary Filter */}
                         <div className={styles.filterGroup}>
                             <label className={styles.label}>
-                                <span className={styles.labelIcon}>📚</span>
+                                <span className={styles.labelIcon}></span>
                                 Field / Category
                             </label>
                             <SearchableSelect
@@ -56,7 +56,7 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                         {/* Degree Level */}
                         <div className={styles.filterGroup}>
                             <label className={styles.label}>
-                                <span className={styles.labelIcon}>🎓</span>
+                                <span className={styles.labelIcon}></span>
                                 Degree Level
                             </label>
                             <SearchableSelect
@@ -70,7 +70,7 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                         {/* Exact Program */}
                         <div className={styles.filterGroup}>
                             <label className={styles.label}>
-                                <span className={styles.labelIcon}>💻</span>
+                                <span className={styles.labelIcon}></span>
                                 Exact Program
                             </label>
                             <SearchableSelect
@@ -84,7 +84,7 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                         {/* Campus/Hostel */}
                         <div className={styles.filterGroup}>
                             <label className={styles.label}>
-                                <span className={styles.labelIcon}>🏠</span>
+                                <span className={styles.labelIcon}></span>
                                 Campus / Hostel
                             </label>
                             <SearchableSelect
@@ -98,7 +98,7 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                         {/* City */}
                         <div className={styles.filterGroup}>
                             <label className={styles.label}>
-                                <span className={styles.labelIcon}>📍</span>
+                                <span className={styles.labelIcon}></span>
                                 City / Location
                             </label>
                             <SearchableSelect
@@ -112,7 +112,7 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                         {/* Campus Type */}
                         <div className={styles.filterGroup}>
                             <label className={styles.label}>
-                                <span className={styles.labelIcon}>🎯</span>
+                                <span className={styles.labelIcon}></span>
                                 Campus Focus
                             </label>
                             <SearchableSelect
@@ -126,7 +126,7 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
 
                     {!isSwipeMode && (
                         <button className={styles.startBtn} onClick={onStartSwiping}>
-                            <span className={styles.btnIcon}>👆</span>
+                            <span className={styles.btnIcon}></span>
                             Start Swiping
                             <span className={styles.btnArrow}>→</span>
                         </button>

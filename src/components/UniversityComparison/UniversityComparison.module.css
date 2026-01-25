@@ -393,10 +393,10 @@
 .facilityTag {
     font-size: 10px;
     padding: 2px var(--space-2);
-    background: var(--glass-bg-light);
-    border: 1px solid var(--color-accent-2);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-primary);
     border-radius: var(--radius-md);
-    color: var(--color-accent-2);
+    color: var(--color-text-primary);
 }
 
 .recruiterTag {
