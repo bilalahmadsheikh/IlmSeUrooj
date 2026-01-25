@@ -1,422 +1,293 @@
-# IlmSeUrooj - Data Sources Reference
+# IlmSeUrooj - Data Sources
 
-Complete documentation of all data used in the website, where it was sourced from, and direct links to the original sources.
-
----
-
-## Table of Contents
-1. [University Basic Information](#1-university-basic-information)
-2. [Merit Cutoffs & Formulas](#2-merit-cutoffs--formulas)
-3. [Admission Deadlines](#3-admission-deadlines)
-4. [Department Comparison Data](#4-department-comparison-data)
-5. [Fee Information](#5-fee-information)
-6. [Data Accuracy Notes](#6-data-accuracy-notes)
+All data used in the website with source references and links.
 
 ---
 
-## 1. University Basic Information
+## University Websites & Admission Portals
 
-### NUST (National University of Sciences & Technology)
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 1991 | [NUST About](https://nust.edu.pk/about-us/) |
-| Type | Public | Official |
-| City | Islamabad | Official |
-| Website | nust.edu.pk | [Link](https://nust.edu.pk) |
-| Admission Portal | ugadmissions.nust.edu.pk | [Link](https://ugadmissions.nust.edu.pk) |
+| University | Official Website | Admission Portal |
+|------------|------------------|------------------|
+| NUST | https://nust.edu.pk | https://nust.edu.pk/admissions |
+| LUMS | https://lums.edu.pk | https://lums.edu.pk/admissions |
+| FAST-NUCES | https://nu.edu.pk | https://admissions.nu.edu.pk |
+| COMSATS | https://www.comsats.edu.pk | https://admissions.comsats.edu.pk |
+| IBA Karachi | https://iba.edu.pk | https://iba.edu.pk (Admissions section) |
+| UET Lahore | https://www.uet.edu.pk | https://admission.uet.edu.pk |
+| UET Taxila | https://www.uettaxila.edu.pk | https://www.uettaxila.edu.pk/admissions |
+| GIKI | https://giki.edu.pk | https://admissions.giki.edu.pk |
+| PIEAS | https://www.pieas.edu.pk | https://admissions.pieas.edu.pk |
+| Bahria | https://www.bahria.edu.pk | https://www.bahria.edu.pk (Online Apply) |
+| NED | https://www.neduet.edu.pk | https://www.neduet.edu.pk/admissions |
+| Habib | https://habib.edu.pk | https://habib.edu.pk/admissions (E-Application) |
+| AKU | https://www.aku.edu | https://www.aku.edu/admissions |
+| Air University | https://www.au.edu.pk | https://www.au.edu.pk (Online Admission Portal) |
+| SZABIST | https://szabist.edu.pk | https://szabist.edu.pk (Admissions Portal) |
+| ITU Lahore | https://itu.edu.pk | https://itu.edu.pk/admissions |
 
 ---
 
-### LUMS (Lahore University of Management Sciences)
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 1985 | [LUMS About](https://lums.edu.pk/about-lums) |
-| Type | Private | Official |
-| City | Lahore | Official |
-| Website | lums.edu.pk | [Link](https://lums.edu.pk) |
-| Admission Portal | admissions.lums.edu.pk | [Link](https://admissions.lums.edu.pk) |
+## COMSATS Campus Websites
 
----
-
-### FAST-NUCES (All Campuses)
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 2000 | [FAST About](https://nu.edu.pk/About) |
-| Type | Private | Official |
-| Main Website | nu.edu.pk | [Link](https://nu.edu.pk) |
-| Admission Portal | nu.edu.pk/Admissions | [Link](https://nu.edu.pk/Admissions) |
-
-**Campus Websites:**
 | Campus | Website |
 |--------|---------|
-| Islamabad | [isb.nu.edu.pk](https://isb.nu.edu.pk) |
-| Lahore | [lhr.nu.edu.pk](https://lhr.nu.edu.pk) |
-| Karachi | [khi.nu.edu.pk](https://khi.nu.edu.pk) |
-| Peshawar | [pwr.nu.edu.pk](https://pwr.nu.edu.pk) |
-| Chiniot-Faisalabad | [cfd.nu.edu.pk](https://cfd.nu.edu.pk) |
+| Lahore | https://cuilahore.edu.pk |
+| Wah | https://cuiwah.edu.pk |
+| Abbottabad | https://cuiatd.edu.pk |
+| Islamabad | https://www.comsats.edu.pk (Main Portal) |
+| Sahiwal | https://www.comsats.edu.pk (Main Portal) |
+| Attock | https://www.comsats.edu.pk (Main Portal) |
+| Vehari | https://www.comsats.edu.pk (Main Portal) |
+
+*All campuses use https://admissions.comsats.edu.pk for admissions*
 
 ---
 
-### COMSATS University (All Campuses)
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 1998 | [COMSATS About](https://www.comsats.edu.pk/About.aspx) |
-| Type | Public (Federal) | Official |
-| Admission Portal | admissions.comsats.edu.pk | [Link](https://admissions.comsats.edu.pk) |
+## FAST-NUCES Campuses
 
-**Campus Websites:**
-| Campus | Website |
-|--------|---------|
-| Islamabad | [islamabad.comsats.edu.pk](https://islamabad.comsats.edu.pk) |
-| Lahore | [lahore.comsats.edu.pk](https://lahore.comsats.edu.pk) |
-| Wah | [wah.comsats.edu.pk](https://wah.comsats.edu.pk) |
-| Abbottabad | [abbottabad.comsats.edu.pk](https://abbottabad.comsats.edu.pk) |
-| Sahiwal | [sahiwal.comsats.edu.pk](https://sahiwal.comsats.edu.pk) |
-| Attock | [attock.comsats.edu.pk](https://attock.comsats.edu.pk) |
-| Vehari | [vehari.comsats.edu.pk](https://vehari.comsats.edu.pk) |
+| Campus | City | Website | Programs |
+|--------|------|---------|----------|
+| FAST Islamabad | Islamabad | https://isb.nu.edu.pk | CS, SE, AI, DS, EE |
+| FAST Lahore | Lahore | https://lhr.nu.edu.pk | CS, SE, EE, BBA |
+| FAST Karachi | Karachi | https://khi.nu.edu.pk | CS, SE, AI, EE |
+| FAST Peshawar | Peshawar | https://pwr.nu.edu.pk | CS, SE |
+| FAST Chiniot | Chiniot | https://cfd.nu.edu.pk | CS, SE |
+
+*Central Admission Portal: https://admissions.nu.edu.pk*
 
 ---
 
-### IBA Karachi
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 1955 | [IBA About](https://iba.edu.pk/about_iba.php) |
-| Type | Public | Official |
-| Website | iba.edu.pk | [Link](https://iba.edu.pk) |
-| Admission Portal | iba.edu.pk/admissions | [Link](https://iba.edu.pk/admissions) |
+## Merit Cutoffs (2024) with Sources
 
----
+### FAST-NUCES CS Cutoffs (NU Test Based)
+| Campus | Aggregate Range | Verified Source |
+|--------|-----------------|----------------|
+| Islamabad | 64-75% | paklearningspot.com, learnospot.com (varies by list) |
+| Lahore | 66-77% | paklearningspot.com, learnospot.com |
+| Karachi | 53-68% | paklearningspot.com, learnospot.com |
+| Peshawar | ~53% | Estimated from student forums |
+| Chiniot | ~54% | Estimated from student forums |
 
-### UET (University of Engineering & Technology)
-| Campus | Website |
-|--------|---------|
-| UET Lahore | [uet.edu.pk](https://uet.edu.pk) |
-| UET Taxila | [uettaxila.edu.pk](https://uettaxila.edu.pk) |
+*Note: FAST cutoffs vary between 1st, 2nd, 3rd merit lists. NTS-based admission has higher cutoffs (74-76%).*
 
----
-
-### GIKI (Ghulam Ishaq Khan Institute)
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 1993 | [GIKI About](https://giki.edu.pk/about/) |
-| Type | Private | Official |
-| City | Topi, KPK | Official |
-| Website | giki.edu.pk | [Link](https://giki.edu.pk) |
-| Admission Portal | giki.edu.pk/admissions | [Link](https://giki.edu.pk/admissions) |
-
----
-
-### PIEAS
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 1967 | [PIEAS About](https://www.pieas.edu.pk/about) |
-| Type | Public | Official |
-| Website | pieas.edu.pk | [Link](https://pieas.edu.pk) |
-
----
-
-### Bahria University (All Campuses)
-| Data | Value | Source |
-|------|-------|--------|
-| Established | 2000 | [Bahria About](https://www.bahria.edu.pk/about/) |
-| Type | Private (Navy) | Official |
-| Website | bahria.edu.pk | [Link](https://bahria.edu.pk) |
-| Admission Portal | bahria.edu.pk/admissions | [Link](https://bahria.edu.pk/admissions) |
-
----
-
-### Other Universities
-| University | Website |
-|------------|---------|
-| Habib University | [habib.edu.pk](https://habib.edu.pk) |
-| Aga Khan University | [aku.edu](https://aku.edu) |
-| NED University | [neduet.edu.pk](https://neduet.edu.pk) |
-| Air University | [au.edu.pk](https://au.edu.pk) |
-| SZABIST | [szabist.edu.pk](https://szabist.edu.pk) |
-| ITU Lahore | [itu.edu.pk](https://itu.edu.pk) |
-
----
-
-## 2. Merit Cutoffs & Formulas
-
-### NUST Merit Data
-| Data Point | Value | Source |
-|------------|-------|--------|
-| Formula | NET 75% + FSc 15% + Matric 10% | [NUST Admissions](https://ugadmissions.nust.edu.pk) |
-| CS Estimated | ~73-78% | Estimated from merit lists |
-| Note | NUST doesn't publish cutoffs | Official policy |
-
-**Source Details:**
-- Official cutoffs not published by NUST
-- Estimates from student forums and merit list analysis
-- Reddit: [r/pakistan NUST threads](https://reddit.com/r/pakistan)
-
----
-
-### FAST Merit Data
-| Campus | CS Cutoff (2024) | Source |
-|--------|------------------|--------|
-| Islamabad | 73% | [Maqsad.io](https://maqsad.io/merit-list/fast-islamabad) |
-| Lahore | 70% | Student forums |
-| Karachi | 69% | Student forums |
-| Peshawar | ~53% | Student forums |
-| Chiniot | ~54% | Student forums |
-
-**Source Links:**
-- [FAST Official Admissions](https://nu.edu.pk/Admissions)
-- [Maqsad.io FAST Merit Lists](https://maqsad.io/merit-list)
-- Reddit discussions
-
-**Formula:**
-- NU Test (50%) + FSc Part-I (50%)
-- Source: [FAST Admission Criteria](https://nu.edu.pk/Admissions/Criteria)
-
----
-
-### COMSATS Merit Data
-| Campus | CS Cutoff (2024) | Source |
-|--------|------------------|--------|
-| Islamabad | 87.1% | [Official Merit List](https://admissions.comsats.edu.pk) |
-| Lahore | 87.5% | Official Merit List |
+### COMSATS CS Cutoffs (Official 1st Merit List)
+| Campus | Aggregate | Verified Source |
+|--------|-----------|----------------|
+| Lahore | 87.36-88.5% | eduvision.edu.pk (Official) |
+| Islamabad | 82.7-87.1% | eduvision.edu.pk (Official) |
 | Wah | ~80% | Estimated |
 | Abbottabad | 78.2% | Official Merit List |
 | Sahiwal | ~68% | Estimated |
 | Attock | ~62% | Estimated |
 | Vehari | ~58% | Estimated |
 
-**Source Links:**
-- [COMSATS Admissions Portal](https://admissions.comsats.edu.pk)
-- [COMSATS Merit Lists](https://admissions.comsats.edu.pk/MeritList)
+*Note: Spring 2025 CS Islamabad closed at 88.26%.*
 
-**Formula:**
-- NTS NAT (50%) + FSc (40%) + Matric (10%)
-- Source: [COMSATS Admission Policy](https://admissions.comsats.edu.pk)
+### UET Lahore Cutoffs (2024 Merit List)
+| Program | Aggregate | Verified Source |
+|---------|-----------|----------------|
+| Computer Science | 84.91% | scribd.com (Official Merit PDF) |
+| Mechanical | 73.02% | scribd.com (Official Merit PDF) |
+| Electrical | ~80% | Estimated |
 
----
+### GIKI Closing Positions (2024)
+| Program | Position | Source Link |
+|---------|----------|-------------|
+| CS | #326 | https://admissions.giki.edu.pk (Results 2024) |
+| ME | #1400+ | https://admissions.giki.edu.pk (Results 2024) |
+| EE | #2000+ | https://admissions.giki.edu.pk (Results 2024) |
 
-### UET Lahore Merit Data
-| Program | Cutoff (2024) | Source |
-|---------|---------------|--------|
-| Mechanical | 81.65% | [Official Merit List](https://uet.edu.pk/admissions) |
-| CS | 80.45% | Official Merit List |
-| Electrical | 80.08% | Official Merit List |
+*Note: GIKI publishes merit positions, not percentage cutoffs*
 
-**Formula:**
-- ECAT (30%) + FSc (45%) + Matric (25%)
-- Min ECAT: 132/400
-- Source: [UET Admission Rules](https://uet.edu.pk/admissions)
+### NUST Estimated Cutoffs
+| Program | Estimated Range | Source Link |
+|---------|-----------------|-------------|
+| CS (SEECS) | 73-78% | https://www.reddit.com/r/pakistan/search?q=NUST+NET+cutoff |
+| Engineering | 70-85% | https://www.reddit.com/r/pakistan/search?q=NUST+merit |
 
----
+*Note: NUST does not publish official cutoffs - all estimates from Reddit & student forums*
 
-### GIKI Merit Data
-| Data Point | Value | Source |
-|------------|-------|--------|
-| CS Closing Position | #326 | [GIKI Merit List 2024](https://giki.edu.pk/admissions) |
-| ME Closing Position | #1400+ | Official announcement |
-| EE Closing Position | #2000+ | Official announcement |
-
-**Note:** GIKI publishes merit **positions**, not percentage cutoffs.
-
-**Formula:**
-- GIKI Test (85%) + FSc Part-I (15%)
-- Source: [GIKI Admission Criteria](https://giki.edu.pk/admissions)
+### IBA Test Cutoffs
+| Metric | Value | Source Link |
+|--------|-------|-------------|
+| Test Score | 180/360 minimum | https://iba.edu.pk (Admissions FAQ) |
+| Math Section | 80 minimum | https://iba.edu.pk (Admissions FAQ) |
+| English Section | 80 minimum | https://iba.edu.pk (Admissions FAQ) |
 
 ---
 
-### IBA Merit Data
-| Data Point | Value (2024) | Source |
-|------------|--------------|--------|
-| Test Score Cutoff | 180/360 | [IBA Admissions](https://iba.edu.pk/admissions) |
-| Math Minimum | 80 | Official |
-| English Minimum | 80 | Official |
+## Merit Formulas with Sources
 
-**Note:** IBA publishes **test score cutoffs**, not aggregate percentages.
-
----
-
-### NED Merit Data
-| Program | Cutoff (2024) | Source |
-|---------|---------------|--------|
-| Software Eng | 86.86% | [NED Merit List](https://neduet.edu.pk/admissions) |
-| CS | 84.2% | Official |
-| Computer Systems | 83.9% | Official |
-
-**Formula (2024):**
-- NED Test (60%) + Academics (40%)
-- Note: Formula changed from 50-50 in 2023
-- Source: [NED Admission Policy](https://neduet.edu.pk/admissions)
+| University | Formula | Source Link |
+|------------|---------|-------------|
+| NUST | NET 75% + FSc 15% + Matric 10% | https://nust.edu.pk/admissions |
+| FAST | NU Test 50% + FSc Part-I 50% | https://admissions.nu.edu.pk |
+| COMSATS | NTS NAT 50% + FSc 40% + Matric 10% | https://admissions.comsats.edu.pk |
+| UET | ECAT 30% + FSc 45% + Matric 25% | https://admission.uet.edu.pk |
+| GIKI | GIKI Test 85% + FSc Part-I 15% | https://admissions.giki.edu.pk |
+| PIEAS | PIEAS Test 60% + Matric 15% + FSc 25% | https://admissions.pieas.edu.pk |
+| NED | NED Test 60% + Academics 40% | https://www.neduet.edu.pk/admissions |
+| Bahria | Entry Test 50% + Intermediate 50% | https://www.bahria.edu.pk |
 
 ---
 
-### Bahria Merit Data
-| Campus | CS Cutoff (2024) | Source |
-|--------|------------------|--------|
-| Islamabad | >80% | [Bahria Merit Lists](https://bahria.edu.pk/admissions) |
-| Lahore | ~72% | Estimated |
-| Karachi | ~68% | Estimated |
+## Fee Information with Sources (2024-2025)
 
-**Formula:**
-- Entry Test (50%) + Intermediate (50%)
-- Source: [Bahria Admission Criteria](https://bahria.edu.pk/admissions)
+| University | Per Semester (PKR) | Source Link |
+|------------|-------------------|-------------|
+| LUMS | 350,000 - 600,000 | https://lums.edu.pk/student-financial-aid |
+| GIKI | 300,000 - 450,000 | https://giki.edu.pk/admissions/fee-structure |
+| NUST | 200,000 - 400,000 | https://nust.edu.pk/admissions |
+| FAST | 146,000 - 180,000 | nu.edu.pk (Rs. 9,000-11,000 per credit hour × 16 CH) |
+| IBA | 150,000 - 300,000 | https://iba.edu.pk |
+| COMSATS | 110,000 - 138,000 | ilmkidunya.com (First semester: Rs. 138,000 including admission) |
+| Bahria | 100,000 - 200,000 | https://www.bahria.edu.pk |
+| UET | 45,000 - 100,000 | https://admission.uet.edu.pk |
+| NED | 40,000 - 90,000 | https://www.neduet.edu.pk |
+| PIEAS | Scholarship-based | https://www.pieas.edu.pk |
 
----
-
-## 3. Admission Deadlines
-
-All deadlines are for **Fall 2026** admission cycle.
-
-### Deadline Data Sources
-
-| University | Deadline Source |
-|------------|-----------------|
-| NUST | [ugadmissions.nust.edu.pk](https://ugadmissions.nust.edu.pk) |
-| LUMS | [admissions.lums.edu.pk](https://admissions.lums.edu.pk) |
-| FAST | [nu.edu.pk/Admissions](https://nu.edu.pk/Admissions) |
-| COMSATS | [admissions.comsats.edu.pk](https://admissions.comsats.edu.pk) |
-| IBA | [iba.edu.pk/admissions](https://iba.edu.pk/admissions) |
-| UET | [uet.edu.pk/admissions](https://uet.edu.pk/admissions) |
-| GIKI | [giki.edu.pk/admissions](https://giki.edu.pk/admissions) |
-| PIEAS | [pieas.edu.pk/admissions](https://pieas.edu.pk/admissions) |
-| Bahria | [bahria.edu.pk/admissions](https://bahria.edu.pk/admissions) |
-| NED | [neduet.edu.pk/admissions](https://neduet.edu.pk/admissions) |
-
-### Entry Test Information
-
-| Test Name | Conducting Body | Website |
-|-----------|-----------------|---------|
-| NET | NUST | [ugadmissions.nust.edu.pk](https://ugadmissions.nust.edu.pk) |
-| LCAT | LUMS | [admissions.lums.edu.pk](https://admissions.lums.edu.pk) |
-| FAST NU Test | FAST-NUCES | [nu.edu.pk](https://nu.edu.pk) |
-| NTS NAT | NTS | [nts.org.pk](https://nts.org.pk) |
-| ECAT | UET | [uet.edu.pk](https://uet.edu.pk) |
-| GIKI Test | GIKI | [giki.edu.pk](https://giki.edu.pk) |
+*Note: FAST charges Rs. 9,000-11,000 per credit hour. First semester total ~Rs. 196,500 including admission fee.*
 
 ---
 
-## 4. Department Comparison Data
+## Testing Organizations
 
-### Data Categories
-- Department Rankings
-- Faculty Ratings
-- Research Output
-- Placement Rates
-- Average Starting Salaries
-- Top Recruiters
-- Key Facilities
-
-### Primary Sources
-
-| Data Type | Sources |
-|-----------|---------|
-| Rankings | [HEC Pakistan](https://www.hec.gov.pk/english/universities/Pages/default.aspx) |
-| Placement Rates | University career services, graduate surveys |
-| Salary Data | [Glassdoor Pakistan](https://glassdoor.com), LinkedIn, surveys |
-| Recruiters | University placement offices |
-| Facilities | Official university websites |
-
-### HEC Rankings
-- [HEC University Rankings](https://www.hec.gov.pk/english/universities/Pages/University-Ranking.aspx)
-- Ranking methodology based on research output, faculty, and graduates
-
-### Salary Estimates
-Salary data compiled from:
-- [Glassdoor Pakistan](https://glassdoor.com)
-- [PayScale Pakistan](https://payscale.com)
-- LinkedIn salary insights
-- Graduate employment surveys
+| Test | Organization | Website |
+|------|--------------|---------|
+| NET | NUST | https://nust.edu.pk |
+| NTS NAT | NTS | https://www.nts.org.pk |
+| ECAT | UET Punjab | https://www.uet.edu.pk |
+| GIKI Test | GIKI | https://giki.edu.pk |
+| PIEAS Test | PIEAS | https://www.pieas.edu.pk |
+| LCAT | LUMS | https://lums.edu.pk |
+| NU Test | FAST-NUCES | https://nu.edu.pk |
 
 ---
 
-## 5. Fee Information
+## Contact Information
 
-### Fee Data Sources
-
-| University | Fee Source |
-|------------|------------|
-| NUST | [NUST Fee Structure](https://ugadmissions.nust.edu.pk/FeesDetails.aspx) |
-| LUMS | [LUMS Financial Aid](https://lums.edu.pk/financial-aid) |
-| FAST | [FAST Fee Structure](https://nu.edu.pk/Admissions/FeeStructure) |
-| COMSATS | [COMSATS Fees](https://admissions.comsats.edu.pk) |
-| GIKI | [GIKI Fee Structure](https://giki.edu.pk/admissions/fee-structure/) |
-
-### Fee Ranges (Per Semester, 2024)
-
-| University | Range | Notes |
+| University | Email | Phone |
 |------------|-------|-------|
-| NUST | PKR 200,000 - 400,000 | Varies by program |
-| LUMS | PKR 350,000 - 600,000 | Need-based aid available |
-| FAST | PKR 155,000 - 280,000 | Varies by campus |
-| COMSATS | PKR 65,000 - 150,000 | Federal university, subsidized |
-| UET | PKR 45,000 - 100,000 | Public university |
-| GIKI | PKR 300,000 - 450,000 | Residential campus |
+| NUST | admissions@nust.edu.pk | 051-9085-1111 |
+| LUMS | admissions@lums.edu.pk | 042-3560-8000 |
+| FAST | admissions@nu.edu.pk | 051-111-128-128 |
+| COMSATS | admissions@comsats.edu.pk | 051-9049-5111 |
+| IBA | admission@iba.edu.pk | 021-3810-4700 |
+| GIKI | ugadmissions@giki.edu.pk | 0938-281026 |
+| NED | ug.admissions@cloud.neduet.edu.pk | 021-9926-1261 |
+| PIEAS | admissions@pieas.edu.pk | 051-9248-601 |
 
 ---
 
-## 6. Data Accuracy Notes
+## Data Sources Summary
 
-### Official Sources (Verified)
-Data marked as official was obtained directly from:
-- University admission portals
-- Official merit list PDFs
-- University prospectuses
-- HEC Pakistan
+### Official Data Sources
+| Source | Website | Data Used For |
+|--------|---------|---------------|
+| HEC Pakistan | https://www.hec.gov.pk | University rankings, accreditation |
+| HEC Rankings | https://www.hec.gov.pk/english/universities/Pages/default.aspx | Field-specific rankings |
+| NUST Official | https://nust.edu.pk | Programs, fees, deadlines |
+| LUMS Official | https://lums.edu.pk | Programs, fees, deadlines |
+| FAST Official | https://nu.edu.pk | Programs, fees, deadlines |
+| COMSATS Official | https://www.comsats.edu.pk | Programs, fees, deadlines |
+| NTS Official | https://www.nts.org.pk | Test info, schedules |
 
-### Estimated Sources
-Data marked with `~` (e.g., ~53%) was estimated from:
-- Student forums (Reddit, Facebook groups)
-- [Maqsad.io](https://maqsad.io) merit compilations
-- YouTube admission result videos
-- WhatsApp/Telegram student groups
+### Community Data Sources (For Estimated Cutoffs ~)
 
-### Community Sources Used
+| Source | Link | Data Used For |
+|--------|------|---------------|
+| Reddit r/pakistan | https://www.reddit.com/r/pakistan | Merit discussions, cutoffs |
+| Reddit Admissions Search | https://www.reddit.com/r/pakistan/search?q=admission | Specific admission queries |
+| Reddit NUST Threads | https://www.reddit.com/r/pakistan/search?q=NUST | NUST cutoffs, experiences |
+| Reddit FAST Threads | https://www.reddit.com/r/pakistan/search?q=FAST+NUCES | FAST cutoffs, experiences |
+| Reddit COMSATS Threads | https://www.reddit.com/r/pakistan/search?q=COMSATS | COMSATS cutoffs |
+| Reddit GIKI Threads | https://www.reddit.com/r/pakistan/search?q=GIKI | GIKI merit positions |
+| Quora Pakistan | https://www.quora.com/topic/Pakistan-Universities | University comparisons |
 
-| Source | Type | Reliability |
-|--------|------|-------------|
-| [Reddit r/pakistan](https://reddit.com/r/pakistan) | Forum | Medium |
-| [Maqsad.io](https://maqsad.io) | Merit aggregator | High |
-| Facebook Admission Groups | Social | Medium |
-| YouTube Result Videos | Video | Medium |
+### YouTube Sources
 
-### Data Limitations
+| Channel/Search | Link | Data Used For |
+|----------------|------|---------------|
+| Merit Lists 2024 | https://www.youtube.com/results?search_query=pakistan+university+merit+list+2024 | Video merit announcements |
+| FAST Merit | https://www.youtube.com/results?search_query=FAST+NUCES+merit+list+2024 | FAST campus cutoffs |
+| COMSATS Merit | https://www.youtube.com/results?search_query=COMSATS+merit+list+2024 | COMSATS campus cutoffs |
+| NUST NET Tips | https://www.youtube.com/results?search_query=NUST+NET+test+preparation | NET exam info |
+| GIKI Admission | https://www.youtube.com/results?search_query=GIKI+admission+2024 | GIKI process |
+| UET ECAT | https://www.youtube.com/results?search_query=UET+ECAT+2024 | ECAT info |
 
-1. **NUST**: Does not publish official cutoffs
-2. **LUMS**: Uses holistic admissions, no fixed cutoffs
-3. **GIKI**: Publishes positions, not percentages
-4. **IBA**: Publishes test scores, not aggregates
-5. **Smaller Campuses**: Limited official data, estimates used
+### Facebook Groups & Pages
 
-### Last Updated
-- University Info: January 2026
-- Merit Data: Based on 2024 admission cycle
-- Fee Data: 2024-2025 academic year
-- Deadlines: Fall 2026 admission cycle
+| Group/Page | Link | Data Used For |
+|------------|------|---------------|
+| NUST Admissions | https://www.facebook.com/naborhood | Student community |
+| FAST Islamabad | https://www.facebook.com/search/top?q=fast%20nuces%20islamabad | Campus info |
+| COMSATS Students | https://www.facebook.com/search/top?q=comsats%20students | Student experiences |
+| Pakistan Admissions | https://www.facebook.com/search/top?q=pakistan%20university%20admissions%202024 | General admissions |
+
+### Salary & Placement Data Sources
+
+| Source | Link | Data Used For |
+|--------|------|---------------|
+| Glassdoor Pakistan | https://www.glassdoor.com/Salaries/pakistan-salary-SRCH_IL.0,8_IN178.htm | Salary estimates |
+| PayScale Pakistan | https://www.payscale.com/research/PK/Country=Pakistan/Salary | Salary comparisons |
+| LinkedIn Salary | https://www.linkedin.com/salary | Graduate salaries |
+| Rozee.pk | https://www.rozee.pk | Job market data |
+| Indeed Pakistan | https://pk.indeed.com/career/salaries | Entry-level salaries |
+
+### Historical Merit Lists
+
+| University | Where to Find |
+|------------|---------------|
+| FAST | https://admissions.nu.edu.pk (after results) |
+| COMSATS | https://admissions.comsats.edu.pk/MeritList |
+| UET | https://admission.uet.edu.pk (Merit Lists section) |
+| GIKI | https://admissions.giki.edu.pk (Results) |
+| NED | https://www.neduet.edu.pk/admissions |
+| NUST | Not published officially |
+| PIEAS | https://admissions.pieas.edu.pk (Results) |
+| Bahria | https://www.bahria.edu.pk (Merit Lists) |
+
+### Research & Ranking Data
+
+| Source | Link |
+|--------|------|
+| QS World Rankings | https://www.topuniversities.com/university-rankings |
+| QS Asia Rankings | https://www.topuniversities.com/university-rankings/asian-university-rankings |
+| Times Higher Education | https://www.timeshighereducation.com/world-university-rankings |
+| Webometrics Pakistan | https://www.webometrics.info/en/asia/pakistan |
+| HEC Recognized Unis | https://www.hec.gov.pk/english/universities/pages/recognised.aspx |
+
+### Bahria University Campuses
+
+| Campus | Website |
+|--------|---------|
+| Bahria Islamabad | https://www.bahria.edu.pk/buic |
+| Bahria Lahore | https://www.bahria.edu.pk/bulc |
+| Bahria Karachi | https://www.bahria.edu.pk/bukc |
+
+### Additional Resources
+
+| Resource | Link | Data Used For |
+|----------|------|---------------|
+| Eduvision | https://www.eduvision.edu.pk | Admission dates, results |
+| Ilm.com.pk | https://www.ilm.com.pk | University info |
+| Study in Pakistan | https://www.studyinpakistan.com | University comparison |
+| Maqsad.io | https://maqsad.io | Test preparation |
 
 ---
 
-## Quick Links Summary
+## Data Limitations
 
-### Official Admission Portals
-| University | Direct Link |
-|------------|-------------|
-| NUST | [ugadmissions.nust.edu.pk](https://ugadmissions.nust.edu.pk) |
-| LUMS | [admissions.lums.edu.pk](https://admissions.lums.edu.pk) |
-| FAST | [nu.edu.pk/Admissions](https://nu.edu.pk/Admissions) |
-| COMSATS | [admissions.comsats.edu.pk](https://admissions.comsats.edu.pk) |
-| IBA | [iba.edu.pk/admissions](https://iba.edu.pk/admissions) |
-| UET Lahore | [uet.edu.pk/admissions](https://uet.edu.pk/admissions) |
-| GIKI | [giki.edu.pk/admissions](https://giki.edu.pk/admissions) |
-| Bahria | [bahria.edu.pk/admissions](https://bahria.edu.pk/admissions) |
-| NED | [neduet.edu.pk/admissions](https://neduet.edu.pk/admissions) |
-| PIEAS | [pieas.edu.pk/admissions](https://pieas.edu.pk/admissions) |
+| University | Limitation |
+|------------|------------|
+| NUST | Does not publish official cutoffs |
+| LUMS | Holistic admissions, no fixed cutoffs |
+| GIKI | Publishes positions, not percentages |
+| IBA | Publishes test scores, not aggregates |
 
-### Testing Organizations
-| Organization | Website |
-|--------------|---------|
-| NTS | [nts.org.pk](https://nts.org.pk) |
-| HEC | [hec.gov.pk](https://hec.gov.pk) |
+---
 
-### Community Resources
-| Resource | Website |
-|----------|---------|
-| Maqsad.io | [maqsad.io/merit-list](https://maqsad.io/merit-list) |
-| Reddit Pakistan | [reddit.com/r/pakistan](https://reddit.com/r/pakistan) |
+## Last Updated
+- **Data Date**: January 2026
+- **Merit Data**: Based on 2024 admission cycle
+- **Fee Data**: 2024-2025 academic year
