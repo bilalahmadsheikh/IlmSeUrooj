@@ -1,6 +1,7 @@
-// Mock University Data for Pakistani Universities
+// Mock University Data for Pakistani Universities - Campus-Specific Entries
 
 export const universities = [
+  // === NUST (Single Campus) ===
   {
     id: 1,
     name: "National University of Sciences & Technology (NUST)",
@@ -37,6 +38,8 @@ export const universities = [
       applyUrl: "https://ugadmissions.nust.edu.pk"
     }
   },
+
+  // === LUMS (Single Campus) ===
   {
     id: 2,
     name: "Lahore University of Management Sciences (LUMS)",
@@ -71,10 +74,12 @@ export const universities = [
       applyUrl: "https://admissions.lums.edu.pk"
     }
   },
+
+  // === FAST-NUCES Campuses ===
   {
     id: 3,
-    name: "FAST National University (FAST-NUCES)",
-    shortName: "FAST",
+    name: "FAST-NUCES Islamabad Campus",
+    shortName: "FAST Isb",
     logo: "/logos/fast.png",
     city: "Islamabad",
     established: 2000,
@@ -94,28 +99,154 @@ export const universities = [
       "Business": ["Business Administration"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
-    highlights: ["Top CS University", "Multiple Campuses", "Strong Alumni Network"],
-    description: "Known for producing top software engineers with campuses across Pakistan.",
-    website: "https://nu.edu.pk",
+    highlights: ["#1 CS University", "Highest Cutoffs", "Strong Alumni Network"],
+    description: "FAST Islamabad - Most competitive campus with highest merit cutoffs (CS: 73%).",
+    website: "https://isb.nu.edu.pk",
     avgFee: "PKR 180,000 - 280,000 per semester",
     admissions: {
-      deadline: "2026-01-10",
-      testName: "NAT/NTS",
-      testDate: "2026-01-15",
+      deadline: "2026-06-15",
+      testName: "FAST NU Test",
+      testDate: "2026-06-25",
       applyUrl: "https://nu.edu.pk/Admissions"
     }
   },
   {
     id: 4,
-    name: "COMSATS University Islamabad",
-    shortName: "COMSATS",
+    name: "FAST-NUCES Lahore Campus",
+    shortName: "FAST Lhr",
+    logo: "/logos/fast.png",
+    city: "Lahore",
+    established: 2000,
+    type: "Private",
+    ranking: 4,
+    fieldRankings: {
+      "Computer Science": 4,
+      "Pre-Engineering": 9
+    },
+    campusType: "Industry-Focused",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Pre-Engineering"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence"],
+      "Pre-Engineering": ["Electrical Engineering"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate"],
+    highlights: ["Strong CS Program", "Lahore Hub", "Industry Connections"],
+    description: "FAST Lahore - Second most competitive campus (CS: 70%).",
+    website: "https://lhr.nu.edu.pk",
+    avgFee: "PKR 175,000 - 270,000 per semester",
+    admissions: {
+      deadline: "2026-06-15",
+      testName: "FAST NU Test",
+      testDate: "2026-06-25",
+      applyUrl: "https://nu.edu.pk/Admissions"
+    }
+  },
+  {
+    id: 5,
+    name: "FAST-NUCES Karachi Campus",
+    shortName: "FAST Khi",
+    logo: "/logos/fast.png",
+    city: "Karachi",
+    established: 2000,
+    type: "Private",
+    ranking: 5,
+    fieldRankings: {
+      "Computer Science": 6,
+      "Pre-Engineering": 12
+    },
+    campusType: "Industry-Focused",
+    hostelAvailability: "On-Campus without Hostel",
+    fields: ["Computer Science", "Pre-Engineering"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering", "Data Science"],
+      "Pre-Engineering": ["Electrical Engineering"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate"],
+    highlights: ["Karachi Tech Hub", "Industry Links", "Affordable"],
+    description: "FAST Karachi - Good program quality with moderate cutoffs (CS: 69%).",
+    website: "https://khi.nu.edu.pk",
+    avgFee: "PKR 170,000 - 260,000 per semester",
+    admissions: {
+      deadline: "2026-06-15",
+      testName: "FAST NU Test",
+      testDate: "2026-06-25",
+      applyUrl: "https://nu.edu.pk/Admissions"
+    }
+  },
+  {
+    id: 6,
+    name: "FAST-NUCES Peshawar Campus",
+    shortName: "FAST Psh",
+    logo: "/logos/fast.png",
+    city: "Peshawar",
+    established: 2004,
+    type: "Private",
+    ranking: 14,
+    fieldRankings: {
+      "Computer Science": 15
+    },
+    campusType: "Industry-Focused",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering"]
+    },
+    degreeLevel: ["Undergraduate"],
+    highlights: ["Lowest Cutoffs", "Easy Admission", "Growing Campus"],
+    description: "FAST Peshawar - Easiest FAST campus to get into (CS: ~53%).",
+    website: "https://pwr.nu.edu.pk",
+    avgFee: "PKR 160,000 - 240,000 per semester",
+    admissions: {
+      deadline: "2026-06-15",
+      testName: "FAST NU Test",
+      testDate: "2026-06-25",
+      applyUrl: "https://nu.edu.pk/Admissions"
+    }
+  },
+  {
+    id: 7,
+    name: "FAST-NUCES Chiniot-Faisalabad Campus",
+    shortName: "FAST CFD",
+    logo: "/logos/fast.png",
+    city: "Chiniot",
+    established: 2012,
+    type: "Private",
+    ranking: 15,
+    fieldRankings: {
+      "Computer Science": 16
+    },
+    campusType: "Industry-Focused",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering"]
+    },
+    degreeLevel: ["Undergraduate"],
+    highlights: ["New Campus", "Low Cutoffs", "Affordable"],
+    description: "FAST Chiniot-Faisalabad - Low cutoffs similar to Peshawar (CS: ~54%).",
+    website: "https://cfd.nu.edu.pk",
+    avgFee: "PKR 155,000 - 235,000 per semester",
+    admissions: {
+      deadline: "2026-06-15",
+      testName: "FAST NU Test",
+      testDate: "2026-06-25",
+      applyUrl: "https://nu.edu.pk/Admissions"
+    }
+  },
+
+  // === COMSATS Campuses ===
+  {
+    id: 8,
+    name: "COMSATS University Islamabad (Main Campus)",
+    shortName: "COMSATS Isb",
     logo: "/logos/comsats.png",
     city: "Islamabad",
     established: 1998,
     type: "Public",
-    ranking: 4,
+    ranking: 6,
     fieldRankings: {
-      "Computer Science": 4,
+      "Computer Science": 5,
       "Pre-Engineering": 7,
       "Business": 4
     },
@@ -123,34 +254,231 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Business"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering", "Information Technology"],
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Cyber Security", "Data Science"],
       "Pre-Engineering": ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering"],
       "Business": ["Business Administration", "Accounting & Finance"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
-    highlights: ["Affordable Fees", "Multiple Campuses", "Research Focus"],
-    description: "Quality education at affordable prices with campuses in major cities.",
-    website: "https://comsats.edu.pk",
+    highlights: ["Affordable Federal", "High Cutoffs (CS: 87%)", "Research Focus"],
+    description: "COMSATS Islamabad - Flagship campus with very high CS cutoffs (87%).",
+    website: "https://islamabad.comsats.edu.pk",
     avgFee: "PKR 80,000 - 150,000 per semester",
     admissions: {
-      deadline: "2026-01-12",
-      testName: "Entry Test",
-      testDate: "2026-01-21",
+      deadline: "2026-07-20",
+      testName: "NTS NAT",
+      testDate: "2026-07-30",
       applyUrl: "https://admissions.comsats.edu.pk"
     }
   },
   {
-    id: 5,
+    id: 9,
+    name: "COMSATS University Lahore Campus",
+    shortName: "COMSATS Lhr",
+    logo: "/logos/comsats.png",
+    city: "Lahore",
+    established: 2002,
+    type: "Public",
+    ranking: 7,
+    fieldRankings: {
+      "Computer Science": 7,
+      "Pre-Engineering": 10,
+      "Business": 6
+    },
+    campusType: "Research-Oriented",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Pre-Engineering", "Business"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence"],
+      "Pre-Engineering": ["Electrical Engineering", "Chemical Engineering"],
+      "Business": ["Business Administration"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate", "PhD"],
+    highlights: ["Higher CS Cutoff than Isb!", "Lahore Location", "Pharm-D Strong"],
+    description: "COMSATS Lahore - Surprisingly higher CS cutoffs than Islamabad (87.5%)!",
+    website: "https://lahore.comsats.edu.pk",
+    avgFee: "PKR 80,000 - 150,000 per semester",
+    admissions: {
+      deadline: "2026-07-20",
+      testName: "NTS NAT",
+      testDate: "2026-07-30",
+      applyUrl: "https://admissions.comsats.edu.pk"
+    }
+  },
+  {
+    id: 10,
+    name: "COMSATS University Wah Campus",
+    shortName: "COMSATS Wah",
+    logo: "/logos/comsats.png",
+    city: "Wah Cantt",
+    established: 2001,
+    type: "Public",
+    ranking: 12,
+    fieldRankings: {
+      "Computer Science": 11,
+      "Pre-Engineering": 14
+    },
+    campusType: "Research-Oriented",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Pre-Engineering"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence"],
+      "Pre-Engineering": ["Electrical Engineering", "Mechanical Engineering"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate"],
+    highlights: ["Moderate Cutoffs (~80%)", "Near Islamabad", "Good Value"],
+    description: "COMSATS Wah - Good middle-ground option with ~80% CS cutoffs.",
+    website: "https://wah.comsats.edu.pk",
+    avgFee: "PKR 75,000 - 140,000 per semester",
+    admissions: {
+      deadline: "2026-07-20",
+      testName: "NTS NAT",
+      testDate: "2026-07-30",
+      applyUrl: "https://admissions.comsats.edu.pk"
+    }
+  },
+  {
+    id: 11,
+    name: "COMSATS University Abbottabad Campus",
+    shortName: "COMSATS Abbottabad",
+    logo: "/logos/comsats.png",
+    city: "Abbottabad",
+    established: 2001,
+    type: "Public",
+    ranking: 13,
+    fieldRankings: {
+      "Computer Science": 12,
+      "Pre-Engineering": 15
+    },
+    campusType: "Research-Oriented",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Pre-Engineering", "Medical"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering"],
+      "Pre-Engineering": ["Electrical Engineering", "Civil Engineering"],
+      "Medical": ["Pharm-D"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate"],
+    highlights: ["Beautiful Location", "CS: 78%", "Strong Pharm-D"],
+    description: "COMSATS Abbottabad - Scenic campus with CS cutoffs around 78%.",
+    website: "https://abbottabad.comsats.edu.pk",
+    avgFee: "PKR 75,000 - 140,000 per semester",
+    admissions: {
+      deadline: "2026-07-20",
+      testName: "NTS NAT",
+      testDate: "2026-07-30",
+      applyUrl: "https://admissions.comsats.edu.pk"
+    }
+  },
+  {
+    id: 12,
+    name: "COMSATS University Sahiwal Campus",
+    shortName: "COMSATS Sahiwal",
+    logo: "/logos/comsats.png",
+    city: "Sahiwal",
+    established: 2007,
+    type: "Public",
+    ranking: 18,
+    fieldRankings: {
+      "Computer Science": 18,
+      "Business": 12
+    },
+    campusType: "Research-Oriented",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Business"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering"],
+      "Business": ["Business Administration"]
+    },
+    degreeLevel: ["Undergraduate"],
+    highlights: ["Low Cutoffs (~68%)", "Affordable", "Easy Admission"],
+    description: "COMSATS Sahiwal - Lower cutoffs around 65-70%, easier admission.",
+    website: "https://sahiwal.comsats.edu.pk",
+    avgFee: "PKR 70,000 - 130,000 per semester",
+    admissions: {
+      deadline: "2026-07-20",
+      testName: "NTS NAT",
+      testDate: "2026-07-30",
+      applyUrl: "https://admissions.comsats.edu.pk"
+    }
+  },
+  {
+    id: 13,
+    name: "COMSATS University Attock Campus",
+    shortName: "COMSATS Attock",
+    logo: "/logos/comsats.png",
+    city: "Attock",
+    established: 2004,
+    type: "Public",
+    ranking: 20,
+    fieldRankings: {
+      "Computer Science": 20,
+      "Business": 14
+    },
+    campusType: "Research-Oriented",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Business"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering"],
+      "Business": ["Business Administration"]
+    },
+    degreeLevel: ["Undergraduate"],
+    highlights: ["Very Low Cutoffs (~62%)", "Near Islamabad", "Easiest COMSATS"],
+    description: "COMSATS Attock - One of the easiest COMSATS campuses (~60-65%).",
+    website: "https://attock.comsats.edu.pk",
+    avgFee: "PKR 70,000 - 130,000 per semester",
+    admissions: {
+      deadline: "2026-07-20",
+      testName: "NTS NAT",
+      testDate: "2026-07-30",
+      applyUrl: "https://admissions.comsats.edu.pk"
+    }
+  },
+  {
+    id: 14,
+    name: "COMSATS University Vehari Campus",
+    shortName: "COMSATS Vehari",
+    logo: "/logos/comsats.png",
+    city: "Vehari",
+    established: 2008,
+    type: "Public",
+    ranking: 22,
+    fieldRankings: {
+      "Computer Science": 22,
+      "Business": 16
+    },
+    campusType: "Research-Oriented",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Business"],
+    programs: {
+      "Computer Science": ["Computer Science"],
+      "Business": ["Business Administration"]
+    },
+    degreeLevel: ["Undergraduate"],
+    highlights: ["Lowest COMSATS Cutoffs", "Very Easy Admission", "Growing"],
+    description: "COMSATS Vehari - Lowest cutoffs in COMSATS system (~55-60%).",
+    website: "https://vehari.comsats.edu.pk",
+    avgFee: "PKR 65,000 - 120,000 per semester",
+    admissions: {
+      deadline: "2026-07-20",
+      testName: "NTS NAT",
+      testDate: "2026-07-30",
+      applyUrl: "https://admissions.comsats.edu.pk"
+    }
+  },
+
+  // === IBA (Single Campus) ===
+  {
+    id: 15,
     name: "Institute of Business Administration (IBA)",
     shortName: "IBA",
     logo: "/logos/iba.png",
     city: "Karachi",
     established: 1955,
     type: "Public",
-    ranking: 5,
+    ranking: 8,
     fieldRankings: {
       "Business": 2,
-      "Computer Science": 5
+      "Computer Science": 8
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
@@ -171,15 +499,17 @@ export const universities = [
       applyUrl: "https://iba.edu.pk/admissions"
     }
   },
+
+  // === UET Campuses ===
   {
-    id: 6,
-    name: "University of Engineering & Technology (UET)",
+    id: 16,
+    name: "University of Engineering & Technology Lahore",
     shortName: "UET Lahore",
     logo: "/logos/uet.png",
     city: "Lahore",
     established: 1921,
     type: "Public",
-    ranking: 6,
+    ranking: 9,
     fieldRankings: {
       "Pre-Engineering": 2
     },
@@ -187,11 +517,11 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Pre-Engineering"],
     programs: {
-      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Metallurgical Engineering", "Mining Engineering"]
+      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Computer Science"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
-    highlights: ["Historic Institution", "Engineering Excellence", "Affordable"],
-    description: "Pakistan's oldest and most prestigious engineering institution.",
+    highlights: ["Historic Institution", "Highest UET Merit", "Very Affordable"],
+    description: "UET Lahore - Flagship campus with highest cutoffs (ME: 81.6%, CS: 80.5%).",
     website: "https://uet.edu.pk",
     avgFee: "PKR 50,000 - 100,000 per semester",
     admissions: {
@@ -202,17 +532,49 @@ export const universities = [
     }
   },
   {
-    id: 7,
+    id: 17,
+    name: "University of Engineering & Technology Taxila",
+    shortName: "UET Taxila",
+    logo: "/logos/uet.png",
+    city: "Taxila",
+    established: 1975,
+    type: "Public",
+    ranking: 11,
+    fieldRankings: {
+      "Pre-Engineering": 5
+    },
+    campusType: "Research-Oriented",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Pre-Engineering"],
+    programs: {
+      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Software Engineering"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate", "PhD"],
+    highlights: ["Near Islamabad", "Lower than Lahore", "Good Value"],
+    description: "UET Taxila - Slightly lower cutoffs than Lahore, near Islamabad.",
+    website: "https://uettaxila.edu.pk",
+    avgFee: "PKR 45,000 - 90,000 per semester",
+    admissions: {
+      deadline: "2026-08-15",
+      testName: "ECAT",
+      testDate: "2026-08-20",
+      applyUrl: "https://uettaxila.edu.pk/admissions"
+    }
+  },
+
+  // === GIKI (Single Campus) ===
+  {
+    id: 18,
     name: "Ghulam Ishaq Khan Institute (GIKI)",
     shortName: "GIKI",
     logo: "/logos/giki.png",
     city: "Topi",
     established: 1993,
     type: "Private",
-    ranking: 7,
+    ranking: 10,
     fieldRankings: {
       "Pre-Engineering": 3,
-      "Computer Science": 6
+      "Computer Science": 9
     },
     campusType: "Strong Campus Life",
     hostelAvailability: "On-Campus with Hostel",
@@ -223,7 +585,7 @@ export const universities = [
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["Residential Campus", "Beautiful Location", "Strong Bonding"],
-    description: "Elite engineering institute with a unique residential campus experience.",
+    description: "Elite engineering institute with unique residential campus experience.",
     website: "https://giki.edu.pk",
     avgFee: "PKR 300,000 - 450,000 per semester",
     admissions: {
@@ -233,18 +595,20 @@ export const universities = [
       applyUrl: "https://giki.edu.pk/admissions"
     }
   },
+
+  // === PIEAS (Single Campus) ===
   {
-    id: 8,
+    id: 19,
     name: "Pakistan Institute of Engineering & Applied Sciences (PIEAS)",
     shortName: "PIEAS",
     logo: "/logos/pieas.png",
     city: "Islamabad",
     established: 1967,
     type: "Public",
-    ranking: 8,
+    ranking: 14,
     fieldRankings: {
       "Pre-Engineering": 4,
-      "Computer Science": 7
+      "Computer Science": 10
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
@@ -265,18 +629,122 @@ export const universities = [
       applyUrl: "https://pieas.edu.pk/admissions"
     }
   },
+
+  // === Bahria Campuses ===
   {
-    id: 9,
+    id: 20,
+    name: "Bahria University Islamabad Campus",
+    shortName: "Bahria Isb",
+    logo: "/logos/bahria.png",
+    city: "Islamabad",
+    established: 2000,
+    type: "Private",
+    ranking: 16,
+    fieldRankings: {
+      "Computer Science": 13,
+      "Business": 7,
+      "Pre-Engineering": 16
+    },
+    campusType: "Industry-Focused",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Business", "Pre-Engineering"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence"],
+      "Business": ["Business Administration", "Accounting & Finance"],
+      "Pre-Engineering": ["Electrical Engineering"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate"],
+    highlights: ["Navy Affiliated", "High Cutoffs (CS: >80%)", "Disciplined"],
+    description: "Bahria Islamabad - Most competitive campus (CS/SE: >80%).",
+    website: "https://bahria.edu.pk/islamabad",
+    avgFee: "PKR 150,000 - 250,000 per semester",
+    admissions: {
+      deadline: "2026-07-15",
+      testName: "Bahria Test",
+      testDate: "2026-07-25",
+      applyUrl: "https://bahria.edu.pk/admissions"
+    }
+  },
+  {
+    id: 21,
+    name: "Bahria University Lahore Campus",
+    shortName: "Bahria Lhr",
+    logo: "/logos/bahria.png",
+    city: "Lahore",
+    established: 2008,
+    type: "Private",
+    ranking: 19,
+    fieldRankings: {
+      "Computer Science": 17,
+      "Business": 10
+    },
+    campusType: "Industry-Focused",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Business"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering"],
+      "Business": ["Business Administration"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate"],
+    highlights: ["Lower than Islamabad", "Growing Campus", "Good Value"],
+    description: "Bahria Lahore - Moderate cutoffs around 70-75%.",
+    website: "https://bahria.edu.pk/lahore",
+    avgFee: "PKR 140,000 - 230,000 per semester",
+    admissions: {
+      deadline: "2026-07-15",
+      testName: "Bahria Test",
+      testDate: "2026-07-25",
+      applyUrl: "https://bahria.edu.pk/admissions"
+    }
+  },
+  {
+    id: 22,
+    name: "Bahria University Karachi Campus",
+    shortName: "Bahria Khi",
+    logo: "/logos/bahria.png",
+    city: "Karachi",
+    established: 2004,
+    type: "Private",
+    ranking: 21,
+    fieldRankings: {
+      "Computer Science": 19,
+      "Business": 11,
+      "Medical": 6
+    },
+    campusType: "Industry-Focused",
+    hostelAvailability: "On-Campus with Hostel",
+    fields: ["Computer Science", "Business", "Medical"],
+    programs: {
+      "Computer Science": ["Computer Science", "Software Engineering"],
+      "Business": ["Business Administration"],
+      "Medical": ["MBBS", "BDS"]
+    },
+    degreeLevel: ["Undergraduate", "Graduate"],
+    highlights: ["Medical Programs", "Karachi Location", "Easier Admission"],
+    description: "Bahria Karachi - Lower cutoffs (~65-70%), has medical programs.",
+    website: "https://bahria.edu.pk/karachi",
+    avgFee: "PKR 140,000 - 230,000 per semester",
+    admissions: {
+      deadline: "2026-07-15",
+      testName: "Bahria Test",
+      testDate: "2026-07-25",
+      applyUrl: "https://bahria.edu.pk/admissions"
+    }
+  },
+
+  // === Other Single-Campus Universities ===
+  {
+    id: 23,
     name: "Habib University",
     shortName: "Habib",
     logo: "/logos/habib.png",
     city: "Karachi",
     established: 2014,
     type: "Private",
-    ranking: 9,
+    ranking: 17,
     fieldRankings: {
-      "Computer Science": 8,
-      "Pre-Engineering": 10,
+      "Computer Science": 14,
+      "Pre-Engineering": 17,
       "Others": 1
     },
     campusType: "Strong Campus Life",
@@ -300,14 +768,14 @@ export const universities = [
     }
   },
   {
-    id: 10,
+    id: 24,
     name: "Aga Khan University",
     shortName: "AKU",
     logo: "/logos/aku.png",
     city: "Karachi",
     established: 1983,
     type: "Private",
-    ranking: 10,
+    ranking: 23,
     fieldRankings: {
       "Medical": 1
     },
@@ -330,17 +798,17 @@ export const universities = [
     }
   },
   {
-    id: 11,
+    id: 25,
     name: "NED University of Engineering & Technology",
     shortName: "NED",
     logo: "/logos/ned.png",
     city: "Karachi",
     established: 1922,
     type: "Public",
-    ranking: 11,
+    ranking: 24,
     fieldRankings: {
-      "Pre-Engineering": 5,
-      "Computer Science": 9
+      "Pre-Engineering": 6,
+      "Computer Science": 21
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
@@ -350,8 +818,8 @@ export const universities = [
       "Computer Science": ["Computer Science", "Software Engineering"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
-    highlights: ["Historic Excellence", "Affordable", "Strong Alumni"],
-    description: "One of Pakistan's oldest engineering universities with strong legacy.",
+    highlights: ["Historic Excellence", "Very Affordable", "SE: 87% Cutoff"],
+    description: "Historic Karachi engineering university. Software Eng is most competitive (87%).",
     website: "https://neduet.edu.pk",
     avgFee: "PKR 60,000 - 120,000 per semester",
     admissions: {
@@ -362,52 +830,18 @@ export const universities = [
     }
   },
   {
-    id: 12,
-    name: "Bahria University",
-    shortName: "Bahria",
-    logo: "/logos/bahria.png",
-    city: "Islamabad",
-    established: 2000,
-    type: "Private",
-    ranking: 12,
-    fieldRankings: {
-      "Computer Science": 10,
-      "Business": 5,
-      "Pre-Engineering": 11
-    },
-    campusType: "Industry-Focused",
-    hostelAvailability: "On-Campus with Hostel",
-    fields: ["Computer Science", "Business", "Pre-Engineering"],
-    programs: {
-      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence"],
-      "Business": ["Business Administration", "Accounting & Finance"],
-      "Pre-Engineering": ["Electrical Engineering"]
-    },
-    degreeLevel: ["Undergraduate", "Graduate"],
-    highlights: ["Navy Affiliated", "Multiple Campuses", "Disciplined Environment"],
-    description: "Navy-affiliated university with strong discipline and quality education.",
-    website: "https://bahria.edu.pk",
-    avgFee: "PKR 150,000 - 250,000 per semester",
-    admissions: {
-      deadline: "2026-02-15",
-      testName: "Bahria Test",
-      testDate: "2026-02-25",
-      applyUrl: "https://bahria.edu.pk/admissions"
-    }
-  },
-  {
-    id: 13,
+    id: 26,
     name: "Air University",
     shortName: "Air",
     logo: "/logos/air.png",
     city: "Islamabad",
     established: 2002,
     type: "Public",
-    ranking: 13,
+    ranking: 25,
     fieldRankings: {
-      "Pre-Engineering": 9,
-      "Computer Science": 11,
-      "Business": 7
+      "Pre-Engineering": 11,
+      "Computer Science": 23,
+      "Business": 13
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
@@ -430,17 +864,17 @@ export const universities = [
     }
   },
   {
-    id: 14,
-    name: "SZABIST",
+    id: 27,
+    name: "SZABIST Karachi",
     shortName: "SZABIST",
     logo: "/logos/szabist.png",
     city: "Karachi",
     established: 1995,
     type: "Private",
-    ranking: 14,
+    ranking: 26,
     fieldRankings: {
-      "Computer Science": 12,
-      "Business": 6,
+      "Computer Science": 24,
+      "Business": 8,
       "Others": 2
     },
     campusType: "Industry-Focused",
@@ -464,17 +898,17 @@ export const universities = [
     }
   },
   {
-    id: 15,
+    id: 28,
     name: "Information Technology University (ITU)",
     shortName: "ITU",
     logo: "/logos/itu.png",
     city: "Lahore",
     established: 2012,
     type: "Public",
-    ranking: 15,
+    ranking: 27,
     fieldRankings: {
-      "Computer Science": 13,
-      "Business": 9
+      "Computer Science": 25,
+      "Business": 15
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus without Hostel",
@@ -497,34 +931,10 @@ export const universities = [
   }
 ];
 
-// Upcoming admission deadlines (sorted by date)
+// Upcoming admission deadlines (sorted by date) - Campus Specific
 export const upcomingDeadlines = [
   {
     id: 1,
-    university: "FAST",
-    shortName: "FAST",
-    program: "All Programs",
-    field: "Computer Science",
-    deadline: "2026-01-10",
-    testName: "NAT/NTS",
-    testDate: "2026-01-15",
-    session: "Spring 2026",
-    applyUrl: "https://nu.edu.pk/Admissions"
-  },
-  {
-    id: 2,
-    university: "COMSATS",
-    shortName: "COMSATS",
-    program: "All Programs (Wah Campus)",
-    field: "Pre-Engineering",
-    deadline: "2026-01-12",
-    testName: "Entry Test",
-    testDate: "2026-01-21",
-    session: "Spring 2026",
-    applyUrl: "https://admissions.comsats.edu.pk"
-  },
-  {
-    id: 3,
     university: "IBA Karachi",
     shortName: "IBA",
     program: "BBA, BS Programs",
@@ -536,7 +946,7 @@ export const upcomingDeadlines = [
     applyUrl: "https://iba.edu.pk/admissions"
   },
   {
-    id: 4,
+    id: 2,
     university: "NUST",
     shortName: "NUST",
     program: "Engineering & CS",
@@ -548,7 +958,7 @@ export const upcomingDeadlines = [
     applyUrl: "https://ugadmissions.nust.edu.pk"
   },
   {
-    id: 5,
+    id: 3,
     university: "LUMS",
     shortName: "LUMS",
     program: "Undergraduate",
@@ -560,20 +970,8 @@ export const upcomingDeadlines = [
     applyUrl: "https://admissions.lums.edu.pk"
   },
   {
-    id: 6,
-    university: "Bahria University",
-    shortName: "Bahria",
-    program: "All Programs",
-    field: "Business",
-    deadline: "2026-02-15",
-    testName: "Bahria Test",
-    testDate: "2026-02-25",
-    session: "Fall 2026",
-    applyUrl: "https://bahria.edu.pk/admissions"
-  },
-  {
-    id: 7,
-    university: "SZABIST",
+    id: 4,
+    university: "SZABIST Karachi",
     shortName: "SZABIST",
     program: "All Programs",
     field: "Business",
@@ -584,7 +982,7 @@ export const upcomingDeadlines = [
     applyUrl: "https://szabist.edu.pk/admissions"
   },
   {
-    id: 8,
+    id: 5,
     university: "Aga Khan University",
     shortName: "AKU",
     program: "MBBS, Nursing",
@@ -594,6 +992,222 @@ export const upcomingDeadlines = [
     testDate: "2026-03-10",
     session: "Fall 2026",
     applyUrl: "https://aku.edu/admissions"
+  },
+  {
+    id: 6,
+    university: "Habib University",
+    shortName: "Habib",
+    program: "All Programs",
+    field: "Computer Science",
+    deadline: "2026-03-15",
+    testName: "Habib Test",
+    testDate: "2026-03-25",
+    session: "Fall 2026",
+    applyUrl: "https://habib.edu.pk/admissions"
+  },
+  {
+    id: 7,
+    university: "FAST Islamabad",
+    shortName: "FAST Isb",
+    program: "CS, SE, AI, DS",
+    field: "Computer Science",
+    deadline: "2026-06-15",
+    testName: "FAST NU Test",
+    testDate: "2026-06-25",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions"
+  },
+  {
+    id: 8,
+    university: "FAST Lahore",
+    shortName: "FAST Lhr",
+    program: "CS, SE, AI",
+    field: "Computer Science",
+    deadline: "2026-06-15",
+    testName: "FAST NU Test",
+    testDate: "2026-06-25",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions"
+  },
+  {
+    id: 9,
+    university: "FAST Karachi",
+    shortName: "FAST Khi",
+    program: "CS, SE",
+    field: "Computer Science",
+    deadline: "2026-06-15",
+    testName: "FAST NU Test",
+    testDate: "2026-06-25",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions"
+  },
+  {
+    id: 10,
+    university: "FAST Peshawar",
+    shortName: "FAST Psh",
+    program: "CS, SE",
+    field: "Computer Science",
+    deadline: "2026-06-15",
+    testName: "FAST NU Test",
+    testDate: "2026-06-25",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions"
+  },
+  {
+    id: 11,
+    university: "GIKI",
+    shortName: "GIKI",
+    program: "Engineering & CS",
+    field: "Pre-Engineering",
+    deadline: "2026-06-30",
+    testName: "GIKI Entry Test",
+    testDate: "2026-07-10",
+    session: "Fall 2026",
+    applyUrl: "https://giki.edu.pk/admissions"
+  },
+  {
+    id: 12,
+    university: "PIEAS",
+    shortName: "PIEAS",
+    program: "Engineering & CS",
+    field: "Pre-Engineering",
+    deadline: "2026-07-15",
+    testName: "PIEAS Entry Test",
+    testDate: "2026-07-25",
+    session: "Fall 2026",
+    applyUrl: "https://pieas.edu.pk/admissions"
+  },
+  {
+    id: 13,
+    university: "Bahria Islamabad",
+    shortName: "Bahria Isb",
+    program: "CS, SE, BBA",
+    field: "Computer Science",
+    deadline: "2026-07-15",
+    testName: "Bahria Test",
+    testDate: "2026-07-25",
+    session: "Fall 2026",
+    applyUrl: "https://bahria.edu.pk/admissions"
+  },
+  {
+    id: 14,
+    university: "Bahria Lahore",
+    shortName: "Bahria Lhr",
+    program: "CS, SE, BBA",
+    field: "Computer Science",
+    deadline: "2026-07-15",
+    testName: "Bahria Test",
+    testDate: "2026-07-25",
+    session: "Fall 2026",
+    applyUrl: "https://bahria.edu.pk/admissions"
+  },
+  {
+    id: 15,
+    university: "COMSATS Islamabad",
+    shortName: "COMSATS Isb",
+    program: "CS, SE, AI (87% Cutoff)",
+    field: "Computer Science",
+    deadline: "2026-07-20",
+    testName: "NTS NAT",
+    testDate: "2026-07-30",
+    session: "Fall 2026",
+    applyUrl: "https://admissions.comsats.edu.pk"
+  },
+  {
+    id: 16,
+    university: "COMSATS Lahore",
+    shortName: "COMSATS Lhr",
+    program: "CS, SE, AI (87.5% Cutoff)",
+    field: "Computer Science",
+    deadline: "2026-07-20",
+    testName: "NTS NAT",
+    testDate: "2026-07-30",
+    session: "Fall 2026",
+    applyUrl: "https://admissions.comsats.edu.pk"
+  },
+  {
+    id: 17,
+    university: "COMSATS Wah",
+    shortName: "COMSATS Wah",
+    program: "CS, SE, AI (~80% Cutoff)",
+    field: "Computer Science",
+    deadline: "2026-07-20",
+    testName: "NTS NAT",
+    testDate: "2026-07-30",
+    session: "Fall 2026",
+    applyUrl: "https://admissions.comsats.edu.pk"
+  },
+  {
+    id: 18,
+    university: "COMSATS Abbottabad",
+    shortName: "COMSATS Abbottabad",
+    program: "CS, SE, Pharm-D",
+    field: "Computer Science",
+    deadline: "2026-07-20",
+    testName: "NTS NAT",
+    testDate: "2026-07-30",
+    session: "Fall 2026",
+    applyUrl: "https://admissions.comsats.edu.pk"
+  },
+  {
+    id: 19,
+    university: "Air University",
+    shortName: "Air",
+    program: "Aerospace, CS",
+    field: "Pre-Engineering",
+    deadline: "2026-07-20",
+    testName: "Air University Test",
+    testDate: "2026-07-28",
+    session: "Fall 2026",
+    applyUrl: "https://au.edu.pk/admissions"
+  },
+  {
+    id: 20,
+    university: "ITU Lahore",
+    shortName: "ITU",
+    program: "CS, Data Science",
+    field: "Computer Science",
+    deadline: "2026-07-31",
+    testName: "ITU Admission Test",
+    testDate: "2026-08-05",
+    session: "Fall 2026",
+    applyUrl: "https://itu.edu.pk/admissions"
+  },
+  {
+    id: 21,
+    university: "NED Karachi",
+    shortName: "NED",
+    program: "Engineering (SE: 87%)",
+    field: "Pre-Engineering",
+    deadline: "2026-08-10",
+    testName: "NED Entry Test",
+    testDate: "2026-08-18",
+    session: "Fall 2026",
+    applyUrl: "https://neduet.edu.pk/admissions"
+  },
+  {
+    id: 22,
+    university: "UET Lahore",
+    shortName: "UET Lahore",
+    program: "Engineering (ME: 81.6%)",
+    field: "Pre-Engineering",
+    deadline: "2026-08-15",
+    testName: "ECAT",
+    testDate: "2026-08-20",
+    session: "Fall 2026",
+    applyUrl: "https://uet.edu.pk/admissions"
+  },
+  {
+    id: 23,
+    university: "UET Taxila",
+    shortName: "UET Taxila",
+    program: "Engineering",
+    field: "Pre-Engineering",
+    deadline: "2026-08-15",
+    testName: "ECAT",
+    testDate: "2026-08-20",
+    session: "Fall 2026",
+    applyUrl: "https://uettaxila.edu.pk/admissions"
   }
 ];
 
@@ -620,7 +1234,8 @@ export const filterOptions = {
       { value: "Electrical Engineering", label: "Electrical Engineering" },
       { value: "Civil Engineering", label: "Civil Engineering" },
       { value: "Chemical Engineering", label: "Chemical Engineering" },
-      { value: "Aerospace Engineering", label: "Aerospace Engineering" }
+      { value: "Aerospace Engineering", label: "Aerospace Engineering" },
+      { value: "Software Engineering", label: "Software Engineering" }
     ],
     "Computer Science": [
       { value: "Any", label: "Any Program" },
@@ -641,6 +1256,7 @@ export const filterOptions = {
       { value: "MBBS", label: "MBBS" },
       { value: "BDS", label: "BDS" },
       { value: "Pharmacy", label: "Pharmacy" },
+      { value: "Pharm-D", label: "Pharm-D" },
       { value: "Nursing", label: "Nursing" }
     ],
     "Others": [
@@ -662,6 +1278,14 @@ export const filterOptions = {
     { value: "Islamabad", label: "Islamabad" },
     { value: "Lahore", label: "Lahore" },
     { value: "Karachi", label: "Karachi" },
+    { value: "Peshawar", label: "Peshawar" },
+    { value: "Chiniot", label: "Chiniot" },
+    { value: "Wah Cantt", label: "Wah Cantt" },
+    { value: "Abbottabad", label: "Abbottabad" },
+    { value: "Sahiwal", label: "Sahiwal" },
+    { value: "Attock", label: "Attock" },
+    { value: "Vehari", label: "Vehari" },
+    { value: "Taxila", label: "Taxila" },
     { value: "Topi", label: "Topi" }
   ],
 
