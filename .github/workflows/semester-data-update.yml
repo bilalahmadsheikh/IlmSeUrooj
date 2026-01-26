@@ -10,6 +10,10 @@ env:
   NODE_VERSION: '20'
   NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-semester-data:
     runs-on: ubuntu-latest
@@ -79,6 +83,7 @@ jobs:
 
       - name: Send notification
         if: steps.diff-check.outputs.has_changes == 'true'
+        continue-on-error: true
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com

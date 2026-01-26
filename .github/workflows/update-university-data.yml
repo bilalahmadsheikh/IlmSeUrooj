@@ -21,6 +21,11 @@ env:
   NODE_VERSION: '20'
   NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
 jobs:
   fetch-and-validate:
     runs-on: ubuntu-latest
@@ -135,6 +140,7 @@ jobs:
     
     steps:
       - name: Send failure notification
+        continue-on-error: true
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -161,6 +167,7 @@ jobs:
     
     steps:
       - name: Send success notification
+        continue-on-error: true
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
