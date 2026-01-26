@@ -49,6 +49,7 @@ jobs:
 
       - name: Generate health report
         run: |
+          mkdir -p reports
           echo "# Website Health Check Report" > reports/health-report.md
           echo "Date: $(date)" >> reports/health-report.md
           echo "" >> reports/health-report.md
@@ -71,22 +72,26 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const issueBody = [
+              '## Health Check Failure',
+              '',
+              '| Check | Status |',
+              '|-------|--------|',
+              '| Build | ${{ steps.build.outcome }} |',
+              '| Lint | ${{ steps.lint.outcome }} |',
+              '| Data Integrity | ${{ steps.data-check.outcome }} |',
+              '| URL Check | ${{ steps.url-check.outcome }} |',
+              '',
+              'Please investigate and fix the issues.',
+              '',
+              'Run ID: ${{ github.run_id }}'
+            ].join('\n');
+            
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `⚠️ Website Health Check Failed - ${new Date().toISOString().split('T')[0]}`,
-              body: `## Health Check Failure
-              
-| Check | Status |
-|-------|--------|
-| Build | ${{ steps.build.outcome }} |
-| Lint | ${{ steps.lint.outcome }} |
-| Data Integrity | ${{ steps.data-check.outcome }} |
-| URL Check | ${{ steps.url-check.outcome }} |
-
-Please investigate and fix the issues.
-
-Run ID: ${{ github.run_id }}`,
+              body: issueBody,
               labels: ['bug', 'health-check']
             });
 
@@ -102,12 +107,11 @@ Run ID: ${{ github.run_id }}`,
           to: ba8516127@gmail.com
           from: IlmSeUrooj Bot
           body: |
-            The daily website health check has detected issues:
+            The daily website health check has detected issues.
             
             Build: ${{ steps.build.outcome }}
             Lint: ${{ steps.lint.outcome }}
             Data Integrity: ${{ steps.data-check.outcome }}
             URL Check: ${{ steps.url-check.outcome }}
             
-            Please check the GitHub Actions logs:
-            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Please check the GitHub Actions logs for details.

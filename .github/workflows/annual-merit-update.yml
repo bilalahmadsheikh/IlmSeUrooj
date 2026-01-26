@@ -50,6 +50,8 @@ jobs:
 
       - name: Create Issue for Manual Review
         uses: actions/github-script@v7
+        env:
+          MERIT_YEAR: ${{ github.event.inputs.year || '2024' }}
         with:
           script: |
             const fs = require('fs');
@@ -57,35 +59,39 @@ jobs:
               ? fs.readFileSync('reports/merit-report.md', 'utf8')
               : 'No report generated';
             
+            const issueBody = [
+              '## Merit List Update Required - Manual Review',
+              '',
+              'This is an automated issue to update merit list data for the year.',
+              '',
+              '### Sources Checked',
+              '- learnospot.com/fast-university-closing-merits/',
+              '- paklearningspot.com (COMSATS, GIKI, NUST, UET)',
+              '- Reddit r/FASTNU',
+              '- Official university Facebook pages',
+              '',
+              '### Scraped Data Preview',
+              '```',
+              report.substring(0, 2000),
+              '```',
+              '',
+              '### Action Required',
+              '1. Review the scraped merit data',
+              '2. Verify against official sources',
+              '3. Update src/components/AdmissionPredictor/AdmissionPredictor.js',
+              '4. Update src/data/universities.js descriptions',
+              '5. Update docs/DATA-SOURCES.md',
+              '6. Close this issue when complete',
+              '',
+              '---',
+              '*This is an automated issue. Manual verification is required before updating.*'
+            ].join('\n');
+            
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `📊 Annual Merit List Update - ${process.env.MERIT_YEAR || new Date().getFullYear()}`,
-              body: `## Merit List Update Required - Manual Review
-              
-This is an automated issue to update merit list data for the year.
-
-### Sources Checked
-- learnospot.com/fast-university-closing-merits/
-- paklearningspot.com (COMSATS, GIKI, NUST, UET)
-- Reddit r/FASTNU
-- Official university Facebook pages
-
-### Scraped Data Preview
-\`\`\`
-${report.substring(0, 2000)}
-\`\`\`
-
-### Action Required
-1. Review the scraped merit data
-2. Verify against official sources
-3. Update \`src/components/AdmissionPredictor/AdmissionPredictor.js\`
-4. Update \`src/data/universities.js\` descriptions
-5. Update \`docs/DATA-SOURCES.md\`
-6. Close this issue when complete
-
----
-*This is an automated issue. Manual verification is required before updating.*`,
+              body: issueBody,
               labels: ['merit-update', 'manual-review', 'yearly']
             });
 
@@ -105,13 +111,11 @@ ${report.substring(0, 2000)}
             A GitHub Issue has been created for manual review.
             Please review the scraped merit data and update the website.
             
-            View the issue:
-            https://github.com/${{ github.repository }}/issues
+            View the issue at your GitHub repository.
             
             The merit data needs to be verified against:
             - learnospot.com
             - paklearningspot.com
             - Official university announcements
             
-            ---
             This requires MANUAL REVIEW before updating.
