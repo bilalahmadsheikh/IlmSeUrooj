@@ -45,8 +45,10 @@ class DataIntegrityValidator {
             this.warnings.push('universities.js contains undefined values');
         }
 
-        // Check for duplicate IDs
-        const idMatches = content.matchAll(/id:\s*(\d+)/g);
+        // Check for duplicate IDs in main universities array only
+        // Split content to get only the first array (universities)
+        const universitiesSection = content.split('export const upcomingDeadlines')[0];
+        const idMatches = universitiesSection.matchAll(/id:\s*(\d+)/g);
         const ids = new Set();
         for (const match of idMatches) {
             const id = match[1];

@@ -1174,7 +1174,7 @@ export const upcomingDeadlines = [
     applyUrl: "https://itu.edu.pk/admissions"
   },
   {
-    id: 21,
+    id: 121,
     university: "NED Karachi",
     shortName: "NED",
     program: "Engineering (SE: 87%)",
@@ -1186,7 +1186,7 @@ export const upcomingDeadlines = [
     applyUrl: "https://neduet.edu.pk/admissions"
   },
   {
-    id: 22,
+    id: 122,
     university: "UET Lahore",
     shortName: "UET Lahore",
     program: "Engineering (ME: 81.6%)",
