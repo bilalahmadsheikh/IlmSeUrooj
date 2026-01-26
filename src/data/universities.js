@@ -1198,7 +1198,7 @@ export const upcomingDeadlines = [
     applyUrl: "https://uet.edu.pk/admissions"
   },
   {
-    id: 23,
+    id: 123,
     university: "UET Taxila",
     shortName: "UET Taxila",
     program: "Engineering",

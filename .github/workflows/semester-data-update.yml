@@ -1,0 +1,100 @@
+name: Semester Data Update
+
+on:
+  schedule:
+    # Run at semester start: January 15 and August 15
+    - cron: '0 0 15 1,8 *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
+
+jobs:
+  update-semester-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch recruiter data
+        run: node scripts/scrapers/recruiter-scraper.js
+
+      - name: Fetch salary/income data
+        run: node scripts/scrapers/salary-scraper.js
+        
+      - name: Fetch facilities data
+        run: node scripts/scrapers/facilities-scraper.js
+
+      - name: Validate scraped data
+        run: node scripts/validators/semester-data-validator.js
+
+      - name: Check for changes
+        id: diff-check
+        run: |
+          if git diff --quiet src/data/; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR for semester update
+        if: steps.diff-check.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: Semester data update [automated]'
+          title: '📚 Semester Data Update - Top Recruiters, Salaries, Facilities'
+          body: |
+            ## Semester Data Update
+            
+            This PR includes updates to:
+            - Top Recruiters by university
+            - Average starting salaries
+            - Campus facilities information
+            
+            ### Data Sources
+            - University career services pages
+            - Glassdoor Pakistan
+            - LinkedIn salary insights
+            - Official university websites
+            
+            ---
+            *Please review before merging.*
+          branch: automated/semester-update
+          delete-branch: true
+          labels: |
+            automated
+            semester-update
+
+      - name: Send notification
+        if: steps.diff-check.outputs.has_changes == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '📚 IlmSeUrooj - Semester Data Update PR Created'
+          to: ba8516127@gmail.com
+          from: IlmSeUrooj Bot
+          body: |
+            A new Pull Request has been created with semester data updates.
+            
+            Updated data includes:
+            - Top Recruiters
+            - Average Starting Salaries
+            - Campus Facilities
+            
+            Please review and merge:
+            https://github.com/${{ github.repository }}/pulls

@@ -1,0 +1,113 @@
+name: Website Health Check
+
+on:
+  schedule:
+    # Run daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        continue-on-error: true
+        id: build
+
+      - name: Run lint checks
+        run: npm run lint
+        continue-on-error: true
+        id: lint
+
+      - name: Check data files integrity
+        run: node scripts/validators/data-integrity.js
+        continue-on-error: true
+        id: data-check
+
+      - name: Check university source URLs
+        run: node scripts/utils/url-checker.js
+        continue-on-error: true
+        id: url-check
+
+      - name: Generate health report
+        run: |
+          echo "# Website Health Check Report" > reports/health-report.md
+          echo "Date: $(date)" >> reports/health-report.md
+          echo "" >> reports/health-report.md
+          echo "| Check | Status |" >> reports/health-report.md
+          echo "|-------|--------|" >> reports/health-report.md
+          echo "| Build | ${{ steps.build.outcome }} |" >> reports/health-report.md
+          echo "| Lint | ${{ steps.lint.outcome }} |" >> reports/health-report.md
+          echo "| Data Integrity | ${{ steps.data-check.outcome }} |" >> reports/health-report.md
+          echo "| URL Check | ${{ steps.url-check.outcome }} |" >> reports/health-report.md
+
+      - name: Upload health report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: reports/health-report.md
+          retention-days: 30
+
+      - name: Create issue on failure
+        if: steps.build.outcome == 'failure' || steps.data-check.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⚠️ Website Health Check Failed - ${new Date().toISOString().split('T')[0]}`,
+              body: `## Health Check Failure
+              
+| Check | Status |
+|-------|--------|
+| Build | ${{ steps.build.outcome }} |
+| Lint | ${{ steps.lint.outcome }} |
+| Data Integrity | ${{ steps.data-check.outcome }} |
+| URL Check | ${{ steps.url-check.outcome }} |
+
+Please investigate and fix the issues.
+
+Run ID: ${{ github.run_id }}`,
+              labels: ['bug', 'health-check']
+            });
+
+      - name: Send failure notification
+        if: steps.build.outcome == 'failure' || steps.data-check.outcome == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '⚠️ IlmSeUrooj - Website Health Check Failed'
+          to: ba8516127@gmail.com
+          from: IlmSeUrooj Bot
+          body: |
+            The daily website health check has detected issues:
+            
+            Build: ${{ steps.build.outcome }}
+            Lint: ${{ steps.lint.outcome }}
+            Data Integrity: ${{ steps.data-check.outcome }}
+            URL Check: ${{ steps.url-check.outcome }}
+            
+            Please check the GitHub Actions logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

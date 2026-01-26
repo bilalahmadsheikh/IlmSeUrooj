@@ -1,0 +1,117 @@
+name: Annual Merit List Update
+
+on:
+  schedule:
+    # Run yearly on August 1st (after admission season ends)
+    - cron: '0 0 1 8 *'
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Year for merit data'
+        required: true
+        default: '2024'
+
+env:
+  NODE_VERSION: '20'
+  NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
+
+jobs:
+  fetch-merit-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch merit data from sources
+        id: fetch-merit
+        run: node scripts/scrapers/merit-scraper.js
+        env:
+          MERIT_YEAR: ${{ github.event.inputs.year || '2024' }}
+
+      - name: Generate merit report
+        run: node scripts/generate-merit-report.js
+
+      - name: Upload merit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: merit-report-${{ github.event.inputs.year || '2024' }}
+          path: reports/merit-report.md
+          retention-days: 90
+
+      - name: Create Issue for Manual Review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.existsSync('reports/merit-report.md') 
+              ? fs.readFileSync('reports/merit-report.md', 'utf8')
+              : 'No report generated';
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📊 Annual Merit List Update - ${process.env.MERIT_YEAR || new Date().getFullYear()}`,
+              body: `## Merit List Update Required - Manual Review
+              
+This is an automated issue to update merit list data for the year.
+
+### Sources Checked
+- learnospot.com/fast-university-closing-merits/
+- paklearningspot.com (COMSATS, GIKI, NUST, UET)
+- Reddit r/FASTNU
+- Official university Facebook pages
+
+### Scraped Data Preview
+\`\`\`
+${report.substring(0, 2000)}
+\`\`\`
+
+### Action Required
+1. Review the scraped merit data
+2. Verify against official sources
+3. Update \`src/components/AdmissionPredictor/AdmissionPredictor.js\`
+4. Update \`src/data/universities.js\` descriptions
+5. Update \`docs/DATA-SOURCES.md\`
+6. Close this issue when complete
+
+---
+*This is an automated issue. Manual verification is required before updating.*`,
+              labels: ['merit-update', 'manual-review', 'yearly']
+            });
+
+      - name: Send notification email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '📊 IlmSeUrooj - Annual Merit Update Review Required'
+          to: ba8516127@gmail.com
+          from: IlmSeUrooj Bot
+          body: |
+            The annual merit list update workflow has completed.
+            
+            A GitHub Issue has been created for manual review.
+            Please review the scraped merit data and update the website.
+            
+            View the issue:
+            https://github.com/${{ github.repository }}/issues
+            
+            The merit data needs to be verified against:
+            - learnospot.com
+            - paklearningspot.com
+            - Official university announcements
+            
+            ---
+            This requires MANUAL REVIEW before updating.

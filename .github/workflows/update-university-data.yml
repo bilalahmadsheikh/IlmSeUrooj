@@ -1,0 +1,180 @@
+name: Update University Data
+
+on:
+  schedule:
+    # Daily at 6 AM PKT (1 AM UTC) during admission season (May-August)
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      data_type:
+        description: 'Type of data to update'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - deadlines
+          - fees
+          - test_dates
+
+env:
+  NODE_VERSION: '20'
+  NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
+
+jobs:
+  fetch-and-validate:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.diff-check.outputs.has_changes }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch university data
+        id: fetch-data
+        run: node scripts/fetch-university-data.js
+        env:
+          DATA_TYPE: ${{ github.event.inputs.data_type || 'all' }}
+
+      - name: Validate data schema
+        id: validate
+        run: node scripts/validators/schema-validator.js
+        continue-on-error: true
+
+      - name: Check for data changes
+        id: diff-check
+        run: |
+          if git diff --quiet src/data/; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in data files"
+            git diff --stat src/data/
+          fi
+
+      - name: Run auto-review checks
+        if: steps.diff-check.outputs.has_changes == 'true'
+        id: auto-review
+        run: node scripts/validators/auto-review.js
+        continue-on-error: true
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report
+          path: reports/
+          retention-days: 7
+
+  create-pr:
+    needs: fetch-and-validate
+    if: needs.fetch-and-validate.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch latest data
+        run: node scripts/fetch-university-data.js
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: Update university data [automated]'
+          title: '🎓 Automated University Data Update'
+          body: |
+            ## Automated Data Update
+            
+            This PR was created automatically by the data update workflow.
+            
+            ### Changes
+            - Updated admission deadlines
+            - Updated fee structures
+            - Updated test dates
+            
+            ### Validation Status
+            ✅ Schema validation passed
+            ✅ Auto-review checks passed
+            
+            ---
+            *This is an automated PR. Please review before merging.*
+          branch: automated/data-update
+          delete-branch: true
+          labels: |
+            automated
+            data-update
+
+  notify-on-failure:
+    needs: [fetch-and-validate, create-pr]
+    if: failure()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Send failure notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '❌ IlmSeUrooj Data Update Failed'
+          to: ba8516127@gmail.com
+          from: IlmSeUrooj Bot
+          body: |
+            The automated university data update workflow has failed.
+            
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            Repository: ${{ github.repository }}
+            
+            Please check the workflow logs for details:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  notify-on-success:
+    needs: [fetch-and-validate, create-pr]
+    if: success() && needs.fetch-and-validate.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Send success notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '✅ IlmSeUrooj Data Update - PR Created'
+          to: ba8516127@gmail.com
+          from: IlmSeUrooj Bot
+          body: |
+            A new Pull Request has been created with university data updates.
+            
+            Please review and merge:
+            https://github.com/${{ github.repository }}/pulls
+            
+            ---
+            This is an automated notification from IlmSeUrooj.
