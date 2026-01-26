@@ -22,7 +22,7 @@ const admissionCriteria = {
         meritType: 'estimated',
         meritHistory: {
             2024: { 'CS (SEECS)': '~73', 'SE (SEECS)': '~74', 'EE (SEECS)': '~68' },
-            2023: { 'CS (SEECS)': '78.5', 'SE (SEECS)': '78.2', 'Data Science': '76.3' }
+
         },
         tips: 'NUST doesn\'t publish official cutoffs. Aim for NET 150+/200 and 80%+ aggregate for SEECS programs.'
     },
@@ -40,7 +40,7 @@ const admissionCriteria = {
         meritType: 'holistic',
         meritHistory: {
             2024: { 'Min FSc': '70%', 'Avg Admitted': '~88%', 'Min A-Level': '2Bs+1C' },
-            2023: { 'Min FSc': '70%', 'Avg Admitted': '~87%', 'Min A-Level': '2Bs+1C' }
+
         },
         tips: 'LUMS uses holistic admissions - no fixed cutoffs exist. Strong essays and interview can compensate for lower scores.'
     },
@@ -55,12 +55,12 @@ const admissionCriteria = {
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
         description: 'FAST Islamabad - Most competitive FAST campus. Highest cutoffs in the system.',
-        cutoffs: { cs: 73, se: 70, ai: 68 },
+        cutoffs: { cs: 75.3, se: 73, ai: 74, ds: 71.69, cyber: 71.45 },
         meritHistory: {
-            2024: { 'CS': '73%', 'SE': '69.5%', 'DS': '68%', 'AI': '67%' },
-            2023: { 'CS': '70%', 'SE': '68%', 'DS': '67%' }
+            2024: { 'CS': '75.3%', 'SE': '73.01%', 'DS': '71.69%', 'AI': '74.0%', 'Cyber': '71.45%' },
+
         },
-        tips: 'Most competitive FAST campus. CS needs 73%+, SE needs 70%+. Very limited seats for popular programs.'
+        tips: 'Most competitive FAST campus. CS needs 75%+, SE needs 73%+. Very limited seats.'
     },
     'FAST Lhr': {
         minFsc: 60,
@@ -70,13 +70,13 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Lahore - Second most competitive campus after Islamabad.',
-        cutoffs: { cs: 70, se: 68, ai: 67 },
+        description: 'FAST Lahore - Highest CS cutoffs in FAST system!',
+        cutoffs: { cs: 76.8, se: 75.6, ai: null, ds: 74.4, cyber: 75.6 },
         meritHistory: {
-            2024: { 'CS': '70%', 'SE': '68%', 'AI': '67%' },
-            2023: { 'CS': '68%', 'SE': '66%' }
+            2024: { 'CS': '76.8%', 'SE': '75.6%', 'DS': '74.4%', 'Cyber': '75.6%' },
+
         },
-        tips: 'Second most competitive. CS cutoff around 70%. Good location in Faisal Town, Lahore.'
+        tips: 'HIGHEST FAST cutoffs! CS needs 77%+. Even harder than Islamabad for CS.'
     },
     'FAST Khi': {
         minFsc: 60,
@@ -86,13 +86,13 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Karachi - Good quality with slightly lower cutoffs than Isb/Lhr.',
-        cutoffs: { cs: 69, se: 67, ds: 66 },
+        description: 'FAST Karachi - Moderate cutoffs, good for students scoring 66-70%.',
+        cutoffs: { cs: 68.08, se: 66.52, ai: 67.43, ds: 66.14 },
         meritHistory: {
-            2024: { 'CS': '69%', 'SE': '67%', 'DS': '66%' },
-            2023: { 'CS': '67%', 'SE': '65%' }
+            2024: { 'CS': '68.08%', 'SE': '66.52%', 'AI': '67.43%', 'DS': '66.14%' },
+
         },
-        tips: 'Moderate cutoffs around 69%. Two campuses in Karachi (Main & City). Good industry connections.'
+        tips: 'Moderate cutoffs around 68%. Two campuses in Karachi. Good industry connections.'
     },
     'FAST Psh': {
         minFsc: 50,
@@ -102,13 +102,13 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Peshawar - Easiest FAST campus. Very low cutoffs compared to others.',
-        cutoffs: { cs: 53, se: 52 },
+        description: 'FAST Peshawar - Lower cutoffs than major campuses.',
+        cutoffs: { cs: 58.46, se: 59.73, ai: 64.57 },
         meritHistory: {
-            2024: { 'CS': '~53%', 'SE': '~52%' },
-            2023: { 'CS': '~50%', 'SE': '~49%' }
+            2024: { 'CS': '58.46%', 'SE': '59.73%', 'AI': '64.57%' },
+
         },
-        tips: 'Easiest FAST campus! CS needs only ~53%. Great option if you want FAST degree at lower score.'
+        tips: 'Lower FAST cutoffs. CS needs ~58%. Great option for FAST degree at moderate score.'
     },
     'FAST CFD': {
         minFsc: 50,
@@ -118,13 +118,13 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Chiniot-Faisalabad - Newest and one of the easiest campuses.',
-        cutoffs: { cs: 54, se: 53 },
+        description: 'FAST Chiniot-Faisalabad - Moderate cutoffs, good for 66-68% scorers.',
+        cutoffs: { cs: 67.02, se: 66.68, ai: 66.35 },
         meritHistory: {
-            2024: { 'CS': '~54%', 'SE': '~53%' },
-            2023: { 'CS': '~52%', 'SE': '~51%' }
+            2024: { 'CS': '67.02%', 'SE': '66.68%', 'AI': '66.35%' },
+
         },
-        tips: 'Similar to Peshawar with very low cutoffs. New campus, good for easy FAST admission.'
+        tips: 'Moderate cutoffs around 67%. Good for students not making Isb/Lhr.'
     },
 
     // === COMSATS Campus-Specific ===
@@ -137,13 +137,13 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Islamabad - Flagship campus with very high CS cutoffs.',
-        cutoffs: { cs: 87, se: 85, ai: 85, cyber: 85 },
+        description: 'COMSATS Islamabad - Flagship campus with high CS cutoffs.',
+        cutoffs: { cs: 82.7, se: 81.6, ai: 80.2, cyber: 79.2, ds: 78.3 },
         meritHistory: {
-            2024: { 'CS': '87.1%', 'SE': '85.4%', 'AI': '85.3%', 'Cyber': '84.6%' },
-            2023: { 'CS': '~85%', 'SE': '~83%', 'AI': '~82%' }
+            2024: { 'CS': '82.7%', 'SE': '81.6%', 'AI': '80.2%', 'Cyber': '79.2%', 'DS': '78.3%' },
+
         },
-        tips: 'Very high cutoffs (87% for CS)! Despite being federal, CS is extremely competitive. Business programs are easier.'
+        tips: 'High cutoffs (82.7% for CS)! Despite being federal, CS is very competitive. Business programs are easier.'
     },
     'COMSATS Lhr': {
         minFsc: 60,
@@ -154,13 +154,13 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Lahore - Surprisingly higher CS cutoffs than Islamabad!',
-        cutoffs: { cs: 87.5, se: 85, ai: 85 },
+        description: 'COMSATS Lahore - HIGHEST COMSATS cutoffs for CS!',
+        cutoffs: { cs: 87.36, se: 85.6, ce: 83.09, pharmd: 83.52, ee: 76.74 },
         meritHistory: {
-            2024: { 'CS': '87.5%', 'SE': '85.1%', 'AI': '85.4%', 'Pharm-D': '82.9%' },
-            2023: { 'CS': '~86%', 'SE': '~84%' }
+            2024: { 'CS': '87.36%', 'SE': '85.6%', 'CE': '83.09%', 'Pharm-D': '83.52%', 'EE': '76.74%' },
+
         },
-        tips: 'Higher CS cutoff than Islamabad (87.5%)! Strong in Pharm-D. Consider Wah/Abbottabad for lower cutoffs.'
+        tips: 'HIGHEST COMSATS cutoffs (87.36% CS)! Consider Wah/Abbottabad for lower cutoffs.'
     },
     'COMSATS Wah': {
         minFsc: 60,
@@ -175,7 +175,7 @@ const admissionCriteria = {
         cutoffs: { cs: 80, se: 80, ai: 80 },
         meritHistory: {
             2024: { 'CS': '~80%', 'SE': '~80%', 'AI': '~80%' },
-            2023: { 'CS': '~78%', 'SE': '~77%' }
+
         },
         tips: 'Moderate cutoffs around 80%. Near Islamabad/Taxila. Good option if Islamabad cutoff is too high.'
     },
@@ -192,7 +192,7 @@ const admissionCriteria = {
         cutoffs: { cs: 78, se: 75, pharmd: 77 },
         meritHistory: {
             2024: { 'CS': '78.2%', 'SE': '74.8%', 'Pharm-D': '76.7%' },
-            2023: { 'CS': '~76%', 'SE': '~73%' }
+
         },
         tips: 'Scenic campus in Abbottabad. CS around 78%, SE around 75%. Strong Pharm-D program.'
     },
@@ -209,7 +209,7 @@ const admissionCriteria = {
         cutoffs: { cs: 68, se: 66 },
         meritHistory: {
             2024: { 'CS': '~68%', 'SE': '~66%' },
-            2023: { 'CS': '~65%', 'SE': '~63%' }
+
         },
         tips: 'Easy admission - CS around 68%. Good for students who want COMSATS quality at lower scores.'
     },
@@ -226,7 +226,7 @@ const admissionCriteria = {
         cutoffs: { cs: 62, se: 60 },
         meritHistory: {
             2024: { 'CS': '~62%', 'SE': '~60%' },
-            2023: { 'CS': '~60%', 'SE': '~58%' }
+
         },
         tips: 'Very easy admission - CS around 62%. Near Islamabad. Great backup option.'
     },
@@ -243,7 +243,7 @@ const admissionCriteria = {
         cutoffs: { cs: 58, se: 56 },
         meritHistory: {
             2024: { 'CS': '~58%', 'SE': '~56%' },
-            2023: { 'CS': '~55%', 'SE': '~53%' }
+
         },
         tips: 'Easiest COMSATS campus - CS as low as 55-58%. Growing campus with improving facilities.'
     },
@@ -261,7 +261,7 @@ const admissionCriteria = {
         meritType: 'test_score',
         meritHistory: {
             2024: { 'IBA Test Min': '180/360', 'Math Min': '80', 'English Min': '80' },
-            2023: { 'IBA Test Min': '220/356', 'Math Min': '92', 'English Min': '92' }
+
         },
         tips: 'IBA publishes test score cutoffs, not aggregates. 2024 cutoff was 180/360 total. Focus on verbal & quant sections.'
     },
@@ -280,7 +280,7 @@ const admissionCriteria = {
         cutoffs: { me: 82, cs: 80, ee: 80 },
         meritHistory: {
             2024: { 'Mechanical': '81.65%', 'CS': '80.45%', 'Electrical': '80.08%' },
-            2023: { 'Architecture': '80.6%', 'Mechanical': '77.7%' }
+
         },
         tips: 'Most competitive UET campus. ME/CS need 80%+. Min 132/400 in ECAT required for eligibility.'
     },
@@ -297,7 +297,7 @@ const admissionCriteria = {
         cutoffs: { me: 75, se: 73, ee: 72 },
         meritHistory: {
             2024: { 'Mechanical': '~75%', 'SE': '~73%', 'Electrical': '~72%' },
-            2023: { 'Mechanical': '~73%', 'SE': '~71%' }
+
         },
         tips: 'Lower cutoffs than Lahore - around 73-75%. Near Islamabad. Good option if Lahore is too competitive.'
     },
@@ -315,7 +315,7 @@ const admissionCriteria = {
         meritType: 'position',
         meritHistory: {
             2024: { 'CS (closed at)': '#326', 'ME (closed at)': '#1400+', 'EE (closed at)': '#2000+' },
-            2023: { 'CS (closed at)': '#310', 'ME (closed at)': '#1359', 'EE (closed at)': '#1800+' }
+
         },
         tips: 'GIKI announces closing merit positions - the rank of last admitted student. CS is most competitive (~326). ME/EE close at 1300-2000+ positions.'
     },
@@ -333,7 +333,7 @@ const admissionCriteria = {
         meritType: 'estimated',
         meritHistory: {
             2024: { 'CS (pos)': '~360', 'ME (pos)': '~1220', 'EE (pos)': '~1741' },
-            2023: { 'CS': '~78.6%', 'ME': '~72.2%', 'EE': '~65.6%' }
+
         },
         tips: 'PIEAS releases positions, aggregates are estimated. Top 1400 positions have good chances. Govt job guarantee!'
     },
@@ -349,7 +349,7 @@ const admissionCriteria = {
         cutoffs: { se: 87, cs: 84, ee: 76 },
         meritHistory: {
             2024: { 'Software Eng': '86.86%', 'CS': '84.2%', 'Computer Sys': '83.9%' },
-            2023: { 'Formula': '50% Test + 50% FSc Part-I (different from 2024)' }
+
         },
         tips: 'NED changed formula in 2024! Now 60% test weight. Software Eng is most competitive at 87%.'
     },
@@ -367,7 +367,7 @@ const admissionCriteria = {
         cutoffs: { cs: 80, se: 78, bba: 65 },
         meritHistory: {
             2024: { 'CS/SE': '>80%', 'BBA': '~65%' },
-            2023: { 'CS/SE': '>78%', 'BBA': '~63%' }
+
         },
         tips: 'Most competitive Bahria campus - CS needs 80%+. Navy dependents get reserved seats.'
     },
@@ -383,7 +383,7 @@ const admissionCriteria = {
         cutoffs: { cs: 72, se: 70, bba: 60 },
         meritHistory: {
             2024: { 'CS': '~72%', 'SE': '~70%', 'BBA': '~60%' },
-            2023: { 'CS': '~70%', 'SE': '~68%' }
+
         },
         tips: 'Lower cutoffs than Islamabad - CS around 70-72%. Growing campus with good facilities.'
     },
@@ -399,7 +399,7 @@ const admissionCriteria = {
         cutoffs: { cs: 68, se: 65, bba: 55 },
         meritHistory: {
             2024: { 'CS': '~68%', 'SE': '~65%', 'BBA': '~55%' },
-            2023: { 'CS': '~65%', 'SE': '~62%' }
+
         },
         tips: 'Easiest Bahria campus - CS around 65-68%. Has medical programs (MBBS, BDS).'
     },
