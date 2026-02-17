@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './page.module.css';
 import Header from '@/components/Header/Header';
 import FilterSection from '@/components/FilterSection/FilterSection';
@@ -12,8 +12,21 @@ import UniversityComparison from '@/components/UniversityComparison/UniversityCo
 import AdmissionPredictor from '@/components/AdmissionPredictor/AdmissionPredictor';
 import AnimatedBackground from '@/components/Background/AnimatedBackground';
 import DecorativeImages from '@/components/Background/DecorativeImages';
+import Toast from '@/components/Toast/Toast';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
+import { loadSavedFromStorage, saveToStorage } from '@/utils/savedStorage';
+
+// Normalize saved item: { university, savedAt, tag, note }
+function hydrateSavedItems(rows) {
+  return rows
+    .map(({ id, savedAt, tag, note }) => {
+      const university = universities.find(u => u.id === id);
+      if (!university) return null;
+      return { university, savedAt: savedAt ?? Date.now(), tag: tag ?? null, note: note ?? '' };
+    })
+    .filter(Boolean);
+}
 
 export default function Home() {
   // Filter state with defaults
@@ -29,34 +42,59 @@ export default function Home() {
   // UI state
   const [isSwipeMode, setIsSwipeMode] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [compareInitialIds, setCompareInitialIds] = useState(null);
+
+  // Saved items: [{ university, savedAt, tag, note }, ...] — order = display order
+  const [savedItems, setSavedItems] = useState([]);
+  const [savedLoaded, setSavedLoaded] = useState(false);
 
   // Universities state
   const [rankedUniversities, setRankedUniversities] = useState([]);
   const [allRankedUniversities, setAllRankedUniversities] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [savedUniversities, setSavedUniversities] = useState([]);
   const [skippedIds, setSkippedIds] = useState([]);
+
+  const savedUniversities = savedItems.map(i => i.university);
+  const savedIds = savedUniversities.map(u => u.id);
+
+  // Load saved from localStorage on mount
+  useEffect(() => {
+    const rows = loadSavedFromStorage();
+    setSavedItems(hydrateSavedItems(rows));
+    setSavedLoaded(true);
+  }, []);
+
+  // Persist saved items when they change (after initial load)
+  useEffect(() => {
+    if (!savedLoaded) return;
+    saveToStorage(savedItems);
+  }, [savedItems, savedLoaded]);
 
   // Rank universities when filters change
   useEffect(() => {
     const ranked = rankUniversities(universities, filters);
     setAllRankedUniversities(ranked);
-    // Filter out already swiped universities for swipe mode
     const filtered = ranked.filter(uni =>
-      !savedUniversities.some(s => s.id === uni.id) &&
+      !savedIds.includes(uni.id) &&
       !skippedIds.includes(uni.id)
     );
     setRankedUniversities(filtered);
     setCurrentIndex(0);
-  }, [filters, savedUniversities, skippedIds]);
+  }, [filters, savedIds, skippedIds]);
+
+  const showToast = useCallback((message, type = 'success') => {
+    setToast({ message, type });
+  }, []);
 
   // Handle swipe action
   const handleSwipe = (direction, university) => {
     if (direction === 'right') {
-      // Save university
-      setSavedUniversities(prev => [...prev, university]);
+      if (!savedIds.includes(university.id)) {
+        setSavedItems(prev => [...prev, { university, savedAt: Date.now(), tag: null, note: '' }]);
+        showToast(`${university.shortName} saved to your list!`, 'success');
+      }
     } else {
-      // Skip university
       setSkippedIds(prev => [...prev, university.id]);
     }
     setCurrentIndex(prev => prev + 1);
@@ -64,15 +102,43 @@ export default function Home() {
 
   // Handle save from list
   const handleSaveFromList = (university) => {
-    if (!savedUniversities.some(s => s.id === university.id)) {
-      setSavedUniversities(prev => [...prev, university]);
+    if (!savedIds.includes(university.id)) {
+      setSavedItems(prev => [...prev, { university, savedAt: Date.now(), tag: null, note: '' }]);
+      showToast(`${university.shortName} added to saved list`, 'success');
     }
   };
 
   // Remove from saved
   const handleRemoveSaved = (id) => {
-    setSavedUniversities(prev => prev.filter(uni => uni.id !== id));
+    const name = savedItems.find(i => i.university.id === id)?.university?.shortName ?? 'University';
+    setSavedItems(prev => prev.filter(i => i.university.id !== id));
+    showToast(`${name} removed from list`, 'removed');
   };
+
+  // Update a saved item (tag, note)
+  const handleUpdateSavedItem = useCallback((id, updates) => {
+    setSavedItems(prev => prev.map(item =>
+      item.university.id === id
+        ? { ...item, ...updates }
+        : item
+    ));
+  }, []);
+
+  // Reorder: move item at fromIndex to toIndex
+  const handleReorderSaved = useCallback((fromIndex, toIndex) => {
+    setSavedItems(prev => {
+      const next = [...prev];
+      const [removed] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, removed);
+      return next;
+    });
+  }, []);
+
+  // Compare selected saved universities (scroll to comparison and pre-fill)
+  const handleCompareSaved = useCallback((ids) => {
+    setCompareInitialIds(ids);
+    setShowSaved(false);
+  }, []);
 
   // Start swiping
   const handleStartSwiping = () => {
@@ -85,16 +151,13 @@ export default function Home() {
   const visibleCards = rankedUniversities.slice(currentIndex, currentIndex + 2);
   const hasMoreCards = currentIndex < rankedUniversities.length;
 
-  // Get saved IDs for list
-  const savedIds = savedUniversities.map(u => u.id);
-
   return (
     <main className={styles.main}>
       <AnimatedBackground />
       <DecorativeImages />
 
       <Header
-        savedCount={savedUniversities.length}
+        savedCount={savedItems.length}
         onShowSaved={() => setShowSaved(true)}
       />
 
@@ -104,6 +167,21 @@ export default function Home() {
         onStartSwiping={handleStartSwiping}
         isSwipeMode={isSwipeMode}
       />
+
+      {savedItems.length > 0 && (
+        <button
+          type="button"
+          className={styles.shortlistStrip}
+          onClick={() => setShowSaved(true)}
+          aria-label="Open saved list"
+        >
+          <span className={styles.shortlistIcon}>💚</span>
+          <span className={styles.shortlistText}>
+            Your shortlist: <strong>{savedItems.length}</strong> universit{savedItems.length === 1 ? 'y' : 'ies'} saved
+          </span>
+          <span className={styles.shortlistArrow}>→</span>
+        </button>
+      )}
 
       {isSwipeMode && (
         <div className={styles.swipeModeContainer}>
@@ -123,7 +201,7 @@ export default function Home() {
                   <span className={styles.noMoreIcon}>🎉</span>
                   <h3 className={styles.noMoreTitle}>All Done!</h3>
                   <p className={styles.noMoreText}>
-                    You've seen all {rankedUniversities.length + savedUniversities.length + skippedIds.length} matching universities.
+                    You've seen all {rankedUniversities.length + savedItems.length + skippedIds.length} matching universities.
                   </p>
                   <button
                     className={styles.resetBtn}
@@ -151,7 +229,7 @@ export default function Home() {
                 <div
                   className={styles.progressFill}
                   style={{
-                    width: `${((currentIndex + savedUniversities.length) / (rankedUniversities.length + savedUniversities.length + skippedIds.length)) * 100}%`
+                    width: `${((currentIndex + savedItems.length) / (rankedUniversities.length + savedItems.length + skippedIds.length)) * 100}%`
                   }}
                 />
               </div>
@@ -173,7 +251,7 @@ export default function Home() {
           <AdmissionsDeadlines currentField={filters.field} />
 
           {/* University Comparison Tool */}
-          <UniversityComparison />
+          <UniversityComparison initialSelectedIds={compareInitialIds} onConsumeInitialIds={() => setCompareInitialIds(null)} />
 
           {/* Admission Chance Predictor */}
           <AdmissionPredictor />
@@ -182,9 +260,20 @@ export default function Home() {
 
       {showSaved && (
         <SavedList
-          savedUniversities={savedUniversities}
+          savedItems={savedItems}
           onRemove={handleRemoveSaved}
+          onUpdateItem={handleUpdateSavedItem}
+          onReorder={handleReorderSaved}
+          onCompare={handleCompareSaved}
           onClose={() => setShowSaved(false)}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToast(null)}
         />
       )}
     </main>

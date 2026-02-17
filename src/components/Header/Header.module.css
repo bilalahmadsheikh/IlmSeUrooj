@@ -186,16 +186,25 @@
     border-radius: var(--radius-full);
     position: relative;
     z-index: 1;
-    animation: badgePop 0.3s var(--transition-spring);
+    animation: badgePop 0.4s var(--transition-spring);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.badge[data-count] {
+    animation: badgePop 0.4s var(--transition-spring);
 }
 
 @keyframes badgePop {
     0% {
         transform: scale(0);
+        opacity: 0;
     }
-
+    70% {
+        transform: scale(1.15);
+    }
     100% {
         transform: scale(1);
+        opacity: 1;
     }
 }
 

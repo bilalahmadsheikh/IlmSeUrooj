@@ -1,15 +1,28 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import styles from './UniversityComparison.module.css';
 import { universities } from '@/data/universities';
 import { departmentDetails, comparisonCriteria, departmentOptions } from '@/data/departmentData';
 import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
 
-export default function UniversityComparison() {
+export default function UniversityComparison({ initialSelectedIds, onConsumeInitialIds }) {
+    const sectionRef = useRef(null);
     const [selectedUnis, setSelectedUnis] = useState([null, null, null]);
     const [selectedDepartment, setSelectedDepartment] = useState('Computer Science');
     const [selectedCriteria, setSelectedCriteria] = useState('overall');
+
+    // Pre-fill from saved list "Compare" action (run once when ids are provided)
+    useEffect(() => {
+        if (!initialSelectedIds?.length) return;
+        const ids = initialSelectedIds.slice(0, 3);
+        const selected = ids.map(id => universities.find(u => u.id === id) ?? null);
+        setSelectedUnis([...selected, null, null, null].slice(0, 3));
+        requestAnimationFrame(() => {
+            sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        onConsumeInitialIds?.();
+    }, [initialSelectedIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Filter universities that have the selected department
     const filteredUniversities = useMemo(() => {
@@ -106,7 +119,7 @@ export default function UniversityComparison() {
     const hasSelection = selectedUnis.some(u => u !== null);
 
     return (
-        <section className={styles.section}>
+        <section className={styles.section} ref={sectionRef}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
                     <span className={styles.titleIcon}></span>

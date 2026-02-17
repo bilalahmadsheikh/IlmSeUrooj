@@ -6,6 +6,52 @@
   transition: background var(--transition-base);
 }
 
+/* Shortlist strip - clickable when you have saved items */
+.shortlistStrip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-2xl);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-base);
+  position: relative;
+  z-index: 2;
+}
+
+.shortlistStrip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.15);
+  transform: translateY(-1px);
+}
+
+.shortlistIcon {
+  font-size: var(--font-size-lg);
+}
+
+.shortlistText strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.shortlistArrow {
+  opacity: 0.7;
+  transition: transform var(--transition-fast);
+}
+
+.shortlistStrip:hover .shortlistArrow {
+  transform: translateX(4px);
+}
+
 /* Swipe Mode Container - holds all swipe content + decorative images */
 .swipeModeContainer {
   position: relative;

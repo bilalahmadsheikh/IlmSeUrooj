@@ -49,11 +49,18 @@ export default function Header({ savedCount, onShowSaved }) {
                 <nav className={styles.nav}>
                     <ThemeToggle />
 
-                    <button className={styles.savedBtn} onClick={onShowSaved}>
+                    <button
+                        className={styles.savedBtn}
+                        onClick={onShowSaved}
+                        title={savedCount > 0 ? `View your shortlist (${savedCount} saved)` : 'View saved universities'}
+                        aria-label={savedCount > 0 ? `Open saved list, ${savedCount} universities` : 'Open saved list'}
+                    >
                         <span className={styles.savedIcon}>💚</span>
                         <span className={styles.savedText}>Saved</span>
                         {savedCount > 0 && (
-                            <span className={styles.badge}>{savedCount}</span>
+                            <span className={styles.badge} key={savedCount} data-count={savedCount}>
+                                {savedCount}
+                            </span>
                         )}
                     </button>
                 </nav>
