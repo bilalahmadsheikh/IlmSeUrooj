@@ -2,12 +2,19 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import styles from './ScholarshipsPanel.module.css';
-import { scholarships, scholarshipCategories } from '@/data/scholarships';
+import { scholarships, scholarshipCategories, quickLinks } from '@/data/scholarships';
 import { IconScholarship, IconClose } from '@/components/Icons/Icons';
+
+const SORT_OPTIONS = [
+  { value: 'default', label: 'Default order' },
+  { value: 'coverage', label: 'Full coverage first' },
+  { value: 'provider', label: 'Provider A–Z' },
+];
 
 export default function ScholarshipsPanel({ onClose }) {
   const [category, setCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('default');
   const [expandedId, setExpandedId] = useState(null);
   const [tipsOpen, setTipsOpen] = useState(true);
   const closeBtnRef = useRef(null);
@@ -23,8 +30,18 @@ export default function ScholarshipsPanel({ onClose }) {
           s.description.toLowerCase().includes(q)
       );
     }
+    if (sortBy === 'coverage') {
+      list = [...list].sort((a, b) => {
+        const aFull = (a.coverage || '').toLowerCase().includes('100%') ? 1 : 0;
+        const bFull = (b.coverage || '').toLowerCase().includes('100%') ? 1 : 0;
+        if (bFull !== aFull) return bFull - aFull;
+        return 0;
+      });
+    } else if (sortBy === 'provider') {
+      list = [...list].sort((a, b) => (a.provider || '').localeCompare(b.provider || ''));
+    }
     return list;
-  }, [category, searchQuery]);
+  }, [category, searchQuery, sortBy]);
 
   const featured = useMemo(() => scholarships.filter((s) => s.featured), []);
 
@@ -73,6 +90,19 @@ export default function ScholarshipsPanel({ onClose }) {
           </p>
         </div>
 
+        <div className={styles.quickLinks}>
+          <p className={styles.quickLinksTitle}>Official portals</p>
+          <ul className={styles.quickLinksList}>
+            {quickLinks.map((link) => (
+              <li key={link.url}>
+                <a href={link.url} target="_blank" rel="noopener noreferrer" className={styles.quickLink}>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         <button
           type="button"
           className={styles.tipsToggle}
@@ -89,6 +119,7 @@ export default function ScholarshipsPanel({ onClose }) {
               <li>LUMS NOP and Habib Yohsin offer strong full-need support; check their portals for deadlines.</li>
               <li>Government schemes (HEC, Ehsaas) open periodically; subscribe to HEC updates for announcements.</li>
               <li>Merit scholarships often require maintaining a minimum GPA; read the terms before applying.</li>
+              <li>Always confirm deadlines and eligibility on the official provider website; dates and criteria can change.</li>
             </ul>
           </div>
         )}
@@ -102,6 +133,22 @@ export default function ScholarshipsPanel({ onClose }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search scholarships"
           />
+          <div className={styles.sortWrap}>
+            <span className={styles.sortLabel}>Sort:</span>
+            <select
+              className={styles.sortSelect}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              aria-label="Sort scholarships"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <p className={styles.resultCount}>
+            Showing {filtered.length} of {scholarships.length} programs
+          </p>
           <div className={styles.chips} role="group" aria-label="Filter by type">
             {scholarshipCategories.map((cat) => (
               <button
@@ -144,9 +191,12 @@ export default function ScholarshipsPanel({ onClose }) {
                       <div className={styles.details}>
                         <p className={styles.eligibility}>{sch.eligibility}</p>
                         {sch.applyUrl && (
-                          <a href={sch.applyUrl} target="_blank" rel="noopener noreferrer" className={styles.applyLink}>
-                            Open application link
-                          </a>
+                          <>
+                            <a href={sch.applyUrl} target="_blank" rel="noopener noreferrer" className={styles.applyLink}>
+                              Open application link
+                            </a>
+                            <p className={styles.verifyNote}>Verify deadline and eligibility on the official site before applying.</p>
+                          </>
                         )}
                       </div>
                     )}
@@ -189,9 +239,12 @@ export default function ScholarshipsPanel({ onClose }) {
                       <div className={styles.details}>
                         <p className={styles.eligibility}>{sch.eligibility}</p>
                         {sch.applyUrl && (
-                          <a href={sch.applyUrl} target="_blank" rel="noopener noreferrer" className={styles.applyLink}>
-                            Open application link
-                          </a>
+                          <>
+                            <a href={sch.applyUrl} target="_blank" rel="noopener noreferrer" className={styles.applyLink}>
+                              Open application link
+                            </a>
+                            <p className={styles.verifyNote}>Verify deadline and eligibility on the official site before applying.</p>
+                          </>
                         )}
                       </div>
                     )}
@@ -204,7 +257,7 @@ export default function ScholarshipsPanel({ onClose }) {
 
         <div className={styles.footer}>
           <p className={styles.disclaimer}>
-            Details and deadlines can change. Always confirm on the official provider website before applying.
+            Information is for guidance only. Details and deadlines can change. Always confirm on the official provider website before applying.
           </p>
         </div>
       </div>

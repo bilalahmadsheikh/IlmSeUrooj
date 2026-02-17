@@ -299,6 +299,16 @@
   color: var(--color-warning);
 }
 
+.badge[data-type="merit"] {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--color-info);
+}
+
+.badge[data-type="merit-need"] {
+  background: rgba(168, 85, 247, 0.2);
+  color: var(--color-secondary);
+}
+
 .coverage {
   font-size: var(--font-size-xs);
   font-weight: 700;
@@ -394,6 +404,81 @@
   color: var(--color-text-muted);
   text-align: center;
   margin: 0;
+}
+
+.quickLinks {
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--glass-border);
+  position: relative;
+  z-index: 1;
+}
+
+.quickLinksTitle {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.quickLinksList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.quickLink {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.quickLink:hover {
+  border-color: var(--color-primary);
+  background: var(--glass-bg-light);
+}
+
+.resultCount {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.sortWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.sortLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.sortSelect {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+}
+
+.verifyNote {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
 }
 
 @media (max-width: 480px) {
