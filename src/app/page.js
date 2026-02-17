@@ -16,6 +16,7 @@ import Toast from '@/components/Toast/Toast';
 import RecommendationsSection from '@/components/RecommendationsSection/RecommendationsSection';
 import ScrollToTop from '@/components/ScrollToTop/ScrollToTop';
 import SimilarUniversities from '@/components/SimilarUniversities/SimilarUniversities';
+import ScholarshipsPanel from '@/components/ScholarshipsPanel/ScholarshipsPanel';
 import { IconBookmark, IconArrowRight, IconCelebrate, IconArrowLeft } from '@/components/Icons/Icons';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
@@ -46,6 +47,7 @@ export default function Home() {
   // UI state
   const [isSwipeMode, setIsSwipeMode] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
+  const [showScholarships, setShowScholarships] = useState(false);
   const [toast, setToast] = useState(null);
   const [compareInitialIds, setCompareInitialIds] = useState(null);
 
@@ -162,6 +164,9 @@ export default function Home() {
         if (showSaved) {
           setShowSaved(false);
           e.preventDefault();
+        } else if (showScholarships) {
+          setShowScholarships(false);
+          e.preventDefault();
         }
         return;
       }
@@ -177,7 +182,7 @@ export default function Home() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showSaved, isSwipeMode, hasMoreCards, visibleCards]);
+  }, [showSaved, showScholarships, isSwipeMode, hasMoreCards, visibleCards]);
 
   return (
     <main className={styles.main}>
@@ -187,6 +192,7 @@ export default function Home() {
       <Header
         savedCount={savedItems.length}
         onShowSaved={() => setShowSaved(true)}
+        onShowScholarships={() => setShowScholarships(true)}
       />
 
       <FilterSection
@@ -324,6 +330,10 @@ export default function Home() {
           onCompare={handleCompareSaved}
           onClose={() => setShowSaved(false)}
         />
+      )}
+
+      {showScholarships && (
+        <ScholarshipsPanel onClose={() => setShowScholarships(false)} />
       )}
 
       {toast && (

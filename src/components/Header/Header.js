@@ -2,9 +2,9 @@
 
 import styles from './Header.module.css';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
-import { IconBookmark } from '@/components/Icons/Icons';
+import { IconBookmark, IconScholarship } from '@/components/Icons/Icons';
 
-export default function Header({ savedCount, onShowSaved }) {
+export default function Header({ savedCount, onShowSaved, onShowScholarships }) {
     return (
         <header className={styles.header}>
             <div className={styles.container}>
@@ -49,6 +49,17 @@ export default function Header({ savedCount, onShowSaved }) {
 
                 <nav className={styles.nav}>
                     <ThemeToggle />
+
+                    <button
+                        type="button"
+                        className={styles.scholarshipsBtn}
+                        onClick={onShowScholarships}
+                        title="Scholarships and financial aid"
+                        aria-label="Open scholarships and financial aid"
+                    >
+                        <IconScholarship className={styles.scholarshipsIcon} aria-hidden />
+                        <span className={styles.scholarshipsText}>Scholarships</span>
+                    </button>
 
                     <button
                         className={styles.savedBtn}
