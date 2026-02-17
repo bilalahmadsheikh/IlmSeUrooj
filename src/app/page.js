@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './page.module.css';
 import Header from '@/components/Header/Header';
 import FilterSection from '@/components/FilterSection/FilterSection';
@@ -14,6 +14,8 @@ import AnimatedBackground from '@/components/Background/AnimatedBackground';
 import DecorativeImages from '@/components/Background/DecorativeImages';
 import Toast from '@/components/Toast/Toast';
 import RecommendationsSection from '@/components/RecommendationsSection/RecommendationsSection';
+import ScrollToTop from '@/components/ScrollToTop/ScrollToTop';
+import SimilarUniversities from '@/components/SimilarUniversities/SimilarUniversities';
 import { IconBookmark, IconArrowRight, IconCelebrate, IconArrowLeft } from '@/components/Icons/Icons';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
@@ -153,6 +155,30 @@ export default function Home() {
   const visibleCards = rankedUniversities.slice(currentIndex, currentIndex + 2);
   const hasMoreCards = currentIndex < rankedUniversities.length;
 
+  // Keyboard: Escape closes saved panel; arrow keys in swipe mode
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (showSaved) {
+          setShowSaved(false);
+          e.preventDefault();
+        }
+        return;
+      }
+      if (!isSwipeMode || !hasMoreCards) return;
+      const topCard = visibleCards[0];
+      if (e.key === 'ArrowLeft' && topCard) {
+        handleSwipe('left', topCard);
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight' && topCard) {
+        handleSwipe('right', topCard);
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showSaved, isSwipeMode, hasMoreCards, visibleCards]);
+
   return (
     <main className={styles.main}>
       <AnimatedBackground />
@@ -229,11 +255,18 @@ export default function Home() {
             </div>
 
             {hasMoreCards && (
-              <div className={styles.swipeHint} role="status" aria-label="Swipe left to skip, right to save">
-                <span className={styles.hintLeft}><IconArrowLeft className={styles.hintIcon} aria-hidden /> Skip</span>
-                <span className={styles.hintCenter}>Swipe or tap buttons</span>
-                <span className={styles.hintRight}>Save <IconArrowRight className={styles.hintIcon} aria-hidden /></span>
-              </div>
+              <>
+                <div className={styles.swipeHint} role="status" aria-label="Swipe left to skip, right to save">
+                  <span className={styles.hintLeft}><IconArrowLeft className={styles.hintIcon} aria-hidden /> Skip</span>
+                  <span className={styles.hintCenter}>Swipe, tap, or use arrow keys</span>
+                  <span className={styles.hintRight}>Save <IconArrowRight className={styles.hintIcon} aria-hidden /></span>
+                </div>
+                <p className={styles.statsStrip}>
+                  Explored <strong>{currentIndex + skippedIds.length}</strong>
+                  {' · '}Saved <strong>{savedItems.length}</strong>
+                  {' · '}<strong>{rankedUniversities.length - currentIndex}</strong> remaining
+                </p>
+              </>
             )}
 
             <div className={styles.progress}>
@@ -259,6 +292,17 @@ export default function Home() {
             onSave={handleSaveFromList}
             savedIds={savedIds}
           />
+
+          {/* You might also like - similar to shortlist */}
+          {savedItems.length > 0 && (
+            <SimilarUniversities
+              rankedUniversities={allRankedUniversities}
+              savedIds={savedIds}
+              savedUniversities={savedUniversities}
+              field={filters.field}
+              onSave={handleSaveFromList}
+            />
+          )}
 
           {/* Admissions Deadlines Section */}
           <AdmissionsDeadlines currentField={filters.field} />
@@ -289,6 +333,8 @@ export default function Home() {
           onDismiss={() => setToast(null)}
         />
       )}
+
+      <ScrollToTop />
     </main>
   );
 }

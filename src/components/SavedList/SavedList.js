@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import styles from './SavedList.module.css';
 import { IconBookmark, IconClose, IconCheck, IconNote, IconChevronUp, IconChevronDown, IconArrowRight } from '@/components/Icons/Icons';
 
@@ -39,20 +39,56 @@ export default function SavedList({
   onClose,
 }) {
   const [sortBy, setSortBy] = useState('manual');
+  const [searchQuery, setSearchQuery] = useState('');
   const [compareMode, setCompareMode] = useState(false);
   const [compareSelected, setCompareSelected] = useState(new Set());
   const [expandedNoteId, setExpandedNoteId] = useState(null);
   const [copied, setCopied] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
+  const panelRef = useRef(null);
+  const closeBtnRef = useRef(null);
 
   const sortedItems = useMemo(() => {
     const list = [...savedItems];
-    if (sortBy === 'manual') return list;
-    if (sortBy === 'savedAt') return list.sort((a, b) => b.savedAt - a.savedAt);
-    if (sortBy === 'deadline') return list.sort((a, b) => getDeadlineTime(a.university) - getDeadlineTime(b.university));
-    if (sortBy === 'ranking') return list.sort((a, b) => (a.university.ranking ?? 999) - (b.university.ranking ?? 999));
+    if (sortBy === 'manual') {
+      // no sort
+    } else if (sortBy === 'savedAt') {
+      list.sort((a, b) => b.savedAt - a.savedAt);
+    } else if (sortBy === 'deadline') {
+      list.sort((a, b) => getDeadlineTime(a.university) - getDeadlineTime(b.university));
+    } else if (sortBy === 'ranking') {
+      list.sort((a, b) => (a.university.ranking ?? 999) - (b.university.ranking ?? 999));
+    }
     return list;
   }, [savedItems, sortBy]);
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return sortedItems;
+    const q = searchQuery.trim().toLowerCase();
+    return sortedItems.filter(
+      (item) =>
+        item.university.shortName.toLowerCase().includes(q) ||
+        item.university.name.toLowerCase().includes(q) ||
+        item.university.city.toLowerCase().includes(q) ||
+        (item.university.type && item.university.type.toLowerCase().includes(q)) ||
+        (item.note && item.note.toLowerCase().includes(q))
+    );
+  }, [sortedItems, searchQuery]);
+
+  useEffect(() => {
+    closeBtnRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const toggleCompareSelect = (id) => {
     setCompareSelected((prev) => {
@@ -92,14 +128,14 @@ export default function SavedList({
   }, [sortedItems]);
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="saved-list-title">
+      <div className={styles.panel} onClick={(e) => e.stopPropagation()} ref={panelRef}>
         <div className={styles.header}>
-          <h2 className={styles.title}>
+          <h2 id="saved-list-title" className={styles.title}>
             <IconBookmark className={styles.titleIcon} aria-hidden />
             Saved Universities
           </h2>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+          <button ref={closeBtnRef} className={styles.closeBtn} onClick={onClose} aria-label="Close saved list">
             <IconClose aria-hidden />
           </button>
         </div>
@@ -119,6 +155,14 @@ export default function SavedList({
         ) : (
           <>
             <div className={styles.toolbar}>
+              <input
+                type="search"
+                className={styles.searchInput}
+                placeholder="Search by name, city, or note…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search saved universities"
+              />
               <label className={styles.sortLabel}>Sort by</label>
               <select
                 className={styles.sortSelect}
@@ -161,11 +205,16 @@ export default function SavedList({
             </div>
 
             <div className={styles.list}>
-              {sortedItems.map((item, index) => {
+              {filteredItems.length === 0 ? (
+                <p className={styles.searchEmpty}>
+                  {searchQuery.trim() ? 'No saved universities match your search.' : 'No items.'}
+                </p>
+              ) : (
+              filteredItems.map((item, index) => {
                 const uni = item.university;
                 const isSelected = compareSelected.has(uni.id);
                 const canMoveUp = sortBy === 'manual' && index > 0;
-                const canMoveDown = sortBy === 'manual' && index < sortedItems.length - 1;
+                const canMoveDown = sortBy === 'manual' && index < filteredItems.length - 1;
                 const originalIndex = savedItems.findIndex((i) => i.university.id === uni.id);
 
                 return (
@@ -297,12 +346,13 @@ export default function SavedList({
                     </div>
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
 
             <div className={styles.footer}>
               <p className={styles.count}>
-                {savedItems.length} universit{savedItems.length === 1 ? 'y' : 'ies'} saved
+                {searchQuery.trim() ? `${filteredItems.length} of ` : ''}{savedItems.length} universit{savedItems.length === 1 ? 'y' : 'ies'} saved
               </p>
               <div className={styles.footerActions}>
                 <button type="button" className={styles.exportBtn} onClick={copyList}>
