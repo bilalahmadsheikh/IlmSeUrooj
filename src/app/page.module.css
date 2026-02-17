@@ -35,7 +35,17 @@
 }
 
 .shortlistIcon {
-  font-size: var(--font-size-lg);
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.shortlistArrow {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 
 .shortlistText strong {
@@ -94,6 +104,15 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   transition: color var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.hintIcon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
 }
 
 .hintLeft {
@@ -168,12 +187,14 @@
 }
 
 .noMoreIcon {
-  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
   display: block;
   margin-bottom: var(--space-4);
   animation: bounce 2s ease-in-out infinite;
   position: relative;
   z-index: 1;
+  color: var(--color-primary);
 }
 
 .noMoreTitle {

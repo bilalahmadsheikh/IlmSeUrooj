@@ -3,6 +3,7 @@
 import styles from './FilterSection.module.css';
 import { filterOptions } from '@/data/universities';
 import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
+import { IconArrowRight } from '@/components/Icons/Icons';
 
 export default function FilterSection({ filters, setFilters, onStartSwiping, isSwipeMode }) {
     const handleFieldChange = (value) => {
@@ -125,10 +126,10 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                     </div>
 
                     {!isSwipeMode && (
-                        <button className={styles.startBtn} onClick={onStartSwiping}>
-                            <span className={styles.btnIcon}></span>
+                        <button type="button" className={styles.startBtn} onClick={onStartSwiping} aria-label="Start swiping through university matches">
+                            <span className={styles.btnIcon} aria-hidden />
                             Start Swiping
-                            <span className={styles.btnArrow}>→</span>
+                            <IconArrowRight className={styles.btnArrow} aria-hidden />
                         </button>
                     )}
                 </div>

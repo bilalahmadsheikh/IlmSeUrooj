@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import styles from './UniversityList.module.css';
-import { getMatchPercentage, getFieldRank } from '@/utils/ranking';
+import { getMatchPercentage, getFieldRank, getMatchReasons } from '@/utils/ranking';
+import { IconCheck } from '@/components/Icons/Icons';
 
 // Progressive visibility limits
 const VISIBILITY_LIMITS = [5, 15, 50];
 
-export default function UniversityList({ universities, field, onSave, savedIds }) {
+export default function UniversityList({ universities, field, filters, onSave, savedIds }) {
     const [expandedId, setExpandedId] = useState(null);
     const [visibleCount, setVisibleCount] = useState(VISIBILITY_LIMITS[0]);
 
@@ -68,11 +69,13 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                     const isSaved = savedIds.includes(uni.id);
                     const fieldRank = getFieldRank(uni, field);
                     const matchPercent = getMatchPercentage(uni.matchScore || 0);
+                    const matchReasons = filters ? getMatchReasons(uni, filters) : [];
 
                     return (
                         <div
                             key={uni.id}
                             className={`${styles.card} ${isExpanded ? styles.expanded : ''} ${isSaved ? styles.saved : ''}`}
+                            role="article"
                         >
                             <div className={styles.cardHeader}>
                                 <div className={styles.rank}>
@@ -92,12 +95,19 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                                     <div className={styles.tags}>
                                         <span className={styles.tag}>{uni.city}</span>
                                         <span className={styles.tag}>{uni.type}</span>
-                                        {fieldRank && (
+                                        {fieldRank != null && (
                                             <span className={styles.tagHighlight}>
                                                 #{fieldRank} in {field}
                                             </span>
                                         )}
                                     </div>
+                                    {matchReasons.length > 0 && (
+                                        <div className={styles.reasonTags} role="list">
+                                            {matchReasons.slice(0, 3).map((r, i) => (
+                                                <span key={i} className={styles.reasonTag}>{r}</span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className={styles.actions}>
@@ -151,8 +161,8 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                                     </div>
 
                                     {/* View Full Details button */}
-                                    <button className={styles.fullDetailsBtn} disabled>
-                                        View Full Details →
+                                    <button type="button" className={styles.fullDetailsBtn} disabled>
+                                        View Full Details
                                         <span className={styles.comingSoon}>Coming Soon</span>
                                     </button>
                                 </div>
@@ -168,11 +178,18 @@ export default function UniversityList({ universities, field, onSave, savedIds }
                                 </button>
 
                                 <button
+                                    type="button"
                                     className={`${styles.saveBtn} ${isSaved ? styles.savedBtn : ''}`}
                                     onClick={() => onSave(uni)}
                                     disabled={isSaved}
+                                    aria-pressed={isSaved}
+                                    aria-label={isSaved ? `${uni.shortName} already saved` : `Save ${uni.shortName}`}
                                 >
-                                    {isSaved ? '✓ Saved' : 'Save'}
+                                    {isSaved ? (
+                                        <><IconCheck className={styles.saveCheckIcon} aria-hidden /> Saved</>
+                                    ) : (
+                                        'Save'
+                                    )}
                                 </button>
                             </div>
                         </div>

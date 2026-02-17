@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import styles from './Toast.module.css';
+import { IconCheck, IconClose } from '@/components/Icons/Icons';
 
 export default function Toast({ message, type = 'success', onDismiss, duration = 3000 }) {
     useEffect(() => {
@@ -9,18 +10,15 @@ export default function Toast({ message, type = 'success', onDismiss, duration =
         return () => clearTimeout(t);
     }, [duration, onDismiss]);
 
-    const icons = {
-        success: '✓',
-        removed: '✕',
-        info: 'ℹ',
-    };
-    const icon = icons[type] ?? icons.success;
-
     return (
         <div className={`${styles.toast} ${styles[type]}`} role="alert">
-            <span className={styles.icon}>{icon}</span>
+            <span className={styles.icon}>
+                {type === 'removed' ? <IconClose aria-hidden /> : <IconCheck aria-hidden />}
+            </span>
             <span className={styles.message}>{message}</span>
-            <button type="button" className={styles.dismiss} onClick={onDismiss} aria-label="Dismiss">×</button>
+            <button type="button" className={styles.dismiss} onClick={onDismiss} aria-label="Dismiss">
+                <IconClose aria-hidden />
+            </button>
         </div>
     );
 }

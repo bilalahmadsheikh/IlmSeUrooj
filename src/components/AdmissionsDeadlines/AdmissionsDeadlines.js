@@ -228,7 +228,7 @@ export default function AdmissionsDeadlines({ currentField }) {
                                 rel="noopener noreferrer"
                                 className={`${styles.applyBtn} ${isPast ? styles.disabled : ''}`}
                             >
-                                {isPast ? 'Applications Closed' : 'Apply Now →'}
+                                {isPast ? 'Applications Closed' : 'Apply Now'}
                             </a>
                         </div>
                     );

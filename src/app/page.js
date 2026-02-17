@@ -13,6 +13,8 @@ import AdmissionPredictor from '@/components/AdmissionPredictor/AdmissionPredict
 import AnimatedBackground from '@/components/Background/AnimatedBackground';
 import DecorativeImages from '@/components/Background/DecorativeImages';
 import Toast from '@/components/Toast/Toast';
+import RecommendationsSection from '@/components/RecommendationsSection/RecommendationsSection';
+import { IconBookmark, IconArrowRight, IconCelebrate, IconArrowLeft } from '@/components/Icons/Icons';
 import { universities } from '@/data/universities';
 import { rankUniversities } from '@/utils/ranking';
 import { loadSavedFromStorage, saveToStorage } from '@/utils/savedStorage';
@@ -168,6 +170,16 @@ export default function Home() {
         isSwipeMode={isSwipeMode}
       />
 
+      {!isSwipeMode && allRankedUniversities.length > 0 && (
+        <RecommendationsSection
+          rankedUniversities={allRankedUniversities}
+          filters={filters}
+          onStartSwiping={handleStartSwiping}
+          onSave={handleSaveFromList}
+          savedIds={savedIds}
+        />
+      )}
+
       {savedItems.length > 0 && (
         <button
           type="button"
@@ -175,11 +187,11 @@ export default function Home() {
           onClick={() => setShowSaved(true)}
           aria-label="Open saved list"
         >
-          <span className={styles.shortlistIcon}>💚</span>
+          <IconBookmark className={styles.shortlistIcon} aria-hidden />
           <span className={styles.shortlistText}>
             Your shortlist: <strong>{savedItems.length}</strong> universit{savedItems.length === 1 ? 'y' : 'ies'} saved
           </span>
-          <span className={styles.shortlistArrow}>→</span>
+          <IconArrowRight className={styles.shortlistArrow} aria-hidden />
         </button>
       )}
 
@@ -198,7 +210,7 @@ export default function Home() {
                 )).reverse()
               ) : (
                 <div className={styles.noMore}>
-                  <span className={styles.noMoreIcon}>🎉</span>
+                  <IconCelebrate className={styles.noMoreIcon} aria-hidden />
                   <h3 className={styles.noMoreTitle}>All Done!</h3>
                   <p className={styles.noMoreText}>
                     You've seen all {rankedUniversities.length + savedItems.length + skippedIds.length} matching universities.
@@ -217,10 +229,10 @@ export default function Home() {
             </div>
 
             {hasMoreCards && (
-              <div className={styles.swipeHint}>
-                <span className={styles.hintLeft}>← Skip</span>
+              <div className={styles.swipeHint} role="status" aria-label="Swipe left to skip, right to save">
+                <span className={styles.hintLeft}><IconArrowLeft className={styles.hintIcon} aria-hidden /> Skip</span>
                 <span className={styles.hintCenter}>Swipe or tap buttons</span>
-                <span className={styles.hintRight}>Save →</span>
+                <span className={styles.hintRight}>Save <IconArrowRight className={styles.hintIcon} aria-hidden /></span>
               </div>
             )}
 
@@ -243,6 +255,7 @@ export default function Home() {
           <UniversityList
             universities={allRankedUniversities}
             field={filters.field}
+            filters={filters}
             onSave={handleSaveFromList}
             savedIds={savedIds}
           />

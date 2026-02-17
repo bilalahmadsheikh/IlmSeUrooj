@@ -143,3 +143,45 @@ export function getMatchPercentage(score) {
 export function getFieldRank(university, field) {
     return university.fieldRankings?.[field] || null;
 }
+
+/**
+ * Get human-readable match reasons for a university (for recommendations UI)
+ * Returns array of short strings explaining why it was recommended
+ */
+export function getMatchReasons(university, filters) {
+    const reasons = [];
+    const fieldRank = university.fieldRankings?.[filters.field];
+
+    if (fieldRank != null) {
+        if (fieldRank <= 3) reasons.push(`Top ${fieldRank} in ${filters.field}`);
+        else if (fieldRank <= 10) reasons.push(`Ranked #${fieldRank} in ${filters.field}`);
+        else reasons.push(`Offers ${filters.field}`);
+    } else if (university.fields.includes(filters.field)) {
+        reasons.push(`Offers ${filters.field}`);
+    }
+
+    if (filters.program !== "Any") {
+        const programs = university.programs[filters.field] || [];
+        if (programs.includes(filters.program)) {
+            reasons.push(`Offers ${filters.program}`);
+        }
+    }
+
+    if (filters.city !== "Any" && university.city === filters.city) {
+        reasons.push(`Located in ${filters.city}`);
+    }
+
+    if (filters.hostel !== "Any" && university.hostelAvailability === filters.hostel) {
+        reasons.push("Matches hostel preference");
+    }
+
+    if (filters.campusType !== "Any" && university.campusType === filters.campusType) {
+        reasons.push(`Matches focus: ${filters.campusType}`);
+    }
+
+    if (filters.degreeLevel !== "Any" && university.degreeLevel?.includes(filters.degreeLevel)) {
+        reasons.push(`${filters.degreeLevel} programs`);
+    }
+
+    return reasons.slice(0, 4); // Cap at 4 for UI
+}

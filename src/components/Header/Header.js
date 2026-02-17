@@ -2,6 +2,7 @@
 
 import styles from './Header.module.css';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import { IconBookmark } from '@/components/Icons/Icons';
 
 export default function Header({ savedCount, onShowSaved }) {
     return (
@@ -55,7 +56,7 @@ export default function Header({ savedCount, onShowSaved }) {
                         title={savedCount > 0 ? `View your shortlist (${savedCount} saved)` : 'View saved universities'}
                         aria-label={savedCount > 0 ? `Open saved list, ${savedCount} universities` : 'Open saved list'}
                     >
-                        <span className={styles.savedIcon}>💚</span>
+                        <IconBookmark className={styles.savedIcon} aria-hidden />
                         <span className={styles.savedText}>Saved</span>
                         {savedCount > 0 && (
                             <span className={styles.badge} key={savedCount} data-count={savedCount}>

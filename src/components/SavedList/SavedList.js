@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import styles from './SavedList.module.css';
+import { IconBookmark, IconClose, IconCheck, IconNote, IconChevronUp, IconChevronDown, IconArrowRight } from '@/components/Icons/Icons';
 
 const SORT_OPTIONS = [
   { value: 'manual', label: 'My order' },
@@ -95,19 +96,19 @@ export default function SavedList({
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>
-            <span className={styles.titleIcon}>💚</span>
+            <IconBookmark className={styles.titleIcon} aria-hidden />
             Saved Universities
           </h2>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
-            ✕
+            <IconClose aria-hidden />
           </button>
         </div>
 
         {savedItems.length === 0 ? (
           <div className={styles.empty}>
             <div className={styles.emptyIllustration}>
-              <span className={styles.emptyBookmark} aria-hidden>📑</span>
-              <span className={styles.emptyCap} aria-hidden>🎓</span>
+              <IconBookmark className={styles.emptyBookmark} aria-hidden />
+              <IconBookmark className={styles.emptyCap} aria-hidden />
             </div>
             <p className={styles.emptyText}>No universities saved yet!</p>
             <p className={styles.emptyHint}>
@@ -176,7 +177,7 @@ export default function SavedList({
                         onClick={() => toggleCompareSelect(uni.id)}
                         aria-pressed={isSelected}
                       >
-                        {isSelected ? '✓' : ''}
+                        {isSelected ? <IconCheck aria-hidden /> : null}
                       </button>
                     )}
                     <div className={styles.itemMain}>
@@ -240,7 +241,14 @@ export default function SavedList({
                             className={styles.noteTrigger}
                             onClick={() => setExpandedNoteId(uni.id)}
                           >
-                            {item.note ? `📝 ${item.note.slice(0, 30)}${item.note.length > 30 ? '…' : ''}` : '+ Add note'}
+                            {item.note ? (
+                              <>
+                                <IconNote className={styles.noteIcon} aria-hidden />
+                                {item.note.slice(0, 30)}{item.note.length > 30 ? '…' : ''}
+                              </>
+                            ) : (
+                              '+ Add note'
+                            )}
                           </button>
                         )}
                       </div>
@@ -255,7 +263,7 @@ export default function SavedList({
                             disabled={!canMoveUp}
                             aria-label="Move up"
                           >
-                            ↑
+                            <IconChevronUp aria-hidden />
                           </button>
                           <button
                             type="button"
@@ -264,7 +272,7 @@ export default function SavedList({
                             disabled={!canMoveDown}
                             aria-label="Move down"
                           >
-                            ↓
+                            <IconChevronDown aria-hidden />
                           </button>
                         </div>
                       )}
@@ -284,7 +292,7 @@ export default function SavedList({
                         onClick={() => onRemove(uni.id)}
                         aria-label={`Remove ${uni.shortName}`}
                       >
-                        ✕
+                        <IconClose aria-hidden />
                       </button>
                     </div>
                   </div>
@@ -307,7 +315,7 @@ export default function SavedList({
                       className={styles.applyBtn}
                       onClick={() => setApplyOpen(!applyOpen)}
                     >
-                      Apply to selected →
+                      Apply to selected <IconArrowRight className={styles.applyArrow} aria-hidden />
                     </button>
                     {applyOpen && (
                       <div className={styles.applyDropdown}>

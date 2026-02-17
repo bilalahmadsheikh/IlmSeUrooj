@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import styles from './SwipeCard.module.css';
 import { getMatchPercentage } from '@/utils/ranking';
+import { IconBookmark, IconClose } from '@/components/Icons/Icons';
 
 export default function SwipeCard({ university, onSwipe, isTop }) {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -84,7 +85,7 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
         >
             {/* Swipe Overlays */}
             <div className={`${styles.overlay} ${styles.likeOverlay}`}>
-                <span>💚 SAVE</span>
+                <span className={styles.overlayContent}><IconBookmark aria-hidden /> SAVE</span>
             </div>
             <div className={`${styles.overlay} ${styles.skipOverlay}`}>
                 <span>SKIP</span>
@@ -156,8 +157,8 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                         </div>
 
                         {/* View Full Details Button */}
-                        <button className={styles.fullDetailsBtn} disabled>
-                            View Full Details →
+                        <button type="button" className={styles.fullDetailsBtn} disabled>
+                            View Full Details
                             <span className={styles.comingSoon}>Coming Soon</span>
                         </button>
                     </div>
@@ -174,24 +175,28 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                 </button>
 
                 {/* Swipe Buttons */}
-                <div className={styles.actions}>
+                <div className={styles.actions} role="group" aria-label="Swipe actions">
                     <button
+                        type="button"
                         className={`${styles.actionBtn} ${styles.skipBtn}`}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleButtonSwipe('left');
                         }}
+                        aria-label="Skip this university"
                     >
-                        <span>✕</span>
+                        <IconClose aria-hidden />
                     </button>
                     <button
+                        type="button"
                         className={`${styles.actionBtn} ${styles.saveBtn}`}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleButtonSwipe('right');
                         }}
+                        aria-label="Save to list"
                     >
-                        <span>💚</span>
+                        <IconBookmark aria-hidden />
                     </button>
                 </div>
             </div>

@@ -440,7 +440,7 @@ export const comparisonCriteria = [
     {
         id: 'overall',
         label: 'Overall Performance',
-        icon: '📊',
+        icon: '',
         fields: [
             { key: 'ranking', label: 'Department Ranking', type: 'rank' },
             { key: 'facultyStrength', label: 'Faculty Quality', type: 'quality' },
@@ -450,7 +450,7 @@ export const comparisonCriteria = [
     {
         id: 'industry',
         label: 'Industry & Placements',
-        icon: '🏢',
+        icon: '',
         fields: [
             { key: 'industryConnections', label: 'Industry Connections', type: 'quality' },
             { key: 'placementRate', label: 'Placement Rate', type: 'percentage' },
@@ -460,7 +460,7 @@ export const comparisonCriteria = [
     {
         id: 'career',
         label: 'Career Opportunities',
-        icon: '💼',
+        icon: '',
         fields: [
             { key: 'placementRate', label: 'Job Placement', type: 'percentage' },
             { key: 'avgStartingSalary', label: 'Avg Starting Salary', type: 'salary' },
@@ -470,7 +470,7 @@ export const comparisonCriteria = [
     {
         id: 'research',
         label: 'Research & Faculty',
-        icon: '🔬',
+        icon: '',
         fields: [
             { key: 'phdFaculty', label: 'PhD Faculty', type: 'percentage' },
             { key: 'researchPapers', label: 'Research Papers', type: 'number' },
@@ -480,7 +480,7 @@ export const comparisonCriteria = [
     {
         id: 'facilities',
         label: 'Facilities & Resources',
-        icon: '🏛️',
+        icon: '',
         fields: [
             { key: 'facilities', label: 'Key Facilities', type: 'list' },
             { key: 'facultyStrength', label: 'Faculty Access', type: 'quality' }
@@ -490,8 +490,8 @@ export const comparisonCriteria = [
 
 // Department options for dropdown
 export const departmentOptions = [
-    { value: 'Computer Science', label: 'Computer Science', icon: '💻' },
-    { value: 'Pre-Engineering', label: 'Engineering', icon: '⚙️' },
-    { value: 'Business', label: 'Business', icon: '📈' },
-    { value: 'Medical', label: 'Medical', icon: '🏥' }
+    { value: 'Computer Science', label: 'Computer Science', icon: '' },
+    { value: 'Pre-Engineering', label: 'Engineering', icon: '' },
+    { value: 'Business', label: 'Business', icon: '' },
+    { value: 'Medical', label: 'Medical', icon: '' }
 ];

@@ -78,7 +78,9 @@
 }
 
 .titleIcon {
-    font-size: var(--font-size-2xl);
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-primary);
     animation: heartbeat 2s ease-in-out infinite;
 }
 
@@ -96,6 +98,11 @@
     30% {
         transform: scale(1);
     }
+}
+
+.closeBtn svg {
+    width: 18px;
+    height: 18px;
 }
 
 .closeBtn {
@@ -140,13 +147,38 @@
 
 .emptyBookmark,
 .emptyCap {
-    font-size: 3.5rem;
+    width: 3rem;
+    height: 3rem;
+    color: var(--color-primary);
     opacity: 0.7;
     animation: float 3s ease-in-out infinite;
 }
 
 .emptyCap {
     animation-delay: 0.5s;
+}
+
+.noteTrigger {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.noteIcon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.applyArrow {
+    width: 1rem;
+    height: 1rem;
+    margin-left: var(--space-1);
+}
+
+.compareCheck svg {
+    width: 14px;
+    height: 14px;
 }
 
 @keyframes float {
@@ -536,6 +568,11 @@
     border: 1px solid var(--glass-border);
     position: relative;
     z-index: 1;
+}
+
+.removeBtn svg {
+    width: 16px;
+    height: 16px;
 }
 
 .removeBtn:hover {
