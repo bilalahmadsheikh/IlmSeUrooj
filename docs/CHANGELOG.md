@@ -13,6 +13,7 @@ All iterations of the IlmSeUrooj (UniMatch) project documented in one place.
 | 3 | 2026-01-23 | Theme system, backgrounds, comparison tool |
 | 4 | 2026-01-25 | Campus-specific data, 28 universities |
 | 5 | 2026-02-19 | Automated CI/CD pipeline, scraper engine, validators |
+| 6 | 2026-02-19 | Functional scraper implementations, AST file updates, workflow fixes |
 
 ---
 
@@ -394,6 +395,84 @@ Implemented a robust "set and forget" system for admission deadlines. The new sy
 - **New Workflow**: `.github/workflows/deadline-verification.yml`
 - **New Script**: `scripts/scrapers/deadline-scraper.js`
 - **Updated Data**: `src/data/universities.js` (added `lastVerified` + sorted)
+
+---
+
+## Iteration 6: Functional Scraper Implementations
+**Date**: 2026-02-19 | **Status**: ✅ Complete
+
+### Overview
+Replaced all placeholder implementations with fully functional code that actually scrapes data from university websites and updates repository files.
+
+### Major Changes
+
+#### Dependencies Added
+- `cheerio` - HTML parsing for static sites
+- `puppeteer` - Headless browser for JavaScript-heavy sites
+- `axios` - HTTP client with retry logic
+- `@babel/parser`, `@babel/traverse`, `@babel/generator` - AST manipulation
+- `recast` - Preserve formatting when updating files
+
+#### New Utility Modules
+- **`scripts/utils/http-client.js`** - HTTP requests with retry logic and exponential backoff
+- **`scripts/utils/ast-manipulator.js`** - Safely update JavaScript files using AST parsing
+- **`scripts/utils/rate-limiter.js`** - Rate limiting to prevent server overload
+
+#### Scraper Implementations
+- **`scripts/scrapers/base-scraper.js`** - Base class with common scraping utilities
+- **`scripts/scrapers/recruiter-scraper.js`** - Scrapes top recruiters from career pages
+- **`scripts/scrapers/salary-scraper.js`** - Scrapes salary data with fallbacks
+- **`scripts/scrapers/facilities-scraper.js`** - Scrapes facilities information
+- **Enhanced `scripts/scrapers/merit-scraper.js`** - Now uses Cheerio + Puppeteer for actual scraping
+
+#### Functional Updates
+- **`scripts/fetch-university-data.js`** - Now actually scrapes deadlines, fees, and test dates
+- **`scripts/utils/url-checker.js`** - Makes real HTTP requests to validate URLs
+- **`scripts/validators/semester-data-validator.js`** - Validates scraped semester data
+
+#### Workflow Fixes
+- Fixed template variable interpolation in health check workflow
+- Added git config for proper commit authorship
+- Added timeout-minutes to prevent hanging jobs
+- Added concurrency groups to prevent duplicate runs
+- Fixed duplicate data fetching in update-university-data workflow
+- Added failure notification job to semester-data-update workflow
+
+#### Testing
+- **`scripts/test-scrapers.js`** - Tests all scraper implementations
+- **`scripts/test-file-updates.js`** - Tests AST manipulation with backup/restore
+
+### Technical Details
+
+#### AST-Based File Updates
+- Uses Babel parser to parse `universities.js`
+- Traverses AST to find university nodes by shortName or id
+- Updates specific fields while preserving formatting and comments
+- Uses Recast to regenerate code with original formatting
+
+#### Scraping Strategy
+- **Cheerio** for static HTML sites (NUST, COMSATS, UET)
+- **Puppeteer** for JavaScript-heavy sites (LUMS, FAST)
+- Automatic fallback if one method fails
+- Rate limiting (1-2 seconds between requests)
+
+#### Error Handling
+- Comprehensive try-catch blocks
+- Retry logic with exponential backoff
+- Partial results if some universities fail
+- Detailed error logging
+- Fallback data for known values
+
+### Files Changed
+- **Modified**: 9 files (workflows, scrapers, utilities)
+- **Created**: 10 new files (scrapers, utilities, tests)
+
+### Impact
+- Workflows now create PRs with actual data changes
+- URL checker validates real URLs
+- Data files are automatically updated
+- Reduced manual data entry
+- Improved data accuracy
 
 ---
 

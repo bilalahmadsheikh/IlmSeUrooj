@@ -32,9 +32,18 @@ A detailed documentation of every file in the project, explaining what each file
 ```
 
 **Dependencies**:
-- `next`: ^15.x - React framework
-- `react`: ^19.x - UI library
-- `react-dom`: ^19.x - React DOM renderer
+- `next`: ^16.1.1 - React framework
+- `react`: ^19.2.3 - UI library
+- `react-dom`: ^19.2.3 - React DOM renderer
+
+**Dev Dependencies**:
+- `cheerio`: ^1.0.0 - HTML parsing for static sites
+- `puppeteer`: ^21.0.0 - Headless browser for JavaScript-heavy sites
+- `axios`: ^1.6.0 - HTTP client with retry logic
+- `@babel/parser`: ^7.23.0 - Parse JavaScript to AST
+- `@babel/traverse`: ^7.23.0 - Traverse and modify AST
+- `@babel/generator`: ^7.23.0 - Generate code from AST
+- `recast`: ^0.23.0 - Preserve formatting when updating files
 
 ---
 
@@ -712,6 +721,7 @@ Campus Type Match: 5 points
 | `CHANGELOG.md` | ~300 | Complete development history |
 | `FEATURES.md` | ~380 | Detailed feature documentation |
 | `FILES.md` | This file | File-by-file reference |
+| `SCRAPERS.md` | ~400 | Scraper implementations and usage guide |
 | `iteration-1.md` | ~40 | Iteration 1 details |
 | `iteration-2.md` | ~40 | Iteration 2 details |
 | `iteration-3.md` | ~70 | Iteration 3 details |
@@ -725,19 +735,52 @@ Campus Type Match: 5 points
 
 ### `scripts/scrapers/`
 
-#### `scripts/scrapers/university-scraper.js`
-**Purpose**: Core scraping engine (~350 lines)
+#### `scripts/scrapers/base-scraper.js`
+**Purpose**: Base class for all scrapers (~130 lines)
+**What it provides**:
+- Common scraping utilities (Cheerio, Puppeteer)
+- Date and fee extraction helpers
+- Rate limiting and error handling
+- Resource cleanup methods
+
+#### `scripts/scrapers/recruiter-scraper.js`
+**Purpose**: Scrapes top recruiters from university career pages (~120 lines)
 **What it does**:
-- Fetches admission data based on tier (critical/general)
-- Configs for 16 university groups (covers all 28 unis)
-- Extracts dates and fees using Regex
-- Handles rate limiting and retries
+- Scrapes career services pages
+- Extracts recruiter names from HTML
+- Falls back to known recruiters if scraping fails
+- Outputs to `reports/recruiter-data.json`
+
+#### `scripts/scrapers/salary-scraper.js`
+**Purpose**: Scrapes salary data from various sources (~80 lines)
+**What it does**:
+- Attempts Glassdoor/LinkedIn (may require auth)
+- Falls back to industry reports and HEC surveys
+- Returns average starting salaries and ranges
+- Outputs to `reports/salary-data.json`
+
+#### `scripts/scrapers/facilities-scraper.js`
+**Purpose**: Scrapes facilities information (~120 lines)
+**What it does**:
+- Scrapes university facilities pages
+- Extracts facilities using keyword matching
+- Filters common facilities (Library, Labs, Sports, etc.)
+- Outputs to `reports/facilities-data.json`
 
 #### `scripts/scrapers/merit-scraper.js`
-**Purpose**: Scrapes merit cutoff data from community sites.
+**Purpose**: Scrapes merit cutoff data from community sites (~135 lines)
+**What it does**:
+- Uses Cheerio for static sites, Puppeteer for dynamic
+- Extracts merit percentages and positions
+- Handles multiple data formats
+- Generates structured reports for manual review
+- Outputs to `reports/merit-report.json` and `.md`
 
 #### `scripts/scrapers/semester-scrapers.js`
-**Purpose**: Scrapes semester-specific data (calendars, courses).
+**Purpose**: Wrapper for semester data scrapers (~20 lines)
+**What it does**:
+- Exports RecruiterScraper, SalaryScraper, FacilitiesScraper
+- Can be run directly to test all semester scrapers
 
 #### `scripts/scrapers/deadline-scraper.js`
 **Purpose**: Standalone scraper for admission deadlines (20-day cycle).
@@ -764,18 +807,75 @@ Campus Type Match: 5 points
 #### `scripts/validators/auto-review.js`
 **Purpose**: Generates AI-style review comments for Pull Requests based on change size and criticality.
 
+#### `scripts/validators/semester-data-validator.js`
+**Purpose**: Validates scraped semester data (~150 lines)
+**What it does**:
+- Validates recruiter data format
+- Validates salary data ranges (reasonable values)
+- Validates facilities data completeness
+- Generates validation reports
+- Exits with error code if validation fails
+
 ### `scripts/utils/`
 
-#### `scripts/utils/parse-universities.js`
-**Purpose**: Helper to parse the `universities.js` file (which is a mix of JS/JSON) into a usable object for scripts.
+#### `scripts/utils/http-client.js`
+**Purpose**: HTTP request wrapper with retry logic (~100 lines)
+**What it provides**:
+- `fetchWithRetry()` - Retry failed requests with exponential backoff
+- `fetchHTML()` - Fetch HTML content
+- `fetchJSON()` - Fetch JSON content
+- Handles timeouts, redirects, and status codes
+
+#### `scripts/utils/ast-manipulator.js`
+**Purpose**: AST parsing and file updating utilities (~250 lines)
+**What it provides**:
+- `parseFile()` - Parse JavaScript file to AST
+- `findUniversityNode()` - Find university by shortName or id
+- `updateUniversityField()` - Update field while preserving formatting
+- Uses Babel parser and Recast for safe file updates
+
+#### `scripts/utils/rate-limiter.js`
+**Purpose**: Rate limiting utilities (~60 lines)
+**What it provides**:
+- `delay()` - Simple delay function
+- `RateLimiter` class - Rate limiter with configurable delay
+- `withRateLimit()` - Wrapper for rate-limited functions
 
 #### `scripts/utils/url-checker.js`
-**Purpose**: Checks reachability of all university URLs for the health check workflow.
+**Purpose**: Validates that all university URLs are accessible (~130 lines)
+**What it does**:
+- Makes actual HTTP HEAD requests (no longer placeholder)
+- Checks status codes (200-399 = success)
+- Measures response times
+- Handles redirects and timeouts
+- Generates detailed reports
 
 ### Root Scripts
 
 #### `scripts/fetch-university-data.js`
-**Purpose**: Pipeline orchestrator. Calls scraper, merges data, runs validators, writes files.
+**Purpose**: Main pipeline orchestrator (~200 lines)
+**What it does**:
+- Scrapes admission deadlines, fees, and test dates
+- Uses BaseScraper for actual web scraping
+- Updates `universities.js` using AST manipulation
+- Handles errors gracefully
+- Generates reports
+
+#### `scripts/test-scrapers.js`
+**Purpose**: Test all scraper implementations (~80 lines)
+**What it does**:
+- Tests recruiter, salary, facilities, and merit scrapers
+- Reports pass/fail status
+- Exits with error code if any test fails
+
+#### `scripts/test-file-updates.js`
+**Purpose**: Test AST manipulation (~100 lines)
+**What it does**:
+- Tests file parsing
+- Tests node finding
+- Tests field updates
+- Creates backup before testing
+- Restores backup after testing
 
 #### `scripts/generate-baseline.js`
 **Purpose**: Creates a snapshot of current data for diffing.
@@ -816,7 +916,7 @@ Campus Type Match: 5 points
 | `src/context/` | 1 | - | - | - | 1 |
 | `src/data/` | 2 | - | - | - | 2 |
 | `src/utils/` | 1 | - | - | - | 1 |
-| `scripts/` | 11 | - | - | - | 11 |
+| `scripts/` | 21 | - | - | - | 21 |
 | `.github/workflows/` | - | - | 4 | - | 4 |
 | `public/` | - | - | - | 17 | 17 |
 | `docs/` | - | - | - | 12 | 12 |

@@ -28,6 +28,7 @@
 | [FILES](./FILES.md) | File-by-file reference |
 | [DATA-SOURCES](./DATA-SOURCES.md) | All data sources with links |
 | [WORKFLOWS](./WORKFLOWS.md) | GitHub Actions CI/CD documentation |
+| [SCRAPERS](./SCRAPERS.md) | Scraper implementations and usage guide |
 | [SHORTFALLS](./SHORTFALLS.md) | Known issues & things to fix |
 | [ENHANCEMENTS](./ENHANCEMENTS.md) | Future improvement roadmap (15 ideas) |
 | [Iteration 1](./iteration-1.md) | Swipe interface, filters, initial 15 universities |
@@ -100,7 +101,9 @@ NUST, LUMS, IBA, GIKI, PIEAS, NED, Habib, AKU, Air University, SZABIST, ITU
 - **Styling**: CSS Modules with custom design system
 - **State Management**: React useState + Context API
 - **Persistence**: localStorage for saved universities
-- **Scraping**: Cheerio (HTML parsing, ~100KB)
+- **Scraping**: Cheerio (static sites) + Puppeteer (JavaScript-heavy sites)
+- **HTTP Client**: Axios with retry logic
+- **File Updates**: Babel AST + Recast (preserves formatting)
 - **CI/CD**: GitHub Actions (4 workflows)
 - **Validation**: Custom Node.js validator scripts
 - **Design**: Mobile-first responsive, treasure map theme
@@ -119,8 +122,18 @@ npm run dev
 # Build for production
 npm run build
 
-# Run scraper locally (dry run)
-DATA_TIER=critical DRY_RUN=true node scripts/fetch-university-data.js
+# Test scrapers
+npm run test-scrapers
+npm run test-file-updates
+
+# Run scraper locally
+DATA_TYPE=all node scripts/fetch-university-data.js
+
+# Run individual scrapers
+node scripts/scrapers/recruiter-scraper.js
+node scripts/scrapers/salary-scraper.js
+node scripts/scrapers/facilities-scraper.js
+MERIT_YEAR=2024 node scripts/scrapers/merit-scraper.js
 ```
 
 Visit `http://localhost:3000` to see the application.

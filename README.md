@@ -29,16 +29,25 @@ src/
 
 scripts/
 ├── scrapers/           # University website scrapers
-│   ├── university-scraper.js   # Core scraper engine (Cheerio)
-│   ├── merit-scraper.js        # Merit cutoff scraper
-│   └── semester-scrapers.js    # Semester data scrapers
+│   ├── base-scraper.js         # Base scraper class with common utilities
+│   ├── recruiter-scraper.js    # Top recruiters scraper
+│   ├── salary-scraper.js       # Salary data scraper
+│   ├── facilities-scraper.js   # Facilities information scraper
+│   ├── merit-scraper.js        # Merit cutoff scraper (Cheerio + Puppeteer)
+│   └── semester-scrapers.js    # Semester data scrapers wrapper
 ├── validators/         # Data validation scripts
-│   ├── schema-validator.js     # Data type & format checks
-│   ├── compare-data.js         # Diff against baseline
-│   ├── data-integrity.js       # Cross-field validation
-│   └── auto-review.js          # AI-style PR review
+│   ├── schema-validator.js           # Data type & format checks
+│   ├── data-integrity.js             # Cross-field validation
+│   ├── semester-data-validator.js    # Semester data validation
+│   └── auto-review.js                # AI-style PR review
 ├── utils/              # Utility scripts
-└── fetch-university-data.js    # Pipeline orchestrator
+│   ├── http-client.js         # HTTP client with retry logic
+│   ├── ast-manipulator.js     # AST parsing and file updates
+│   ├── rate-limiter.js        # Rate limiting utilities
+│   └── url-checker.js         # URL validation (now functional)
+├── test-scrapers.js           # Test all scrapers
+├── test-file-updates.js       # Test AST manipulation
+└── fetch-university-data.js   # Pipeline orchestrator
 
 .github/workflows/      # CI/CD automation
 ├── update-university-data.yml  # Tiered auto-update (every 20 days / bimonthly)
@@ -78,20 +87,25 @@ docs/                    # Project documentation
 - 🗺️ **Treasure Map Mode** — Vintage parchment with map backgrounds
 
 ### Automated Data Pipeline (CI/CD)
-- 🔄 **Tiered scraping** — Critical data (deadlines) every 20 days, general data bimonthly
-- 🕷️ **University website scraper** — Cheerio-based, 28 university configs
-- 📅 **Deadline Verification** — Standalone scraper checks official dates every 20 days
+- 🔄 **Functional scraping** — Actually fetches data from university websites
+- 🕷️ **Multi-tool scraping** — Cheerio for static sites, Puppeteer for JavaScript-heavy sites
+- 📝 **AST-based updates** — Safely updates universities.js while preserving formatting
+- 📅 **Real-time data** — Scrapes deadlines, fees, test dates from official sources
 - ✅ **Validation** — Schema, integrity, and diff checks on every update
-- 🤖 **Auto-Updates** — Smart workflow that auto-commits confirmed deadline changes
-- 📬 **Auto PRs** — AI-reviewed pull requests for larger data updates
-- 🩺 **Weekly health checks** — Broken URL detection with GitHub issue alerts
+- 🔁 **Retry logic** — Automatic retries with exponential backoff
+- ⏱️ **Rate limiting** — Prevents server overload and IP bans
+- 📬 **Auto PRs** — Creates pull requests with actual data changes
+- 🩺 **URL health checks** — Validates all URLs with actual HTTP requests
+- 📊 **Semester updates** — Scrapes recruiters, salaries, and facilities data
 
 ## Tech Stack
 
 - **Framework**: Next.js 16+ (App Router)
 - **Styling**: Vanilla CSS (Design System)
 - **State**: React Hooks & Context
-- **Scraping**: Cheerio (HTML parsing)
+- **Scraping**: Cheerio (HTML parsing) + Puppeteer (JavaScript-heavy sites)
+- **HTTP Client**: Axios with retry logic
+- **AST Manipulation**: Babel parser + Recast (for file updates)
 - **CI/CD**: GitHub Actions (4 workflows)
 - **Validation**: Custom Node.js scripts
 
@@ -112,11 +126,12 @@ See the [`/docs`](./docs/) folder:
 |----------|-------------|
 | [README](docs/README.md) | Project overview & quick stats |
 | [FEATURES](docs/FEATURES.md) | Detailed feature documentation |
-| [CHANGELOG](docs/CHANGELOG.md) | Complete development history (Iterations 1–5) |
+| [CHANGELOG](docs/CHANGELOG.md) | Complete development history (Iterations 1–6) |
 | [Architecture](docs/architecture.md) | Component structure & data flow |
 | [FILES](docs/FILES.md) | File-by-file reference |
 | [DATA-SOURCES](docs/DATA-SOURCES.md) | All data sources with links |
 | [WORKFLOWS](docs/WORKFLOWS.md) | GitHub Actions CI/CD documentation |
+| [SCRAPERS](docs/SCRAPERS.md) | Scraper implementations and usage guide |
 | [SHORTFALLS](docs/SHORTFALLS.md) | Known issues & things to fix |
 | [ENHANCEMENTS](docs/ENHANCEMENTS.md) | Future improvement roadmap |
 
@@ -128,12 +143,23 @@ npm run dev              # Start dev server
 npm run build            # Production build
 npm run lint             # ESLint check
 
+# Testing
+npm run test-scrapers    # Test all scraper implementations
+npm run test-file-updates # Test AST file manipulation
+
 # Data pipeline (local)
-DATA_TIER=critical DRY_RUN=true node scripts/fetch-university-data.js
+DATA_TYPE=all node scripts/fetch-university-data.js
+
+# Individual scrapers
+node scripts/scrapers/recruiter-scraper.js
+node scripts/scrapers/salary-scraper.js
+node scripts/scrapers/facilities-scraper.js
+node scripts/scrapers/merit-scraper.js
 
 # Validators
 node scripts/validators/schema-validator.js
-node scripts/validators/compare-data.js
+node scripts/validators/data-integrity.js
+node scripts/validators/semester-data-validator.js
 
 # URL health check
 node scripts/utils/url-checker.js

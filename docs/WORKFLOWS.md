@@ -162,19 +162,25 @@ Dedicated workflow for ensuring admission deadlines are always accurate. It uses
 
 | Script | Path | Purpose |
 |--------|------|---------|
-| `university-scraper.js` | `scripts/scrapers/` | Cheerio-based scraper with per-university configs |
-| `merit-scraper.js` | `scripts/scrapers/` | Scrapes merit cutoff data from community sources |
-| `semester-scrapers.js` | `scripts/scrapers/` | Semester-specific data scrapers |
+| `base-scraper.js` | `scripts/scrapers/` | Base class with common scraping utilities |
+| `fetch-university-data.js` | `scripts/` | Main orchestrator - scrapes deadlines, fees, test dates |
+| `recruiter-scraper.js` | `scripts/scrapers/` | Scrapes top recruiters from career pages |
+| `salary-scraper.js` | `scripts/scrapers/` | Scrapes salary data (with fallbacks) |
+| `facilities-scraper.js` | `scripts/scrapers/` | Scrapes facilities information |
+| `merit-scraper.js` | `scripts/scrapers/` | Scrapes merit cutoff data (Cheerio + Puppeteer) |
+| `semester-scrapers.js` | `scripts/scrapers/` | Wrapper for semester data scrapers |
 
 ## Utility Scripts
 
 | Script | Path | Purpose |
 |--------|------|---------|
-| `fetch-university-data.js` | `scripts/` | Pipeline orchestrator (scrape → parse → merge → write) |
-| `generate-baseline.js` | `scripts/` | Generates baseline snapshot for comparison |
+| `http-client.js` | `scripts/utils/` | HTTP client with retry logic and error handling |
+| `ast-manipulator.js` | `scripts/utils/` | AST parsing and file updates (preserves formatting) |
+| `rate-limiter.js` | `scripts/utils/` | Rate limiting utilities to prevent server overload |
+| `url-checker.js` | `scripts/utils/` | Validates URL reachability (now functional with HTTP requests) |
 | `generate-merit-report.js` | `scripts/` | Generates merit analysis reports |
-| `parse-universities.js` | `scripts/utils/` | Parses universities.js into structured data |
-| `url-checker.js` | `scripts/utils/` | Validates URL reachability |
+| `test-scrapers.js` | `scripts/` | Test all scraper implementations |
+| `test-file-updates.js` | `scripts/` | Test AST manipulation |
 
 ---
 
@@ -191,16 +197,40 @@ Dedicated workflow for ensuring admission deadlines are always accurate. It uses
 ## Running Locally
 
 ```bash
-# Run the scraper (dry run)
-DATA_TIER=critical DRY_RUN=true node scripts/fetch-university-data.js
+# Run the scraper
+DATA_TYPE=all node scripts/fetch-university-data.js
+
+# Run individual scrapers
+node scripts/scrapers/recruiter-scraper.js
+node scripts/scrapers/salary-scraper.js
+node scripts/scrapers/facilities-scraper.js
+MERIT_YEAR=2024 node scripts/scrapers/merit-scraper.js
 
 # Run validators
 node scripts/validators/schema-validator.js
-node scripts/validators/compare-data.js
+node scripts/validators/data-integrity.js
+node scripts/validators/semester-data-validator.js
 
-# Regenerate baseline
-node scripts/generate-baseline.js
+# Test implementations
+npm run test-scrapers
+npm run test-file-updates
 
 # Check URLs
 node scripts/utils/url-checker.js
 ```
+
+## Key Improvements (2026-02-19)
+
+All workflows have been upgraded from placeholder implementations to fully functional code:
+
+1. **Actual Web Scraping**: All scrapers now fetch real data from websites
+2. **File Updates**: AST manipulation safely updates `universities.js` while preserving formatting
+3. **Error Handling**: Comprehensive retry logic and error recovery
+4. **Rate Limiting**: Prevents server overload and IP bans
+5. **URL Validation**: Real HTTP requests validate URL accessibility
+6. **Git Configuration**: Proper commit authorship in all workflows
+7. **Concurrency Control**: Prevents duplicate workflow runs
+8. **Timeouts**: Prevents hanging jobs
+9. **Template Fixes**: Fixed variable interpolation in workflow scripts
+
+See [SCRAPERS.md](./SCRAPERS.md) for detailed scraper documentation.
