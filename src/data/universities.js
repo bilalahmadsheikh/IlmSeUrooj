@@ -1071,7 +1071,7 @@ export const upcomingDeadlines = [
     field: "Pre-Engineering",
     deadline: "2026-06-16",
     testName: "GIKI Entry Test",
-    testDate: "2026-07-09",
+    testDate: "2025-08-15",
     session: "Fall 2026",
     applyUrl: "https://giki.edu.pk/admissions",
     lastVerified: "2026-02-19"
@@ -1149,7 +1149,7 @@ export const upcomingDeadlines = [
     field: "Pre-Engineering",
     deadline: "2026-07-15",
     testName: "ECAT",
-    testDate: "2026-07-20",
+    testDate: "2026-03-22",
     session: "Fall 2026",
     applyUrl: "https://uettaxila.edu.pk/admissions",
     lastVerified: "2026-02-19"
