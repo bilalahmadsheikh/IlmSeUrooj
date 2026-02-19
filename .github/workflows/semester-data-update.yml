@@ -14,11 +14,23 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: semester-data-update
+  cancel-in-progress: true
+
 jobs:
   update-semester-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
+      - name: Validate environment
+        run: |
+          if [ -z "${{ env.NODE_VERSION }}" ]; then
+            echo "::error::NODE_VERSION is not set"
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -31,26 +43,31 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fetch recruiter data
-        run: node scripts/scrapers/recruiter-scraper.js
-
-      - name: Fetch salary/income data
-        run: node scripts/scrapers/salary-scraper.js
-        
-      - name: Fetch facilities data
-        run: node scripts/scrapers/facilities-scraper.js
+      - name: Fetch semester data (recruiters, salaries, facilities)
+        run: node scripts/scrapers/semester-scrapers.js
 
       - name: Validate scraped data
-        run: node scripts/validators/semester-data-validator.js
+        run: node scripts/validators/schema-validator.js
 
       - name: Check for changes
         id: diff-check
         run: |
           if git diff --quiet src/data/; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected in semester data" >> $GITHUB_STEP_SUMMARY
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "### 📝 Semester Data Changes Detected" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            git diff --stat src/data/ >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Configure Git
+        if: steps.diff-check.outputs.has_changes == 'true'
+        run: |
+          git config user.name "IlmSeUrooj Bot"
+          git config user.email "${{ env.NOTIFICATION_EMAIL }}"
 
       - name: Create PR for semester update
         if: steps.diff-check.outputs.has_changes == 'true'
@@ -91,7 +108,7 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '📚 IlmSeUrooj - Semester Data Update PR Created'
-          to: ba8516127@gmail.com
+          to: ${{ env.NOTIFICATION_EMAIL }}
           from: IlmSeUrooj Bot
           body: |
             A new Pull Request has been created with semester data updates.
@@ -103,3 +120,31 @@ jobs:
             
             Please review and merge:
             https://github.com/${{ github.repository }}/pulls
+
+  notify-on-failure:
+    needs: [update-semester-data]
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Send failure notification
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '❌ IlmSeUrooj Semester Data Update Failed'
+          to: ${{ env.NOTIFICATION_EMAIL }}
+          from: IlmSeUrooj Bot
+          body: |
+            The semester data update workflow has failed.
+            
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            Repository: ${{ github.repository }}
+            
+            Please check the workflow logs for details:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

@@ -26,13 +26,25 @@ permissions:
   pull-requests: write
   issues: write
 
+concurrency:
+  group: update-university-data
+  cancel-in-progress: true
+
 jobs:
   fetch-and-validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       has_changes: ${{ steps.diff-check.outputs.has_changes }}
     
     steps:
+      - name: Validate environment
+        run: |
+          if [ -z "${{ env.NODE_VERSION }}" ]; then
+            echo "::error::NODE_VERSION is not set"
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -55,19 +67,22 @@ jobs:
 
       - name: Validate data schema
         id: validate
-        run: node scripts/validators/schema-validator.js
-        continue-on-error: true
+        run: |
+          node scripts/validators/schema-validator.js
+          echo "✅ Schema validation passed" >> $GITHUB_STEP_SUMMARY
 
       - name: Check for data changes
         id: diff-check
         run: |
           if git diff --quiet src/data/; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "No changes detected"
+            echo "ℹ️ No changes detected" >> $GITHUB_STEP_SUMMARY
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "Changes detected in data files"
-            git diff --stat src/data/
+            echo "### 📝 Changes Detected" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            git diff --stat src/data/ >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Run auto-review checks
@@ -76,34 +91,42 @@ jobs:
         run: node scripts/validators/auto-review.js
         continue-on-error: true
 
+      - name: Upload data artifacts
+        if: steps.diff-check.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated-data
+          path: src/data/
+          retention-days: 7
+
       - name: Upload validation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: validation-report
           path: reports/
-          retention-days: 7
+          retention-days: 30
 
   create-pr:
     needs: fetch-and-validate
     if: needs.fetch-and-validate.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download updated data
+        uses: actions/download-artifact@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          name: updated-data
+          path: src/data/
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Fetch latest data
-        run: node scripts/fetch-university-data.js
+      - name: Configure Git
+        run: |
+          git config user.name "IlmSeUrooj Bot"
+          git config user.email "${{ env.NOTIFICATION_EMAIL }}"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
@@ -133,10 +156,16 @@ jobs:
             automated
             data-update
 
+      - name: Write summary
+        run: |
+          echo "### ✅ Pull Request Created" >> $GITHUB_STEP_SUMMARY
+          echo "A PR has been created with the latest university data updates." >> $GITHUB_STEP_SUMMARY
+
   notify-on-failure:
     needs: [fetch-and-validate, create-pr]
     if: failure()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: Send failure notification
@@ -148,7 +177,7 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '❌ IlmSeUrooj Data Update Failed'
-          to: ba8516127@gmail.com
+          to: ${{ env.NOTIFICATION_EMAIL }}
           from: IlmSeUrooj Bot
           body: |
             The automated university data update workflow has failed.
@@ -164,6 +193,7 @@ jobs:
     needs: [fetch-and-validate, create-pr]
     if: success() && needs.fetch-and-validate.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: Send success notification
@@ -175,7 +205,7 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '✅ IlmSeUrooj Data Update - PR Created'
-          to: ba8516127@gmail.com
+          to: ${{ env.NOTIFICATION_EMAIL }}
           from: IlmSeUrooj Bot
           body: |
             A new Pull Request has been created with university data updates.
