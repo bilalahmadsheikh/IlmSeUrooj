@@ -80,8 +80,10 @@ docs/                    # Project documentation
 ### Automated Data Pipeline (CI/CD)
 - 🔄 **Tiered scraping** — Critical data (deadlines) every 20 days, general data bimonthly
 - 🕷️ **University website scraper** — Cheerio-based, 28 university configs
+- 📅 **Deadline Verification** — Standalone scraper checks official dates every 20 days
 - ✅ **Validation** — Schema, integrity, and diff checks on every update
-- 📬 **Auto PRs** — AI-reviewed pull requests with change reports
+- 🤖 **Auto-Updates** — Smart workflow that auto-commits confirmed deadline changes
+- 📬 **Auto PRs** — AI-reviewed pull requests for larger data updates
 - 🩺 **Weekly health checks** — Broken URL detection with GitHub issue alerts
 
 ## Tech Stack

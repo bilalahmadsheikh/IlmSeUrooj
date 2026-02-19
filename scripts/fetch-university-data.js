@@ -46,6 +46,7 @@ function parseUniversitiesFile(filePath) {
 /**
  * Merge scraped data into university entries.
  * Only updates fields that were successfully scraped (non-empty).
+ * Adds `admissions.lastVerified` timestamp when data is scraped.
  * Returns { updated: [...], changes: [...] }
  */
 function mergeScrapedData(universities, scrapeReport) {
@@ -54,7 +55,6 @@ function mergeScrapedData(universities, scrapeReport) {
 
     for (const result of scrapeReport.results) {
         if (result.status === 'failed') continue;
-        if (Object.keys(result.data).length === 0) continue;
 
         for (const id of result.ids) {
             const uniIndex = updated.findIndex(u => u.id === id);
@@ -66,6 +66,8 @@ function mergeScrapedData(universities, scrapeReport) {
             // Merge flat-dotted keys (e.g., 'admissions.deadline' → uni.admissions.deadline)
             for (const [key, value] of Object.entries(result.data)) {
                 if (!value) continue;
+                // Skip internal keys
+                if (key.startsWith('_')) continue;
 
                 if (key.startsWith('admissions.')) {
                     const subKey = key.replace('admissions.', '');
@@ -84,6 +86,19 @@ function mergeScrapedData(universities, scrapeReport) {
                             field: key, old: oldValue || '(none)', new: value,
                         });
                     }
+                }
+            }
+
+            // Always update lastVerified if scraper ran successfully for this university
+            if (result.status !== 'failed' && result.data['_lastVerified']) {
+                const oldVerified = uni.admissions?.lastVerified;
+                uni.admissions.lastVerified = result.data['_lastVerified'];
+                if (oldVerified !== result.data['_lastVerified']) {
+                    uniChanges.fields.push({
+                        field: 'admissions.lastVerified',
+                        old: oldVerified || '(never)',
+                        new: result.data['_lastVerified'],
+                    });
                 }
             }
 

@@ -739,6 +739,14 @@ Campus Type Match: 5 points
 #### `scripts/scrapers/semester-scrapers.js`
 **Purpose**: Scrapes semester-specific data (calendars, courses).
 
+#### `scripts/scrapers/deadline-scraper.js`
+**Purpose**: Standalone scraper for admission deadlines (20-day cycle).
+**What it does**:
+- Checks official admission pages for all universities
+- Verifies deadline and test dates
+- Updates `lastVerified` timestamps
+- Sorts data by closest deadline first
+
 ### `scripts/validators/`
 
 #### `scripts/validators/schema-validator.js`
@@ -789,6 +797,13 @@ Campus Type Match: 5 points
 
 #### `.github/workflows/website-health-check.yml`
 **Purpose**: Weekly check for broken university links.
+
+#### `.github/workflows/deadline-verification.yml`
+**Purpose**: Automated deadline verification (every 20 days).
+**What it does**:
+- Runs deadline-scraper.js
+- Commits changes directly if confirmed
+- Uploads verification reports
 
 ---
 

@@ -30,7 +30,7 @@ export const universities = [
     highlights: ["Top Engineering School", "Strong Research", "Industry Connections"],
     description: "Pakistan's leading STEM university with world-class facilities and research programs.",
     website: "https://nust.edu.pk",
-    avgFee: "PKR 120,000 - 202,050 per semester (varies by school)",
+    avgFee: "PKR 170,000 - 202,050 per semester (varies by school)",
     admissions: {
       deadline: "2026-01-25",
       testName: "NET Series II",
@@ -66,7 +66,7 @@ export const universities = [
     highlights: ["Best Business School", "Need-Based Aid", "Diverse Community"],
     description: "Premier private university known for its business and computer science programs.",
     website: "https://lums.edu.pk",
-    avgFee: "PKR 630,000 - 1,000,000 per semester (SBASSE)",
+    avgFee: "PKR 850,000 - 1,200,000 per semester (Rs. 41,700/CH)",
     admissions: {
       deadline: "2026-01-27",
       testName: "LCAT",
@@ -491,7 +491,7 @@ export const universities = [
     highlights: ["Oldest Business School", "Strong Placement", "Merit Based"],
     description: "Asia's oldest business school with exceptional corporate connections.",
     website: "https://iba.edu.pk",
-    avgFee: "PKR 420,000 per semester (Rs. 28,000/CH × 15)",
+    avgFee: "PKR 200,000 - 240,000 per semester (Rs. 29,400/CH)",
     admissions: {
       deadline: "2026-01-21",
       testName: "IBA Aptitude Test",
@@ -587,7 +587,7 @@ export const universities = [
     highlights: ["Residential Campus", "Beautiful Location", "Strong Bonding"],
     description: "Elite engineering institute with unique residential campus (CS: #324, AI: #499).",
     website: "https://giki.edu.pk",
-    avgFee: "PKR 285,000 per semester (tuition, excl. hostel)",
+    avgFee: "PKR 427,500 per semester (tuition + accommodation)",
     admissions: {
       deadline: "2026-06-16",
       testName: "GIKI Entry Test",
@@ -657,7 +657,7 @@ export const universities = [
     highlights: ["Navy Affiliated", "High Cutoffs (CS: >80%)", "Disciplined"],
     description: "Bahria Islamabad - Most competitive campus (CS/SE: >80%).",
     website: "https://bahria.edu.pk/islamabad",
-    avgFee: "PKR 88,000 - 250,000 per semester",
+    avgFee: "PKR 85,000 - 145,000 per semester",
     admissions: {
       deadline: "2026-06-15",
       testName: "BUET (Bahria Entry Test)",
@@ -689,7 +689,7 @@ export const universities = [
     highlights: ["Lower than Islamabad", "Growing Campus", "Good Value"],
     description: "Bahria Lahore - Moderate cutoffs around 70-75%.",
     website: "https://bahria.edu.pk/lahore",
-    avgFee: "PKR 88,000 - 230,000 per semester",
+    avgFee: "PKR 85,000 - 145,000 per semester",
     admissions: {
       deadline: "2026-06-22",
       testName: "BUET (Bahria Entry Test)",
@@ -723,7 +723,7 @@ export const universities = [
     highlights: ["Medical Programs", "Karachi Location", "Easier Admission"],
     description: "Bahria Karachi - Lower cutoffs (~65-70%), has medical programs.",
     website: "https://bahria.edu.pk/karachi",
-    avgFee: "PKR 88,000 - 230,000 per semester",
+    avgFee: "PKR 85,000 - 145,000 per semester",
     admissions: {
       deadline: "2026-06-15",
       testName: "BUET (Bahria Entry Test)",
@@ -789,7 +789,7 @@ export const universities = [
     highlights: ["Top Medical School", "International Recognition", "Research Excellence"],
     description: "Premier medical institution with world-class healthcare training.",
     website: "https://aku.edu",
-    avgFee: "PKR 852,000 per semester (MBBS, ~PKR 1,704,000/year)",
+    avgFee: "PKR 927,000 per semester (MBBS, ~PKR 1,854,000/year)",
     admissions: {
       deadline: "2026-03-15",
       testName: "AKU Entry Test",
@@ -821,7 +821,7 @@ export const universities = [
     highlights: ["Historic Excellence", "Very Affordable", "SE: 87% Cutoff"],
     description: "Historic Karachi engineering university. Software Eng is most competitive (87%).",
     website: "https://neduet.edu.pk",
-    avgFee: "PKR 61,600 - 90,000 per semester",
+    avgFee: "PKR 55,000 - 65,000 per semester (subsidized)",
     admissions: {
       deadline: "2026-07-15",
       testName: "NED Entry Test",
@@ -855,7 +855,7 @@ export const universities = [
     highlights: ["Air Force Affiliated", "Aerospace Focus", "Modern Facilities"],
     description: "Air Force university excelling in aerospace and related fields.",
     website: "https://au.edu.pk",
-    avgFee: "PKR 93,000 - 153,000 per semester",
+    avgFee: "PKR 86,000 - 115,000 per semester (per credit hour)",
     admissions: {
       deadline: "2026-06-20",
       testName: "Air University Entry Test",
@@ -943,19 +943,8 @@ export const upcomingDeadlines = [
     testName: "IBA Aptitude Test",
     testDate: "2026-02-01",
     session: "Fall 2026 - Round 1",
-    applyUrl: "https://iba.edu.pk/admissions"
-  },
-  {
-    id: 2,
-    university: "NUST",
-    shortName: "NUST",
-    program: "Engineering & CS",
-    field: "Pre-Engineering",
-    deadline: "2026-01-25",
-    testName: "NET Series II",
-    testDate: "2026-01-31",
-    session: "Fall 2026",
-    applyUrl: "https://ugadmissions.nust.edu.pk"
+    applyUrl: "https://iba.edu.pk/admissions",
+    lastVerified: "2026-02-19"
   },
   {
     id: 3,
@@ -967,7 +956,8 @@ export const upcomingDeadlines = [
     testName: "LCAT",
     testDate: "2026-02-15",
     session: "Fall 2026",
-    applyUrl: "https://admissions.lums.edu.pk"
+    applyUrl: "https://admissions.lums.edu.pk",
+    lastVerified: "2026-02-19"
   },
   {
     id: 4,
@@ -975,11 +965,25 @@ export const upcomingDeadlines = [
     shortName: "SZABIST",
     program: "All Programs",
     field: "Business",
-    deadline: "2026-02-20",
+    deadline: "2026-02-12",
     testName: "SZABIST Test",
+    testDate: "2026-02-22",
+    session: "Fall 2026",
+    applyUrl: "https://szabist.edu.pk/admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 6,
+    university: "Habib University",
+    shortName: "Habib",
+    program: "All Programs",
+    field: "Computer Science",
+    deadline: "2026-02-19",
+    testName: "Habib Entrance Test",
     testDate: "2026-03-01",
     session: "Fall 2026",
-    applyUrl: "https://szabist.edu.pk/admissions"
+    applyUrl: "https://habib.edu.pk/admissions",
+    lastVerified: "2026-02-19"
   },
   {
     id: 5,
@@ -991,79 +995,8 @@ export const upcomingDeadlines = [
     testName: "AKU Test",
     testDate: "2026-03-10",
     session: "Fall 2026",
-    applyUrl: "https://aku.edu/admissions"
-  },
-  {
-    id: 6,
-    university: "Habib University",
-    shortName: "Habib",
-    program: "All Programs",
-    field: "Computer Science",
-    deadline: "2026-03-15",
-    testName: "Habib Test",
-    testDate: "2026-03-25",
-    session: "Fall 2026",
-    applyUrl: "https://habib.edu.pk/admissions"
-  },
-  {
-    id: 7,
-    university: "FAST Islamabad",
-    shortName: "FAST Isb",
-    program: "CS, SE, AI, DS",
-    field: "Computer Science",
-    deadline: "2026-06-15",
-    testName: "FAST NU Test",
-    testDate: "2026-06-25",
-    session: "Fall 2026",
-    applyUrl: "https://nu.edu.pk/Admissions"
-  },
-  {
-    id: 8,
-    university: "FAST Lahore",
-    shortName: "FAST Lhr",
-    program: "CS, SE, AI",
-    field: "Computer Science",
-    deadline: "2026-06-15",
-    testName: "FAST NU Test",
-    testDate: "2026-06-25",
-    session: "Fall 2026",
-    applyUrl: "https://nu.edu.pk/Admissions"
-  },
-  {
-    id: 9,
-    university: "FAST Karachi",
-    shortName: "FAST Khi",
-    program: "CS, SE",
-    field: "Computer Science",
-    deadline: "2026-06-15",
-    testName: "FAST NU Test",
-    testDate: "2026-06-25",
-    session: "Fall 2026",
-    applyUrl: "https://nu.edu.pk/Admissions"
-  },
-  {
-    id: 10,
-    university: "FAST Peshawar",
-    shortName: "FAST Psh",
-    program: "CS, SE",
-    field: "Computer Science",
-    deadline: "2026-06-15",
-    testName: "FAST NU Test",
-    testDate: "2026-06-25",
-    session: "Fall 2026",
-    applyUrl: "https://nu.edu.pk/Admissions"
-  },
-  {
-    id: 11,
-    university: "GIKI",
-    shortName: "GIKI",
-    program: "Engineering & CS",
-    field: "Pre-Engineering",
-    deadline: "2026-06-30",
-    testName: "GIKI Entry Test",
-    testDate: "2026-07-10",
-    session: "Fall 2026",
-    applyUrl: "https://giki.edu.pk/admissions"
+    applyUrl: "https://aku.edu/admissions",
+    lastVerified: "2026-02-19"
   },
   {
     id: 12,
@@ -1071,11 +1004,38 @@ export const upcomingDeadlines = [
     shortName: "PIEAS",
     program: "Engineering & CS",
     field: "Pre-Engineering",
-    deadline: "2026-07-15",
-    testName: "PIEAS Entry Test",
-    testDate: "2026-07-25",
+    deadline: "2026-03-05",
+    testName: "PIEAS Written Test",
+    testDate: "2026-04-12",
     session: "Fall 2026",
-    applyUrl: "https://pieas.edu.pk/admissions"
+    applyUrl: "https://pieas.edu.pk/admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 122,
+    university: "UET Lahore",
+    shortName: "UET Lahore",
+    program: "Engineering (ME: 81.6%)",
+    field: "Pre-Engineering",
+    deadline: "2026-03-22",
+    testName: "ECAT",
+    testDate: "2026-03-30",
+    session: "Fall 2026",
+    applyUrl: "https://uet.edu.pk/admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 2,
+    university: "NUST",
+    shortName: "NUST",
+    program: "Engineering & CS",
+    field: "Pre-Engineering",
+    deadline: "2026-03-30",
+    testName: "NET Series III",
+    testDate: "2026-04-04",
+    session: "Fall 2026",
+    applyUrl: "https://ugadmissions.nust.edu.pk",
+    lastVerified: "2026-02-19"
   },
   {
     id: 13,
@@ -1083,11 +1043,12 @@ export const upcomingDeadlines = [
     shortName: "Bahria Isb",
     program: "CS, SE, BBA",
     field: "Computer Science",
-    deadline: "2026-07-15",
-    testName: "Bahria Test",
-    testDate: "2026-07-25",
+    deadline: "2026-04-02",
+    testName: "Bahria CBT (BUET)",
+    testDate: "2026-04-04",
     session: "Fall 2026",
-    applyUrl: "https://bahria.edu.pk/admissions"
+    applyUrl: "https://bahria.edu.pk/admissions",
+    lastVerified: "2026-02-19"
   },
   {
     id: 14,
@@ -1095,11 +1056,103 @@ export const upcomingDeadlines = [
     shortName: "Bahria Lhr",
     program: "CS, SE, BBA",
     field: "Computer Science",
-    deadline: "2026-07-15",
-    testName: "Bahria Test",
-    testDate: "2026-07-25",
+    deadline: "2026-04-02",
+    testName: "Bahria CBT (BUET)",
+    testDate: "2026-04-04",
     session: "Fall 2026",
-    applyUrl: "https://bahria.edu.pk/admissions"
+    applyUrl: "https://bahria.edu.pk/admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 11,
+    university: "GIKI",
+    shortName: "GIKI",
+    program: "Engineering & CS",
+    field: "Pre-Engineering",
+    deadline: "2026-06-16",
+    testName: "GIKI Entry Test",
+    testDate: "2026-07-09",
+    session: "Fall 2026",
+    applyUrl: "https://giki.edu.pk/admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 7,
+    university: "FAST Islamabad",
+    shortName: "FAST Isb",
+    program: "CS, SE, AI, DS",
+    field: "Computer Science",
+    deadline: "2026-07-04",
+    testName: "FAST NU Test",
+    testDate: "2026-07-07",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 8,
+    university: "FAST Lahore",
+    shortName: "FAST Lhr",
+    program: "CS, SE, AI",
+    field: "Computer Science",
+    deadline: "2026-07-04",
+    testName: "FAST NU Test",
+    testDate: "2026-07-07",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 9,
+    university: "FAST Karachi",
+    shortName: "FAST Khi",
+    program: "CS, SE",
+    field: "Computer Science",
+    deadline: "2026-07-04",
+    testName: "FAST NU Test",
+    testDate: "2026-07-07",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 10,
+    university: "FAST Peshawar",
+    shortName: "FAST Psh",
+    program: "CS, SE",
+    field: "Computer Science",
+    deadline: "2026-07-04",
+    testName: "FAST NU Test",
+    testDate: "2026-07-07",
+    session: "Fall 2026",
+    applyUrl: "https://nu.edu.pk/Admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 19,
+    university: "Air University",
+    shortName: "Air",
+    program: "Aerospace, CS",
+    field: "Pre-Engineering",
+    deadline: "2026-07-15",
+    testName: "Air University CBT",
+    testDate: "2026-07-18",
+    session: "Fall 2026",
+    applyUrl: "https://au.edu.pk/admissions",
+    lastVerified: "2026-02-19"
+  },
+  {
+    id: 123,
+    university: "UET Taxila",
+    shortName: "UET Taxila",
+    program: "Engineering",
+    field: "Pre-Engineering",
+    deadline: "2026-07-15",
+    testName: "ECAT",
+    testDate: "2026-07-20",
+    session: "Fall 2026",
+    applyUrl: "https://uettaxila.edu.pk/admissions",
+    lastVerified: "2026-02-19"
   },
   {
     id: 15,
@@ -1111,7 +1164,8 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk"
+    applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-02-19"
   },
   {
     id: 16,
@@ -1123,7 +1177,8 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk"
+    applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-02-19"
   },
   {
     id: 17,
@@ -1135,7 +1190,8 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk"
+    applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-02-19"
   },
   {
     id: 18,
@@ -1147,19 +1203,8 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk"
-  },
-  {
-    id: 19,
-    university: "Air University",
-    shortName: "Air",
-    program: "Aerospace, CS",
-    field: "Pre-Engineering",
-    deadline: "2026-07-20",
-    testName: "Air University Test",
-    testDate: "2026-07-28",
-    session: "Fall 2026",
-    applyUrl: "https://au.edu.pk/admissions"
+    applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-02-19"
   },
   {
     id: 20,
@@ -1171,7 +1216,8 @@ export const upcomingDeadlines = [
     testName: "ITU Admission Test",
     testDate: "2026-08-05",
     session: "Fall 2026",
-    applyUrl: "https://itu.edu.pk/admissions"
+    applyUrl: "https://itu.edu.pk/admissions",
+    lastVerified: "2026-02-19"
   },
   {
     id: 121,
@@ -1183,31 +1229,10 @@ export const upcomingDeadlines = [
     testName: "NED Entry Test",
     testDate: "2026-08-18",
     session: "Fall 2026",
-    applyUrl: "https://neduet.edu.pk/admissions"
+    applyUrl: "https://neduet.edu.pk/admissions",
+    lastVerified: "2026-02-19"
   },
   {
-    id: 122,
-    university: "UET Lahore",
-    shortName: "UET Lahore",
-    program: "Engineering (ME: 81.6%)",
-    field: "Pre-Engineering",
-    deadline: "2026-08-15",
-    testName: "ECAT",
-    testDate: "2026-08-20",
-    session: "Fall 2026",
-    applyUrl: "https://uet.edu.pk/admissions"
-  },
-  {
-    id: 123,
-    university: "UET Taxila",
-    shortName: "UET Taxila",
-    program: "Engineering",
-    field: "Pre-Engineering",
-    deadline: "2026-08-15",
-    testName: "ECAT",
-    testDate: "2026-08-20",
-    session: "Fall 2026",
-    applyUrl: "https://uettaxila.edu.pk/admissions"
   }
 ];
 

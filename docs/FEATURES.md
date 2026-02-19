@@ -399,6 +399,31 @@ Scrape → Parse → Merge → Validate → PR → Review → Merge
 
 ---
 
+## 11. Deadline Verification & Auto-Updates
+
+### What It Does
+A specialized system that ensures university admission deadlines are always accurate and up-to-date without manual intervention.
+
+### Why It's Useful
+- **Trust**: Students can rely on dates being current (verified every 20 days)
+- **Urgency**: Automatically sorts universities by the *closest* deadline first
+- **Consistency**: "Last Verified" timestamps show data freshness
+- **Zero Maintenance**: System auto-commits updates so the site runs itself
+
+### How It Works
+1. **Verification**: A dedicated scraper checks official admission pages for all universities
+2. **Session Intelligence**: Distinguishes between "Spring" and "Fall" dates to avoid overwriting valid future deadlines with near-term irrelevant ones
+3. **Sorting**: Automatically re-sorts the entire database by closest deadline
+4. **Auto-Commit**: If changes are confirmed safe, the system pushes them directly to the codebase
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `scripts/scrapers/deadline-scraper.js` | Verification & sorting logic |
+| `.github/workflows/deadline-verification.yml` | Automation workflow |
+
+---
+
 ## Feature Location Quick Reference
 
 | Feature | Main Component | Data Source |

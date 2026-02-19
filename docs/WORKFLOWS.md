@@ -125,7 +125,26 @@ Verify that all university website URLs and admission portal links are still val
 ### Output
 - Creates GitHub issue if any URLs are broken
 - Attaches report as artifact
-- Labels issue with `broken-link`
+---
+
+## 5. Deadline Verification
+
+**File**: `.github/workflows/deadline-verification.yml`
+**Trigger**: Every 20 days (`0 3 */20 * *`) or Manual dispatch
+
+### Purpose
+Dedicated workflow for ensuring admission deadlines are always accurate. It uses a specialized scraper to check official university dates and automatically updates the system if changes are verified.
+
+### Key Features
+- **Auto-Update**: Commits confirmed changes directly to the repository (no manual PR needed)
+- **Fail-Safe**: If a university site is down, it keeps existing data and only updates the `lastVerified` timestamp
+- **Sorted Data**: Always maintains the correct date order in `universities.js`
+- **Session-Aware**: Intelligently rejects "Spring" semester dates when looking for "Fall" deadlines
+
+### Output
+- Updates `universities.js` with new dates and timestamps
+- Uploads verification report artifact (`reports/deadline-verification-report.md`)
+- Sends email notification only on failure
 
 ---
 

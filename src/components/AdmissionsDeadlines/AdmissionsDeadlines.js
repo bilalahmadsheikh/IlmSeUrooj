@@ -59,6 +59,11 @@ export default function AdmissionsDeadlines({ currentField }) {
         } else {
             return daysLeft >= 0; // Show only upcoming
         }
+    }).sort((a, b) => {
+        // Sort by closest deadline first (upcoming) or most recent first (elapsed)
+        const dateA = new Date(a.deadline);
+        const dateB = new Date(b.deadline);
+        return showElapsed ? dateB - dateA : dateA - dateB;
     });
 
     // Handle View More
@@ -86,6 +91,14 @@ export default function AdmissionsDeadlines({ currentField }) {
         if (days <= 7) return styles.soon;
         if (days <= 14) return styles.upcoming;
         return '';
+    };
+
+    // Check if deadline data is stale (not verified in >60 days)
+    const isStale = (deadline) => {
+        if (!deadline.lastVerified) return true; // No timestamp = assume stale
+        const verified = new Date(deadline.lastVerified);
+        const daysSinceVerify = Math.floor((now - verified) / (1000 * 60 * 60 * 24));
+        return daysSinceVerify > 60;
     };
 
     // Format date
@@ -219,6 +232,11 @@ export default function AdmissionsDeadlines({ currentField }) {
                                 <div className={styles.session}>
                                     <span className={styles.sessionBadge}>{deadline.session}</span>
                                     <span className={styles.fieldBadge}>{deadline.field}</span>
+                                    {isStale(deadline) && (
+                                        <span className={styles.staleBadge} title="This deadline has not been verified recently. Please confirm on the official website.">
+                                            ⚠️ Not recently verified
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -265,7 +283,8 @@ export default function AdmissionsDeadlines({ currentField }) {
 
             <div className={styles.disclaimer}>
                 <span className={styles.disclaimerIcon}></span>
-                Deadlines sourced from official university websites. Always verify on the official portal.
+                Deadlines are auto-scraped from official university websites every 20 days.
+                Entries marked ⚠️ haven't been verified recently — always confirm on the official portal.
             </div>
         </section>
     );

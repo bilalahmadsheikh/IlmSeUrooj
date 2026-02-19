@@ -371,6 +371,32 @@ Dry run with `DATA_TIER=critical`:
 
 ---
 
+## Iteration 6: Deadline Verification & Auto-Updates
+**Date**: 2026-02-19 | **Status**: ✅ Complete
+
+### Overview
+Implemented a robust "set and forget" system for admission deadlines. The new system automatically verifies dates against official websites, sorts them by urgency, and commits updates directly to the repository without manual intervention.
+
+### Features Implemented
+
+#### Automated Deadline Verification
+- **Standalone Scraper**: Dedicated script just for deadlines (every 20 days)
+- **Auto-Commit**: Workflow pushes changes directly if validated (no PR bottleneck)
+- **Fallback Protection**: Keeps existing verified data if university sites are down
+- **Session Intelligence**: Distinguishes "Spring" vs "Fall" dates to prevent overwriting
+
+#### Sorting & display
+- **Sorted Data**: `universities.js` is now physically sorted by closest deadline
+- **UI Sorting**: `AdmissionsDeadlines` component explicitly sorts by closest date
+- **Urgency Logic**: Upcoming deadlines shown first, elapsed shown last
+
+### Technical Changes
+- **New Workflow**: `.github/workflows/deadline-verification.yml`
+- **New Script**: `scripts/scrapers/deadline-scraper.js`
+- **Updated Data**: `src/data/universities.js` (added `lastVerified` + sorted)
+
+---
+
 ## Future Roadmap (Planned)
 
 - [ ] AI-powered university recommender

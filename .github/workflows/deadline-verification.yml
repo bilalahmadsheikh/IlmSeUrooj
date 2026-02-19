@@ -1,0 +1,120 @@
+name: Verify Admission Deadlines
+
+on:
+  schedule:
+    # Every 20 days at 3 AM UTC
+    - cron: '0 3 */20 * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no PR created)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+  NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verify-deadlines
+  cancel-in-progress: true
+
+jobs:
+  verify-deadlines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Run deadline verification scraper
+        id: scrape
+        run: |
+          node scripts/scrapers/deadline-scraper.js
+          echo "### 📋 Deadline Verification Report" >> $GITHUB_STEP_SUMMARY
+          cat reports/deadline-verification-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for data changes
+        id: check
+        run: |
+          if git diff --quiet src/data/universities.js; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No deadline changes detected (timestamps updated only)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "### 📝 Changes Detected" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            git diff --stat src/data/universities.js >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deadline-verification-report
+          path: reports/deadline-verification-report.*
+          retention-days: 30
+
+      - name: Commit and push changes
+        if: steps.check.outputs.has_changes == 'true' && !inputs.dry_run
+        run: |
+          git config user.name "IlmSeUrooj Bot"
+          git config user.email "${{ env.NOTIFICATION_EMAIL }}"
+          git add src/data/universities.js
+          git commit -m "chore: Update admission deadlines [automated]"
+          git push
+
+  notify-on-failure:
+    needs: [verify-deadlines]
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Send failure notification
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '❌ Deadline Verification Failed'
+          to: ${{ env.NOTIFICATION_EMAIL }}
+          from: IlmSeUrooj Bot
+          body: |
+            The deadline verification workflow has failed.
+            
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            
+            Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
