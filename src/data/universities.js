@@ -1231,8 +1231,6 @@ export const upcomingDeadlines = [
     session: "Fall 2026",
     applyUrl: "https://neduet.edu.pk/admissions",
     lastVerified: "2026-02-19"
-  },
-  {
   }
 ];
 
