@@ -1,169 +1,59 @@
 /**
- * Deadline Verification Scraper
+ * Deadline Verification Scraper v2
  * 
- * Scrapes official university admission pages to verify/update deadlines
- * in the upcomingDeadlines array of universities.js.
+ * Per-university custom extractors with multi-tier fetch strategy:
+ *   Tier 1: Static fetch + Cheerio (IBA, AKU, Habib, NED, PIEAS)
+ *   Tier 2: Puppeteer headless browser (LUMS, COMSATS, Bahria, ITU)
+ *   Tier 3: Published schedule data (NUST, FAST, UET, GIKI, Air, SZABIST)
  * 
- * Runs via GitHub Actions every 20 days, or manually via:
- *   node scripts/scrapers/deadline-scraper.js
+ * Usage:
+ *   node scripts/scrapers/deadline-scraper.js              # All universities
+ *   node scripts/scrapers/deadline-scraper.js --uni IBA     # Single university
  */
 
 const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
 
-// ─── Verified URL map: university shortName → official admission URLs ───
-const DEADLINE_SOURCES = {
-    'IBA': {
-        urls: [
-            'https://www.iba.edu.pk/undergraduate.php',
-            'https://www.iba.edu.pk/',
-        ],
-        testNameHint: 'IBA',
-    },
-    'NUST': {
-        urls: [
-            'https://nust.edu.pk/admissions/',
-            'https://ugadmissions.nust.edu.pk',
-        ],
-        testNameHint: 'NET',
-    },
-    'LUMS': {
-        urls: [
-            'https://lums.edu.pk/admissions',
-        ],
-        testNameHint: 'LCAT',
-    },
-    'SZABIST': {
-        urls: [
-            'https://szabist.edu.pk/admissions/',
-            'https://szabist.edu.pk/',
-        ],
-        testNameHint: 'SZABIST',
-    },
-    'AKU': {
-        urls: [
-            'https://www.aku.edu/admissions/Pages/home.aspx',
-        ],
-        testNameHint: 'AKU',
-    },
-    'Habib': {
-        urls: [
-            'https://habib.edu.pk/apply/',
-            'https://habib.edu.pk/admissions/',
-        ],
-        testNameHint: 'Habib',
-    },
-    'FAST Isb': {
-        urls: ['https://nu.edu.pk'],
-        testNameHint: 'NU',
-        sharedKey: 'FAST',
-    },
-    'FAST Lhr': {
-        urls: ['https://nu.edu.pk'],
-        testNameHint: 'NU',
-        sharedKey: 'FAST',
-    },
-    'FAST Khi': {
-        urls: ['https://nu.edu.pk'],
-        testNameHint: 'NU',
-        sharedKey: 'FAST',
-    },
-    'FAST Psh': {
-        urls: ['https://nu.edu.pk'],
-        testNameHint: 'NU',
-        sharedKey: 'FAST',
-    },
-    'GIKI': {
-        urls: [
-            'https://giki.edu.pk/admissions/',
-            'https://giki.edu.pk/',
-        ],
-        testNameHint: 'GIKI',
-    },
-    'PIEAS': {
-        urls: [
-            'https://www.pieas.edu.pk/admissions',
-            'https://www.pieas.edu.pk/',
-        ],
-        testNameHint: 'PIEAS',
-    },
-    'Bahria Isb': {
-        urls: ['https://bahria.edu.pk/admissions/'],
-        testNameHint: 'Bahria',
-        sharedKey: 'Bahria',
-    },
-    'Bahria Lhr': {
-        urls: ['https://bahria.edu.pk/admissions/'],
-        testNameHint: 'Bahria',
-        sharedKey: 'Bahria',
-    },
-    'COMSATS Isb': {
-        urls: [
-            'https://admissions.comsats.edu.pk',
-            'https://www.comsats.edu.pk/Admissions.aspx',
-        ],
-        testNameHint: 'NAT',
-        sharedKey: 'COMSATS',
-    },
-    'COMSATS Lhr': {
-        urls: ['https://admissions.comsats.edu.pk'],
-        testNameHint: 'NAT',
-        sharedKey: 'COMSATS',
-    },
-    'COMSATS Wah': {
-        urls: ['https://admissions.comsats.edu.pk'],
-        testNameHint: 'NAT',
-        sharedKey: 'COMSATS',
-    },
-    'COMSATS Abbottabad': {
-        urls: ['https://admissions.comsats.edu.pk'],
-        testNameHint: 'NAT',
-        sharedKey: 'COMSATS',
-    },
-    'Air': {
-        urls: [
-            'https://au.edu.pk/',
-            'https://webdata.au.edu.pk/Pages/Admission/newpages/Bachelor_programs.aspx',
-        ],
-        testNameHint: 'Air',
-    },
-    'ITU': {
-        urls: [
-            'https://itu.edu.pk/admissions/',
-            'https://itu.edu.pk/',
-        ],
-        testNameHint: 'ITU',
-    },
-    'NED': {
-        urls: [
-            'https://www.neduet.edu.pk/admission',
-            'https://www.neduet.edu.pk/',
-        ],
-        testNameHint: 'NED',
-    },
-    'UET Lahore': {
-        urls: [
-            'https://admission.uet.edu.pk',
-            'https://www.uet.edu.pk/',
-        ],
-        testNameHint: 'ECAT',
-    },
-    'UET Taxila': {
-        urls: [
-            'https://admissions.uettaxila.edu.pk',
-            'https://www.uettaxila.edu.pk/',
-        ],
-        testNameHint: 'ECAT',
-    },
+// ─── Date parsing utility ───
+const MONTHS = {
+    jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+    jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+    january: '01', february: '02', march: '03', april: '04',
+    june: '06', july: '07', august: '08', september: '09',
+    october: '10', november: '11', december: '12',
 };
+
+function parseDate(str) {
+    if (!str) return null;
+    const cleaned = str.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+
+    // "Month DD YYYY" — e.g. "January 21, 2026"
+    let m = cleaned.match(/(\w+)\s+(\d{1,2})\s+(\d{4})/);
+    if (m) {
+        const mon = MONTHS[m[1].toLowerCase()] || MONTHS[m[1].substring(0, 3).toLowerCase()];
+        if (mon) return `${m[3]}-${mon}-${String(m[2]).padStart(2, '0')}`;
+    }
+
+    // "DD Month YYYY" — e.g. "21 January 2026"
+    m = cleaned.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(\w+)\s+(\d{4})/);
+    if (m) {
+        const mon = MONTHS[m[2].toLowerCase()] || MONTHS[m[2].substring(0, 3).toLowerCase()];
+        if (mon) return `${m[3]}-${mon}-${String(m[1]).padStart(2, '0')}`;
+    }
+
+    // "YYYY-MM-DD"
+    m = cleaned.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[0];
+
+    return null;
+}
 
 // ─── Fetch with retry + realistic browser headers ───
 async function fetchPage(url, retries = 2) {
     const userAgents = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     ];
     const ua = userAgents[Math.floor(Math.random() * userAgents.length)];
 
@@ -174,11 +64,9 @@ async function fetchPage(url, retries = 2) {
             const res = await fetch(url, {
                 headers: {
                     'User-Agent': ua,
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language': 'en-US,en;q=0.9',
                     'Accept-Encoding': 'gzip, deflate, br',
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache',
                     'Sec-Fetch-Dest': 'document',
                     'Sec-Fetch-Mode': 'navigate',
                     'Sec-Fetch-Site': 'none',
@@ -193,141 +81,677 @@ async function fetchPage(url, retries = 2) {
             return await res.text();
         } catch (err) {
             if (attempt === retries) throw err;
-            // Exponential backoff with jitter
             const delay = (2000 * (attempt + 1)) + Math.random() * 1000;
             await new Promise(r => setTimeout(r, delay));
         }
     }
 }
 
-// ─── Parse flexible date strings into YYYY-MM-DD ───
-function parseDate(str) {
-    if (!str) return null;
-    const cleaned = str.replace(/(\d+)(st|nd|rd|th)/gi, '$1').trim();
+// ─── Puppeteer fetch (for JS-rendered sites) ───
+async function fetchWithPuppeteer(url, waitSelector, waitMs = 3000) {
+    let browser;
+    try {
+        const puppeteer = require('puppeteer');
+        browser = await puppeteer.launch({
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        });
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-    // Try native Date parse
-    const d = new Date(cleaned);
-    if (!isNaN(d.getTime()) && d.getFullYear() >= 2025) {
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
+        if (waitSelector) {
+            try { await page.waitForSelector(waitSelector, { timeout: 8000 }); } catch { }
+        }
+        await new Promise(r => setTimeout(r, waitMs));
+
+        const html = await page.content();
+        const bodyText = await page.evaluate(() => document.body.innerText);
+        return { html, bodyText };
+    } finally {
+        if (browser) await browser.close();
     }
+}
 
-    // Manual: "DD Month YYYY" or "Month DD, YYYY"
-    const months = {
-        jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
-        jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
-    };
+// ════════════════════════════════════════════════════
+// ██ PER-UNIVERSITY EXTRACTORS
+// ════════════════════════════════════════════════════
 
-    // DD Month YYYY
-    let m = cleaned.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
-    if (m) {
-        const mon = months[m[2].substring(0, 3).toLowerCase()];
-        if (mon) return `${m[3]}-${mon}-${String(m[1]).padStart(2, '0')}`;
+// ── IBA (Tier 1: Static) ──
+async function extractIBA() {
+    const currentYear = new Date().getFullYear();
+    // IBA uses dynamic URL with year/semester
+    const urls = [
+        `https://admissions.iba.edu.pk/admission-schedule-fall${currentYear}.php`,
+        `https://admissions.iba.edu.pk/admission-schedule-fall${currentYear + 1}.php`,
+    ];
+
+    for (const url of urls) {
+        try {
+            const html = await fetchPage(url);
+            const text = cheerio.load(html)('body').text().replace(/\s+/g, ' ');
+
+            // IBA has: "Form Submission Deadline Wednesday, January 21, 2026"
+            const deadlineMatch = text.match(
+                /Form\s*Submission\s*Deadline\s*\w+day,?\s*(\w+\s+\d{1,2},?\s*\d{4})/i
+            );
+            const testMatch = text.match(
+                /Aptitude\s*Test\s*Date\s*\w+day,?\s*(\w+\s+\d{1,2},?\s*\d{4})/i
+            );
+
+            const deadline = deadlineMatch ? parseDate(deadlineMatch[1]) : null;
+            const testDate = testMatch ? parseDate(testMatch[1]) : null;
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'static' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
     }
-
-    // Month DD, YYYY
-    m = cleaned.match(/(\w+)\s+(\d{1,2}),?\s*(\d{4})/);
-    if (m) {
-        const mon = months[m[1].substring(0, 3).toLowerCase()];
-        if (mon) return `${m[3]}-${mon}-${String(m[2]).padStart(2, '0')}`;
-    }
-
     return null;
 }
 
-// ─── Extract deadline and test dates from page text ───
-function extractDeadlineInfo(text, testNameHint) {
-    const t = text.replace(/\s+/g, ' ');
-    const result = {};
-
-    // Deadline patterns (most specific first)
-    const deadlinePatterns = [
-        /(?:last\s*date\s*(?:to\s*(?:apply|submit|join)))[:\s]*(\d{1,2}(?:st|nd|rd|th)?\s+\w+,?\s*\d{4})/i,
-        /(?:last\s*date\s*(?:of\s*(?:application|submission|registration)))[:\s]*(\d{1,2}\s*\w+\s*\d{4})/i,
-        /(?:application\s*deadline|deadline\s*(?:for\s*)?(?:application|submission))[:\s]*(\d{1,2}\s*\w+\s*,?\s*\d{4})/i,
-        /(?:apply\s*(?:before|by))[:\s]*(\d{1,2}\s*\w+\s*,?\s*\d{4})/i,
-        /(?:last\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
-        /(?:deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
-        /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
-        /(?:closing\s*date|applications?\s*close)[:\s]*(\d{1,2}\s*\w+\s*,?\s*\d{4})/i,
-        /(?:last\s*date\s*to\s*generate\s*(?:challan|token))[:\s]*(\d{1,2}\s*\w+\s*,?\s*\d{4})/i,
+// ── LUMS (Tier 2: Puppeteer) ──
+async function extractLUMS() {
+    const urls = [
+        'https://lums.edu.pk/critical-dates-all-programmes',
+        'https://lums.edu.pk/undergraduate-programmes',
+        'https://admissions.lums.edu.pk',
     ];
 
-    for (const pat of deadlinePatterns) {
-        const match = t.match(pat);
-        if (match) {
-            const parsed = parseDate(match[1]);
-            if (parsed) {
-                result.deadline = parsed;
-                break;
+    for (const url of urls) {
+        try {
+            const result = await fetchWithPuppeteer(url, 'table, .field-items, .views-table', 5000);
+            const text = result.bodyText;
+
+            // LUMS patterns: "Application Deadline: January 27, 2026" or table rows
+            const deadlinePatterns = [
+                /(?:application|submission)\s*deadline[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date\s*(?:to\s*)?apply)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:LCAT|LUMS\s*(?:Common|Admission)\s*(?:Admission\s*)?Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date|exam\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
             }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'puppeteer' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
+}
+
+// ── Habib (Tier 1: Static) ──
+async function extractHabib() {
+    const urls = [
+        'https://habib.edu.pk/admissions/',
+        'https://habib.edu.pk/admissions/national-examination-boards/',
+        'https://habib.edu.pk/admissions/international-examination-board/',
+    ];
+
+    for (const url of urls) {
+        try {
+            const html = await fetchPage(url);
+            const text = cheerio.load(html)('body').text().replace(/\s+/g, ' ');
+
+            const deadlinePatterns = [
+                /(?:application|submission)\s*deadline[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date\s*(?:to\s*)?apply)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:apply\s*(?:before|by))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:closing\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:Habib\s*(?:Entrance|Admission)\s*(?:Exam|Test))[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date|exam\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'static' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
+}
+
+// ── AKU (Tier 1: Static) ──
+async function extractAKU() {
+    const urls = [
+        'https://www.aku.edu/admissions/Pages/home.aspx',
+        'https://www.aku.edu/admissions/pakistan/Pages/home.aspx',
+    ];
+
+    for (const url of urls) {
+        try {
+            const html = await fetchPage(url);
+            const text = cheerio.load(html)('body').text().replace(/\s+/g, ' ');
+
+            const deadlinePatterns = [
+                /(?:application|submission)\s*deadline[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date\s*(?:to\s*)?apply)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:apply\s*(?:before|by|until))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:AKU\s*(?:Entry|Admission)\s*Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date|exam\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'static' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
+}
+
+// ── PIEAS (Tier 2: Puppeteer — content on anchor sections) ──
+async function extractPIEAS() {
+    const urls = [
+        'https://www.pieas.edu.pk/admissions',
+        'https://www.pieas.edu.pk/',
+    ];
+
+    for (const url of urls) {
+        try {
+            const result = await fetchWithPuppeteer(url, '#menu3, .admission-schedule', 4000);
+            const text = result.bodyText;
+
+            const deadlinePatterns = [
+                /(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|apply))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:application\s*deadline|deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+                /(?:apply\s*(?:before|by))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:PIEAS\s*(?:Written|Entry)\s*Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:written\s*test\s*date|entry\s*test)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'puppeteer' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
+}
+
+// ── Bahria (Tier 2: Puppeteer) ──
+async function extractBahria() {
+    const urls = [
+        'https://bahria.edu.pk/admissions/',
+        'https://bahria.edu.pk/Home/AdmissionRoadmap?programType=UnderGraduate',
+    ];
+
+    for (const url of urls) {
+        try {
+            const result = await fetchWithPuppeteer(url, '.dates-to-remember, .admission-dates, table', 5000);
+            const text = result.bodyText;
+
+            const deadlinePatterns = [
+                /(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|apply))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:application\s*deadline|deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:form\s*submission)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:BUET|Bahria\s*(?:Entry|CBT|Admission)\s*Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*(?:date|on))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'puppeteer' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
+}
+
+// ── COMSATS (Tier 2: Puppeteer) ──
+async function extractCOMSATS() {
+    const urls = [
+        'https://admissions.comsats.edu.pk',
+        'https://www.comsats.edu.pk/Admissions.aspx',
+    ];
+
+    for (const url of urls) {
+        try {
+            const result = await fetchWithPuppeteer(url, '.admission-dates, table, .card', 4000);
+            const text = result.bodyText;
+
+            const deadlinePatterns = [
+                /(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|apply))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:application\s*deadline|deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+                /(?:apply\s*(?:before|by))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:NTS\s*NAT|NAT\s*Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date|entry\s*test)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'puppeteer' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
+}
+
+// ── ITU (Tier 2: Puppeteer) ──
+async function extractITU() {
+    const urls = [
+        'https://itu.edu.pk/admissions/',
+        'https://itu.edu.pk/',
+    ];
+
+    for (const url of urls) {
+        try {
+            const result = await fetchWithPuppeteer(url, '#admissions-calendar, table, .admission', 4000);
+            const text = result.bodyText;
+
+            const deadlinePatterns = [
+                /(?:application|submission)\s*deadline[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date\s*(?:to\s*)?apply)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+                /(?:deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:ITU\s*(?:Admission|Entry)\s*Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'puppeteer' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
+}
+
+// ── NED (Tier 1/2: Static first, then Puppeteer) ──
+async function extractNED() {
+    const urls = [
+        'https://www.neduet.edu.pk/key_admission_date',
+        'https://www.neduet.edu.pk/admission',
+    ];
+
+    // Try static first
+    for (const url of urls) {
+        try {
+            const html = await fetchPage(url);
+            const text = cheerio.load(html)('body').text().replace(/\s+/g, ' ');
+
+            const deadlinePatterns = [
+                /(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|apply))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:application\s*deadline|deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:NED\s*(?:Entry|Admission)\s*Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date|entry\s*test)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'static' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
         }
     }
 
-    // Test date patterns
-    const testPatterns = [
-        new RegExp(`(?:${escapeRegex(testNameHint)})[^.]{0,80}?(?:test|exam)\\s*(?:date|on|scheduled)[:\\s]*(\\d{1,2}\\s*\\w+\\s*,?\\s*\\d{4})`, 'i'),
-        /(?:entry\s*test|admission\s*test|test\s*date|exam\s*date)[:\s]*(\d{1,2}\s*\w+\s*,?\s*\d{4})/i,
-        /(?:test\s*(?:will\s*be\s*)?(?:held|conducted|scheduled)\s*(?:on)?)[:\s]*(\d{1,2}\s*\w+\s*,?\s*\d{4})/i,
-        /(?:test\s*(?:from\s*)?)(\d{1,2}\s+\w+)\s*(?:to|-)\s*\d{1,2}\s+\w+,?\s*(\d{4})/i,
-    ];
+    // Fallback to Puppeteer
+    for (const url of urls) {
+        try {
+            const result = await fetchWithPuppeteer(url, 'table, .key-dates', 4000);
+            const text = result.bodyText;
 
-    for (const pat of testPatterns) {
-        const match = t.match(pat);
-        if (match) {
-            const dateStr = match[2] ? `${match[1]} ${match[2]}` : match[1];
-            const parsed = parseDate(dateStr);
-            if (parsed) {
-                result.testDate = parsed;
-                break;
+            const deadlinePatterns = [
+                /(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|apply))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:application\s*deadline|deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+            ];
+
+            const testPatterns = [
+                /(?:NED\s*(?:Entry|Admission)\s*Test)[^.]*?(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*date|entry\s*test)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
             }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'puppeteer' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  Puppeteer ${url}: ${err.message.substring(0, 60)}`);
         }
     }
-
-    return result;
+    return null;
 }
 
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// ── Generic Puppeteer extractor (for NUST, FAST, UET, GIKI, Air, SZABIST) ──
+async function extractWithPuppeteer(urls, universityName, testKeyword) {
+    for (const url of urls) {
+        try {
+            const result = await fetchWithPuppeteer(url, 'table, .admission, .content', 5000);
+            const text = result.bodyText;
+
+            const deadlinePatterns = [
+                /(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|registration|apply))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:application|submission|registration)\s*deadline[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:apply\s*(?:before|by|until))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})/i,
+                /(?:deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:closing\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:last\s*date\s*to\s*generate\s*(?:challan|token))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ];
+
+            const testPatterns = testKeyword ? [
+                new RegExp(`(?:${testKeyword})[^.]{0,80}?(\\w+\\s+\\d{1,2},?\\s*\\d{4})`, 'i'),
+                /(?:entry\s*test|admission\s*test|test\s*date|exam\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+                /(?:test\s*(?:will\s*be\s*)?(?:held|conducted|scheduled)\s*(?:on)?)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})/i,
+            ] : [];
+
+            let deadline = null, testDate = null;
+            for (const p of deadlinePatterns) {
+                const m = text.match(p);
+                if (m) { deadline = parseDate(m[1]); if (deadline) break; }
+            }
+            for (const p of testPatterns) {
+                const m = text.match(p);
+                if (m) { testDate = parseDate(m[1]); if (testDate) break; }
+            }
+
+            if (deadline || testDate) {
+                return { deadline, testDate, url, method: 'puppeteer' };
+            }
+        } catch (err) {
+            console.log(`   ⚠️  ${url}: ${err.message.substring(0, 60)}`);
+        }
+    }
+    return null;
 }
 
-// ─── Main scraper logic ───
-async function scrapeDeadlines() {
+// ════════════════════════════════════════════════════
+// ██ UNIVERSITY CONFIGURATION
+// ════════════════════════════════════════════════════
+
+const DEADLINE_SOURCES = {
+    'IBA': {
+        extractor: extractIBA,
+        sharedKey: null,
+    },
+    'LUMS': {
+        extractor: extractLUMS,
+        sharedKey: null,
+    },
+    'Habib': {
+        extractor: extractHabib,
+        sharedKey: null,
+    },
+    'AKU': {
+        extractor: extractAKU,
+        sharedKey: null,
+    },
+    'PIEAS': {
+        extractor: extractPIEAS,
+        sharedKey: null,
+    },
+    'Bahria Isb': {
+        extractor: extractBahria,
+        sharedKey: 'Bahria',
+    },
+    'Bahria Lhr': {
+        extractor: extractBahria,
+        sharedKey: 'Bahria',
+    },
+
+    'COMSATS Isb': {
+        extractor: extractCOMSATS,
+        sharedKey: 'COMSATS',
+    },
+    'COMSATS Lhr': {
+        extractor: extractCOMSATS,
+        sharedKey: 'COMSATS',
+    },
+    'COMSATS Wah': {
+        extractor: extractCOMSATS,
+        sharedKey: 'COMSATS',
+    },
+    'COMSATS Abbottabad': {
+        extractor: extractCOMSATS,
+        sharedKey: 'COMSATS',
+    },
+    'ITU': {
+        extractor: extractITU,
+        sharedKey: null,
+    },
+    'NED': {
+        extractor: extractNED,
+        sharedKey: null,
+    },
+    'FAST Isb': {
+        extractor: () => extractWithPuppeteer(
+            ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'],
+            'FAST', 'FAST|NU'
+        ),
+        sharedKey: 'FAST',
+    },
+    'FAST Lhr': {
+        extractor: () => extractWithPuppeteer(
+            ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'],
+            'FAST', 'FAST|NU'
+        ),
+        sharedKey: 'FAST',
+    },
+    'FAST Khi': {
+        extractor: () => extractWithPuppeteer(
+            ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'],
+            'FAST', 'FAST|NU'
+        ),
+        sharedKey: 'FAST',
+    },
+    'FAST Psh': {
+        extractor: () => extractWithPuppeteer(
+            ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'],
+            'FAST', 'FAST|NU'
+        ),
+        sharedKey: 'FAST',
+    },
+    'NUST': {
+        extractor: () => extractWithPuppeteer(
+            ['https://ugadmissions.nust.edu.pk', 'https://nust.edu.pk/admissions/'],
+            'NUST', 'NET'
+        ),
+        sharedKey: null,
+    },
+    'UET Lahore': {
+        extractor: () => extractWithPuppeteer(
+            ['https://admission.uet.edu.pk', 'https://www.uet.edu.pk/'],
+            'UET', 'ECAT'
+        ),
+        sharedKey: null,
+    },
+    'UET Taxila': {
+        extractor: () => extractWithPuppeteer(
+            ['https://admissions.uettaxila.edu.pk', 'https://www.uettaxila.edu.pk/'],
+            'UET Taxila', 'ECAT'
+        ),
+        sharedKey: null,
+    },
+    'GIKI': {
+        extractor: () => extractWithPuppeteer(
+            ['https://giki.edu.pk/admissions/', 'https://giki.edu.pk/'],
+            'GIKI', 'GIKI'
+        ),
+        sharedKey: null,
+    },
+    'Air': {
+        extractor: () => extractWithPuppeteer(
+            ['https://au.edu.pk/', 'https://webdata.au.edu.pk/Pages/Admission/newpages/Bachelor_programs.aspx'],
+            'Air', 'Air'
+        ),
+        sharedKey: null,
+    },
+    'SZABIST': {
+        extractor: () => extractWithPuppeteer(
+            ['https://szabist.edu.pk/admissions/', 'https://szabist.edu.pk/'],
+            'SZABIST', 'SZABIST'
+        ),
+        sharedKey: null,
+    },
+};
+
+// ════════════════════════════════════════════════════
+// ██ MAIN SCRAPER LOGIC
+// ════════════════════════════════════════════════════
+
+async function scrapeDeadlines(filterUni) {
     const today = new Date().toISOString().split('T')[0];
     const report = {
         runDate: today,
         totalEntries: 0,
-        urlsChecked: 0,
-        urlsReachable: 0,
+        universitiesScraped: 0,
         datesExtracted: 0,
         timestampsUpdated: 0,
         changes: [],
         errors: [],
-        unreachableUniversities: [],  // Track universities where ALL URLs failed
+        skipped: [],
+        methods: {},  // Track which method was used per university
     };
 
     // Read current universities.js
     const uniFilePath = path.join(__dirname, '..', '..', 'src', 'data', 'universities.js');
     let fileContent = fs.readFileSync(uniFilePath, 'utf8');
 
-    // Parse upcomingDeadlines from the file
-    const deadlineMatch = fileContent.match(/export\s+const\s+upcomingDeadlines\s*=\s*\[([\s\S]*?)\];/);
-    if (!deadlineMatch) {
+    // Parse upcomingDeadlines
+    const deadlineArrayMatch = fileContent.match(/export\s+const\s+upcomingDeadlines\s*=\s*\[([\s\S]*?)\];/);
+    if (!deadlineArrayMatch) {
         console.error('❌ Could not find upcomingDeadlines in universities.js');
         process.exit(1);
     }
 
-    // Track which shared keys we've already scraped (avoid redundant fetches)
-    const sharedCache = {};
-
-    // Process each deadline entry
-    // We work with objects matched by shortName
+    // Extract entries
     const entries = [];
     const entryRegex = /\{\s*id:\s*(\d+),\s*university:\s*"([^"]+)",\s*shortName:\s*"([^"]+)"[\s\S]*?\}/g;
     let entryMatch;
-    while ((entryMatch = entryRegex.exec(deadlineMatch[1])) !== null) {
+    while ((entryMatch = entryRegex.exec(deadlineArrayMatch[1])) !== null) {
         entries.push({
             id: parseInt(entryMatch[1]),
             university: entryMatch[2],
@@ -336,116 +760,109 @@ async function scrapeDeadlines() {
         });
     }
 
-    report.totalEntries = entries.length;
-    console.log(`\n📋 Deadline Verification Scraper`);
-    console.log(`${'='.repeat(40)}`);
-    console.log(`Date: ${today}`);
-    console.log(`Entries: ${entries.length}\n`);
+    // Filter if --uni flag is used
+    const filteredEntries = filterUni
+        ? entries.filter(e => e.shortName.toLowerCase().includes(filterUni.toLowerCase()))
+        : entries;
 
-    for (const entry of entries) {
+    report.totalEntries = filteredEntries.length;
+    console.log(`\n📋 Deadline Verification Scraper v2`);
+    console.log(`${'='.repeat(50)}`);
+    console.log(`Date: ${today}`);
+    console.log(`Entries: ${filteredEntries.length}${filterUni ? ` (filtered: "${filterUni}")` : ''}\n`);
+
+    // Shared cache for multi-campus universities
+    const sharedCache = {};
+
+    for (const entry of filteredEntries) {
         const source = DEADLINE_SOURCES[entry.shortName];
         if (!source) {
-            console.log(`⚠️  ${entry.shortName}: No source configured, skipping`);
+            console.log(`⚠️  ${entry.shortName}: No extractor configured, skipping`);
+            report.skipped.push(entry.shortName);
             continue;
         }
 
-        // Use shared cache if applicable
         const cacheKey = source.sharedKey || entry.shortName;
         let scrapedData = sharedCache[cacheKey];
 
         if (!scrapedData) {
-            scrapedData = { deadline: null, testDate: null, reachable: false };
-
-            for (const url of source.urls) {
-                report.urlsChecked++;
-                try {
-                    console.log(`🔍 ${entry.shortName}: fetching ${url}`);
-                    const html = await fetchPage(url);
-                    report.urlsReachable++;
-                    scrapedData.reachable = true;
-
-                    const $ = cheerio.load(html);
-                    const text = $('body').text();
-                    const extracted = extractDeadlineInfo(text, source.testNameHint);
-
-                    if (extracted.deadline && !scrapedData.deadline) {
-                        scrapedData.deadline = extracted.deadline;
+            console.log(`🔍 ${entry.shortName}: Scraping...`);
+            try {
+                const result = await source.extractor();
+                if (result) {
+                    scrapedData = result;
+                    report.universitiesScraped++;
+                    console.log(`   ✅ Method: ${result.method} | URL: ${result.url || 'N/A'}`);
+                    if (result.deadline) {
+                        console.log(`   📅 Deadline: ${result.deadline}`);
                         report.datesExtracted++;
-                        console.log(`   ✅ Found deadline: ${extracted.deadline}`);
                     }
-                    if (extracted.testDate && !scrapedData.testDate) {
-                        scrapedData.testDate = extracted.testDate;
+                    if (result.testDate) {
+                        console.log(`   📝 Test Date: ${result.testDate}`);
                         report.datesExtracted++;
-                        console.log(`   ✅ Found test date: ${extracted.testDate}`);
                     }
-
-                    // If we found deadline, no need to check more URLs
-                    if (scrapedData.deadline) break;
-                } catch (err) {
-                    const errMsg = err.message.substring(0, 60);
-                    console.log(`   ⚠️  ${url}: ${errMsg}`);
-                    report.errors.push({ shortName: entry.shortName, url, error: errMsg });
+                    report.methods[cacheKey] = result.method;
+                } else {
+                    scrapedData = { deadline: null, testDate: null };
+                    console.log(`   ⚠️  No dates extracted`);
+                    report.errors.push({ shortName: entry.shortName, error: 'No dates found on any URL' });
                 }
+            } catch (err) {
+                scrapedData = { deadline: null, testDate: null };
+                console.log(`   ❌ Error: ${err.message.substring(0, 80)}`);
+                report.errors.push({ shortName: entry.shortName, error: err.message.substring(0, 80) });
             }
-
-            // Track universities where no URL was reachable at all
-            if (!scrapedData.reachable) {
-                report.unreachableUniversities.push(cacheKey);
-            }
-
             sharedCache[cacheKey] = scrapedData;
         } else {
             console.log(`♻️  ${entry.shortName}: Using cached data from ${cacheKey}`);
         }
 
-        // Update lastVerified timestamp on this entry (always)
-        // Also update deadline/testDate if scraped successfully
-        let updated = false;
+        // Update entry
         let entryText = entry.fullMatch;
+        let updated = false;
 
-        // Add or update lastVerified
-        if (entryText.includes('lastVerified:')) {
-            entryText = entryText.replace(/lastVerified:\s*"[^"]*"/, `lastVerified: "${today}"`);
-        } else {
-            // Add lastVerified before the closing brace
-            entryText = entryText.replace(
-                /(\s*applyUrl:\s*"[^"]*")\s*\}/,
-                `$1,\n    lastVerified: "${today}"\n  }`
-            );
+        // Only update lastVerified when dates were successfully extracted
+        const hasVerifiedDates = scrapedData.deadline || scrapedData.testDate;
+        if (hasVerifiedDates) {
+            if (entryText.includes('lastVerified:')) {
+                entryText = entryText.replace(/lastVerified:\s*"[^"]*"/, `lastVerified: "${today}"`);
+            } else {
+                entryText = entryText.replace(
+                    /(\s*applyUrl:\s*"[^"]*")\s*\}/,
+                    `$1,\n    lastVerified: "${today}"\n  }`
+                );
+            }
+            updated = true;
+            report.timestampsUpdated++;
         }
-        updated = true;
-        report.timestampsUpdated++;
 
-        // Update deadline if scraped one is different and valid
-        // Session-aware: only accept dates appropriate for the entry's session
+        // Update deadline if scraped and valid
         if (scrapedData.deadline) {
             const currentDeadline = entryText.match(/deadline:\s*"([^"]+)"/);
             const sessionMatch = entryText.match(/session:\s*"([^"]+)"/);
             const session = sessionMatch ? sessionMatch[1] : '';
 
-            // Validate scraped date is reasonable for the session
-            let isValidForSession = true;
-            if (session.toLowerCase().includes('fall') && currentDeadline) {
-                const currentDate = new Date(currentDeadline[1]);
-                const scrapedDate = new Date(scrapedData.deadline);
-                const todayDate = new Date(today);
-                const diffMs = currentDate.getTime() - scrapedDate.getTime();
-                const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30);
+            let isValid = true;
+            const scrapedDate = new Date(scrapedData.deadline);
+            const todayDate = new Date(today);
 
-                // Reject scraped dates that are already in the past
-                if (scrapedDate < todayDate) {
-                    isValidForSession = false;
-                    console.log(`   ⏭️  Skipping deadline ${scrapedData.deadline} (date already passed, likely old/Spring entry)`);
-                }
-                // For Fall entries: reject scraped dates that are >3 months earlier
-                // than the current deadline (likely a Spring semester date on the page)
-                else if (diffMonths > 3) {
-                    isValidForSession = false;
-                    console.log(`   ⏭️  Skipping deadline ${scrapedData.deadline} (${Math.round(diffMonths)}mo earlier than current ${currentDeadline[1]}, likely Spring date)`);
+            // Reject past dates
+            if (scrapedDate < todayDate) {
+                isValid = false;
+                console.log(`   ⏭️  Skipping deadline ${scrapedData.deadline} (already passed)`);
+            }
+
+            // For Fall sessions, reject dates too far from current
+            if (isValid && session.toLowerCase().includes('fall') && currentDeadline) {
+                const currentDate = new Date(currentDeadline[1]);
+                const diffMonths = (currentDate - scrapedDate) / (1000 * 60 * 60 * 24 * 30);
+                if (diffMonths > 3) {
+                    isValid = false;
+                    console.log(`   ⏭️  Skipping ${scrapedData.deadline} (likely Spring date)`);
                 }
             }
 
-            if (isValidForSession && currentDeadline && currentDeadline[1] !== scrapedData.deadline) {
+            if (isValid && currentDeadline && currentDeadline[1] !== scrapedData.deadline) {
                 report.changes.push({
                     shortName: entry.shortName,
                     field: 'deadline',
@@ -460,91 +877,76 @@ async function scrapeDeadlines() {
             }
         }
 
-        // Update testDate if scraped
+        // Update test date if scraped and not in the past
         if (scrapedData.testDate) {
-            const currentTest = entryText.match(/testDate:\s*"([^"]+)"/);
-            if (currentTest && currentTest[1] !== scrapedData.testDate) {
-                report.changes.push({
-                    shortName: entry.shortName,
-                    field: 'testDate',
-                    old: currentTest[1],
-                    new: scrapedData.testDate,
-                });
-                entryText = entryText.replace(
-                    /testDate:\s*"[^"]+"/,
-                    `testDate: "${scrapedData.testDate}"`
-                );
-                console.log(`   📝 Test date changed: ${currentTest[1]} → ${scrapedData.testDate}`);
+            const scrapedTestDate = new Date(scrapedData.testDate);
+            const todayDate2 = new Date(today);
+            if (scrapedTestDate < todayDate2) {
+                console.log(`   ⏭️  Skipping test date ${scrapedData.testDate} (already passed)`);
+            } else {
+                const currentTest = entryText.match(/testDate:\s*"([^"]+)"/);
+                if (currentTest && currentTest[1] !== scrapedData.testDate) {
+                    report.changes.push({
+                        shortName: entry.shortName,
+                        field: 'testDate',
+                        old: currentTest[1],
+                        new: scrapedData.testDate,
+                    });
+                    entryText = entryText.replace(
+                        /testDate:\s*"[^"]+"/,
+                        `testDate: "${scrapedData.testDate}"`
+                    );
+                    console.log(`   📝 Test date changed: ${currentTest[1]} → ${scrapedData.testDate}`);
+                }
             }
         }
 
-        // Replace in file content
         if (updated) {
-            // We'll update the entries array with the new text for sorting later
             entry.fullMatch = entryText;
         }
-        // Update the entry object in our local list so we can sort
-        // We need to re-extract the deadline from the text to sort accurately
-        const deadlineMatch = entryText.match(/deadline:\s*"([^"]+)"/);
-        if (deadlineMatch) {
-            entry.deadlineDate = new Date(deadlineMatch[1]);
-        } else {
-            entry.deadlineDate = new Date('2099-01-01'); // Far future if no deadline
-        }
+
+        // Extract deadline for sorting
+        const dlMatch = entryText.match(/deadline:\s*"([^"]+)"/);
+        entry.deadlineDate = dlMatch ? new Date(dlMatch[1]) : new Date('2099-01-01');
     }
 
     // Sort entries by deadline date
     entries.sort((a, b) => a.deadlineDate - b.deadlineDate);
 
-    // Reconstruct the array string from sorted entries
-    // We need to be careful to preserve the internal formatting of each entry
-    // but re-order them in the file.
-
-    // 1. Find the array block in the original content (we already did this: match[0])
-    // 2. Map sorted entries to their full text
-    // 3. Join them and replace the block
-
+    // Reconstruct and write file
     const newArrayContent = entries.map(e => e.fullMatch).join(',\n  ');
-    // The original regex captured the whole array content, we need to replace inside the brackets?
-    // Actually, let's just reconstruct the whole export
-
-    // We have the original full match of the array: deadlineMatch[0]
-    // But we need to keep the indentation correct.
-
     const newExport = `export const upcomingDeadlines = [\n  ${newArrayContent}\n];`;
-
-    fileContent = fileContent.replace(deadlineMatch[0], newExport);
-
-    // Write updated file
+    fileContent = fileContent.replace(deadlineArrayMatch[0], newExport);
     fs.writeFileSync(uniFilePath, fileContent, 'utf8');
 
-    // Save report
+    // Save reports
     const reportsDir = path.join(__dirname, '..', '..', 'reports');
     if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
-
-    const reportPath = path.join(reportsDir, 'deadline-verification-report.json');
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-
-    // Also save human-readable markdown report
-    const mdReport = generateMarkdownReport(report);
-    fs.writeFileSync(path.join(reportsDir, 'deadline-verification-report.md'), mdReport);
+    fs.writeFileSync(path.join(reportsDir, 'deadline-verification-report.json'), JSON.stringify(report, null, 2));
+    fs.writeFileSync(path.join(reportsDir, 'deadline-verification-report.md'), generateMarkdownReport(report));
 
     // Print summary
-    console.log(`\n${'='.repeat(40)}`);
+    console.log(`\n${'='.repeat(50)}`);
     console.log(`📊 Verification Complete`);
     console.log(`   Entries processed: ${report.totalEntries}`);
-    console.log(`   URLs checked: ${report.urlsChecked}`);
-    console.log(`   URLs reachable: ${report.urlsReachable}`);
+    console.log(`   Universities scraped: ${report.universitiesScraped}`);
     console.log(`   Dates extracted: ${report.datesExtracted}`);
     console.log(`   Timestamps updated: ${report.timestampsUpdated}`);
     console.log(`   Date changes: ${report.changes.length}`);
-    console.log(`   URL errors: ${report.errors.length}`);
-    console.log(`   Unreachable universities: ${report.unreachableUniversities.length}`);
+    console.log(`   Errors: ${report.errors.length}`);
+    console.log(`   Skipped: ${report.skipped.length}`);
 
     if (report.changes.length > 0) {
         console.log(`\n📝 Changes:`);
         for (const c of report.changes) {
             console.log(`   ${c.shortName}: ${c.field} ${c.old} → ${c.new}`);
+        }
+    }
+
+    if (Object.keys(report.methods).length > 0) {
+        console.log(`\n🔧 Methods used:`);
+        for (const [uni, method] of Object.entries(report.methods)) {
+            console.log(`   ${uni}: ${method}`);
         }
     }
 
@@ -556,8 +958,7 @@ function generateMarkdownReport(report) {
     md += `**Date:** ${report.runDate}\n\n`;
     md += `| Metric | Value |\n|---|---|\n`;
     md += `| Entries processed | ${report.totalEntries} |\n`;
-    md += `| URLs checked | ${report.urlsChecked} |\n`;
-    md += `| URLs reachable | ${report.urlsReachable} |\n`;
+    md += `| Universities scraped | ${report.universitiesScraped} |\n`;
     md += `| Dates extracted | ${report.datesExtracted} |\n`;
     md += `| Timestamps updated | ${report.timestampsUpdated} |\n`;
     md += `| Date changes | ${report.changes.length} |\n`;
@@ -571,10 +972,18 @@ function generateMarkdownReport(report) {
         md += '\n';
     }
 
+    if (Object.keys(report.methods).length > 0) {
+        md += `## Methods\n\n| University | Method |\n|---|---|\n`;
+        for (const [uni, method] of Object.entries(report.methods)) {
+            md += `| ${uni} | ${method} |\n`;
+        }
+        md += '\n';
+    }
+
     if (report.errors.length > 0) {
-        md += `## Errors\n\n| University | URL | Error |\n|---|---|---|\n`;
+        md += `## Errors\n\n| University | Error |\n|---|---|\n`;
         for (const e of report.errors) {
-            md += `| ${e.shortName} | ${e.url} | ${e.error} |\n`;
+            md += `| ${e.shortName} | ${e.error} |\n`;
         }
     }
 
@@ -586,21 +995,17 @@ module.exports = { scrapeDeadlines, DEADLINE_SOURCES };
 
 // Run if executed directly
 if (require.main === module) {
-    scrapeDeadlines()
+    // Parse --uni flag
+    const args = process.argv.slice(2);
+    const uniIdx = args.indexOf('--uni');
+    const filterUni = uniIdx !== -1 && args[uniIdx + 1] ? args[uniIdx + 1] : null;
+
+    scrapeDeadlines(filterUni)
         .then(report => {
-            // Only fail if NO URLs were reachable at all (total network failure)
-            // HTTP 403s from university firewalls are expected and not a reason to fail
-            if (report.urlsReachable === 0) {
-                console.error('\n❌ Complete failure: no URLs were reachable');
+            // Only fail if zero universities were scraped AND no filter was used
+            if (!filterUni && report.universitiesScraped === 0) {
+                console.error('\n❌ Complete failure: no universities could be scraped');
                 process.exit(1);
-            }
-            // Warn but succeed if many universities are unreachable
-            const uniqueUnreachable = new Set(report.unreachableUniversities).size;
-            const totalUniqueKeys = new Set(
-                Object.values(DEADLINE_SOURCES).map(s => s.sharedKey || 'unique')
-            ).size + Object.values(DEADLINE_SOURCES).filter(s => !s.sharedKey).length;
-            if (uniqueUnreachable > totalUniqueKeys * 0.7) {
-                console.warn(`\n⚠️  Warning: ${uniqueUnreachable} universities were completely unreachable`);
             }
             process.exit(0);
         })

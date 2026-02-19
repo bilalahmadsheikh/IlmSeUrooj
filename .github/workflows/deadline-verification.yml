@@ -26,7 +26,7 @@ concurrency:
 jobs:
   verify-deadlines:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
 
@@ -55,8 +55,13 @@ jobs:
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
 
+      - name: Install Puppeteer browser
+        run: npx puppeteer browsers install chrome
+
       - name: Run deadline verification scraper
         id: scrape
+        env:
+          PUPPETEER_ARGS: '--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage'
         run: |
           node scripts/scrapers/deadline-scraper.js
           echo "### 📋 Deadline Verification Report" >> $GITHUB_STEP_SUMMARY
