@@ -2,7 +2,7 @@
 
 ## Overview
 
-IlmSeUrooj follows a component-based architecture with clear separation of concerns. The application is built with Next.js 14+ using the App Router pattern.
+IlmSeUrooj follows a component-based architecture with clear separation of concerns. The application is built with Next.js 16+ using the App Router pattern, with an automated CI/CD pipeline for data updates.
 
 ---
 
@@ -70,12 +70,37 @@ ilmseurroj/
 │       ├── universities.js    # 28 universities with all attributes
 │       └── departmentData.js  # Department-specific comparison data
 │
+├── scripts/
+│   ├── scrapers/
+│   │   ├── university-scraper.js   # Cheerio-based scraper engine (16 configs)
+│   │   ├── merit-scraper.js        # Merit cutoff scraper
+│   │   └── semester-scrapers.js    # Semester-specific scrapers
+│   ├── validators/
+│   │   ├── schema-validator.js     # Data type/format validation
+│   │   ├── compare-data.js         # Diff against baseline
+│   │   ├── data-integrity.js       # Cross-field checks
+│   │   ├── data-target-map.js      # Tier-to-field mapping
+│   │   └── auto-review.js          # AI-style PR review
+│   ├── utils/
+│   │   ├── parse-universities.js   # Parse universities.js data
+│   │   └── url-checker.js          # URL reachability checker
+│   ├── fetch-university-data.js    # Pipeline orchestrator
+│   ├── generate-baseline.js        # Baseline snapshot generator
+│   └── generate-merit-report.js    # Merit analysis reports
+│
+├── .github/workflows/
+│   ├── update-university-data.yml  # Tiered auto-update (every 20 days + bimonthly)
+│   ├── semester-data-update.yml    # Semester cycle refresh (Mar/Sep)
+│   ├── annual-merit-update.yml     # Yearly merit update (Nov)
+│   └── website-health-check.yml    # Weekly URL health check
+│
 ├── public/
 │   ├── logos/                 # University logo images
 │   └── backgrounds/           # Theme background images
 │
 └── docs/                      # This documentation folder
 ```
+
 
 ---
 

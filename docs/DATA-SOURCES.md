@@ -4,7 +4,39 @@ All data used in the website with source references and links.
 
 ---
 
-## University Websites & Admission Portals
+## Automated Scraper Sources
+
+Data is automatically fetched from these official sources by the `university-scraper.js` engine on a tiered schedule.
+
+### Tier 1: Critical Data (Every 20 Days)
+**Target Fields**: Admission Deadline, Test Date, Test Name
+
+| University | Scrape Target URL | Config Key |
+|------------|-------------------|------------|
+| NUST | `https://ugadmissions.nust.edu.pk` | `NUST` |
+| LUMS | `https://lums.edu.pk/admissions` | `LUMS` |
+| FAST-NUCES | `https://admissions.nu.edu.pk` | `FAST` |
+| COMSATS | `https://admissions.comsats.edu.pk` | `COMSATS` |
+| IBA | `https://www.iba.edu.pk` | `IBA` |
+| GIKI | `https://giki.edu.pk/admissions/` | `GIKI` |
+| UET Lahore | `https://admission.uet.edu.pk` | `UET` |
+| PIEAS | `http://admissions.pieas.edu.pk` | `PIEAS` |
+| NED | `https://www.neduet.edu.pk/admissions` | `NED` |
+| Bahria | `https://bahria.edu.pk/admissions` | `Bahria` |
+| Air University | `https://au.edu.pk/pages/admissions` | `Air` |
+| SZABIST | `https://szabist-isb.edu.pk/admissions` | `SZABIST` |
+| Habib | `https://habib.edu.pk/admissions` | `Habib` |
+| AKU | `https://www.aku.edu/admissions` | `AKU` |
+| ITU | `https://itu.edu.pk/admissions` | `ITU` |
+
+### Tier 2: General Data (Bimonthly)
+**Target Fields**: Fees (`avgFee`), Website URL, Description
+
+| Source Type | Update Frequency | Data Points |
+|-------------|------------------|-------------|
+| Official Websites | 1st of every 2nd month | Fee structures, mission statements, contact info |
+
+---
 
 | University | Official Website | Admission Portal |
 |------------|------------------|------------------|

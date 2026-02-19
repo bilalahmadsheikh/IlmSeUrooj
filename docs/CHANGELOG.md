@@ -12,6 +12,7 @@ All iterations of the IlmSeUrooj (UniMatch) project documented in one place.
 | 2 | 2026-01-12 | University list, rankings, deadlines |
 | 3 | 2026-01-23 | Theme system, backgrounds, comparison tool |
 | 4 | 2026-01-25 | Campus-specific data, 28 universities |
+| 5 | 2026-02-19 | Automated CI/CD pipeline, scraper engine, validators |
 
 ---
 
@@ -262,6 +263,96 @@ Campus cutoff data researched from:
 
 ---
 
+## Iteration 5: Automated CI/CD Pipeline & Data Scraper
+**Date**: 2026-02-19 | **Status**: ✅ Complete
+
+### Overview
+Built a complete automated data update pipeline using GitHub Actions. The system scrapes university websites on a tiered schedule, validates the data, and creates pull requests for review.
+
+### Features Implemented
+
+#### Tiered University Scraper Engine
+New `scripts/scrapers/university-scraper.js`:
+- **16 scrape configurations** covering all 28 universities
+- **Cheerio** for HTML parsing (lightweight, no headless browser)
+- Two-tier scraping:
+
+| Tier | Schedule | Data Fields |
+|------|----------|-------------|
+| Critical | Every 20 days | Deadlines, test dates, test names |
+| General | Bimonthly | Fees, websites, descriptions |
+
+- Rate limiting (2-second delay between requests)
+- Retry logic (2 retries with exponential backoff)
+- Graceful failure (one university failing doesn't block others)
+- Regex-based date extraction (`parseFlexibleDate`)
+- Fee extraction with currency normalization
+
+#### Pipeline Orchestrator
+Rewrote `scripts/fetch-university-data.js`:
+1. Accepts `DATA_TIER` environment variable
+2. Calls scraper engine
+3. Parses current `universities.js`
+4. Merges only changed fields
+5. Generates `reports/scrape-results.json`
+6. Generates `reports/change-report.json`
+7. Sets GitHub Actions output variables
+
+#### GitHub Actions Workflow Updates
+Updated `.github/workflows/update-university-data.yml`:
+- Two-tier cron schedule (`0 2 */20 * *` + `0 2 1 */2 *`)
+- Runtime tier detection based on cron trigger day
+- Manual dispatch with `critical`/`general`/`all` options
+- Tier-labeled PRs with descriptive body and labels
+- AI review comments on PRs
+- Artifact uploads (reports, updated data)
+
+#### Validation Pipeline
+5 validator scripts run on every data change:
+| Validator | Purpose |
+|-----------|---------|
+| `schema-validator.js` | Data type and format checks |
+| `compare-data.js` | Diff against baseline snapshot |
+| `data-integrity.js` | Cross-field relationship checks |
+| `data-target-map.js` | Maps which fields each tier targets |
+| `auto-review.js` | AI-style review for PR comments |
+
+### Technical Changes
+
+#### New Files Created
+| File | Purpose |
+|------|---------|
+| `scripts/scrapers/university-scraper.js` | Core scraper engine (345 lines) |
+| `docs/WORKFLOWS.md` | CI/CD workflow documentation |
+| `docs/SHORTFALLS.md` | Known issues and fixes needed |
+| `docs/ENHANCEMENTS.md` | Future improvement roadmap |
+
+#### Modified Files
+| File | Change |
+|------|--------|
+| `scripts/fetch-university-data.js` | Complete rewrite as pipeline orchestrator |
+| `.github/workflows/update-university-data.yml` | Two-tier schedule, tier detection, PR labels |
+| `package.json` | Added `cheerio` dev dependency |
+| `.gitignore` | Added `reports/` directory |
+| `README.md` | Added CI/CD section, scripts, full doc links |
+| All docs/*.md | Updated for Iteration 5 |
+
+### Data Sources (Scraper)
+Per-university configs target official admission pages:
+- NUST: `ugadmissions.nust.edu.pk`
+- LUMS: `lums.edu.pk/admissions`
+- FAST: `admissions.nu.edu.pk`
+- COMSATS: `admissions.comsats.edu.pk`
+- And 12 more university groups
+
+### Local Testing Results
+Dry run with `DATA_TIER=critical`:
+- 9/16 university sites fetched successfully
+- 7 returned 403/404 (sites block bots or changed URLs)
+- Infrastructure works correctly with graceful error handling
+
+---
+
 ## Current Project Stats
 
 | Metric | Value |
@@ -273,15 +364,23 @@ Campus cutoff data researched from:
 | Theme Modes | 3 |
 | Admission Criteria Entries | 22 |
 | Data Points per Uni | 15+ |
-| Lines of Code | ~8,000+ |
+| GitHub Actions Workflows | 4 |
+| Validation Scripts | 5 |
+| Scraper Configs | 16 |
+| Lines of Code | ~10,000+ |
 
 ---
 
 ## Future Roadmap (Planned)
 
+- [ ] AI-powered university recommender
+- [ ] Individual university pages (SEO)
+- [ ] Urdu language support
+- [ ] PWA with offline mode & push notifications
 - [ ] User accounts and saved preferences
-- [ ] More universities (medical colleges, smaller unis)
-- [ ] Mobile app (React Native)
-- [ ] AI-powered university recommendations
 - [ ] Scholarship information database
+- [ ] More universities (medical colleges, smaller unis)
+- [ ] Interactive university map
+- [ ] Application checklist generator
 - [ ] University reviews from students
+

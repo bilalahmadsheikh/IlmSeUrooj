@@ -14,6 +14,7 @@ A comprehensive guide to all features of the IlmSeUrooj platform, explaining wha
 7. [Expandable University List](#7-expandable-university-list)
 8. [Campus-Specific Data](#8-campus-specific-data)
 9. [Theme System](#9-theme-system)
+10. [Automated Data Pipeline](#10-automated-data-pipeline)
 
 ---
 
@@ -345,6 +346,59 @@ Three visual themes with seamless switching via toggle button.
 
 ---
 
+---
+
+## 10. Automated Data Pipeline
+
+### What It Does
+A CI/CD system that automatically scrapes university websites, validates changes, and creates pull requests — keeping admission data fresh without manual effort.
+
+### Why It's Useful
+- **Always Current**: Deadlines and test dates auto-update every 20 days
+- **No Manual Work**: Scraper runs on GitHub Actions — zero human intervention
+- **Safe Updates**: Changes go through validation + AI review before merging
+- **Transparent**: Change reports show exactly what was modified and why
+- **Graceful Failures**: One university failing doesn't block others
+
+### Tiered Schedule
+
+| Tier | Frequency | Fields Updated | Cron |
+|------|-----------|----------------|------|
+| **Critical** | Every 20 days | Deadlines, test dates, test names | `0 2 */20 * *` |
+| **General** | Bimonthly | Fees, websites, descriptions | `0 2 1 */2 *` |
+
+### Pipeline Flow
+```
+Scrape → Parse → Merge → Validate → PR → Review → Merge
+```
+
+1. **Scrape**: Cheerio-based scraper fetches admission pages (28 universities, 16 configs)
+2. **Parse**: Extract dates, fees, and URLs using regex patterns
+3. **Merge**: Compare scraped data with `universities.js`, update only changed fields
+4. **Validate**: Run 5 validators (schema, integrity, diff, target map, auto-review)
+5. **PR**: Create GitHub PR with tier label, change table, and AI review comment
+6. **Report**: Generate `scrape-results.json` and `change-report.json` artifacts
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `scripts/scrapers/university-scraper.js` | Core scraper engine (Cheerio + regex) |
+| `scripts/fetch-university-data.js` | Pipeline orchestrator |
+| `.github/workflows/update-university-data.yml` | Tiered CI/CD workflow |
+| `scripts/validators/schema-validator.js` | Data type & format validation |
+| `scripts/validators/compare-data.js` | Diff against baseline |
+| `scripts/validators/data-integrity.js` | Cross-field checks |
+| `scripts/validators/auto-review.js` | AI-style PR review |
+
+### Additional Workflows
+| Workflow | File | Schedule |
+|----------|------|----------|
+| Semester Refresh | `semester-data-update.yml` | March 1 & Sep 1 |
+| Annual Merit | `annual-merit-update.yml` | November 1 |
+| URL Health Check | `website-health-check.yml` | Every Monday |
+
+---
+
 ## Feature Location Quick Reference
 
 | Feature | Main Component | Data Source |
@@ -357,6 +411,7 @@ Three visual themes with seamless switching via toggle button.
 | Deadlines | `AdmissionsDeadlines/` | `universities.js` (upcomingDeadlines) |
 | Uni List | `UniversityList/` | `universities.js` |
 | Themes | `ThemeToggle/`, `ThemeContext` | localStorage |
+| Data Pipeline | `scripts/scrapers/` | University websites (scraped) |
 
 ---
 
@@ -366,6 +421,10 @@ Three visual themes with seamless switching via toggle button.
 - University admission portals (2024 data)
 - HEC Pakistan rankings
 - Official merit lists (when available)
+
+### Automated Sources (Scraper)
+- University admission pages (scraped via university-scraper.js)
+- Community merit sites (learnospot.com, paklearningspot.com)
 
 ### Community Sources
 - Reddit r/pakistan admission threads
@@ -378,3 +437,5 @@ Three visual themes with seamless switching via toggle button.
 - GIKI uses merit positions, not percentages
 - LUMS uses holistic admissions (no fixed cutoffs)
 - IBA publishes test score cutoffs, not aggregates
+- Scraped data is validated against 5 automated checks before merging
+

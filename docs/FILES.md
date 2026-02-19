@@ -719,19 +719,95 @@ Campus Type Match: 5 points
 
 ---
 
+---
+
+## Scripts (`scripts/`)
+
+### `scripts/scrapers/`
+
+#### `scripts/scrapers/university-scraper.js`
+**Purpose**: Core scraping engine (~350 lines)
+**What it does**:
+- Fetches admission data based on tier (critical/general)
+- Configs for 16 university groups (covers all 28 unis)
+- Extracts dates and fees using Regex
+- Handles rate limiting and retries
+
+#### `scripts/scrapers/merit-scraper.js`
+**Purpose**: Scrapes merit cutoff data from community sites.
+
+#### `scripts/scrapers/semester-scrapers.js`
+**Purpose**: Scrapes semester-specific data (calendars, courses).
+
+### `scripts/validators/`
+
+#### `scripts/validators/schema-validator.js`
+**Purpose**: Validates `universities.js` against a strict schema. Checks data types, required fields, and enum values.
+
+#### `scripts/validators/compare-data.js`
+**Purpose**: Compares new data against baseline to detect changes. Generates change reports.
+
+#### `scripts/validators/data-integrity.js`
+**Purpose**: Checks logical relationships (e.g., if `deadline` exists, `applyUrl` should exist).
+
+#### `scripts/validators/data-target-map.js`
+**Purpose**: Maps which fields belong to which scraping tier.
+
+#### `scripts/validators/auto-review.js`
+**Purpose**: Generates AI-style review comments for Pull Requests based on change size and criticality.
+
+### `scripts/utils/`
+
+#### `scripts/utils/parse-universities.js`
+**Purpose**: Helper to parse the `universities.js` file (which is a mix of JS/JSON) into a usable object for scripts.
+
+#### `scripts/utils/url-checker.js`
+**Purpose**: Checks reachability of all university URLs for the health check workflow.
+
+### Root Scripts
+
+#### `scripts/fetch-university-data.js`
+**Purpose**: Pipeline orchestrator. Calls scraper, merges data, runs validators, writes files.
+
+#### `scripts/generate-baseline.js`
+**Purpose**: Creates a snapshot of current data for diffing.
+
+---
+
+## Workflows (`.github/workflows/`)
+
+#### `.github/workflows/update-university-data.yml`
+**Purpose**: Main automation workflow.
+**Schedule**: Tier 1 (20 days) & Tier 2 (Bimonthly).
+**Jobs**: Fetch, Validate, Create PR, Notify.
+
+#### `.github/workflows/semester-data-update.yml`
+**Purpose**: Full data refresh at semester start (March/Sept).
+
+#### `.github/workflows/annual-merit-update.yml`
+**Purpose**: Scrapes new merit lists once a year (Nov).
+
+#### `.github/workflows/website-health-check.yml`
+**Purpose**: Weekly check for broken university links.
+
+---
+
 ## File Count Summary
 
-| Directory | JS Files | CSS Files | Other | Total |
-|-----------|----------|-----------|-------|-------|
-| `src/app/` | 2 | 2 | - | 4 |
-| `src/components/` | 11 | 11 | - | 22 |
-| `src/context/` | 1 | - | - | 1 |
-| `src/data/` | 2 | - | - | 2 |
-| `src/utils/` | 1 | - | - | 1 |
-| `public/` | - | - | 17 | 17 |
-| `docs/` | - | - | 9 | 9 |
-| Root | - | - | 7 | 7 |
-| **Total** | **17** | **13** | **33** | **63** |
+| Directory | JS Files | CSS Files | YAML | Other | Total |
+|-----------|----------|-----------|------|-------|-------|
+| `src/app/` | 2 | 2 | - | - | 4 |
+| `src/components/` | 11 | 11 | - | - | 22 |
+| `src/context/` | 1 | - | - | - | 1 |
+| `src/data/` | 2 | - | - | - | 2 |
+| `src/utils/` | 1 | - | - | - | 1 |
+| `scripts/` | 11 | - | - | - | 11 |
+| `.github/workflows/` | - | - | 4 | - | 4 |
+| `public/` | - | - | - | 17 | 17 |
+| `docs/` | - | - | - | 12 | 12 |
+| Root | - | - | - | 8 | 8 |
+| **Total** | **28** | **13** | **4** | **37** | **82** |
+
 
 ---
 

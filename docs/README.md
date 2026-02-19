@@ -2,7 +2,7 @@
 
 ## About the Project
 
-**IlmSeUrooj** (علم سے عروج - "Rise through Knowledge") is a comprehensive Pakistani university discovery platform designed to help students find their perfect university match. The platform uses a modern Tinder-like swipe interface combined with detailed admission data, merit calculators, and comparison tools.
+**IlmSeUrooj** (علم سے عروج — "Rise through Knowledge") is a comprehensive Pakistani university discovery platform designed to help students find their perfect university match. The platform uses a modern Tinder-like swipe interface combined with detailed admission data, merit calculators, comparison tools, and automated CI/CD data pipelines.
 
 ### Target Audience
 - Pakistani students preparing for university admissions (FSc/A-Level)
@@ -14,6 +14,7 @@
 - **Swipe Interface**: Intuitive Tinder-like experience for browsing universities
 - **Real Merit Data**: Researched cutoffs from official merit lists and student forums
 - **Visual Theme**: Unique treasure map theme representing the "journey to knowledge"
+- **Automated Updates**: GitHub Actions pipeline scrapes university websites on a tiered schedule
 
 ---
 
@@ -21,8 +22,14 @@
 
 | Document | Description |
 |----------|-------------|
-| [Architecture](./architecture.md) | Component structure, data flow, and technical decisions |
-| [CHANGELOG](./CHANGELOG.md) | Complete development history with all iterations |
+| [Architecture](./architecture.md) | Component structure, data flow, and CI/CD pipeline |
+| [CHANGELOG](./CHANGELOG.md) | Complete development history (Iterations 1–5) |
+| [FEATURES](./FEATURES.md) | Detailed feature documentation |
+| [FILES](./FILES.md) | File-by-file reference |
+| [DATA-SOURCES](./DATA-SOURCES.md) | All data sources with links |
+| [WORKFLOWS](./WORKFLOWS.md) | GitHub Actions CI/CD documentation |
+| [SHORTFALLS](./SHORTFALLS.md) | Known issues & things to fix |
+| [ENHANCEMENTS](./ENHANCEMENTS.md) | Future improvement roadmap (15 ideas) |
 | [Iteration 1](./iteration-1.md) | Swipe interface, filters, initial 15 universities |
 | [Iteration 2](./iteration-2.md) | University list, rankings, admission deadlines |
 | [Iteration 3](./iteration-3.md) | Theme system, decorative backgrounds, comparison tool |
@@ -39,6 +46,9 @@
 | Major Components | 12 |
 | Theme Modes | 3 (Dark, Light, Treasure Map) |
 | Data Points per University | 15+ attributes |
+| GitHub Actions Workflows | 4 |
+| Scraper Configs | 16 |
+| Validation Scripts | 5 |
 
 ---
 
@@ -86,10 +96,13 @@ NUST, LUMS, IBA, GIKI, PIEAS, NED, Habib, AKU, Air University, SZABIST, ITU
 
 ## Technical Stack
 
-- **Framework**: Next.js 14+ (App Router)
+- **Framework**: Next.js 16+ (App Router)
 - **Styling**: CSS Modules with custom design system
 - **State Management**: React useState + Context API
 - **Persistence**: localStorage for saved universities
+- **Scraping**: Cheerio (HTML parsing, ~100KB)
+- **CI/CD**: GitHub Actions (4 workflows)
+- **Validation**: Custom Node.js validator scripts
 - **Design**: Mobile-first responsive, treasure map theme
 
 ---
@@ -105,6 +118,9 @@ npm run dev
 
 # Build for production
 npm run build
+
+# Run scraper locally (dry run)
+DATA_TIER=critical DRY_RUN=true node scripts/fetch-university-data.js
 ```
 
 Visit `http://localhost:3000` to see the application.
@@ -121,3 +137,4 @@ Visit `http://localhost:3000` to see the application.
 ## License
 
 This project is for educational purposes.
+
