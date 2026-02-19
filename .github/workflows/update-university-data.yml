@@ -2,20 +2,21 @@ name: Update University Data
 
 on:
   schedule:
-    # Daily at 6 AM PKT (1 AM UTC) during admission season (May-August)
-    - cron: '0 1 * * *'
+    # Tier 1: Critical data (deadlines, test dates) — every 20 days at 2 AM UTC
+    - cron: '0 2 */20 * *'
+    # Tier 2: General data (fees, websites) — 1st of every other month at 2 AM UTC
+    - cron: '0 2 1 */2 *'
   workflow_dispatch:
     inputs:
-      data_type:
-        description: 'Type of data to update'
+      data_tier:
+        description: 'Data tier to update'
         required: true
-        default: 'all'
+        default: 'critical'
         type: choice
         options:
+          - critical
+          - general
           - all
-          - deadlines
-          - fees
-          - test_dates
 
 env:
   NODE_VERSION: '20'
@@ -37,6 +38,7 @@ jobs:
     outputs:
       has_changes: ${{ steps.diff-check.outputs.has_changes }}
       comparison_status: ${{ steps.compare.outputs.status }}
+      data_tier: ${{ steps.tier.outputs.tier }}
     
     steps:
       - name: Validate environment
@@ -45,6 +47,25 @@ jobs:
             echo "::error::NODE_VERSION is not set"
             exit 1
           fi
+
+      - name: Determine data tier
+        id: tier
+        run: |
+          # Manual dispatch: use the input
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TIER="${{ github.event.inputs.data_tier }}"
+          else
+            # Scheduled: determine from cron
+            # */20 cron = critical tier, 1st-of-month cron = general tier
+            DAY=$(date -u +%d)
+            if [ "$DAY" = "01" ]; then
+              TIER="general"
+            else
+              TIER="critical"
+            fi
+          fi
+          echo "tier=$TIER" >> $GITHUB_OUTPUT
+          echo "### 🎯 Data Tier: $TIER" >> $GITHUB_STEP_SUMMARY
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -89,11 +110,11 @@ jobs:
             echo "✅ Baseline exists"
           fi
 
-      - name: Fetch university data
+      - name: Fetch & update university data
         id: fetch-data
         run: node scripts/fetch-university-data.js
         env:
-          DATA_TYPE: ${{ github.event.inputs.data_type || 'all' }}
+          DATA_TIER: ${{ steps.tier.outputs.tier }}
 
       - name: Validate data schema
         id: validate
@@ -182,30 +203,31 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore: Update university data [automated]'
-          title: '🎓 Automated University Data Update'
+          commit-message: 'chore: Update university data [${{ needs.fetch-and-validate.outputs.data_tier }}] [automated]'
+          title: '🎓 [${{ needs.fetch-and-validate.outputs.data_tier }}] Automated University Data Update'
           body: |
-            ## Automated Data Update
+            ## Automated Data Update — Tier: `${{ needs.fetch-and-validate.outputs.data_tier }}`
             
-            This PR was created automatically by the data update workflow.
+            This PR was created automatically by the **${{ needs.fetch-and-validate.outputs.data_tier }}** tier scraper.
+            
+            | Tier     | Scrapes                        | Schedule       |
+            |----------|--------------------------------|----------------|
+            | critical | Deadlines, test dates           | Every 20 days  |
+            | general  | Fees, websites, descriptions   | Every ~45 days |
             
             ### Validation Results
             - Schema validation: ✅ Passed
             - Baseline comparison: ${{ needs.fetch-and-validate.outputs.comparison_status }}
-            - Auto-review: See reports artifact
-            
-            ### What Changed
-            - Updated admission deadlines
-            - Updated fee structures
-            - Updated test dates
+            - Change report: See `reports/change-report.json` in artifacts
             
             ---
             *⚠️ AI review comment will be posted below. Please review before merging.*
-          branch: automated/data-update
+          branch: automated/data-update-${{ needs.fetch-and-validate.outputs.data_tier }}
           delete-branch: true
           labels: |
             automated
             data-update
+            tier-${{ needs.fetch-and-validate.outputs.data_tier }}
 
       # AI-Powered Review: Analyze diff and post review comment
       - name: AI-powered review comment

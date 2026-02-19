@@ -14,6 +14,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "cheerio": "^1.2.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "sharp": "^0.34.5"
