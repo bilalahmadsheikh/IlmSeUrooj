@@ -1,9 +1,6 @@
 name: Annual Merit List Update
 
 on:
-  schedule:
-    # Run yearly on August 1st (after admission season ends)
-    - cron: '0 0 1 8 *'
   workflow_dispatch:
     inputs:
       year:

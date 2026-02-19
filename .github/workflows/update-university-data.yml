@@ -1,9 +1,6 @@
 name: Update University Data
 
 on:
-  schedule:
-    # Daily at 6 AM PKT (1 AM UTC) during admission season (May-August)
-    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
       data_type:

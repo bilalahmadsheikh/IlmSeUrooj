@@ -1,9 +1,6 @@
 name: Semester Data Update
 
 on:
-  schedule:
-    # Run at semester start: January 15 and August 15
-    - cron: '0 0 15 1,8 *'
   workflow_dispatch:
 
 env:
