@@ -1,0 +1,41 @@
+name: Data Update Reminder
+
+on:
+  schedule:
+    # Every 20 days at 9 AM PKT (4 AM UTC)
+    - cron: '0 4 */20 * *'
+  workflow_dispatch:
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Send reminder email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '📋 IlmSeUrooj — Time to Update University Data'
+          to: ba8516127@gmail.com
+          from: IlmSeUrooj Bot
+          body: |
+            Assalam o Alaikum Bilal,
+
+            This is your 20-day reminder to update the university data on IlmSeUrooj.
+
+            📌 Things to check:
+            • Admission deadlines — verify dates on university websites
+            • Test dates — check for any schedule changes
+            • Merit lists — update if new data is available
+            • New programs or fee changes
+
+            🔗 Quick links:
+            • Run scrapers: https://github.com/${{ github.repository }}/actions
+            • Edit data: https://github.com/${{ github.repository }}/blob/main/src/data/universities.js
+
+            Best regards,
+            IlmSeUrooj Bot
