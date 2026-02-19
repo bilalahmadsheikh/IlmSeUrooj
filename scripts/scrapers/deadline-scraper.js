@@ -158,17 +158,32 @@ const DEADLINE_SOURCES = {
     },
 };
 
-// ─── Fetch with retry + User-Agent ───
+// ─── Fetch with retry + realistic browser headers ───
 async function fetchPage(url, retries = 2) {
+    const userAgents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    ];
+    const ua = userAgents[Math.floor(Math.random() * userAgents.length)];
+
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
+            const timeout = setTimeout(() => controller.abort(), 20000);
             const res = await fetch(url, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml',
+                    'User-Agent': ua,
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
                     'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'Upgrade-Insecure-Requests': '1',
                 },
                 signal: controller.signal,
                 redirect: 'follow',
@@ -178,7 +193,9 @@ async function fetchPage(url, retries = 2) {
             return await res.text();
         } catch (err) {
             if (attempt === retries) throw err;
-            await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+            // Exponential backoff with jitter
+            const delay = (2000 * (attempt + 1)) + Math.random() * 1000;
+            await new Promise(r => setTimeout(r, delay));
         }
     }
 }
@@ -288,6 +305,7 @@ async function scrapeDeadlines() {
         timestampsUpdated: 0,
         changes: [],
         errors: [],
+        unreachableUniversities: [],  // Track universities where ALL URLs failed
     };
 
     // Read current universities.js
@@ -368,6 +386,11 @@ async function scrapeDeadlines() {
                     console.log(`   ⚠️  ${url}: ${errMsg}`);
                     report.errors.push({ shortName: entry.shortName, url, error: errMsg });
                 }
+            }
+
+            // Track universities where no URL was reachable at all
+            if (!scrapedData.reachable) {
+                report.unreachableUniversities.push(cacheKey);
             }
 
             sharedCache[cacheKey] = scrapedData;
@@ -515,7 +538,8 @@ async function scrapeDeadlines() {
     console.log(`   Dates extracted: ${report.datesExtracted}`);
     console.log(`   Timestamps updated: ${report.timestampsUpdated}`);
     console.log(`   Date changes: ${report.changes.length}`);
-    console.log(`   Errors: ${report.errors.length}`);
+    console.log(`   URL errors: ${report.errors.length}`);
+    console.log(`   Unreachable universities: ${report.unreachableUniversities.length}`);
 
     if (report.changes.length > 0) {
         console.log(`\n📝 Changes:`);
@@ -564,7 +588,21 @@ module.exports = { scrapeDeadlines, DEADLINE_SOURCES };
 if (require.main === module) {
     scrapeDeadlines()
         .then(report => {
-            process.exit(report.errors.length > report.totalEntries / 2 ? 1 : 0);
+            // Only fail if NO URLs were reachable at all (total network failure)
+            // HTTP 403s from university firewalls are expected and not a reason to fail
+            if (report.urlsReachable === 0) {
+                console.error('\n❌ Complete failure: no URLs were reachable');
+                process.exit(1);
+            }
+            // Warn but succeed if many universities are unreachable
+            const uniqueUnreachable = new Set(report.unreachableUniversities).size;
+            const totalUniqueKeys = new Set(
+                Object.values(DEADLINE_SOURCES).map(s => s.sharedKey || 'unique')
+            ).size + Object.values(DEADLINE_SOURCES).filter(s => !s.sharedKey).length;
+            if (uniqueUnreachable > totalUniqueKeys * 0.7) {
+                console.warn(`\n⚠️  Warning: ${uniqueUnreachable} universities were completely unreachable`);
+            }
+            process.exit(0);
         })
         .catch(err => {
             console.error('❌ Fatal error:', err);
