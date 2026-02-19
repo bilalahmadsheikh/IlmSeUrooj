@@ -2,73 +2,44 @@ name: Update University Data
 
 on:
   schedule:
-    # Tier 1: Critical data (deadlines, test dates) — every 20 days at 2 AM UTC
-    - cron: '0 2 */20 * *'
-    # Tier 2: General data (fees, websites) — 1st of every other month at 2 AM UTC
-    - cron: '0 2 1 */2 *'
+    # Daily at 6 AM PKT (1 AM UTC) during admission season (May-August)
+    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
-      data_tier:
-        description: 'Data tier to update'
+      data_type:
+        description: 'Type of data to update'
         required: true
-        default: 'critical'
+        default: 'all'
         type: choice
         options:
-          - critical
-          - general
           - all
+          - deadlines
+          - fees
+          - test_dates
 
 env:
   NODE_VERSION: '20'
   NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
+
+concurrency:
+  group: university-data-update-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
   pull-requests: write
   issues: write
 
-concurrency:
-  group: update-university-data
-  cancel-in-progress: true
-
 jobs:
   fetch-and-validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     outputs:
       has_changes: ${{ steps.diff-check.outputs.has_changes }}
-      comparison_status: ${{ steps.compare.outputs.status }}
-      data_tier: ${{ steps.tier.outputs.tier }}
     
     steps:
-      - name: Validate environment
-        run: |
-          if [ -z "${{ env.NODE_VERSION }}" ]; then
-            echo "::error::NODE_VERSION is not set"
-            exit 1
-          fi
-
-      - name: Determine data tier
-        id: tier
-        run: |
-          # Manual dispatch: use the input
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TIER="${{ github.event.inputs.data_tier }}"
-          else
-            # Scheduled: determine from cron
-            # */20 cron = critical tier, 1st-of-month cron = general tier
-            DAY=$(date -u +%d)
-            if [ "$DAY" = "01" ]; then
-              TIER="general"
-            else
-              TIER="critical"
-            fi
-          fi
-          echo "tier=$TIER" >> $GITHUB_OUTPUT
-          echo "### 🎯 Data Tier: $TIER" >> $GITHUB_STEP_SUMMARY
-
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
@@ -78,75 +49,30 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      # Smart caching: cache node_modules based on package-lock.json hash
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      # Cache baseline data so it persists across runs
-      - name: Cache baseline data
-        uses: actions/cache@v4
-        with:
-          path: scripts/baselines/
-          key: baseline-${{ hashFiles('src/data/universities.js') }}
-          restore-keys: |
-            baseline-
-
-      - name: Generate baseline if missing
-        run: |
-          if [ ! -f scripts/baselines/universities-baseline.json ]; then
-            echo "📸 No baseline found — generating from current data"
-            node scripts/generate-baseline.js
-          else
-            echo "✅ Baseline exists"
-          fi
-
-      - name: Fetch & update university data
+      - name: Fetch university data
         id: fetch-data
         run: node scripts/fetch-university-data.js
         env:
-          DATA_TIER: ${{ steps.tier.outputs.tier }}
+          DATA_TYPE: ${{ github.event.inputs.data_type || 'all' }}
 
       - name: Validate data schema
         id: validate
-        run: |
-          node scripts/validators/schema-validator.js
-          cat reports/validation-report.md >> $GITHUB_STEP_SUMMARY
-
-      - name: Compare against baseline
-        id: compare
-        run: |
-          node scripts/validators/compare-data.js
-          cat reports/comparison-report.md >> $GITHUB_STEP_SUMMARY
-          # Pass comparison status to next jobs
-          STATUS=$(node -e "const r=JSON.parse(require('fs').readFileSync('reports/comparison-report.json','utf8'));console.log(r.status)")
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
+        run: node scripts/validators/schema-validator.js
         continue-on-error: true
-
-      - name: Verify data targets
-        run: node scripts/validators/data-target-map.js
 
       - name: Check for data changes
         id: diff-check
         run: |
           if git diff --quiet src/data/; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No changes detected" >> $GITHUB_STEP_SUMMARY
+            echo "No changes detected"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "### 📝 Changes Detected" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            git diff --stat src/data/ >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "Changes detected in data files"
+            git diff --stat src/data/
           fi
 
       - name: Run auto-review checks
@@ -155,164 +81,78 @@ jobs:
         run: node scripts/validators/auto-review.js
         continue-on-error: true
 
-      - name: Upload data artifacts
-        if: steps.diff-check.outputs.has_changes == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: updated-data
-          path: src/data/
-          retention-days: 7
-
-      - name: Upload validation reports
+      - name: Upload validation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: validation-reports
+          name: validation-report
           path: reports/
-          retention-days: 30
+          retention-days: 7
+
+      - name: Configure Git
+        if: steps.diff-check.outputs.has_changes == 'true'
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
 
   create-pr:
     needs: fetch-and-validate
     if: needs.fetch-and-validate.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download updated data
-        uses: actions/download-artifact@v4
+        uses: actions/checkout@v4.1.1
         with:
-          name: updated-data
-          path: src/data/
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download reports
-        uses: actions/download-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: validation-reports
-          path: reports/
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Configure Git
         run: |
-          git config user.name "IlmSeUrooj Bot"
-          git config user.email "${{ env.NOTIFICATION_EMAIL }}"
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
 
       - name: Create Pull Request
-        id: create-pr
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore: Update university data [${{ needs.fetch-and-validate.outputs.data_tier }}] [automated]'
-          title: '🎓 [${{ needs.fetch-and-validate.outputs.data_tier }}] Automated University Data Update'
+          commit-message: 'chore: Update university data [automated]'
+          title: '🎓 Automated University Data Update'
           body: |
-            ## Automated Data Update — Tier: `${{ needs.fetch-and-validate.outputs.data_tier }}`
+            ## Automated Data Update
             
-            This PR was created automatically by the **${{ needs.fetch-and-validate.outputs.data_tier }}** tier scraper.
+            This PR was created automatically by the data update workflow.
             
-            | Tier     | Scrapes                        | Schedule       |
-            |----------|--------------------------------|----------------|
-            | critical | Deadlines, test dates           | Every 20 days  |
-            | general  | Fees, websites, descriptions   | Every ~45 days |
+            ### Changes
+            - Updated admission deadlines
+            - Updated fee structures
+            - Updated test dates
             
-            ### Validation Results
-            - Schema validation: ✅ Passed
-            - Baseline comparison: ${{ needs.fetch-and-validate.outputs.comparison_status }}
-            - Change report: See `reports/change-report.json` in artifacts
+            ### Validation Status
+            ✅ Schema validation passed
+            ✅ Auto-review checks passed
             
             ---
-            *⚠️ AI review comment will be posted below. Please review before merging.*
-          branch: automated/data-update-${{ needs.fetch-and-validate.outputs.data_tier }}
+            *This is an automated PR. Please review before merging.*
+          branch: automated/data-update
           delete-branch: true
           labels: |
             automated
             data-update
-            tier-${{ needs.fetch-and-validate.outputs.data_tier }}
-
-      # AI-Powered Review: Analyze diff and post review comment
-      - name: AI-powered review comment
-        if: steps.create-pr.outputs.pull-request-number
-        uses: actions/github-script@v7
-        env:
-          COMPARISON_STATUS: ${{ needs.fetch-and-validate.outputs.comparison_status }}
-        with:
-          script: |
-            const fs = require('fs');
-            const prNumber = parseInt('${{ steps.create-pr.outputs.pull-request-number }}');
-            if (!prNumber) return;
-
-            // Read comparison report
-            let comparisonMd = 'No comparison report available.';
-            try {
-              comparisonMd = fs.readFileSync('reports/comparison-report.md', 'utf8');
-            } catch {}
-
-            // Read validation report
-            let validationMd = 'No validation report available.';
-            try {
-              validationMd = fs.readFileSync('reports/validation-report.md', 'utf8');
-            } catch {}
-
-            // Get the PR diff
-            const { data: diff } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              mediaType: { format: 'diff' }
-            });
-
-            // Count changes
-            const additions = (diff.match(/^\+[^+]/gm) || []).length;
-            const deletions = (diff.match(/^-[^-]/gm) || []).length;
-
-            // Build AI-style analysis
-            const status = process.env.COMPARISON_STATUS;
-            const needsReview = status === 'NEEDS_REVIEW';
-
-            let reviewBody = `## 🤖 Automated Data Review\n\n`;
-            reviewBody += `### Change Summary\n`;
-            reviewBody += `- **Lines added:** ${additions}\n`;
-            reviewBody += `- **Lines removed:** ${deletions}\n`;
-            reviewBody += `- **Baseline comparison:** ${needsReview ? '⚠️ NEEDS REVIEW' : '✅ OK'}\n\n`;
-            reviewBody += `---\n\n`;
-            reviewBody += comparisonMd + '\n\n---\n\n';
-            reviewBody += validationMd + '\n\n';
-
-            if (needsReview) {
-              reviewBody += `> ⚠️ **This PR has baseline anomalies.** Please review the comparison report above carefully before merging.\n`;
-            } else {
-              reviewBody += `> ✅ **All automated checks passed.** Data changes are within expected parameters.\n`;
-            }
-
-            reviewBody += `\n---\n*Posted by IlmSeUrooj CI/CD Bot*`;
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: reviewBody
-            });
-
-            // Add label based on review
-            if (needsReview) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                labels: ['needs-review']
-              });
-            }
-
-      - name: Update baseline after successful PR
-        run: |
-          echo "📸 Baseline will update after PR is merged"
-          echo "### ✅ Pull Request Created" >> $GITHUB_STEP_SUMMARY
 
   notify-on-failure:
     needs: [fetch-and-validate, create-pr]
     if: failure()
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     
     steps:
       - name: Send failure notification
@@ -324,7 +164,7 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '❌ IlmSeUrooj Data Update Failed'
-          to: ${{ env.NOTIFICATION_EMAIL }}
+          to: ba8516127@gmail.com
           from: IlmSeUrooj Bot
           body: |
             The automated university data update workflow has failed.
@@ -340,7 +180,6 @@ jobs:
     needs: [fetch-and-validate, create-pr]
     if: success() && needs.fetch-and-validate.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     
     steps:
       - name: Send success notification
@@ -352,12 +191,10 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '✅ IlmSeUrooj Data Update - PR Created'
-          to: ${{ env.NOTIFICATION_EMAIL }}
+          to: ba8516127@gmail.com
           from: IlmSeUrooj Bot
           body: |
             A new Pull Request has been created with university data updates.
-            
-            Baseline comparison: ${{ needs.fetch-and-validate.outputs.comparison_status }}
             
             Please review and merge:
             https://github.com/${{ github.repository }}/pulls

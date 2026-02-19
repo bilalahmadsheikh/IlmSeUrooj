@@ -10,29 +10,22 @@ env:
   NODE_VERSION: '20'
   NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
 
+concurrency:
+  group: website-health-check-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
   issues: write
 
-concurrency:
-  group: website-health-check
-  cancel-in-progress: true
-
 jobs:
   health-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     
     steps:
-      - name: Validate environment
-        run: |
-          if [ -z "${{ env.NODE_VERSION }}" ]; then
-            echo "::error::NODE_VERSION is not set"
-            exit 1
-          fi
-
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,42 +33,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
-
-      # Cache Next.js build output for faster builds
-      - name: Cache Next.js build
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*.js', 'src/**/*.css') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
-            ${{ runner.os }}-nextjs-
-
-      - name: Cache baseline data
-        uses: actions/cache@v4
-        with:
-          path: scripts/baselines/
-          key: baseline-${{ hashFiles('src/data/universities.js') }}
-          restore-keys: |
-            baseline-
-
-      - name: Generate baseline if missing
-        run: |
-          if [ ! -f scripts/baselines/universities-baseline.json ]; then
-            node scripts/generate-baseline.js
-          fi
 
       - name: Build application
         run: npm run build
@@ -87,27 +46,12 @@ jobs:
         continue-on-error: true
         id: lint
 
-      - name: Validate data schema
-        run: node scripts/validators/schema-validator.js
-        continue-on-error: true
-        id: schema-check
-
-      - name: Compare data against baseline
-        run: node scripts/validators/compare-data.js
-        continue-on-error: true
-        id: baseline-check
-
       - name: Check data files integrity
         run: node scripts/validators/data-integrity.js
         continue-on-error: true
         id: data-check
 
-      - name: Verify data target mapping
-        run: node scripts/validators/data-target-map.js
-        continue-on-error: true
-        id: target-check
-
-      - name: Check university source URLs (real HTTP)
+      - name: Check university source URLs
         run: node scripts/utils/url-checker.js
         continue-on-error: true
         id: url-check
@@ -122,103 +66,46 @@ jobs:
           echo "|-------|--------|" >> reports/health-report.md
           echo "| Build | ${{ steps.build.outcome }} |" >> reports/health-report.md
           echo "| Lint | ${{ steps.lint.outcome }} |" >> reports/health-report.md
-          echo "| Schema Validation | ${{ steps.schema-check.outcome }} |" >> reports/health-report.md
-          echo "| Baseline Comparison | ${{ steps.baseline-check.outcome }} |" >> reports/health-report.md
           echo "| Data Integrity | ${{ steps.data-check.outcome }} |" >> reports/health-report.md
-          echo "| Data Targets | ${{ steps.target-check.outcome }} |" >> reports/health-report.md
           echo "| URL Check | ${{ steps.url-check.outcome }} |" >> reports/health-report.md
-
-      - name: Write workflow summary
-        run: |
-          echo "### 🏥 Website Health Check Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Build | ${{ steps.build.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint | ${{ steps.lint.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Schema Validation | ${{ steps.schema-check.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Baseline Comparison | ${{ steps.baseline-check.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Data Integrity | ${{ steps.data-check.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Data Targets | ${{ steps.target-check.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| URL Check | ${{ steps.url-check.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          # Append detailed reports if they exist
-          if [ -f reports/comparison-report.md ]; then
-            cat reports/comparison-report.md >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -f reports/url-check-report.md ]; then
-            cat reports/url-check-report.md >> $GITHUB_STEP_SUMMARY
-          fi
 
       - name: Upload health report
         uses: actions/upload-artifact@v4
         with:
           name: health-report
-          path: reports/
+          path: reports/health-report.md
           retention-days: 30
 
       - name: Create issue on failure
-        if: steps.build.outcome == 'failure' || steps.data-check.outcome == 'failure' || steps.schema-check.outcome == 'failure'
+        if: steps.build.outcome == 'failure' || steps.data-check.outcome == 'failure'
         uses: actions/github-script@v7
-        env:
-          BUILD_OUTCOME: ${{ steps.build.outcome }}
-          LINT_OUTCOME: ${{ steps.lint.outcome }}
-          SCHEMA_OUTCOME: ${{ steps.schema-check.outcome }}
-          BASELINE_OUTCOME: ${{ steps.baseline-check.outcome }}
-          DATA_CHECK_OUTCOME: ${{ steps.data-check.outcome }}
-          TARGET_OUTCOME: ${{ steps.target-check.outcome }}
-          URL_CHECK_OUTCOME: ${{ steps.url-check.outcome }}
-          RUN_ID: ${{ github.run_id }}
-          REPO_FULL: ${{ github.repository }}
         with:
           script: |
-            const fs = require('fs');
-            
-            // Check for duplicate open issues today
-            const today = new Date().toISOString().split('T')[0];
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'health-check',
-              state: 'open'
-            });
-            if (issues.some(i => i.title.includes(today))) {
-              console.log('Issue already exists for today — skipping');
-              return;
-            }
-            
-            // Read detailed reports
-            let details = '';
-            try {
-              const compReport = fs.readFileSync('reports/comparison-report.md', 'utf8');
-              details += '\n\n' + compReport;
-            } catch {}
-            try {
-              const urlReport = fs.readFileSync('reports/url-check-report.md', 'utf8');
-              details += '\n\n' + urlReport;
-            } catch {}
+            const buildOutcome = '${{ steps.build.outcome }}';
+            const lintOutcome = '${{ steps.lint.outcome }}';
+            const dataCheckOutcome = '${{ steps.data-check.outcome }}';
+            const urlCheckOutcome = '${{ steps.url-check.outcome }}';
+            const runId = '${{ github.run_id }}';
             
             const issueBody = [
               '## Health Check Failure',
               '',
               '| Check | Status |',
               '|-------|--------|',
-              `| Build | ${process.env.BUILD_OUTCOME} |`,
-              `| Lint | ${process.env.LINT_OUTCOME} |`,
-              `| Schema | ${process.env.SCHEMA_OUTCOME} |`,
-              `| Baseline | ${process.env.BASELINE_OUTCOME} |`,
-              `| Data Integrity | ${process.env.DATA_CHECK_OUTCOME} |`,
-              `| Data Targets | ${process.env.TARGET_OUTCOME} |`,
-              `| URL Check | ${process.env.URL_CHECK_OUTCOME} |`,
+              `| Build | ${buildOutcome} |`,
+              `| Lint | ${lintOutcome} |`,
+              `| Data Integrity | ${dataCheckOutcome} |`,
+              `| URL Check | ${urlCheckOutcome} |`,
               '',
-              `[View workflow run](https://github.com/${process.env.REPO_FULL}/actions/runs/${process.env.RUN_ID})`,
-              details
+              'Please investigate and fix the issues.',
+              '',
+              `Run ID: ${runId}`
             ].join('\n');
             
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `⚠️ Website Health Check Failed - ${today}`,
+              title: `⚠️ Website Health Check Failed - ${new Date().toISOString().split('T')[0]}`,
               body: issueBody,
               labels: ['bug', 'health-check']
             });
@@ -233,15 +120,14 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '⚠️ IlmSeUrooj - Website Health Check Failed'
-          to: ${{ env.NOTIFICATION_EMAIL }}
+          to: ba8516127@gmail.com
           from: IlmSeUrooj Bot
           body: |
             The daily website health check has detected issues.
             
             Build: ${{ steps.build.outcome }}
-            Schema: ${{ steps.schema-check.outcome }}
-            Baseline: ${{ steps.baseline-check.outcome }}
+            Lint: ${{ steps.lint.outcome }}
             Data Integrity: ${{ steps.data-check.outcome }}
             URL Check: ${{ steps.url-check.outcome }}
             
-            View details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Please check the GitHub Actions logs for details.

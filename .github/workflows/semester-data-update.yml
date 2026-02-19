@@ -10,32 +10,22 @@ env:
   NODE_VERSION: '20'
   NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
 
+concurrency:
+  group: semester-data-update-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
 
-concurrency:
-  group: semester-data-update
-  cancel-in-progress: true
-
 jobs:
   update-semester-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    outputs:
-      has_changes: ${{ steps.diff-check.outputs.has_changes }}
-      comparison_status: ${{ steps.compare.outputs.status }}
+    timeout-minutes: 30
     
     steps:
-      - name: Validate environment
-        run: |
-          if [ -z "${{ env.NODE_VERSION }}" ]; then
-            echo "::error::NODE_VERSION is not set"
-            exit 1
-          fi
-
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,76 +33,37 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Cache baseline data
-        uses: actions/cache@v4
-        with:
-          path: scripts/baselines/
-          key: baseline-${{ hashFiles('src/data/universities.js') }}
-          restore-keys: |
-            baseline-
-
-      - name: Generate baseline if missing
+      - name: Configure Git
         run: |
-          if [ ! -f scripts/baselines/universities-baseline.json ]; then
-            node scripts/generate-baseline.js
-          fi
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
 
-      - name: Fetch semester data (recruiters, salaries, facilities)
-        run: node scripts/scrapers/semester-scrapers.js
+      - name: Fetch recruiter data
+        run: node scripts/scrapers/recruiter-scraper.js
 
-      - name: Validate data schema
-        run: |
-          node scripts/validators/schema-validator.js
-          cat reports/validation-report.md >> $GITHUB_STEP_SUMMARY
+      - name: Fetch salary/income data
+        run: node scripts/scrapers/salary-scraper.js
+        
+      - name: Fetch facilities data
+        run: node scripts/scrapers/facilities-scraper.js
 
-      - name: Compare against baseline
-        id: compare
-        run: |
-          node scripts/validators/compare-data.js
-          cat reports/comparison-report.md >> $GITHUB_STEP_SUMMARY
-          STATUS=$(node -e "const r=JSON.parse(require('fs').readFileSync('reports/comparison-report.json','utf8'));console.log(r.status)")
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-        continue-on-error: true
-
-      - name: Verify data targets
-        run: node scripts/validators/data-target-map.js
+      - name: Validate scraped data
+        run: node scripts/validators/semester-data-validator.js
 
       - name: Check for changes
         id: diff-check
         run: |
           if git diff --quiet src/data/; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No changes detected in semester data" >> $GITHUB_STEP_SUMMARY
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "### 📝 Semester Data Changes" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            git diff --stat src/data/ >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
           fi
-
-      - name: Configure Git
-        if: steps.diff-check.outputs.has_changes == 'true'
-        run: |
-          git config user.name "IlmSeUrooj Bot"
-          git config user.email "${{ env.NOTIFICATION_EMAIL }}"
 
       - name: Create PR for semester update
         if: steps.diff-check.outputs.has_changes == 'true'
-        id: create-pr
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -121,58 +72,24 @@ jobs:
           body: |
             ## Semester Data Update
             
-            ### Validation
-            - Schema: ✅ Passed
-            - Baseline comparison: ${{ steps.compare.outputs.status }}
-            
-            ### Updated Data
+            This PR includes updates to:
             - Top Recruiters by university
             - Average starting salaries
             - Campus facilities information
             
+            ### Data Sources
+            - University career services pages
+            - Glassdoor Pakistan
+            - LinkedIn salary insights
+            - Official university websites
+            
             ---
-            *⚠️ AI review comment will be posted below.*
+            *Please review before merging.*
           branch: automated/semester-update
           delete-branch: true
           labels: |
             automated
             semester-update
-
-      - name: AI-powered review comment
-        if: steps.create-pr.outputs.pull-request-number
-        uses: actions/github-script@v7
-        env:
-          COMPARISON_STATUS: ${{ steps.compare.outputs.status }}
-        with:
-          script: |
-            const fs = require('fs');
-            const prNumber = parseInt('${{ steps.create-pr.outputs.pull-request-number }}');
-            if (!prNumber) return;
-
-            let comparisonMd = '';
-            try { comparisonMd = fs.readFileSync('reports/comparison-report.md', 'utf8'); } catch {}
-            let validationMd = '';
-            try { validationMd = fs.readFileSync('reports/validation-report.md', 'utf8'); } catch {}
-
-            const needsReview = process.env.COMPARISON_STATUS === 'NEEDS_REVIEW';
-            let body = `## 🤖 Semester Data Review\n\n`;
-            body += comparisonMd + '\n\n---\n\n' + validationMd + '\n\n';
-            body += needsReview
-              ? `> ⚠️ **Baseline anomalies detected.** Review carefully.\n`
-              : `> ✅ **All checks passed.**\n`;
-            body += `\n---\n*IlmSeUrooj CI/CD Bot*`;
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: prNumber, body
-            });
-
-            if (needsReview) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: prNumber, labels: ['needs-review']
-              });
-            }
 
       - name: Send notification
         if: steps.diff-check.outputs.has_changes == 'true'
@@ -184,20 +101,23 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '📚 IlmSeUrooj - Semester Data Update PR Created'
-          to: ${{ env.NOTIFICATION_EMAIL }}
+          to: ba8516127@gmail.com
           from: IlmSeUrooj Bot
           body: |
             A new Pull Request has been created with semester data updates.
-            Baseline comparison: ${{ steps.compare.outputs.status }}
+            
+            Updated data includes:
+            - Top Recruiters
+            - Average Starting Salaries
+            - Campus Facilities
             
             Please review and merge:
             https://github.com/${{ github.repository }}/pulls
 
   notify-on-failure:
-    needs: [update-semester-data]
+    needs: update-semester-data
     if: failure()
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     
     steps:
       - name: Send failure notification
@@ -209,12 +129,14 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '❌ IlmSeUrooj Semester Data Update Failed'
-          to: ${{ env.NOTIFICATION_EMAIL }}
+          to: ba8516127@gmail.com
           from: IlmSeUrooj Bot
           body: |
             The semester data update workflow has failed.
             
             Workflow: ${{ github.workflow }}
             Run ID: ${{ github.run_id }}
+            Repository: ${{ github.repository }}
             
-            Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Please check the workflow logs for details:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

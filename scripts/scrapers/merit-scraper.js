@@ -46,29 +46,95 @@ class MeritScraper {
         console.log(`\n📊 Merit Scraper - Year ${this.year}`);
         console.log('================================\n');
 
+        const BaseScraper = require('./base-scraper');
+        const scraper = new BaseScraper({ rateLimitDelay: 3000 });
+
         for (const [key, source] of Object.entries(MERIT_SOURCES)) {
             console.log(`🔍 Scraping ${source.name}...`);
 
             try {
-                // In production, this would use puppeteer/cheerio
-                // For now, we log the source and create a placeholder
+                let meritData = null;
+
+                // Try scraping with Cheerio first (faster)
+                try {
+                    const $ = await scraper.fetchWithCheerio(source.url);
+                    meritData = this.extractMeritFromHTML($, key);
+                } catch (cheerioError) {
+                    // Fallback to Puppeteer for JavaScript-heavy sites
+                    try {
+                        const page = await scraper.fetchWithPuppeteer(source.url);
+                        const content = await page.content();
+                        const $ = require('cheerio').load(content);
+                        meritData = this.extractMeritFromHTML($, key);
+                        await page.close();
+                    } catch (puppeteerError) {
+                        console.log(`   ⚠️  Could not scrape: ${puppeteerError.message}`);
+                    }
+                }
+
                 this.results[key] = {
                     university: source.name,
                     sourceUrl: source.url,
                     year: this.year,
                     lastScraped: new Date().toISOString(),
-                    status: 'pending_manual_verification',
-                    data: null
+                    status: meritData ? 'scraped' : 'pending_manual_verification',
+                    data: meritData
                 };
 
-                console.log(`   ✅ Source identified: ${source.url}`);
+                if (meritData) {
+                    console.log(`   ✅ Scraped merit data`);
+                } else {
+                    console.log(`   ⚠️  Source identified but no data extracted: ${source.url}`);
+                }
             } catch (error) {
                 this.errors.push({ university: key, error: error.message });
                 console.log(`   ❌ Error: ${error.message}`);
             }
         }
 
+        await scraper.cleanup();
         return this.generateReport();
+    }
+
+    extractMeritFromHTML($, universityKey) {
+        const meritData = {};
+        const bodyText = $('body').text();
+
+        // Extract percentages (e.g., "75.3%", "CS: 76.8%")
+        const percentagePattern = /([A-Z]{2,4}|CS|SE|AI|DS|Cyber|EE|ME|CE|Pharm-D)[:\s]*(\d+\.?\d*)%/gi;
+        const percentageMatches = [...bodyText.matchAll(percentagePattern)];
+
+        if (percentageMatches.length > 0) {
+            percentageMatches.forEach(match => {
+                const program = match[1].trim();
+                const cutoff = parseFloat(match[2]);
+                if (cutoff > 40 && cutoff < 100) {
+                    meritData[program] = cutoff;
+                }
+            });
+        }
+
+        // Extract positions (e.g., "#324", "Position: 450")
+        const positionPattern = /(?:position|rank|seat|merit)[:\s]*#?(\d+)/gi;
+        const positionMatches = [...bodyText.matchAll(positionPattern)];
+
+        if (positionMatches.length > 0 && Object.keys(meritData).length === 0) {
+            positionMatches.forEach((match, index) => {
+                const position = parseInt(match[1]);
+                if (position > 0 && position < 10000) {
+                    meritData[`Position_${index + 1}`] = `#${position}`;
+                }
+            });
+        }
+
+        // Extract dates (for merit list publication dates)
+        const datePattern = /(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})/g;
+        const dateMatches = [...bodyText.matchAll(datePattern)];
+        if (dateMatches.length > 0) {
+            meritData.publicationDate = dateMatches[0][0];
+        }
+
+        return Object.keys(meritData).length > 0 ? meritData : null;
     }
 
     generateReport() {

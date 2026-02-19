@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       year:
-        description: 'Year for merit data (leave empty for current year)'
-        required: false
-        default: ''
+        description: 'Year for merit data'
+        required: true
+        default: '2024'
 
 env:
   NODE_VERSION: '20'
@@ -20,36 +20,17 @@ permissions:
   issues: write
 
 concurrency:
-  group: annual-merit-update
-  cancel-in-progress: true
+  group: annual-merit-update-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   fetch-merit-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     
     steps:
-      - name: Validate environment
-        run: |
-          if [ -z "${{ env.NODE_VERSION }}" ]; then
-            echo "::error::NODE_VERSION is not set"
-            exit 1
-          fi
-
-      - name: Determine merit year
-        id: year
-        run: |
-          INPUT_YEAR="${{ github.event.inputs.year }}"
-          if [ -z "$INPUT_YEAR" ]; then
-            MERIT_YEAR=$(date +%Y)
-          else
-            MERIT_YEAR="$INPUT_YEAR"
-          fi
-          echo "value=$MERIT_YEAR" >> $GITHUB_OUTPUT
-          echo "📅 Merit year: **$MERIT_YEAR**" >> $GITHUB_STEP_SUMMARY
-
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -57,31 +38,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
-
-      # Cache previous merit reports to avoid re-scraping same year
-      - name: Cache merit reports
-        uses: actions/cache@v4
-        with:
-          path: reports/merit-*
-          key: merit-report-${{ steps.year.outputs.value }}
 
       - name: Fetch merit data from sources
         id: fetch-merit
         run: node scripts/scrapers/merit-scraper.js
         env:
-          MERIT_YEAR: ${{ steps.year.outputs.value }}
+          MERIT_YEAR: ${{ github.event.inputs.year || '2024' }}
 
       - name: Generate merit report
         run: node scripts/generate-merit-report.js
@@ -89,14 +53,14 @@ jobs:
       - name: Upload merit report
         uses: actions/upload-artifact@v4
         with:
-          name: merit-report-${{ steps.year.outputs.value }}
+          name: merit-report-${{ github.event.inputs.year || '2024' }}
           path: reports/merit-report.md
-          retention-days: 30
+          retention-days: 90
 
       - name: Create Issue for Manual Review
         uses: actions/github-script@v7
         env:
-          MERIT_YEAR: ${{ steps.year.outputs.value }}
+          MERIT_YEAR: ${{ github.event.inputs.year || '2024' }}
         with:
           script: |
             const fs = require('fs');
@@ -104,33 +68,10 @@ jobs:
               ? fs.readFileSync('reports/merit-report.md', 'utf8')
               : 'No report generated';
             
-            const meritYear = process.env.MERIT_YEAR;
-            
-            // Check if issue already exists for this year
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'merit-update,yearly',
-              state: 'open'
-            });
-            
-            const existingIssue = issues.find(i => i.title.includes(meritYear));
-            if (existingIssue) {
-              // Update existing issue instead of creating duplicate
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existingIssue.number,
-                body: `## 🔄 Updated Merit Data (Re-run)\n\n\`\`\`\n${report.substring(0, 2000)}\n\`\`\`\n\n*Updated: ${new Date().toISOString()}*`
-              });
-              console.log(`Updated existing issue #${existingIssue.number}`);
-              return;
-            }
-            
             const issueBody = [
               '## Merit List Update Required - Manual Review',
               '',
-              `This is an automated issue to update merit list data for **${meritYear}**.`,
+              'This is an automated issue to update merit list data for the year.',
               '',
               '### Sources Checked',
               '- learnospot.com/fast-university-closing-merits/',
@@ -158,17 +99,10 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `📊 Annual Merit List Update - ${meritYear}`,
+              title: `📊 Annual Merit List Update - ${process.env.MERIT_YEAR || new Date().getFullYear()}`,
               body: issueBody,
               labels: ['merit-update', 'manual-review', 'yearly']
             });
-
-      - name: Write summary
-        run: |
-          echo "### ✅ Merit Update Workflow Complete" >> $GITHUB_STEP_SUMMARY
-          echo "- Year: **${{ steps.year.outputs.value }}**" >> $GITHUB_STEP_SUMMARY
-          echo "- GitHub Issue created for manual review" >> $GITHUB_STEP_SUMMARY
-          echo "- Merit report uploaded as artifact" >> $GITHUB_STEP_SUMMARY
 
       - name: Send notification email
         continue-on-error: true
@@ -179,12 +113,19 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '📊 IlmSeUrooj - Annual Merit Update Review Required'
-          to: ${{ env.NOTIFICATION_EMAIL }}
+          to: ba8516127@gmail.com
           from: IlmSeUrooj Bot
           body: |
-            The annual merit list update workflow has completed for ${{ steps.year.outputs.value }}.
+            The annual merit list update workflow has completed.
             
             A GitHub Issue has been created for manual review.
             Please review the scraped merit data and update the website.
+            
+            View the issue at your GitHub repository.
+            
+            The merit data needs to be verified against:
+            - learnospot.com
+            - paklearningspot.com
+            - Official university announcements
             
             This requires MANUAL REVIEW before updating.
