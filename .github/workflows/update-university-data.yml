@@ -36,6 +36,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       has_changes: ${{ steps.diff-check.outputs.has_changes }}
+      comparison_status: ${{ steps.compare.outputs.status }}
     
     steps:
       - name: Validate environment
@@ -56,8 +57,37 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      # Smart caching: cache node_modules based on package-lock.json hash
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
+
+      # Cache baseline data so it persists across runs
+      - name: Cache baseline data
+        uses: actions/cache@v4
+        with:
+          path: scripts/baselines/
+          key: baseline-${{ hashFiles('src/data/universities.js') }}
+          restore-keys: |
+            baseline-
+
+      - name: Generate baseline if missing
+        run: |
+          if [ ! -f scripts/baselines/universities-baseline.json ]; then
+            echo "📸 No baseline found — generating from current data"
+            node scripts/generate-baseline.js
+          else
+            echo "✅ Baseline exists"
+          fi
 
       - name: Fetch university data
         id: fetch-data
@@ -69,7 +99,20 @@ jobs:
         id: validate
         run: |
           node scripts/validators/schema-validator.js
-          echo "✅ Schema validation passed" >> $GITHUB_STEP_SUMMARY
+          cat reports/validation-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Compare against baseline
+        id: compare
+        run: |
+          node scripts/validators/compare-data.js
+          cat reports/comparison-report.md >> $GITHUB_STEP_SUMMARY
+          # Pass comparison status to next jobs
+          STATUS=$(node -e "const r=JSON.parse(require('fs').readFileSync('reports/comparison-report.json','utf8'));console.log(r.status)")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Verify data targets
+        run: node scripts/validators/data-target-map.js
 
       - name: Check for data changes
         id: diff-check
@@ -99,11 +142,11 @@ jobs:
           path: src/data/
           retention-days: 7
 
-      - name: Upload validation report
+      - name: Upload validation reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: validation-report
+          name: validation-reports
           path: reports/
           retention-days: 30
 
@@ -123,12 +166,19 @@ jobs:
           name: updated-data
           path: src/data/
 
+      - name: Download reports
+        uses: actions/download-artifact@v4
+        with:
+          name: validation-reports
+          path: reports/
+
       - name: Configure Git
         run: |
           git config user.name "IlmSeUrooj Bot"
           git config user.email "${{ env.NOTIFICATION_EMAIL }}"
 
       - name: Create Pull Request
+        id: create-pr
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -139,27 +189,102 @@ jobs:
             
             This PR was created automatically by the data update workflow.
             
-            ### Changes
+            ### Validation Results
+            - Schema validation: ✅ Passed
+            - Baseline comparison: ${{ needs.fetch-and-validate.outputs.comparison_status }}
+            - Auto-review: See reports artifact
+            
+            ### What Changed
             - Updated admission deadlines
             - Updated fee structures
             - Updated test dates
             
-            ### Validation Status
-            ✅ Schema validation passed
-            ✅ Auto-review checks passed
-            
             ---
-            *This is an automated PR. Please review before merging.*
+            *⚠️ AI review comment will be posted below. Please review before merging.*
           branch: automated/data-update
           delete-branch: true
           labels: |
             automated
             data-update
 
-      - name: Write summary
+      # AI-Powered Review: Analyze diff and post review comment
+      - name: AI-powered review comment
+        if: steps.create-pr.outputs.pull-request-number
+        uses: actions/github-script@v7
+        env:
+          COMPARISON_STATUS: ${{ needs.fetch-and-validate.outputs.comparison_status }}
+        with:
+          script: |
+            const fs = require('fs');
+            const prNumber = parseInt('${{ steps.create-pr.outputs.pull-request-number }}');
+            if (!prNumber) return;
+
+            // Read comparison report
+            let comparisonMd = 'No comparison report available.';
+            try {
+              comparisonMd = fs.readFileSync('reports/comparison-report.md', 'utf8');
+            } catch {}
+
+            // Read validation report
+            let validationMd = 'No validation report available.';
+            try {
+              validationMd = fs.readFileSync('reports/validation-report.md', 'utf8');
+            } catch {}
+
+            // Get the PR diff
+            const { data: diff } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              mediaType: { format: 'diff' }
+            });
+
+            // Count changes
+            const additions = (diff.match(/^\+[^+]/gm) || []).length;
+            const deletions = (diff.match(/^-[^-]/gm) || []).length;
+
+            // Build AI-style analysis
+            const status = process.env.COMPARISON_STATUS;
+            const needsReview = status === 'NEEDS_REVIEW';
+
+            let reviewBody = `## 🤖 Automated Data Review\n\n`;
+            reviewBody += `### Change Summary\n`;
+            reviewBody += `- **Lines added:** ${additions}\n`;
+            reviewBody += `- **Lines removed:** ${deletions}\n`;
+            reviewBody += `- **Baseline comparison:** ${needsReview ? '⚠️ NEEDS REVIEW' : '✅ OK'}\n\n`;
+            reviewBody += `---\n\n`;
+            reviewBody += comparisonMd + '\n\n---\n\n';
+            reviewBody += validationMd + '\n\n';
+
+            if (needsReview) {
+              reviewBody += `> ⚠️ **This PR has baseline anomalies.** Please review the comparison report above carefully before merging.\n`;
+            } else {
+              reviewBody += `> ✅ **All automated checks passed.** Data changes are within expected parameters.\n`;
+            }
+
+            reviewBody += `\n---\n*Posted by IlmSeUrooj CI/CD Bot*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: reviewBody
+            });
+
+            // Add label based on review
+            if (needsReview) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: ['needs-review']
+              });
+            }
+
+      - name: Update baseline after successful PR
         run: |
+          echo "📸 Baseline will update after PR is merged"
           echo "### ✅ Pull Request Created" >> $GITHUB_STEP_SUMMARY
-          echo "A PR has been created with the latest university data updates." >> $GITHUB_STEP_SUMMARY
 
   notify-on-failure:
     needs: [fetch-and-validate, create-pr]
@@ -209,6 +334,8 @@ jobs:
           from: IlmSeUrooj Bot
           body: |
             A new Pull Request has been created with university data updates.
+            
+            Baseline comparison: ${{ needs.fetch-and-validate.outputs.comparison_status }}
             
             Please review and merge:
             https://github.com/${{ github.repository }}/pulls

@@ -1,0 +1,718 @@
+{
+  "metadata": {
+    "generatedAt": "2026-02-19T12:24:49.770Z",
+    "universityCount": 28,
+    "version": 1,
+    "description": "Known-good data snapshot. New data is compared against this."
+  },
+  "universities": [
+    {
+      "id": 1,
+      "name": "National University of Sciences & Technology (NUST)",
+      "shortName": "NUST",
+      "city": "Islamabad",
+      "type": "Public",
+      "ranking": 1,
+      "established": 1991,
+      "avgFee": "PKR 202,050 per semester (SEECS)",
+      "website": "https://nust.edu.pk",
+      "description": "Pakistan",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-01-25",
+        "testName": "NET Series II",
+        "testDate": "2026-01-31",
+        "applyUrl": "https://ugadmissions.nust.edu.pk"
+      },
+      "fields": [
+        "Pre-Engineering",
+        "Computer Science",
+        "Business",
+        "Medical"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Lahore University of Management Sciences (LUMS)",
+      "shortName": "LUMS",
+      "city": "Lahore",
+      "type": "Private",
+      "ranking": 2,
+      "established": 1985,
+      "avgFee": "PKR 844,460 - 1,154,300 per semester (SBASSE)",
+      "website": "https://lums.edu.pk",
+      "description": "Premier private university known for its business and computer science programs.",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-01-27",
+        "testName": "LCAT",
+        "testDate": "2026-02-15",
+        "applyUrl": "https://admissions.lums.edu.pk"
+      },
+      "fields": [
+        "Business",
+        "Computer Science",
+        "Pre-Engineering"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "FAST-NUCES Islamabad Campus",
+      "shortName": "FAST Isb",
+      "city": "Islamabad",
+      "type": "Private",
+      "ranking": 3,
+      "established": 2000,
+      "avgFee": "PKR 176,000 per semester (Rs. 11,000/CH)",
+      "website": "https://isb.nu.edu.pk",
+      "description": "FAST Islamabad - Most competitive campus with highest merit cutoffs (CS: 75.3%, SE: 73%).",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-06-15",
+        "testName": "FAST NU Test",
+        "testDate": "2026-06-25",
+        "applyUrl": "https://nu.edu.pk/Admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering",
+        "Business"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "FAST-NUCES Lahore Campus",
+      "shortName": "FAST Lhr",
+      "city": "Lahore",
+      "type": "Private",
+      "ranking": 4,
+      "established": 2000,
+      "avgFee": "PKR 176,000 per semester (Rs. 11,000/CH)",
+      "website": "https://lhr.nu.edu.pk",
+      "description": "FAST Lahore - Second most competitive campus (CS: 76.8%, SE: 75.6%).",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-06-15",
+        "testName": "FAST NU Test",
+        "testDate": "2026-06-25",
+        "applyUrl": "https://nu.edu.pk/Admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "FAST-NUCES Karachi Campus",
+      "shortName": "FAST Khi",
+      "city": "Karachi",
+      "type": "Private",
+      "ranking": 5,
+      "established": 2000,
+      "avgFee": "PKR 176,000 per semester (Rs. 11,000/CH)",
+      "website": "https://khi.nu.edu.pk",
+      "description": "FAST Karachi - Good program quality with moderate cutoffs (CS: 68.08%, SE: 66.52%).",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus without Hostel",
+      "admissions": {
+        "deadline": "2026-06-15",
+        "testName": "FAST NU Test",
+        "testDate": "2026-06-25",
+        "applyUrl": "https://nu.edu.pk/Admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "FAST-NUCES Peshawar Campus",
+      "shortName": "FAST Psh",
+      "city": "Peshawar",
+      "type": "Private",
+      "ranking": 14,
+      "established": 2004,
+      "avgFee": "PKR 176,000 per semester (Rs. 11,000/CH)",
+      "website": "https://pwr.nu.edu.pk",
+      "description": "FAST Peshawar - Lower cutoffs campus (CS: 58.46%, SE: 59.73%).",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-06-15",
+        "testName": "FAST NU Test",
+        "testDate": "2026-06-25",
+        "applyUrl": "https://nu.edu.pk/Admissions"
+      },
+      "fields": [
+        "Computer Science"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "FAST-NUCES Chiniot-Faisalabad Campus",
+      "shortName": "FAST CFD",
+      "city": "Chiniot",
+      "type": "Private",
+      "ranking": 15,
+      "established": 2012,
+      "avgFee": "PKR 176,000 per semester (Rs. 11,000/CH)",
+      "website": "https://cfd.nu.edu.pk",
+      "description": "FAST Chiniot-Faisalabad - Lowest cutoffs in FAST (CS: 67.02%, SE: 66.68%).",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-06-15",
+        "testName": "FAST NU Test",
+        "testDate": "2026-06-25",
+        "applyUrl": "https://nu.edu.pk/Admissions"
+      },
+      "fields": [
+        "Computer Science"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "COMSATS University Islamabad (Main Campus)",
+      "shortName": "COMSATS Isb",
+      "city": "Islamabad",
+      "type": "Public",
+      "ranking": 6,
+      "established": 1998,
+      "avgFee": "PKR 138,000 (1st sem) / PKR 116,000 (regular)",
+      "website": "https://islamabad.comsats.edu.pk",
+      "description": "COMSATS Islamabad - Flagship campus with high CS cutoffs (82.7%, SE: 81.6%).",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "NTS NAT",
+        "testDate": "2026-07-30",
+        "applyUrl": "https://admissions.comsats.edu.pk"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering",
+        "Business"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "COMSATS University Lahore Campus",
+      "shortName": "COMSATS Lhr",
+      "city": "Lahore",
+      "type": "Public",
+      "ranking": 7,
+      "established": 2002,
+      "avgFee": "PKR 116,500 (1st sem) / PKR 94,500 (regular)",
+      "website": "https://lahore.comsats.edu.pk",
+      "description": "COMSATS Lahore - Highest CS cutoffs in COMSATS (87.36%, SE: 85.6%)!",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "NTS NAT",
+        "testDate": "2026-07-30",
+        "applyUrl": "https://admissions.comsats.edu.pk"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering",
+        "Business"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "COMSATS University Wah Campus",
+      "shortName": "COMSATS Wah",
+      "city": "Wah Cantt",
+      "type": "Public",
+      "ranking": 12,
+      "established": 2001,
+      "avgFee": "PKR 75,000 - 140,000 per semester",
+      "website": "https://wah.comsats.edu.pk",
+      "description": "COMSATS Wah - Good middle-ground option with ~80% CS cutoffs.",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "NTS NAT",
+        "testDate": "2026-07-30",
+        "applyUrl": "https://admissions.comsats.edu.pk"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "COMSATS University Abbottabad Campus",
+      "shortName": "COMSATS Abbottabad",
+      "city": "Abbottabad",
+      "type": "Public",
+      "ranking": 13,
+      "established": 2001,
+      "avgFee": "PKR 75,000 - 140,000 per semester",
+      "website": "https://abbottabad.comsats.edu.pk",
+      "description": "COMSATS Abbottabad - Scenic campus with CS cutoffs around 78%.",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "NTS NAT",
+        "testDate": "2026-07-30",
+        "applyUrl": "https://admissions.comsats.edu.pk"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering",
+        "Medical"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "COMSATS University Sahiwal Campus",
+      "shortName": "COMSATS Sahiwal",
+      "city": "Sahiwal",
+      "type": "Public",
+      "ranking": 18,
+      "established": 2007,
+      "avgFee": "PKR 155,000 (1st sem) / PKR 133,000 (regular)",
+      "website": "https://sahiwal.comsats.edu.pk",
+      "description": "COMSATS Sahiwal - Lower cutoffs around 68%, easier admission.",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "NTS NAT",
+        "testDate": "2026-07-30",
+        "applyUrl": "https://admissions.comsats.edu.pk"
+      },
+      "fields": [
+        "Computer Science",
+        "Business"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "COMSATS University Attock Campus",
+      "shortName": "COMSATS Attock",
+      "city": "Attock",
+      "type": "Public",
+      "ranking": 20,
+      "established": 2004,
+      "avgFee": "PKR 70,000 - 130,000 per semester",
+      "website": "https://attock.comsats.edu.pk",
+      "description": "COMSATS Attock - One of the easiest COMSATS campuses (~60-65%).",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "NTS NAT",
+        "testDate": "2026-07-30",
+        "applyUrl": "https://admissions.comsats.edu.pk"
+      },
+      "fields": [
+        "Computer Science",
+        "Business"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "COMSATS University Vehari Campus",
+      "shortName": "COMSATS Vehari",
+      "city": "Vehari",
+      "type": "Public",
+      "ranking": 22,
+      "established": 2008,
+      "avgFee": "PKR 65,000 - 120,000 per semester",
+      "website": "https://vehari.comsats.edu.pk",
+      "description": "COMSATS Vehari - Lowest cutoffs in COMSATS system (~55-60%).",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "NTS NAT",
+        "testDate": "2026-07-30",
+        "applyUrl": "https://admissions.comsats.edu.pk"
+      },
+      "fields": [
+        "Computer Science",
+        "Business"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Institute of Business Administration (IBA)",
+      "shortName": "IBA",
+      "city": "Karachi",
+      "type": "Public",
+      "ranking": 8,
+      "established": 1955,
+      "avgFee": "PKR 420,000 per semester (Rs. 28,000/CH × 15)",
+      "website": "https://iba.edu.pk",
+      "description": "Asia",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-01-21",
+        "testName": "IBA Aptitude Test",
+        "testDate": "2026-02-01",
+        "applyUrl": "https://iba.edu.pk/admissions"
+      },
+      "fields": [
+        "Business",
+        "Computer Science"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "University of Engineering & Technology Lahore",
+      "shortName": "UET Lahore",
+      "city": "Lahore",
+      "type": "Public",
+      "ranking": 9,
+      "established": 1921,
+      "avgFee": "PKR 44,450 - 59,150 (subsidized) / 278,950 (self)",
+      "website": "https://uet.edu.pk",
+      "description": "UET Lahore - Flagship campus with highest cutoffs (ME: 81.13%, CS: 78.57%).",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-08-15",
+        "testName": "ECAT",
+        "testDate": "2026-08-20",
+        "applyUrl": "https://uet.edu.pk/admissions"
+      },
+      "fields": [
+        "Pre-Engineering"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "University of Engineering & Technology Taxila",
+      "shortName": "UET Taxila",
+      "city": "Taxila",
+      "type": "Public",
+      "ranking": 11,
+      "established": 1975,
+      "avgFee": "PKR 45,000 - 90,000 per semester",
+      "website": "https://uettaxila.edu.pk",
+      "description": "UET Taxila - Slightly lower cutoffs than Lahore, near Islamabad.",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-08-15",
+        "testName": "ECAT",
+        "testDate": "2026-08-20",
+        "applyUrl": "https://uettaxila.edu.pk/admissions"
+      },
+      "fields": [
+        "Pre-Engineering"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Ghulam Ishaq Khan Institute (GIKI)",
+      "shortName": "GIKI",
+      "city": "Topi",
+      "type": "Private",
+      "ranking": 10,
+      "established": 1993,
+      "avgFee": "PKR 470,000 per semester (incl. hostel)",
+      "website": "https://giki.edu.pk",
+      "description": "Elite engineering institute with unique residential campus (CS: #324, AI: #499).",
+      "campusType": "Strong Campus Life",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-06-30",
+        "testName": "GIKI Entry Test",
+        "testDate": "2026-07-10",
+        "applyUrl": "https://giki.edu.pk/admissions"
+      },
+      "fields": [
+        "Pre-Engineering",
+        "Computer Science"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Pakistan Institute of Engineering & Applied Sciences (PIEAS)",
+      "shortName": "PIEAS",
+      "city": "Islamabad",
+      "type": "Public",
+      "ranking": 14,
+      "established": 1967,
+      "avgFee": "PKR 100,000 - 200,000 per semester",
+      "website": "https://pieas.edu.pk",
+      "description": "Premier research institute focusing on nuclear and advanced engineering.",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-15",
+        "testName": "PIEAS Entry Test",
+        "testDate": "2026-07-25",
+        "applyUrl": "https://pieas.edu.pk/admissions"
+      },
+      "fields": [
+        "Pre-Engineering",
+        "Computer Science"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Bahria University Islamabad Campus",
+      "shortName": "Bahria Isb",
+      "city": "Islamabad",
+      "type": "Private",
+      "ranking": 16,
+      "established": 2000,
+      "avgFee": "PKR 150,000 - 250,000 per semester",
+      "website": "https://bahria.edu.pk/islamabad",
+      "description": "Bahria Islamabad - Most competitive campus (CS/SE: >80%).",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-15",
+        "testName": "Bahria Test",
+        "testDate": "2026-07-25",
+        "applyUrl": "https://bahria.edu.pk/admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Business",
+        "Pre-Engineering"
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Bahria University Lahore Campus",
+      "shortName": "Bahria Lhr",
+      "city": "Lahore",
+      "type": "Private",
+      "ranking": 19,
+      "established": 2008,
+      "avgFee": "PKR 140,000 - 230,000 per semester",
+      "website": "https://bahria.edu.pk/lahore",
+      "description": "Bahria Lahore - Moderate cutoffs around 70-75%.",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-15",
+        "testName": "Bahria Test",
+        "testDate": "2026-07-25",
+        "applyUrl": "https://bahria.edu.pk/admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Business"
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Bahria University Karachi Campus",
+      "shortName": "Bahria Khi",
+      "city": "Karachi",
+      "type": "Private",
+      "ranking": 21,
+      "established": 2004,
+      "avgFee": "PKR 140,000 - 230,000 per semester",
+      "website": "https://bahria.edu.pk/karachi",
+      "description": "Bahria Karachi - Lower cutoffs (~65-70%), has medical programs.",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-15",
+        "testName": "Bahria Test",
+        "testDate": "2026-07-25",
+        "applyUrl": "https://bahria.edu.pk/admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Business",
+        "Medical"
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Habib University",
+      "shortName": "Habib",
+      "city": "Karachi",
+      "type": "Private",
+      "ranking": 17,
+      "established": 2014,
+      "avgFee": "PKR 400,000 - 550,000 per semester",
+      "website": "https://habib.edu.pk",
+      "description": "Pakistan",
+      "campusType": "Strong Campus Life",
+      "hostelAvailability": "On-Campus without Hostel",
+      "admissions": {
+        "deadline": "2026-03-15",
+        "testName": "Habib Test",
+        "testDate": "2026-03-25",
+        "applyUrl": "https://habib.edu.pk/admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Pre-Engineering",
+        "Others"
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Aga Khan University",
+      "shortName": "AKU",
+      "city": "Karachi",
+      "type": "Private",
+      "ranking": 23,
+      "established": 1983,
+      "avgFee": "PKR 500,000 - 800,000 per semester",
+      "website": "https://aku.edu",
+      "description": "Premier medical institution with world-class healthcare training.",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-02-28",
+        "testName": "AKU Test",
+        "testDate": "2026-03-10",
+        "applyUrl": "https://aku.edu/admissions"
+      },
+      "fields": [
+        "Medical"
+      ]
+    },
+    {
+      "id": 25,
+      "name": "NED University of Engineering & Technology",
+      "shortName": "NED",
+      "city": "Karachi",
+      "type": "Public",
+      "ranking": 24,
+      "established": 1922,
+      "avgFee": "PKR 60,000 - 120,000 per semester",
+      "website": "https://neduet.edu.pk",
+      "description": "Historic Karachi engineering university. Software Eng is most competitive (87%).",
+      "campusType": "Research-Oriented",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-08-10",
+        "testName": "NED Entry Test",
+        "testDate": "2026-08-18",
+        "applyUrl": "https://neduet.edu.pk/admissions"
+      },
+      "fields": [
+        "Pre-Engineering",
+        "Computer Science"
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Air University",
+      "shortName": "Air",
+      "city": "Islamabad",
+      "type": "Public",
+      "ranking": 25,
+      "established": 2002,
+      "avgFee": "PKR 130,000 - 220,000 per semester",
+      "website": "https://au.edu.pk",
+      "description": "Air Force university excelling in aerospace and related fields.",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus with Hostel",
+      "admissions": {
+        "deadline": "2026-07-20",
+        "testName": "Air University Test",
+        "testDate": "2026-07-28",
+        "applyUrl": "https://au.edu.pk/admissions"
+      },
+      "fields": [
+        "Pre-Engineering",
+        "Computer Science",
+        "Business"
+      ]
+    },
+    {
+      "id": 27,
+      "name": "SZABIST Karachi",
+      "shortName": "SZABIST",
+      "city": "Karachi",
+      "type": "Private",
+      "ranking": 26,
+      "established": 1995,
+      "avgFee": "PKR 180,000 - 300,000 per semester",
+      "website": "https://szabist.edu.pk",
+      "description": "Known for business and media programs with industry connections.",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "Hybrid/Partially Online",
+      "admissions": {
+        "deadline": "2026-02-20",
+        "testName": "SZABIST Test",
+        "testDate": "2026-03-01",
+        "applyUrl": "https://szabist.edu.pk/admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Business",
+        "Others"
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Information Technology University (ITU)",
+      "shortName": "ITU",
+      "city": "Lahore",
+      "type": "Public",
+      "ranking": 27,
+      "established": 2012,
+      "avgFee": "PKR 200,000 - 350,000 per semester",
+      "website": "https://itu.edu.pk",
+      "description": "Modern IT-focused university promoting entrepreneurship and innovation.",
+      "campusType": "Industry-Focused",
+      "hostelAvailability": "On-Campus without Hostel",
+      "admissions": {
+        "deadline": "2026-07-31",
+        "testName": "ITU Admission Test",
+        "testDate": "2026-08-05",
+        "applyUrl": "https://itu.edu.pk/admissions"
+      },
+      "fields": [
+        "Computer Science",
+        "Business"
+      ]
+    }
+  ],
+  "summary": {
+    "totalUniversities": 28,
+    "cities": [
+      "Abbottabad",
+      "Attock",
+      "Chiniot",
+      "Islamabad",
+      "Karachi",
+      "Lahore",
+      "Peshawar",
+      "Sahiwal",
+      "Taxila",
+      "Topi",
+      "Vehari",
+      "Wah Cantt"
+    ],
+    "types": [
+      "Private",
+      "Public"
+    ],
+    "rankingRange": {
+      "min": 1,
+      "max": 27
+    },
+    "idRange": {
+      "min": 1,
+      "max": 28
+    }
+  }
+}

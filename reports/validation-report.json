@@ -1,6 +1,9 @@
 {
   "valid": true,
+  "universitiesValidated": 28,
   "errors": [],
-  "warnings": [],
-  "timestamp": "2026-01-26T01:05:02.104Z"
+  "warnings": [
+    "  [SZABIST] hostelAvailability: \"Hybrid/Partially Online\" not in allowed values"
+  ],
+  "timestamp": "2026-02-19T12:25:06.412Z"
 }

@@ -57,8 +57,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
+
+      # Cache previous merit reports to avoid re-scraping same year
+      - name: Cache merit reports
+        uses: actions/cache@v4
+        with:
+          path: reports/merit-*
+          key: merit-report-${{ steps.year.outputs.value }}
 
       - name: Fetch merit data from sources
         id: fetch-merit
@@ -88,6 +105,27 @@ jobs:
               : 'No report generated';
             
             const meritYear = process.env.MERIT_YEAR;
+            
+            // Check if issue already exists for this year
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'merit-update,yearly',
+              state: 'open'
+            });
+            
+            const existingIssue = issues.find(i => i.title.includes(meritYear));
+            if (existingIssue) {
+              // Update existing issue instead of creating duplicate
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## 🔄 Updated Merit Data (Re-run)\n\n\`\`\`\n${report.substring(0, 2000)}\n\`\`\`\n\n*Updated: ${new Date().toISOString()}*`
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
+              return;
+            }
             
             const issueBody = [
               '## Merit List Update Required - Manual Review',
@@ -148,12 +186,5 @@ jobs:
             
             A GitHub Issue has been created for manual review.
             Please review the scraped merit data and update the website.
-            
-            View the issue at your GitHub repository.
-            
-            The merit data needs to be verified against:
-            - learnospot.com
-            - paklearningspot.com
-            - Official university announcements
             
             This requires MANUAL REVIEW before updating.

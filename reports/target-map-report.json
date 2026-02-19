@@ -1,0 +1,98 @@
+{
+  "status": "FAIL",
+  "verified": [
+    {
+      "file": "reports/validation-report.json",
+      "status": "ALLOWED",
+      "reason": "Reports/baselines are OK"
+    }
+  ],
+  "violations": [
+    {
+      "file": ".github/workflows/annual-merit-update.yml",
+      "status": "VIOLATION",
+      "reason": "Protected file modified"
+    },
+    {
+      "file": ".github/workflows/semester-data-update.yml",
+      "status": "VIOLATION",
+      "reason": "Protected file modified"
+    },
+    {
+      "file": ".github/workflows/update-university-data.yml",
+      "status": "VIOLATION",
+      "reason": "Protected file modified"
+    },
+    {
+      "file": ".github/workflows/website-health-check.yml",
+      "status": "VIOLATION",
+      "reason": "Protected file modified"
+    },
+    {
+      "file": "scripts/utils/url-checker.js",
+      "status": "UNEXPECTED",
+      "reason": "File not in target map"
+    },
+    {
+      "file": "scripts/validators/schema-validator.js",
+      "status": "UNEXPECTED",
+      "reason": "File not in target map"
+    },
+    {
+      "file": "src/app/page.js",
+      "status": "VIOLATION",
+      "reason": "Protected file modified"
+    }
+  ],
+  "targetMap": {
+    "universities": {
+      "targets": [
+        "src/data/universities.js"
+      ],
+      "description": "University list, rankings, fees, admissions info",
+      "schema": [
+        "id",
+        "name",
+        "shortName",
+        "city",
+        "ranking",
+        "avgFee",
+        "website",
+        "admissions"
+      ]
+    },
+    "scholarships": {
+      "targets": [
+        "src/data/scholarships.js"
+      ],
+      "description": "Scholarship information",
+      "schema": [
+        "id",
+        "name",
+        "amount",
+        "eligibility"
+      ]
+    },
+    "departments": {
+      "targets": [
+        "src/data/departmentData.js"
+      ],
+      "description": "Department-specific data",
+      "schema": [
+        "name",
+        "programs"
+      ]
+    },
+    "meritCutoffs": {
+      "targets": [
+        "src/components/AdmissionPredictor/AdmissionPredictor.js"
+      ],
+      "description": "Merit cutoff values used in admission prediction",
+      "validRange": {
+        "min": 40,
+        "max": 95
+      }
+    }
+  },
+  "timestamp": "2026-02-19T12:19:24.746Z"
+}

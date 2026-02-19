@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import styles from './page.module.css';
 import Header from '@/components/Header/Header';
 import FilterSection from '@/components/FilterSection/FilterSection';
@@ -61,8 +61,8 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [skippedIds, setSkippedIds] = useState([]);
 
-  const savedUniversities = savedItems.map(i => i.university);
-  const savedIds = savedUniversities.map(u => u.id);
+  const savedUniversities = useMemo(() => savedItems.map(i => i.university), [savedItems]);
+  const savedIds = useMemo(() => savedItems.map(i => i.university.id), [savedItems]);
 
   // Load saved from localStorage on mount
   useEffect(() => {
