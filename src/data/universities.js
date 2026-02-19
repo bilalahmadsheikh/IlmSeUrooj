@@ -30,7 +30,7 @@ export const universities = [
     highlights: ["Top Engineering School", "Strong Research", "Industry Connections"],
     description: "Pakistan's leading STEM university with world-class facilities and research programs.",
     website: "https://nust.edu.pk",
-    avgFee: "PKR 202,050 per semester (SEECS)",
+    avgFee: "PKR 120,000 - 202,050 per semester (varies by school)",
     admissions: {
       deadline: "2026-01-25",
       testName: "NET Series II",
@@ -66,7 +66,7 @@ export const universities = [
     highlights: ["Best Business School", "Need-Based Aid", "Diverse Community"],
     description: "Premier private university known for its business and computer science programs.",
     website: "https://lums.edu.pk",
-    avgFee: "PKR 844,460 - 1,154,300 per semester (SBASSE)",
+    avgFee: "PKR 630,000 - 1,000,000 per semester (SBASSE)",
     admissions: {
       deadline: "2026-01-27",
       testName: "LCAT",
@@ -104,9 +104,9 @@ export const universities = [
     website: "https://isb.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     admissions: {
-      deadline: "2026-06-15",
+      deadline: "2026-07-04",
       testName: "FAST NU Test",
-      testDate: "2026-06-25",
+      testDate: "2026-07-07",
       applyUrl: "https://nu.edu.pk/Admissions"
     }
   },
@@ -136,9 +136,9 @@ export const universities = [
     website: "https://lhr.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     admissions: {
-      deadline: "2026-06-15",
+      deadline: "2026-07-04",
       testName: "FAST NU Test",
-      testDate: "2026-06-25",
+      testDate: "2026-07-07",
       applyUrl: "https://nu.edu.pk/Admissions"
     }
   },
@@ -168,9 +168,9 @@ export const universities = [
     website: "https://khi.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     admissions: {
-      deadline: "2026-06-15",
+      deadline: "2026-07-04",
       testName: "FAST NU Test",
-      testDate: "2026-06-25",
+      testDate: "2026-07-07",
       applyUrl: "https://nu.edu.pk/Admissions"
     }
   },
@@ -198,9 +198,9 @@ export const universities = [
     website: "https://pwr.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     admissions: {
-      deadline: "2026-06-15",
+      deadline: "2026-07-04",
       testName: "FAST NU Test",
-      testDate: "2026-06-25",
+      testDate: "2026-07-07",
       applyUrl: "https://nu.edu.pk/Admissions"
     }
   },
@@ -228,9 +228,9 @@ export const universities = [
     website: "https://cfd.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     admissions: {
-      deadline: "2026-06-15",
+      deadline: "2026-07-04",
       testName: "FAST NU Test",
-      testDate: "2026-06-25",
+      testDate: "2026-07-07",
       applyUrl: "https://nu.edu.pk/Admissions"
     }
   },
@@ -262,7 +262,7 @@ export const universities = [
     highlights: ["Affordable Federal", "High Cutoffs (CS: 82.7%)", "Research Focus"],
     description: "COMSATS Islamabad - Flagship campus with high CS cutoffs (82.7%, SE: 81.6%).",
     website: "https://islamabad.comsats.edu.pk",
-    avgFee: "PKR 138,000 (1st sem) / PKR 116,000 (regular)",
+    avgFee: "PKR 180,000 - 220,000 per semester (CS/Engineering)",
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -296,7 +296,7 @@ export const universities = [
     highlights: ["Higher CS Cutoff than Isb!", "Lahore Location", "Pharm-D Strong"],
     description: "COMSATS Lahore - Highest CS cutoffs in COMSATS (87.36%, SE: 85.6%)!",
     website: "https://lahore.comsats.edu.pk",
-    avgFee: "PKR 116,500 (1st sem) / PKR 94,500 (regular)",
+    avgFee: "PKR 120,000 - 190,000 per semester",
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -328,7 +328,7 @@ export const universities = [
     highlights: ["Moderate Cutoffs (~80%)", "Near Islamabad", "Good Value"],
     description: "COMSATS Wah - Good middle-ground option with ~80% CS cutoffs.",
     website: "https://wah.comsats.edu.pk",
-    avgFee: "PKR 75,000 - 140,000 per semester",
+    avgFee: "PKR 96,000 - 140,000 per semester (Rs. 6,000/CH)",
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -523,11 +523,11 @@ export const universities = [
     highlights: ["Historic Institution", "Highest UET Merit", "Very Affordable"],
     description: "UET Lahore - Flagship campus with highest cutoffs (ME: 81.13%, CS: 78.57%).",
     website: "https://uet.edu.pk",
-    avgFee: "PKR 44,450 - 59,150 (subsidized) / 278,950 (self)",
+    avgFee: "PKR 150,000 - 250,000 per year (subsidized)",
     admissions: {
-      deadline: "2026-08-15",
+      deadline: "2026-03-22",
       testName: "ECAT",
-      testDate: "2026-08-20",
+      testDate: "2026-03-30",
       applyUrl: "https://uet.edu.pk/admissions"
     }
   },
@@ -553,11 +553,11 @@ export const universities = [
     highlights: ["Near Islamabad", "Lower than Lahore", "Good Value"],
     description: "UET Taxila - Slightly lower cutoffs than Lahore, near Islamabad.",
     website: "https://uettaxila.edu.pk",
-    avgFee: "PKR 45,000 - 90,000 per semester",
+    avgFee: "PKR 150,000 - 250,000 per year (subsidized)",
     admissions: {
-      deadline: "2026-08-15",
+      deadline: "2026-03-22",
       testName: "ECAT",
-      testDate: "2026-08-20",
+      testDate: "2026-03-30",
       applyUrl: "https://uettaxila.edu.pk/admissions"
     }
   },
@@ -587,11 +587,11 @@ export const universities = [
     highlights: ["Residential Campus", "Beautiful Location", "Strong Bonding"],
     description: "Elite engineering institute with unique residential campus (CS: #324, AI: #499).",
     website: "https://giki.edu.pk",
-    avgFee: "PKR 470,000 per semester (incl. hostel)",
+    avgFee: "PKR 285,000 per semester (tuition, excl. hostel)",
     admissions: {
-      deadline: "2026-06-30",
+      deadline: "2026-06-16",
       testName: "GIKI Entry Test",
-      testDate: "2026-07-10",
+      testDate: "2026-07-09",
       applyUrl: "https://giki.edu.pk/admissions"
     }
   },
@@ -621,11 +621,11 @@ export const universities = [
     highlights: ["Nuclear Research", "High Security", "Elite Faculty"],
     description: "Premier research institute focusing on nuclear and advanced engineering.",
     website: "https://pieas.edu.pk",
-    avgFee: "PKR 100,000 - 200,000 per semester",
+    avgFee: "PKR 63,000 - 100,000 per semester (heavily subsidized)",
     admissions: {
-      deadline: "2026-07-15",
-      testName: "PIEAS Entry Test",
-      testDate: "2026-07-25",
+      deadline: "2026-03-05",
+      testName: "PIEAS Written Test",
+      testDate: "2026-04-12",
       applyUrl: "https://pieas.edu.pk/admissions"
     }
   },
@@ -657,11 +657,11 @@ export const universities = [
     highlights: ["Navy Affiliated", "High Cutoffs (CS: >80%)", "Disciplined"],
     description: "Bahria Islamabad - Most competitive campus (CS/SE: >80%).",
     website: "https://bahria.edu.pk/islamabad",
-    avgFee: "PKR 150,000 - 250,000 per semester",
+    avgFee: "PKR 88,000 - 250,000 per semester",
     admissions: {
-      deadline: "2026-07-15",
-      testName: "Bahria Test",
-      testDate: "2026-07-25",
+      deadline: "2026-06-15",
+      testName: "BUET (Bahria Entry Test)",
+      testDate: "2026-07-10",
       applyUrl: "https://bahria.edu.pk/admissions"
     }
   },
@@ -689,11 +689,11 @@ export const universities = [
     highlights: ["Lower than Islamabad", "Growing Campus", "Good Value"],
     description: "Bahria Lahore - Moderate cutoffs around 70-75%.",
     website: "https://bahria.edu.pk/lahore",
-    avgFee: "PKR 140,000 - 230,000 per semester",
+    avgFee: "PKR 88,000 - 230,000 per semester",
     admissions: {
-      deadline: "2026-07-15",
-      testName: "Bahria Test",
-      testDate: "2026-07-25",
+      deadline: "2026-06-22",
+      testName: "BUET (Bahria Entry Test)",
+      testDate: "2026-07-10",
       applyUrl: "https://bahria.edu.pk/admissions"
     }
   },
@@ -723,11 +723,11 @@ export const universities = [
     highlights: ["Medical Programs", "Karachi Location", "Easier Admission"],
     description: "Bahria Karachi - Lower cutoffs (~65-70%), has medical programs.",
     website: "https://bahria.edu.pk/karachi",
-    avgFee: "PKR 140,000 - 230,000 per semester",
+    avgFee: "PKR 88,000 - 230,000 per semester",
     admissions: {
-      deadline: "2026-07-15",
-      testName: "Bahria Test",
-      testDate: "2026-07-25",
+      deadline: "2026-06-15",
+      testName: "BUET (Bahria Entry Test)",
+      testDate: "2026-07-10",
       applyUrl: "https://bahria.edu.pk/admissions"
     }
   },
@@ -759,12 +759,12 @@ export const universities = [
     highlights: ["Liberal Arts Focus", "Modern Campus", "Innovative Curriculum"],
     description: "Pakistan's first liberal arts university with a focus on innovation.",
     website: "https://habib.edu.pk",
-    avgFee: "PKR 400,000 - 550,000 per semester",
+    avgFee: "PKR 335,000 - 395,000 per semester (Engineering)",
     admissions: {
-      deadline: "2026-03-15",
-      testName: "Habib Test",
-      testDate: "2026-03-25",
-      applyUrl: "https://habib.edu.pk/admissions"
+      deadline: "2026-02-19",
+      testName: "Habib Entrance Exam",
+      testDate: "2026-02-23",
+      applyUrl: "https://habib.edu.pk/apply"
     }
   },
   {
@@ -789,11 +789,11 @@ export const universities = [
     highlights: ["Top Medical School", "International Recognition", "Research Excellence"],
     description: "Premier medical institution with world-class healthcare training.",
     website: "https://aku.edu",
-    avgFee: "PKR 500,000 - 800,000 per semester",
+    avgFee: "PKR 852,000 per semester (MBBS, ~PKR 1,704,000/year)",
     admissions: {
-      deadline: "2026-02-28",
-      testName: "AKU Test",
-      testDate: "2026-03-10",
+      deadline: "2026-03-15",
+      testName: "AKU Entry Test",
+      testDate: "2026-06-15",
       applyUrl: "https://aku.edu/admissions"
     }
   },
@@ -821,11 +821,11 @@ export const universities = [
     highlights: ["Historic Excellence", "Very Affordable", "SE: 87% Cutoff"],
     description: "Historic Karachi engineering university. Software Eng is most competitive (87%).",
     website: "https://neduet.edu.pk",
-    avgFee: "PKR 60,000 - 120,000 per semester",
+    avgFee: "PKR 61,600 - 90,000 per semester",
     admissions: {
-      deadline: "2026-08-10",
+      deadline: "2026-07-15",
       testName: "NED Entry Test",
-      testDate: "2026-08-18",
+      testDate: "2026-07-20",
       applyUrl: "https://neduet.edu.pk/admissions"
     }
   },
@@ -855,11 +855,11 @@ export const universities = [
     highlights: ["Air Force Affiliated", "Aerospace Focus", "Modern Facilities"],
     description: "Air Force university excelling in aerospace and related fields.",
     website: "https://au.edu.pk",
-    avgFee: "PKR 130,000 - 220,000 per semester",
+    avgFee: "PKR 93,000 - 153,000 per semester",
     admissions: {
-      deadline: "2026-07-20",
-      testName: "Air University Test",
-      testDate: "2026-07-28",
+      deadline: "2026-06-20",
+      testName: "Air University Entry Test",
+      testDate: "2026-07-05",
       applyUrl: "https://au.edu.pk/admissions"
     }
   },
@@ -889,11 +889,11 @@ export const universities = [
     highlights: ["Flexible Programs", "Media Focus", "Industry Links"],
     description: "Known for business and media programs with industry connections.",
     website: "https://szabist.edu.pk",
-    avgFee: "PKR 180,000 - 300,000 per semester",
+    avgFee: "PKR 120,000 - 165,000 per semester",
     admissions: {
-      deadline: "2026-02-20",
-      testName: "SZABIST Test",
-      testDate: "2026-03-01",
+      deadline: "2026-02-12",
+      testName: "SZABIST Admission Test",
+      testDate: "2026-02-14",
       applyUrl: "https://szabist.edu.pk/admissions"
     }
   },
@@ -921,11 +921,11 @@ export const universities = [
     highlights: ["Tech Focused", "Modern Curriculum", "Startup Culture"],
     description: "Modern IT-focused university promoting entrepreneurship and innovation.",
     website: "https://itu.edu.pk",
-    avgFee: "PKR 200,000 - 350,000 per semester",
+    avgFee: "PKR 80,000 - 175,000 per semester (Rs. 6,000/CH)",
     admissions: {
-      deadline: "2026-07-31",
+      deadline: "2026-06-18",
       testName: "ITU Admission Test",
-      testDate: "2026-08-05",
+      testDate: "2026-07-01",
       applyUrl: "https://itu.edu.pk/admissions"
     }
   }
