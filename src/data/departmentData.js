@@ -203,6 +203,18 @@ export const departmentDetails = {
             facilities: ["Workshops", "Foundry", "Materials Testing Lab", "Hydraulics Lab"],
             phdFaculty: "75%",
             researchPapers: 550
+        },
+        "Computer Science": {
+            ranking: 8,
+            facultyStrength: "Good",
+            researchOutput: "High",
+            industryConnections: "Good",
+            placementRate: "82%",
+            avgStartingSalary: "PKR 100,000",
+            internshipPartners: ["Systems Ltd", "NetSol", "Arbisoft"],
+            facilities: ["CS Labs", "Networks Lab", "Data Center"],
+            phdFaculty: "60%",
+            researchPapers: 200
         }
     },
 
@@ -431,6 +443,349 @@ export const departmentDetails = {
             facilities: ["Entrepreneurship Center"],
             phdFaculty: "40%",
             researchPapers: 40
+        }
+    },
+
+    // === FAST Campus Branches ===
+    // FAST Lahore - id=4
+    4: {
+        "Computer Science": {
+            ranking: 1,
+            facultyStrength: "Excellent",
+            researchOutput: "High",
+            industryConnections: "Excellent",
+            placementRate: "93%",
+            avgStartingSalary: "PKR 150,000",
+            internshipPartners: ["Systems Ltd", "Arbisoft", "VentureDive", "NetSol"],
+            facilities: ["CS Labs", "AI Lab", "Software Center"],
+            phdFaculty: "60%",
+            researchPapers: 350
+        },
+        "Pre-Engineering": {
+            ranking: 6,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Good",
+            placementRate: "78%",
+            avgStartingSalary: "PKR 85,000",
+            internshipPartners: ["Nayatel", "PTCL"],
+            facilities: ["Electronics Lab", "Networks Lab"],
+            phdFaculty: "45%",
+            researchPapers: 80
+        }
+    },
+
+    // FAST Karachi - id=5
+    5: {
+        "Computer Science": {
+            ranking: 1,
+            facultyStrength: "Excellent",
+            researchOutput: "High",
+            industryConnections: "Exceptional",
+            placementRate: "92%",
+            avgStartingSalary: "PKR 145,000",
+            internshipPartners: ["TPS", "Folio3", "Netsol", "10Pearls"],
+            facilities: ["CS Labs", "Software Dev Center", "Networking Lab"],
+            phdFaculty: "58%",
+            researchPapers: 300
+        },
+        "Pre-Engineering": {
+            ranking: 7,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Good",
+            placementRate: "75%",
+            avgStartingSalary: "PKR 80,000",
+            internshipPartners: ["K-Electric", "SSGC"],
+            facilities: ["EE Labs", "Circuits Lab"],
+            phdFaculty: "40%",
+            researchPapers: 60
+        }
+    },
+
+    // FAST Peshawar - id=6
+    6: {
+        "Computer Science": {
+            ranking: 2,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Good",
+            placementRate: "80%",
+            avgStartingSalary: "PKR 100,000",
+            internshipPartners: ["Local IT Firms", "PTCL"],
+            facilities: ["CS Labs", "Basic Networking Lab"],
+            phdFaculty: "40%",
+            researchPapers: 80
+        }
+    },
+
+    // FAST Chiniot-Faisalabad - id=7
+    7: {
+        "Computer Science": {
+            ranking: 3,
+            facultyStrength: "Good",
+            researchOutput: "Low",
+            industryConnections: "Average",
+            placementRate: "72%",
+            avgStartingSalary: "PKR 80,000",
+            internshipPartners: ["Local Companies", "Startups"],
+            facilities: ["CS Labs"],
+            phdFaculty: "35%",
+            researchPapers: 40
+        }
+    },
+
+    // === COMSATS Campus Branches ===
+    // COMSATS Lahore - id=9
+    9: {
+        "Computer Science": {
+            ranking: 5,
+            facultyStrength: "Good",
+            researchOutput: "High",
+            industryConnections: "Good",
+            placementRate: "80%",
+            avgStartingSalary: "PKR 95,000",
+            internshipPartners: ["Systems Ltd", "Arbisoft", "Jazz"],
+            facilities: ["Research Labs", "IT Center"],
+            phdFaculty: "55%",
+            researchPapers: 280
+        },
+        "Pre-Engineering": {
+            ranking: 8,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Average",
+            placementRate: "72%",
+            avgStartingSalary: "PKR 75,000",
+            internshipPartners: ["LESCO", "WAPDA"],
+            facilities: ["Engineering Labs", "Workshop"],
+            phdFaculty: "50%",
+            researchPapers: 130
+        },
+        "Business": {
+            ranking: 5,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Good",
+            placementRate: "75%",
+            avgStartingSalary: "PKR 70,000",
+            internshipPartners: ["Banks", "Telecom"],
+            facilities: ["Business Lab"],
+            phdFaculty: "45%",
+            researchPapers: 70
+        }
+    },
+
+    // COMSATS Wah - id=10
+    10: {
+        "Computer Science": {
+            ranking: 6,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Average",
+            placementRate: "76%",
+            avgStartingSalary: "PKR 85,000",
+            internshipPartners: ["POF", "HIT", "Local IT"],
+            facilities: ["CS Labs", "Network Lab"],
+            phdFaculty: "45%",
+            researchPapers: 150
+        },
+        "Pre-Engineering": {
+            ranking: 10,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Average",
+            placementRate: "70%",
+            avgStartingSalary: "PKR 70,000",
+            internshipPartners: ["POF", "HIT"],
+            facilities: ["Engineering Labs"],
+            phdFaculty: "45%",
+            researchPapers: 100
+        }
+    },
+
+    // COMSATS Abbottabad - id=11
+    11: {
+        "Computer Science": {
+            ranking: 7,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Average",
+            placementRate: "74%",
+            avgStartingSalary: "PKR 80,000",
+            internshipPartners: ["PTCL", "Local Firms"],
+            facilities: ["CS Labs", "Project Lab"],
+            phdFaculty: "45%",
+            researchPapers: 130
+        },
+        "Pre-Engineering": {
+            ranking: 12,
+            facultyStrength: "Good",
+            researchOutput: "Low",
+            industryConnections: "Average",
+            placementRate: "68%",
+            avgStartingSalary: "PKR 65,000",
+            internshipPartners: ["Local Industries"],
+            facilities: ["Basic Labs"],
+            phdFaculty: "40%",
+            researchPapers: 70
+        }
+    },
+
+    // COMSATS Sahiwal - id=12
+    12: {
+        "Computer Science": {
+            ranking: 9,
+            facultyStrength: "Average",
+            researchOutput: "Low",
+            industryConnections: "Average",
+            placementRate: "68%",
+            avgStartingSalary: "PKR 65,000",
+            internshipPartners: ["Local IT Companies"],
+            facilities: ["CS Labs"],
+            phdFaculty: "35%",
+            researchPapers: 50
+        },
+        "Business": {
+            ranking: 10,
+            facultyStrength: "Average",
+            researchOutput: "Low",
+            industryConnections: "Average",
+            placementRate: "65%",
+            avgStartingSalary: "PKR 55,000",
+            internshipPartners: ["Local Banks"],
+            facilities: ["Basic Lab"],
+            phdFaculty: "30%",
+            researchPapers: 25
+        }
+    },
+
+    // COMSATS Attock - id=13
+    13: {
+        "Computer Science": {
+            ranking: 11,
+            facultyStrength: "Average",
+            researchOutput: "Low",
+            industryConnections: "Average",
+            placementRate: "65%",
+            avgStartingSalary: "PKR 60,000",
+            internshipPartners: ["Local Companies"],
+            facilities: ["Basic CS Lab"],
+            phdFaculty: "30%",
+            researchPapers: 30
+        },
+        "Business": {
+            ranking: 12,
+            facultyStrength: "Average",
+            researchOutput: "Low",
+            industryConnections: "Average",
+            placementRate: "62%",
+            avgStartingSalary: "PKR 50,000",
+            internshipPartners: ["Local Banks"],
+            facilities: ["Basic Lab"],
+            phdFaculty: "25%",
+            researchPapers: 15
+        }
+    },
+
+    // COMSATS Vehari - id=14
+    14: {
+        "Computer Science": {
+            ranking: 13,
+            facultyStrength: "Average",
+            researchOutput: "Low",
+            industryConnections: "Low",
+            placementRate: "60%",
+            avgStartingSalary: "PKR 55,000",
+            internshipPartners: ["Local Companies"],
+            facilities: ["Basic CS Lab"],
+            phdFaculty: "25%",
+            researchPapers: 20
+        },
+        "Business": {
+            ranking: 14,
+            facultyStrength: "Average",
+            researchOutput: "Low",
+            industryConnections: "Low",
+            placementRate: "58%",
+            avgStartingSalary: "PKR 45,000",
+            internshipPartners: ["Local Banks"],
+            facilities: ["Basic Lab"],
+            phdFaculty: "20%",
+            researchPapers: 10
+        }
+    },
+
+    // === Bahria Campus Branches ===
+    // Bahria Lahore - id=21
+    21: {
+        "Computer Science": {
+            ranking: 11,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Good",
+            placementRate: "75%",
+            avgStartingSalary: "PKR 80,000",
+            internshipPartners: ["Banks", "IT Companies"],
+            facilities: ["IT Labs", "Networks Lab"],
+            phdFaculty: "40%",
+            researchPapers: 70
+        },
+        "Business": {
+            ranking: 7,
+            facultyStrength: "Good",
+            researchOutput: "Low",
+            industryConnections: "Good",
+            placementRate: "76%",
+            avgStartingSalary: "PKR 70,000",
+            internshipPartners: ["Banks", "Corporates"],
+            facilities: ["Business Lab"],
+            phdFaculty: "35%",
+            researchPapers: 40
+        }
+    },
+
+    // Bahria Karachi - id=22
+    22: {
+        "Computer Science": {
+            ranking: 12,
+            facultyStrength: "Average",
+            researchOutput: "Low",
+            industryConnections: "Good",
+            placementRate: "72%",
+            avgStartingSalary: "PKR 75,000",
+            internshipPartners: ["Navy IT", "Banks", "TPS"],
+            facilities: ["IT Labs"],
+            phdFaculty: "35%",
+            researchPapers: 50
+        },
+        "Business": {
+            ranking: 8,
+            facultyStrength: "Good",
+            researchOutput: "Low",
+            industryConnections: "Good",
+            placementRate: "74%",
+            avgStartingSalary: "PKR 65,000",
+            internshipPartners: ["Navy", "Banks"],
+            facilities: ["Business Lab"],
+            phdFaculty: "35%",
+            researchPapers: 35
+        }
+    },
+
+    // UET Lahore CS (id=16 already exists for Pre-Eng, adding CS)
+    17: {
+        "Pre-Engineering": {
+            ranking: 6,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Good",
+            placementRate: "80%",
+            avgStartingSalary: "PKR 80,000",
+            internshipPartners: ["FWO", "NLC", "WAPDA"],
+            facilities: ["Workshops", "Labs"],
+            phdFaculty: "60%",
+            researchPapers: 200
         }
     }
 };

@@ -515,7 +515,7 @@ export const universities = [
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering"],
+    fields: ["Pre-Engineering", "Computer Science"],
     programs: {
       "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Computer Science"]
     },
