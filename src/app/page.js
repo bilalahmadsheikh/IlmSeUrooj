@@ -10,6 +10,7 @@ import UniversityList from '@/components/UniversityList/UniversityList';
 import AdmissionsDeadlines from '@/components/AdmissionsDeadlines/AdmissionsDeadlines';
 import UniversityComparison from '@/components/UniversityComparison/UniversityComparison';
 import AdmissionPredictor from '@/components/AdmissionPredictor/AdmissionPredictor';
+import EntryTests from '@/components/EntryTests/EntryTests';
 import AnimatedBackground from '@/components/Background/AnimatedBackground';
 import DecorativeImages from '@/components/Background/DecorativeImages';
 import Toast from '@/components/Toast/Toast';
@@ -318,6 +319,9 @@ export default function Home() {
 
           {/* Admission Chance Predictor */}
           <AdmissionPredictor />
+
+          {/* Entry Tests & Cutoffs */}
+          <EntryTests />
         </div>
       )}
 
