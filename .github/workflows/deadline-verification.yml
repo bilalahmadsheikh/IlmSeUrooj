@@ -2,7 +2,7 @@ name: Verify Admission Deadlines
 
 on:
   schedule:
-    - cron: '0 0 1 * *'   # 1st of every month at midnight UTC
+    - cron: '0 0 1,21 * *'  # Runs on 1st and 21st of each month (~every 20 days)
   workflow_dispatch:
     inputs:
       dry_run:

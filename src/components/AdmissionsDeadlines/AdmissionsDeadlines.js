@@ -93,12 +93,12 @@ export default function AdmissionsDeadlines({ currentField }) {
         return '';
     };
 
-    // Check if deadline data is stale (not verified in >60 days)
+    // Check if deadline data is stale (not verified in >25 days — scraper runs every 20 days)
     const isStale = (deadline) => {
         if (!deadline.lastVerified) return true; // No timestamp = assume stale
         const verified = new Date(deadline.lastVerified);
         const daysSinceVerify = Math.floor((now - verified) / (1000 * 60 * 60 * 24));
-        return daysSinceVerify > 60;
+        return daysSinceVerify > 25;
     };
 
     // Format date
