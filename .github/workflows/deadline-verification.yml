@@ -33,36 +33,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm ci
-
-      - name: Install Puppeteer browser
-        run: npx puppeteer browsers install chrome
+      - name: Install Python dependencies
+        run: |
+          pip install -r scripts/scrapers/requirements.txt
+          playwright install chromium
 
       - name: Run deadline verification scraper
         id: scrape
-        env:
-          PUPPETEER_ARGS: '--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage'
         run: |
-          node scripts/scrapers/deadline-scraper.js
+          python scripts/scrapers/deadline_scraper.py
           echo "### 📋 Deadline Verification Report" >> $GITHUB_STEP_SUMMARY
-          cat reports/deadline-verification-report.md >> $GITHUB_STEP_SUMMARY
+          echo "Automated deadline verification performed by Python scraper." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for data changes
         id: check
