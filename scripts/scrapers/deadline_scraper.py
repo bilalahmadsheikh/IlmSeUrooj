@@ -7,6 +7,11 @@ from dateutil import parser as date_parser
 import requests
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+import io
+import PyPDF2
+
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -111,9 +116,20 @@ def _parse_generic_text(text, url, test_keyword=""):
             if d:
                 test_date = d
                 break
-    
+                
+    session_str = None
     if deadline or test_date:
-        return {'deadline': deadline, 'testDate': test_date, 'method': 'playwright', 'url': url}
+        spring_fall_match = re.search(r'(Spring|Fall)\s*(20\d{2})', text, re.IGNORECASE)
+        if spring_fall_match:
+            session_str = f"{spring_fall_match.group(1).capitalize()} {spring_fall_match.group(2)}"
+        
+        round_match = re.search(r'(Round|Phase|Series)\s*(\d+|[IVX]+)', text, re.IGNORECASE)
+        if round_match:
+            r_str = f"{round_match.group(1).capitalize()} {round_match.group(2)}"
+            session_str = f"{session_str} - {r_str}" if session_str else r_str
+            
+    if deadline or test_date:
+        return {'deadline': deadline, 'testDate': test_date, 'session': session_str, 'method': 'playwright/pdf', 'url': url}
     return None
 
 def extract_with_playwright_generic(page, urls, test_keyword=""):
@@ -185,17 +201,15 @@ def extract_lums(page):
     return _parse_generic_text(text, url, 'LCAT')
 
 def extract_habib(page):
-    url = "https://habib.edu.pk/admissions/"
+    url = "https://habib.edu.pk/admissions/international-examination-board/admission-schedule/"
     html = fetch_with_playwright(page, url, 'body', timeout=10000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
-    
-    target_heading = soup.find(lambda t: t.name in ['h2','h3','h4'] and 'Important Dates' in t.text)
-    text = target_heading.find_parent('div').get_text(separator=' ', strip=True) if target_heading else soup.get_text(separator=' ', strip=True)
+    text = soup.get_text(separator=' ', strip=True)
     return _parse_generic_text(text, url)
 
 def extract_aku(page):
-    url = "https://www.aku.edu/admissions/pk/Pages/default.aspx"
+    url = "https://www.aku.edu/admissions/key-dates/Pages/home.aspx"
     html = fetch_with_playwright(page, url, 'body', timeout=10000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
@@ -203,7 +217,7 @@ def extract_aku(page):
     return _parse_generic_text(text, url, 'AKU Test')
 
 def extract_pieas(page):
-    url = "http://admissions.pieas.edu.pk/Admissions/important_dates.html"
+    url = "https://admissions.pieas.edu.pk/Admissions/schedule.html"
     html = fetch_with_playwright(page, url, 'body', timeout=10000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
@@ -211,21 +225,28 @@ def extract_pieas(page):
     return _parse_generic_text(text, url)
 
 def extract_bahria(page):
-    url = "https://bahria.edu.pk/admissions/"
-    html = fetch_with_playwright(page, url, 'body', timeout=10000)
-    if not html: return None
-    soup = BeautifulSoup(html, 'html.parser')
-    
-    target_heading = soup.find(lambda t: t.name in ['h2','h3','h4'] and 'Dates to Remember' in t.text)
-    text = target_heading.find_parent('div').get_text(separator=' ', strip=True) if target_heading else soup.get_text(separator=' ', strip=True)
-    return _parse_generic_text(text, url)
-
-def extract_comsats(page):
-    url = "https://admissions.comsats.edu.pk/Home/Schedule"
+    url = "https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1"
     html = fetch_with_playwright(page, url, 'body', timeout=10000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
     text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url)
+
+def extract_comsats(page, campus="Islamabad"):
+    url = "https://admissions.comsats.edu.pk/Home/Keydates"
+    html = fetch_with_playwright(page, url, 'table', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    # Try to extract the specific row for this campus for Admission Close Date
+    text = ""
+    for table in soup.find_all('table'):
+        for row in table.find_all('tr'):
+            if campus.lower() in row.get_text(separator=' ', strip=True).lower():
+                text += " " + row.get_text(separator=' ', strip=True)
+    
+    if not text:
+        text = soup.get_text(separator=' ', strip=True)
     return _parse_generic_text(text, url, 'NTS')
 
 def extract_itu(page):
@@ -236,16 +257,21 @@ def extract_itu(page):
     text = soup.get_text(separator=' ', strip=True)
     return _parse_generic_text(text, url)
 
-def extract_ned(page):
-    url = "https://www.neduet.edu.pk/admission"
-    html = fetch_with_playwright(page, url, 'body', timeout=10000)
-    if not html: return None
-    soup = BeautifulSoup(html, 'html.parser')
-    text = soup.get_text(separator=' ', strip=True)
-    return _parse_generic_text(text, url, 'NED')
+def extract_ned_pdf():
+    url = "https://www.neduet.edu.pk/sites/default/files/Admissions-2025/ADMISSION_SCHEDULE_2025.pdf"
+    try:
+        r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, verify=False, timeout=15)
+        r.raise_for_status()
+        pdf_file = io.BytesIO(r.content)
+        reader = PyPDF2.PdfReader(pdf_file)
+        text = " ".join([page.extract_text() for page in reader.pages])
+        return _parse_generic_text(text, url, 'NED')
+    except Exception as e:
+        logger.warning(f"   ⚠️  NED PDF Exception: {str(e)[:60]}")
+        return None
 
 def extract_air(page):
-    url = "https://au.edu.pk/Pages/Admission/admission_calendar.aspx"
+    url = "https://webdata.au.edu.pk/Pages/Admission/admission_schedule.aspx"
     html = fetch_with_playwright(page, url, 'body', timeout=10000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
@@ -328,12 +354,12 @@ def main():
         'PIEAS': {'extractor': extract_pieas, 'sharedKey': None},
         'Bahria Isb': {'extractor': extract_bahria, 'sharedKey': 'Bahria'},
         'Bahria Lhr': {'extractor': extract_bahria, 'sharedKey': 'Bahria'},
-        'COMSATS Isb': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
-        'COMSATS Lhr': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
-        'COMSATS Wah': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
-        'COMSATS Abbottabad': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
+        'COMSATS Isb': {'extractor': lambda p: extract_comsats(p, "Islamabad"), 'sharedKey': 'COMSATS_Islamabad'},
+        'COMSATS Lhr': {'extractor': lambda p: extract_comsats(p, "Lahore"), 'sharedKey': 'COMSATS_Lahore'},
+        'COMSATS Wah': {'extractor': lambda p: extract_comsats(p, "Wah"), 'sharedKey': 'COMSATS_Wah'},
+        'COMSATS Abbottabad': {'extractor': lambda p: extract_comsats(p, "Abbottabad"), 'sharedKey': 'COMSATS_Abbottabad'},
         'ITU': {'extractor': extract_itu, 'sharedKey': None},
-        'NED': {'extractor': extract_ned, 'sharedKey': None},
+        'NED': {'extractor': lambda p: extract_ned_pdf(), 'sharedKey': None},
         'Air': {'extractor': extract_air, 'sharedKey': None},
         'SZABIST': {'extractor': extract_szabist, 'sharedKey': None},
     }
@@ -416,7 +442,7 @@ def main():
                         logger.info(f"   📝 Deadline changed: {current_match.group(1)} -> {scraped_data['deadline']}")
 
             # Update testDate if scraped
-            if scraped_data['testDate']:
+            if scraped_data.get('testDate'):
                 current_match = re.search(r'testDate:\s*"([^"]+)"', entry_text)
                 scraped_date_obj = datetime.strptime(scraped_data['testDate'], "%Y-%m-%d")
                 
@@ -432,6 +458,19 @@ def main():
                         })
                         entry_text = re.sub(r'testDate:\s*"[^"]+"', f'testDate: "{scraped_data["testDate"]}"', entry_text)
                         logger.info(f"   📝 Test date changed: {current_match.group(1)} -> {scraped_data['testDate']}")
+
+            # Update session if scraped
+            if scraped_data.get('session'):
+                current_match = re.search(r'session:\s*"([^"]+)"', entry_text)
+                if current_match and current_match.group(1) != scraped_data['session']:
+                    report['changes'].append({
+                        'shortName': entry['shortName'],
+                        'field': 'session',
+                        'old': current_match.group(1),
+                        'new': scraped_data['session']
+                    })
+                    entry_text = re.sub(r'session:\s*"[^"]+"', f'session: "{scraped_data["session"]}"', entry_text)
+                    logger.info(f"   📝 Session updated: {current_match.group(1)} -> {scraped_data['session']}")
 
             # Replace block in file content
             if entry_text != entry['fullMatch']:
