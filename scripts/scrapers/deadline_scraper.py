@@ -83,21 +83,22 @@ def extract_iba():
 
 def _parse_generic_text(text, url, test_keyword=""):
     deadline_patterns = [
-        r'(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|registration|apply))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})',
-        r'(?:application|submission|registration)\s*deadline[:\s]*(\w+\s+\d{1,2},?\s*\d{4})',
-        r'(?:apply\s*(?:before|by|until))[:\s]*(\w+\s+\d{1,2},?\s*\d{4})',
-        r'(?:last\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})',
-        r'(?:last\s*date)[:\s]*(\d{1,2}\s+\w+\s+\d{4})',
-        r'(?:deadline)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})',
-        r'(?:closing\s*date)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})'
+        r'(?:last\s*date\s*(?:of|for|to)\s*(?:submission|application|registration|apply))[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:application|submission|registration)\s*deadline[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:apply\s*(?:before|by|until))[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:last\s*date)[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:deadline)[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:closing\s*date)[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:admissions?\s*close|applications?\s*close|submission\s*close)[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4})'
     ]
     
     test_patterns = []
     if test_keyword:
-        test_patterns.append(rf'(?:{test_keyword})[^\.]{{0,80}}?(\w+\s+\d{{1,2}},?\s*\d{{4}})')
+        test_patterns.append(rf'(?:{test_keyword})[^\.]{{0,80}}?(\d{{1,2}}\s+\w+\s+\d{{4}}|\w+\s+\d{{1,2}},?\s*\d{{4}}|\d{{1,2}}/\d{{1,2}}/\d{{4}}|\d{{1,2}}-\d{{1,2}}-\d{{4}})')
     test_patterns.extend([
-        r'(?:entry\s*test|admission\s*test|test\s*date|exam\s*date|ECAT)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})',
-        r'(?:test\s*(?:will\s*be\s*)?(?:held|conducted|scheduled)\s*(?:on)?)[:\s]*(\w+\s+\d{1,2},?\s*\d{4})'
+        r'(?:entry\s*test|admission\s*test|test\s*date|exam\s*date|ECAT|BUET)[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:test\s*(?:will\s*be\s*)?(?:held|conducted|scheduled)\s*(?:on)?)[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}-\d{1,2}-\d{4})',
+        r'(?:w\.e\.f)[^a-zA-Z0-9]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s*\d{4}|\d{1,2}-\d{1,2}-\d{4})'
     ])
     
     deadline, test_date = None, None
@@ -186,15 +187,29 @@ def extract_giki(page):
 
 def extract_fast(page):
     url = "https://nu.edu.pk/Admissions/Schedule"
-    html = fetch_with_playwright(page, url, 'table', timeout=10000)
+    html = fetch_with_playwright(page, url, 'table', timeout=15000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
-    text = soup.get_text(separator=' ', strip=True)
+    
+    text = ""
+    for table in soup.find_all('table'):
+        headers = [th.get_text(separator=' ', strip=True) for th in table.find_all(['th', 'td']) if th.name == 'th' or th.find('strong')]
+        if not headers and table.find('tr'):
+            headers = [td.get_text(separator=' ', strip=True) for td in table.find('tr').find_all(['th', 'td'])]
+
+        for row in table.find_all('tr'):
+            cells = row.find_all(['th', 'td'])
+            for i, cell in enumerate(cells):
+                header_prefix = headers[i] if i < len(headers) else ""
+                text += f" {header_prefix} {cell.get_text(separator=' ', strip=True)}"
+                
+    if not text:
+        text = soup.get_text(separator=' ', strip=True)
     return _parse_generic_text(text, url, 'FAST|NU')
 
 def extract_lums(page):
     url = "https://admission.lums.edu.pk/critical-dates-all-programmes"
-    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    html = fetch_with_playwright(page, url, 'body', timeout=20000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
     text = soup.get_text(separator=' ', strip=True)
@@ -238,12 +253,18 @@ def extract_comsats(page, campus="Islamabad"):
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
     
-    # Try to extract the specific row for this campus for Admission Close Date
     text = ""
     for table in soup.find_all('table'):
+        headers = [th.get_text(separator=' ', strip=True) for th in table.find_all(['th', 'td']) if th.name == 'th' or th.find('strong')]
+        if not headers and table.find('tr'):
+            headers = [td.get_text(separator=' ', strip=True) for td in table.find('tr').find_all(['th', 'td'])]
+
         for row in table.find_all('tr'):
             if campus.lower() in row.get_text(separator=' ', strip=True).lower():
-                text += " " + row.get_text(separator=' ', strip=True)
+                cells = row.find_all(['th', 'td'])
+                for i, cell in enumerate(cells):
+                    header_prefix = headers[i] if i < len(headers) else ""
+                    text += f" {header_prefix} {cell.get_text(separator=' ', strip=True)}"
     
     if not text:
         text = soup.get_text(separator=' ', strip=True)
@@ -280,7 +301,7 @@ def extract_air(page):
 
 def extract_szabist(page):
     url = "https://szabist.edu.pk/admission-schedule"
-    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    html = fetch_with_playwright(page, url, 'body', timeout=20000)
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
     text = soup.get_text(separator=' ', strip=True)
