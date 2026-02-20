@@ -122,8 +122,8 @@ export const departmentDetails = {
         }
     },
 
-    // COMSATS - #4 Overall
-    4: {
+    // COMSATS Isb - id=8 in universities.js
+    8: {
         "Computer Science": {
             ranking: 4,
             facultyStrength: "Good",
@@ -162,8 +162,8 @@ export const departmentDetails = {
         }
     },
 
-    // IBA - #5 Overall
-    5: {
+    // IBA - id=15 in universities.js
+    15: {
         "Computer Science": {
             ranking: 5,
             facultyStrength: "Excellent",
@@ -190,8 +190,8 @@ export const departmentDetails = {
         }
     },
 
-    // UET Lahore - #6 Overall
-    6: {
+    // UET Lahore - id=16 in universities.js
+    16: {
         "Pre-Engineering": {
             ranking: 2,
             facultyStrength: "Excellent",
@@ -206,8 +206,8 @@ export const departmentDetails = {
         }
     },
 
-    // GIKI - #7 Overall
-    7: {
+    // GIKI - id=18 in universities.js
+    18: {
         "Pre-Engineering": {
             ranking: 3,
             facultyStrength: "Excellent",
@@ -234,8 +234,8 @@ export const departmentDetails = {
         }
     },
 
-    // PIEAS - #8 Overall
-    8: {
+    // PIEAS - id=19 in universities.js
+    19: {
         "Pre-Engineering": {
             ranking: 4,
             facultyStrength: "World-Class",
@@ -262,8 +262,8 @@ export const departmentDetails = {
         }
     },
 
-    // Habib - #9 Overall
-    9: {
+    // Habib - id=23 in universities.js
+    23: {
         "Computer Science": {
             ranking: 8,
             facultyStrength: "Good",
@@ -278,8 +278,8 @@ export const departmentDetails = {
         }
     },
 
-    // AKU - #10 Overall
-    10: {
+    // AKU - id=24 in universities.js
+    24: {
         "Medical": {
             ranking: 1,
             facultyStrength: "World-Class",
@@ -294,8 +294,8 @@ export const departmentDetails = {
         }
     },
 
-    // NED - #11 Overall
-    11: {
+    // NED - id=25 in universities.js
+    25: {
         "Pre-Engineering": {
             ranking: 5,
             facultyStrength: "Excellent",
@@ -322,8 +322,8 @@ export const departmentDetails = {
         }
     },
 
-    // Bahria - #12 Overall
-    12: {
+    // Bahria Isb - id=20 in universities.js
+    20: {
         "Computer Science": {
             ranking: 10,
             facultyStrength: "Good",
@@ -350,8 +350,8 @@ export const departmentDetails = {
         }
     },
 
-    // Air University - #13 Overall
-    13: {
+    // Air University - id=26 in universities.js
+    26: {
         "Pre-Engineering": {
             ranking: 9,
             facultyStrength: "Good",
@@ -378,8 +378,8 @@ export const departmentDetails = {
         }
     },
 
-    // SZABIST - #14 Overall
-    14: {
+    // SZABIST - id=27 in universities.js
+    27: {
         "Computer Science": {
             ranking: 12,
             facultyStrength: "Average",
@@ -406,8 +406,8 @@ export const departmentDetails = {
         }
     },
 
-    // ITU - #15 Overall
-    15: {
+    // ITU - id=28 in universities.js
+    28: {
         "Computer Science": {
             ranking: 13,
             facultyStrength: "Good",
