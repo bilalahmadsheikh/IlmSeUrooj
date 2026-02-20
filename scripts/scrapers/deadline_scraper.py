@@ -133,16 +133,8 @@ def extract_nust(page):
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
     
-    # User requested: under heading "NET will be conducted as per (Tentative) schedule mentioned below:"
     target_heading = soup.find(lambda t: t.name in ['h2','h3','h4','p','strong'] and 'NET will be conducted' in t.text)
-    text = ""
-    if target_heading:
-        table = target_heading.find_next('table')
-        if table:
-            text = table.get_text(separator=' ', strip=True)
-    if not text:
-        text = soup.get_text(separator=' ', strip=True) # fallback
-
+    text = target_heading.find_next('table').get_text(separator=' ', strip=True) if target_heading and target_heading.find_next('table') else soup.get_text(separator=' ', strip=True)
     return _parse_generic_text(text, url, 'NET')
 
 def extract_uet_lahore(page):
@@ -167,19 +159,115 @@ def extract_giki(page):
     if not html: return None
     soup = BeautifulSoup(html, 'html.parser')
     
-    # User requested: under title "IMPORTANT DATES:"
     target_heading = soup.find(lambda t: t.name in ['h2','h3','h4','h5','strong','span'] and 'IMPORTANT DATES' in t.text.upper())
     text = ""
     if target_heading:
         content_div = target_heading.find_parent('div') or target_heading.find_next('table') or target_heading.find_next('ul')
-        if content_div:
-            text = content_div.get_text(separator=' ', strip=True)
-    if not text:
-        text = soup.get_text(separator=' ', strip=True) # fallback
+        if content_div: text = content_div.get_text(separator=' ', strip=True)
+    if not text: text = soup.get_text(separator=' ', strip=True)
         
     return _parse_generic_text(text, url)
 
+def extract_fast(page):
+    url = "https://nu.edu.pk/Admissions/Schedule"
+    html = fetch_with_playwright(page, url, 'table', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url, 'FAST|NU')
+
+def extract_lums(page):
+    url = "https://admission.lums.edu.pk/critical-dates-all-programmes"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url, 'LCAT')
+
+def extract_habib(page):
+    url = "https://habib.edu.pk/admissions/"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    target_heading = soup.find(lambda t: t.name in ['h2','h3','h4'] and 'Important Dates' in t.text)
+    text = target_heading.find_parent('div').get_text(separator=' ', strip=True) if target_heading else soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url)
+
+def extract_aku(page):
+    url = "https://www.aku.edu/admissions/pk/Pages/default.aspx"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url, 'AKU Test')
+
+def extract_pieas(page):
+    url = "http://admissions.pieas.edu.pk/Admissions/important_dates.html"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url)
+
+def extract_bahria(page):
+    url = "https://bahria.edu.pk/admissions/"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    target_heading = soup.find(lambda t: t.name in ['h2','h3','h4'] and 'Dates to Remember' in t.text)
+    text = target_heading.find_parent('div').get_text(separator=' ', strip=True) if target_heading else soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url)
+
+def extract_comsats(page):
+    url = "https://admissions.comsats.edu.pk/Home/Schedule"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url, 'NTS')
+
+def extract_itu(page):
+    url = "https://itu.edu.pk/admissions/"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url)
+
+def extract_ned(page):
+    url = "https://www.neduet.edu.pk/admission"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url, 'NED')
+
+def extract_air(page):
+    url = "https://au.edu.pk/Pages/Admission/admission_calendar.aspx"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url)
+
+def extract_szabist(page):
+    url = "https://szabist.edu.pk/admission-schedule"
+    html = fetch_with_playwright(page, url, 'body', timeout=10000)
+    if not html: return None
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    return _parse_generic_text(text, url)
+
+import argparse
+
 def main():
+    parser = argparse.ArgumentParser(description="Deadline Scraper")
+    parser.add_argument('--uni', type=str, help="Filter by university shortName")
+    args = parser.parse_args()
+    filter_uni = args.uni.lower() if args.uni else None
+    
     today = datetime.now()
     today_str = today.strftime('%Y-%m-%d')
     report = {
@@ -215,6 +303,9 @@ def main():
             'fullMatch': match.group(0),
         })
 
+    if filter_uni:
+        entries = [e for e in entries if filter_uni in e['shortName'].lower()]
+
     report['totalEntries'] = len(entries)
     logger.info(f"\n📋 Python Deadline Verification Scraper")
     logger.info(f"{'='*50}")
@@ -227,11 +318,24 @@ def main():
         'UET Lahore': {'extractor': extract_uet_lahore, 'sharedKey': 'UET Lahore'},
         'UET Taxila': {'extractor': extract_uet_taxila, 'sharedKey': 'UET Taxila'},
         'GIKI': {'extractor': extract_giki, 'sharedKey': 'GIKI'},
-        # Handle FAST like JS did
-        'FAST Isb': {'extractor': lambda p: extract_with_playwright_generic(p, ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'], 'FAST|NU'), 'sharedKey': 'FAST'},
-        'FAST Lhr': {'extractor': lambda p: extract_with_playwright_generic(p, ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'], 'FAST|NU'), 'sharedKey': 'FAST'},
-        'FAST Khi': {'extractor': lambda p: extract_with_playwright_generic(p, ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'], 'FAST|NU'), 'sharedKey': 'FAST'},
-        'FAST Psh': {'extractor': lambda p: extract_with_playwright_generic(p, ['https://nu.edu.pk/Admissions', 'https://nu.edu.pk'], 'FAST|NU'), 'sharedKey': 'FAST'},
+        'FAST Isb': {'extractor': extract_fast, 'sharedKey': 'FAST'},
+        'FAST Lhr': {'extractor': extract_fast, 'sharedKey': 'FAST'},
+        'FAST Khi': {'extractor': extract_fast, 'sharedKey': 'FAST'},
+        'FAST Psh': {'extractor': extract_fast, 'sharedKey': 'FAST'},
+        'LUMS': {'extractor': extract_lums, 'sharedKey': None},
+        'Habib': {'extractor': extract_habib, 'sharedKey': None},
+        'AKU': {'extractor': extract_aku, 'sharedKey': None},
+        'PIEAS': {'extractor': extract_pieas, 'sharedKey': None},
+        'Bahria Isb': {'extractor': extract_bahria, 'sharedKey': 'Bahria'},
+        'Bahria Lhr': {'extractor': extract_bahria, 'sharedKey': 'Bahria'},
+        'COMSATS Isb': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
+        'COMSATS Lhr': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
+        'COMSATS Wah': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
+        'COMSATS Abbottabad': {'extractor': extract_comsats, 'sharedKey': 'COMSATS'},
+        'ITU': {'extractor': extract_itu, 'sharedKey': None},
+        'NED': {'extractor': extract_ned, 'sharedKey': None},
+        'Air': {'extractor': extract_air, 'sharedKey': None},
+        'SZABIST': {'extractor': extract_szabist, 'sharedKey': None},
     }
 
     shared_cache = {}
