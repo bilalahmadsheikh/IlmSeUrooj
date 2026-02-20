@@ -201,9 +201,7 @@ async function extractLUMS() {
 // ── Habib (Tier 1: Static) ──
 async function extractHabib() {
     const urls = [
-        'https://habib.edu.pk/admissions/',
-        'https://habib.edu.pk/admissions/national-examination-boards/',
-        'https://habib.edu.pk/admissions/international-examination-board/',
+        'https://habib.edu.pk/admissions/international-examination-board/admission-schedule/',
     ];
 
     for (const url of urls) {
@@ -247,8 +245,7 @@ async function extractHabib() {
 // ── AKU (Tier 1: Static) ──
 async function extractAKU() {
     const urls = [
-        'https://www.aku.edu/admissions/Pages/home.aspx',
-        'https://www.aku.edu/admissions/pakistan/Pages/home.aspx',
+        'https://www.aku.edu/admissions/key-dates/Pages/home.aspx',
     ];
 
     for (const url of urls) {
@@ -291,8 +288,7 @@ async function extractAKU() {
 // ── PIEAS (Tier 2: Puppeteer — content on anchor sections) ──
 async function extractPIEAS() {
     const urls = [
-        'https://www.pieas.edu.pk/admissions',
-        'https://www.pieas.edu.pk/',
+        'https://admissions.pieas.edu.pk/Admissions/schedule.html',
     ];
 
     for (const url of urls) {
@@ -336,8 +332,7 @@ async function extractPIEAS() {
 // ── Bahria (Tier 2: Puppeteer) ──
 async function extractBahria() {
     const urls = [
-        'https://bahria.edu.pk/admissions/',
-        'https://bahria.edu.pk/Home/AdmissionRoadmap?programType=UnderGraduate',
+        'https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1',
     ];
 
     for (const url of urls) {
@@ -380,8 +375,7 @@ async function extractBahria() {
 // ── COMSATS (Tier 2: Puppeteer) ──
 async function extractCOMSATS() {
     const urls = [
-        'https://admissions.comsats.edu.pk',
-        'https://www.comsats.edu.pk/Admissions.aspx',
+        'https://admissions.comsats.edu.pk/Home/Keydates',
     ];
 
     for (const url of urls) {
@@ -468,8 +462,7 @@ async function extractITU() {
 // ── NED (Tier 1/2: Static first, then Puppeteer) ──
 async function extractNED() {
     const urls = [
-        'https://www.neduet.edu.pk/key_admission_date',
-        'https://www.neduet.edu.pk/admission',
+        'https://www.neduet.edu.pk/sites/default/files/Admissions-2025/ADMISSION_SCHEDULE_2025.pdf',
     ];
 
     // Try static first
@@ -704,7 +697,7 @@ const DEADLINE_SOURCES = {
     },
     'Air': {
         extractor: () => extractWithPuppeteer(
-            ['https://au.edu.pk/', 'https://webdata.au.edu.pk/Pages/Admission/newpages/Bachelor_programs.aspx'],
+            ['https://webdata.au.edu.pk/Pages/Admission/admission_schedule.aspx'],
             'Air', 'Air'
         ),
         sharedKey: null,
