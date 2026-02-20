@@ -499,18 +499,68 @@ def main():
 
         browser.close()
 
-    # Save universities.js
-    with open(uni_file_path, 'w', encoding='utf-8') as f:
-        f.write(file_content)
+    # ── Validation Summary ──
+    total_success = report['universitiesScraped']
+    total_failed = len(report['errors'])
+    total_skipped = len(report['skipped'])
+    total_changes = len(report['changes'])
 
-    # Save report
     logger.info(f"\n{'='*50}")
-    logger.info(f"📋 Verification Complete")
-    logger.info(f"   Universities scraped: {report['universitiesScraped']}")
-    logger.info(f"   Timestamps updated: {report['timestampsUpdated']}")
-    logger.info(f"   Date changes: len({report['changes']})")
-    
-    # Optional markdown report writing logic can go here (similar to JS)
+    logger.info(f"📋 VERIFICATION SUMMARY")
+    logger.info(f"{'='*50}")
+    logger.info(f"  ✅ Universities successfully scraped: {total_success}")
+    logger.info(f"  ❌ Universities failed to extract:    {total_failed}")
+    logger.info(f"  ⏭️  Universities skipped (no config):  {total_skipped}")
+    logger.info(f"  📅 Total dates extracted:             {report['datesExtracted']}")
+    logger.info(f"  🔄 Data changes detected:             {total_changes}")
+    logger.info(f"  🕐 Timestamps updated:                {report['timestampsUpdated']}")
+
+    if total_changes > 0:
+        logger.info(f"\n📝 CHANGES DETAIL:")
+        for c in report['changes']:
+            logger.info(f"  • {c['shortName']}: {c['field']} {c['old']} → {c['new']}")
+
+    if total_failed > 0:
+        logger.info(f"\n⚠️  FAILED EXTRACTIONS:")
+        for e in report['errors']:
+            logger.info(f"  • {e['shortName']}: {e['error']}")
+
+    # ── Save or Rollback Logic ──
+    # Only write the file if we actually extracted at least 1 date
+    if report['datesExtracted'] > 0:
+        with open(uni_file_path, 'w', encoding='utf-8') as f:
+            f.write(file_content)
+        logger.info(f"\n✅ universities.js updated with new data.")
+    else:
+        logger.info(f"\n⚠️  No dates extracted at all — keeping existing data untouched.")
+
+    # ── Save JSON report ──
+    import json
+    reports_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'reports')
+    os.makedirs(reports_dir, exist_ok=True)
+    report_path = os.path.join(reports_dir, 'deadline-verification-report.json')
+    with open(report_path, 'w', encoding='utf-8') as f:
+        json.dump({
+            'runDate': today_str,
+            'totalEntries': report['totalEntries'],
+            'universitiesScraped': total_success,
+            'failedExtractions': total_failed,
+            'skipped': total_skipped,
+            'datesExtracted': report['datesExtracted'],
+            'dataChanges': total_changes,
+            'timestampsUpdated': report['timestampsUpdated'],
+            'changes': report['changes'],
+            'errors': report['errors'],
+            'methods': report['methods'],
+        }, f, indent=2)
+    logger.info(f"📄 Report saved to {report_path}")
+
+    # ── Exit code for CI ──
+    # Exit 0 = success (new data written or no changes needed)
+    # Exit 1 = total failure (zero dates extracted, old data kept)
+    if report['datesExtracted'] == 0:
+        logger.error("\n❌ PIPELINE FAILED: Zero dates extracted from any university.")
+        exit(1)
     
 if __name__ == '__main__':
     main()

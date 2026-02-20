@@ -2,11 +2,11 @@ name: Verify Admission Deadlines
 
 on:
   schedule:
-    - cron: '0 0 1 * *' # Runs at 00:00 on day-of-month 1 (effectively every ~30 days)
+    - cron: '0 0 1 * *'   # 1st of every month at midnight UTC
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (no PR created)'
+        description: 'Dry run (no commit/push)'
         required: false
         default: false
         type: boolean
@@ -28,6 +28,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
+      scrape_status: ${{ steps.scrape.outcome }}
 
     steps:
       - name: Checkout repository
@@ -46,43 +47,123 @@ jobs:
           pip install -r scripts/scrapers/requirements.txt
           playwright install chromium
 
+      # ── Backup current data before scraping ──
+      - name: Backup current data
+        run: |
+          cp src/data/universities.js src/data/universities.js.bak
+          echo "✅ Backed up current universities.js"
+
+      # ── Run scraper (continue-on-error so we can rollback) ──
       - name: Run deadline verification scraper
         id: scrape
+        continue-on-error: true
         run: |
-          python scripts/scrapers/deadline_scraper.py
-          echo "### 📋 Deadline Verification Report" >> $GITHUB_STEP_SUMMARY
-          echo "Automated deadline verification performed by Python scraper." >> $GITHUB_STEP_SUMMARY
+          python scripts/scrapers/deadline_scraper.py 2>&1 | tee scrape_output.log
 
+      # ── Rollback on failure ──
+      - name: Rollback on failure (keep old data)
+        if: steps.scrape.outcome == 'failure'
+        run: |
+          echo "⚠️ Scraper failed — rolling back to previous data"
+          cp src/data/universities.js.bak src/data/universities.js
+          echo "✅ Rollback complete — old data preserved"
+
+      # ── Check for data changes ──
       - name: Check for data changes
         id: check
         run: |
           if git diff --quiet src/data/universities.js; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No deadline changes detected (timestamps updated only)" >> $GITHUB_STEP_SUMMARY
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "### 📝 Changes Detected" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            git diff --stat src/data/universities.js >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
           fi
 
+      # ── Generate detailed validation summary ──
+      - name: Generate validation summary
+        if: always()
+        run: |
+          echo "## 📋 Deadline Verification Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date:** $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Scraper Status:** ${{ steps.scrape.outcome == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Parse JSON report if it exists
+          if [ -f reports/deadline-verification-report.json ]; then
+            echo "### 📊 Extraction Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Universities Scraped | $(jq '.universitiesScraped' reports/deadline-verification-report.json) |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed Extractions | $(jq '.failedExtractions' reports/deadline-verification-report.json) |" >> $GITHUB_STEP_SUMMARY
+            echo "| Dates Extracted | $(jq '.datesExtracted' reports/deadline-verification-report.json) |" >> $GITHUB_STEP_SUMMARY
+            echo "| Data Changes | $(jq '.dataChanges' reports/deadline-verification-report.json) |" >> $GITHUB_STEP_SUMMARY
+            echo "| Timestamps Updated | $(jq '.timestampsUpdated' reports/deadline-verification-report.json) |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Show changes if any
+            CHANGES_COUNT=$(jq '.dataChanges' reports/deadline-verification-report.json)
+            if [ "$CHANGES_COUNT" -gt 0 ] 2>/dev/null; then
+              echo "### 🔄 Data Changes" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "| University | Field | Old Value | New Value |" >> $GITHUB_STEP_SUMMARY
+              echo "|------------|-------|-----------|-----------|" >> $GITHUB_STEP_SUMMARY
+              jq -r '.changes[] | "| \(.shortName) | \(.field) | \(.old) | \(.new) |"' reports/deadline-verification-report.json >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            # Show errors if any
+            ERRORS_COUNT=$(jq '.failedExtractions' reports/deadline-verification-report.json)
+            if [ "$ERRORS_COUNT" -gt 0 ] 2>/dev/null; then
+              echo "### ⚠️ Failed Extractions" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "| University | Error |" >> $GITHUB_STEP_SUMMARY
+              echo "|------------|-------|" >> $GITHUB_STEP_SUMMARY
+              jq -r '.errors[] | "| \(.shortName) | \(.error) |"' reports/deadline-verification-report.json >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "### ❌ No report generated" >> $GITHUB_STEP_SUMMARY
+            echo "The scraper did not produce a validation report." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Rollback notice
+          if [ "${{ steps.scrape.outcome }}" == "failure" ]; then
+            echo "### 🔙 Rollback Applied" >> $GITHUB_STEP_SUMMARY
+            echo "Scraper failed — **old data has been preserved**. No changes were committed." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # ── Upload report artifact ──
       - name: Upload verification report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: deadline-verification-report
-          path: reports/deadline-verification-report.*
+          path: |
+            reports/deadline-verification-report.json
+            scrape_output.log
           retention-days: 30
 
+      # ── Commit only on success with real changes ──
       - name: Commit and push changes
-        if: steps.check.outputs.has_changes == 'true' && !inputs.dry_run
+        if: steps.scrape.outcome == 'success' && steps.check.outputs.has_changes == 'true' && !inputs.dry_run
         run: |
           git config user.name "IlmSeUrooj Bot"
           git config user.email "${{ env.NOTIFICATION_EMAIL }}"
           git add src/data/universities.js
-          git commit -m "chore: Update admission deadlines [automated]"
+          git commit -m "chore: Update admission deadlines [automated]
+
+          $(if [ -f reports/deadline-verification-report.json ]; then
+            echo "Universities scraped: $(jq '.universitiesScraped' reports/deadline-verification-report.json)"
+            echo "Data changes: $(jq '.dataChanges' reports/deadline-verification-report.json)"
+            echo "Dates extracted: $(jq '.datesExtracted' reports/deadline-verification-report.json)"
+          fi)"
           git push
+
+      # ── Clean up backup ──
+      - name: Clean up backup
+        if: always()
+        run: rm -f src/data/universities.js.bak
 
   notify-on-failure:
     needs: [verify-deadlines]
@@ -104,8 +185,9 @@ jobs:
           from: IlmSeUrooj Bot
           body: |
             The deadline verification workflow has failed.
-            
+            Old data has been preserved (automatic rollback).
+
             Workflow: ${{ github.workflow }}
             Run ID: ${{ github.run_id }}
-            
+
             Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
