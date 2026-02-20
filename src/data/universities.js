@@ -1319,3 +1319,6 @@ export const filterOptions = {
     { value: "Strong Campus Life", label: "Strong Campus Life" }
   ]
 };
+
+// Auto-updated by CI/CD pipeline — do not edit manually
+export const lastScraperRun = "2026-02-20";

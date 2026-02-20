@@ -528,6 +528,12 @@ def main():
     # ── Save or Rollback Logic ──
     # Only write the file if we actually extracted at least 1 date
     if report['datesExtracted'] > 0:
+        # Update the lastScraperRun timestamp
+        file_content = re.sub(
+            r'export const lastScraperRun\s*=\s*"[^"]*"',
+            f'export const lastScraperRun = "{today_str}"',
+            file_content
+        )
         with open(uni_file_path, 'w', encoding='utf-8') as f:
             f.write(file_content)
         logger.info(f"\n✅ universities.js updated with new data.")

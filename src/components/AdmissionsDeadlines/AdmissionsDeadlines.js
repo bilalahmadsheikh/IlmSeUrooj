@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './AdmissionsDeadlines.module.css';
-import { upcomingDeadlines } from '@/data/universities';
+import { upcomingDeadlines, lastScraperRun } from '@/data/universities';
 
 // Responsive visibility limits
 const DESKTOP_LIMITS = [6, 15];
@@ -285,6 +285,11 @@ export default function AdmissionsDeadlines({ currentField }) {
                 <span className={styles.disclaimerIcon}></span>
                 Deadlines are auto-scraped from official university websites every 20 days.
                 Entries marked ⚠️ haven't been verified recently — always confirm on the official portal.
+                {lastScraperRun && (
+                    <span className={styles.lastUpdated}>
+                        Last updated: {new Date(lastScraperRun).toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                )}
             </div>
         </section>
     );
