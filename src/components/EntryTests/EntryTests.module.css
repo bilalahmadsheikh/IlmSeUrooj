@@ -46,51 +46,10 @@
     color: var(--color-text-secondary);
 }
 
-/* Filter Tabs */
-.filterTabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    justify-content: center;
-    margin-bottom: var(--space-6);
-}
-
-.filterTab {
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-body);
-    font-weight: 500;
-}
-
-.filterTab:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-    background: rgba(200, 155, 60, 0.08);
-}
-
-.filterTabActive {
-    background: var(--color-accent);
-    color: white;
-    border-color: var(--color-accent);
-}
-
-.filterTabActive:hover {
-    background: var(--color-accent-hover);
-    color: white;
-}
-
 /* Test Cards Grid */
 .testsGrid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--space-4);
 }
 
@@ -101,40 +60,32 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
     transition: all 0.3s ease;
 }
 
 .testCard:hover {
     border-color: var(--color-accent);
     box-shadow: 0 4px 20px rgba(200, 155, 60, 0.08);
+    transform: translateY(-2px);
 }
 
-/* Card Header (clickable) */
-.cardHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-4) var(--space-5);
-    cursor: pointer;
-    gap: var(--space-3);
-    user-select: none;
-}
-
-.cardHeaderLeft {
+/* Card Top: Icon + Name */
+.cardTop {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    flex: 1;
-    min-width: 0;
 }
 
 .testIcon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: var(--radius-md);
     background: linear-gradient(135deg, rgba(200, 155, 60, 0.15), rgba(200, 155, 60, 0.05));
     border: 1px solid rgba(200, 155, 60, 0.2);
@@ -152,9 +103,6 @@
     font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--color-text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .testConductor {
@@ -163,197 +111,57 @@
     margin-top: 2px;
 }
 
-.uniCount {
-    padding: var(--space-1) var(--space-3);
-    background: rgba(200, 155, 60, 0.1);
-    border: 1px solid rgba(200, 155, 60, 0.25);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-xs);
+/* Period Badge */
+.testPeriod {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: rgba(200, 155, 60, 0.06);
+    border: 1px solid rgba(200, 155, 60, 0.15);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
     color: var(--color-accent);
     font-weight: 600;
-    white-space: nowrap;
+}
+
+.periodIcon {
+    font-size: var(--font-size-sm);
     flex-shrink: 0;
 }
 
-.expandIcon {
+/* Description */
+.testDescription {
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
-    transition: transform 0.3s ease;
-    flex-shrink: 0;
+    line-height: 1.6;
+    margin: 0;
 }
 
-.expandIconOpen {
-    transform: rotate(180deg);
-}
-
-/* Card Body (expandable) */
-.cardBody {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease;
-}
-
-.cardBodyOpen {
-    max-height: 2000px;
-}
-
-.cardContent {
-    padding: 0 var(--space-5) var(--space-5);
-    border-top: 1px solid var(--glass-border);
-}
-
-/* Test Details */
-.testDetails {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: var(--space-3);
-    padding: var(--space-4) 0;
-}
-
-.detailItem {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.detailLabel {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-}
-
-.detailValue {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-primary);
-    font-weight: 500;
-}
-
-/* Subjects */
-.subjects {
+/* Accepted By Tags */
+.acceptedBy {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
-    margin-top: 4px;
 }
 
-.subjectTag {
-    padding: 2px var(--space-2);
-    background: rgba(200, 155, 60, 0.08);
-    border: 1px solid rgba(200, 155, 60, 0.15);
+.uniTag {
+    padding: 3px var(--space-2);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
     font-size: 11px;
-    color: var(--color-accent);
+    color: var(--color-text-secondary);
     font-weight: 500;
 }
 
-/* University Cutoffs */
-.uniSection {
-    margin-top: var(--space-4);
-}
-
-.uniSectionTitle {
-    font-family: var(--font-display);
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: var(--space-3);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.uniSectionIcon {
-    font-size: var(--font-size-base);
-}
-
-/* University Row */
-.uniRow {
-    background: rgba(200, 155, 60, 0.03);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-3) var(--space-4);
-    margin-bottom: var(--space-3);
-}
-
-.uniHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-2);
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
-
-.uniName {
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-primary);
-}
-
-.weightage {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    background: var(--glass-bg);
-    padding: 2px var(--space-2);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--glass-border);
-}
-
-/* Cutoff Grid */
-.cutoffGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: var(--space-2);
-}
-
-.cutoffItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-2) var(--space-3);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm);
-    gap: var(--space-2);
-}
-
-.cutoffProgram {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.cutoffValue {
-    font-size: var(--font-size-sm);
-    font-weight: 700;
-    color: var(--color-accent);
-    white-space: nowrap;
-}
-
-.cutoffHigh {
-    color: #E74C3C;
-}
-
-.cutoffMedium {
-    color: #F39C12;
-}
-
-.cutoffLow {
-    color: #27AE60;
-}
-
-/* Apply Link */
-.applyLink {
+/* Apply Button */
+.applyBtn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--space-2);
-    margin-top: var(--space-4);
+    margin-top: auto;
     padding: var(--space-2) var(--space-4);
     background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
     color: white;
@@ -362,15 +170,12 @@
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
+    text-align: center;
 }
 
-.applyLink:hover {
+.applyBtn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(200, 155, 60, 0.3);
-}
-
-.applyIcon {
-    font-size: var(--font-size-xs);
 }
 
 /* Disclaimer */
@@ -390,7 +195,7 @@
 .viewMore {
     display: flex;
     justify-content: center;
-    margin-top: var(--space-4);
+    margin-top: var(--space-6);
 }
 
 .viewMoreBtn {
@@ -421,57 +226,21 @@
         font-size: var(--font-size-xl);
     }
 
-    .cardHeader {
-        padding: var(--space-3) var(--space-4);
+    .testsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .testCard {
+        padding: var(--space-4);
     }
 
     .testIcon {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         font-size: var(--font-size-base);
     }
 
     .testName {
         font-size: var(--font-size-base);
-    }
-
-    .testDetails {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .cutoffGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .cardContent {
-        padding: 0 var(--space-3) var(--space-4);
-    }
-
-    .uniRow {
-        padding: var(--space-2) var(--space-3);
-    }
-
-    .filterTabs {
-        gap: var(--space-1);
-    }
-
-    .filterTab {
-        padding: var(--space-1) var(--space-3);
-        font-size: var(--font-size-xs);
-    }
-}
-
-@media (max-width: 480px) {
-    .testDetails {
-        grid-template-columns: 1fr;
-    }
-
-    .uniHeader {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .cutoffItem {
-        padding: var(--space-1) var(--space-2);
     }
 }
