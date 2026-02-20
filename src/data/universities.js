@@ -267,7 +267,7 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
+      applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates"
     }
   },
   {
@@ -301,7 +301,7 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
+      applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates"
     }
   },
   {
@@ -333,7 +333,7 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
+      applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates"
     }
   },
   {
@@ -366,7 +366,7 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
+      applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates"
     }
   },
   {
@@ -398,7 +398,7 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
+      applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates"
     }
   },
   {
@@ -430,7 +430,7 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
+      applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates"
     }
   },
   {
@@ -462,7 +462,7 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
+      applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates"
     }
   },
 
@@ -626,7 +626,7 @@ export const universities = [
       deadline: "2026-03-05",
       testName: "PIEAS Written Test",
       testDate: "2026-04-12",
-      applyUrl: "https://pieas.edu.pk/admissions"
+      applyUrl: "https://admissions.pieas.edu.pk/Admissions/schedule.html"
     }
   },
 
@@ -662,7 +662,7 @@ export const universities = [
       deadline: "2026-06-15",
       testName: "BUET (Bahria Entry Test)",
       testDate: "2026-07-10",
-      applyUrl: "https://bahria.edu.pk/admissions"
+      applyUrl: "https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1"
     }
   },
   {
@@ -694,7 +694,7 @@ export const universities = [
       deadline: "2026-06-22",
       testName: "BUET (Bahria Entry Test)",
       testDate: "2026-07-10",
-      applyUrl: "https://bahria.edu.pk/admissions"
+      applyUrl: "https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1"
     }
   },
   {
@@ -728,7 +728,7 @@ export const universities = [
       deadline: "2026-06-15",
       testName: "BUET (Bahria Entry Test)",
       testDate: "2026-07-10",
-      applyUrl: "https://bahria.edu.pk/admissions"
+      applyUrl: "https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1"
     }
   },
 
@@ -764,7 +764,7 @@ export const universities = [
       deadline: "2026-02-19",
       testName: "Habib Entrance Exam",
       testDate: "2026-02-23",
-      applyUrl: "https://habib.edu.pk/apply"
+      applyUrl: "https://habib.edu.pk/admissions/international-examination-board/admission-schedule/"
     }
   },
   {
@@ -794,7 +794,7 @@ export const universities = [
       deadline: "2026-03-15",
       testName: "AKU Entry Test",
       testDate: "2026-06-15",
-      applyUrl: "https://aku.edu/admissions"
+      applyUrl: "https://www.aku.edu/admissions/key-dates/Pages/home.aspx"
     }
   },
   {
@@ -826,7 +826,7 @@ export const universities = [
       deadline: "2026-07-15",
       testName: "NED Entry Test",
       testDate: "2026-07-20",
-      applyUrl: "https://neduet.edu.pk/admissions"
+      applyUrl: "https://www.neduet.edu.pk/sites/default/files/Admissions-2025/ADMISSION_SCHEDULE_2025.pdf"
     }
   },
   {
@@ -860,7 +860,7 @@ export const universities = [
       deadline: "2026-06-20",
       testName: "Air University Entry Test",
       testDate: "2026-07-05",
-      applyUrl: "https://au.edu.pk/admissions"
+      applyUrl: "https://webdata.au.edu.pk/Pages/Admission/admission_schedule.aspx"
     }
   },
   {
@@ -982,7 +982,7 @@ export const upcomingDeadlines = [
     testName: "Habib Entrance Test",
     testDate: "2026-03-01",
     session: "Fall 2026",
-    applyUrl: "https://habib.edu.pk/admissions",
+    applyUrl: "https://habib.edu.pk/admissions/international-examination-board/admission-schedule/",
     lastVerified: "2026-02-19"
   },
   {
@@ -995,7 +995,7 @@ export const upcomingDeadlines = [
     testName: "AKU Test",
     testDate: "2026-03-10",
     session: "Fall 2026",
-    applyUrl: "https://aku.edu/admissions",
+    applyUrl: "https://www.aku.edu/admissions/key-dates/Pages/home.aspx",
     lastVerified: "2026-02-19"
   },
   {
@@ -1008,7 +1008,7 @@ export const upcomingDeadlines = [
     testName: "PIEAS Written Test",
     testDate: "2026-04-12",
     session: "Fall 2026",
-    applyUrl: "https://pieas.edu.pk/admissions",
+    applyUrl: "https://admissions.pieas.edu.pk/Admissions/schedule.html",
     lastVerified: "2026-02-19"
   },
   {
@@ -1047,7 +1047,7 @@ export const upcomingDeadlines = [
     testName: "Bahria CBT (BUET)",
     testDate: "2026-04-04",
     session: "Fall 2026",
-    applyUrl: "https://bahria.edu.pk/admissions",
+    applyUrl: "https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1",
     lastVerified: "2026-02-19"
   },
   {
@@ -1060,7 +1060,7 @@ export const upcomingDeadlines = [
     testName: "Bahria CBT (BUET)",
     testDate: "2026-04-04",
     session: "Fall 2026",
-    applyUrl: "https://bahria.edu.pk/admissions",
+    applyUrl: "https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1",
     lastVerified: "2026-02-19"
   },
   {
@@ -1138,7 +1138,7 @@ export const upcomingDeadlines = [
     testName: "Air University CBT",
     testDate: "2026-07-18",
     session: "Fall 2026",
-    applyUrl: "https://au.edu.pk/admissions",
+    applyUrl: "https://webdata.au.edu.pk/Pages/Admission/admission_schedule.aspx",
     lastVerified: "2026-02-19"
   },
   {
@@ -1164,7 +1164,7 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
+    applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates",
     lastVerified: "2026-02-19"
   },
   {
@@ -1177,7 +1177,7 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
+    applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates",
     lastVerified: "2026-02-19"
   },
   {
@@ -1190,7 +1190,7 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
+    applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates",
     lastVerified: "2026-02-19"
   },
   {
@@ -1203,7 +1203,7 @@ export const upcomingDeadlines = [
     testName: "NTS NAT",
     testDate: "2026-07-30",
     session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
+    applyUrl: "https://admissions.comsats.edu.pk/Home/Keydates",
     lastVerified: "2026-02-19"
   },
   {
@@ -1229,7 +1229,7 @@ export const upcomingDeadlines = [
     testName: "NED Entry Test",
     testDate: "2026-08-18",
     session: "Fall 2026",
-    applyUrl: "https://neduet.edu.pk/admissions",
+    applyUrl: "https://www.neduet.edu.pk/sites/default/files/Admissions-2025/ADMISSION_SCHEDULE_2025.pdf",
     lastVerified: "2026-02-19"
   }
 ];
