@@ -15,6 +15,14 @@ A comprehensive guide to all features of the IlmSeUrooj platform, explaining wha
 8. [Campus-Specific Data](#8-campus-specific-data)
 9. [Theme System](#9-theme-system)
 10. [Automated Data Pipeline](#10-automated-data-pipeline)
+11. [Deadline Verification & Auto-Updates](#11-deadline-verification--auto-updates)
+12. [Entry Tests Guide](#12-entry-tests-guide)
+13. [Scholarships & Financial Aid](#13-scholarships--financial-aid)
+14. [Top Picks Recommendations](#14-top-picks-recommendations)
+15. [Similar Universities Suggestions](#15-similar-universities-suggestions)
+16. [Toast Notifications](#16-toast-notifications)
+17. [Scroll to Top](#17-scroll-to-top)
+18. [SVG Icon System](#18-svg-icon-system)
 
 ---
 
@@ -424,19 +432,166 @@ A specialized system that ensures university admission deadlines are always accu
 
 ---
 
+## 12. Entry Tests Guide
+
+### What It Does
+Displays expandable info cards for major Pakistani university entry tests with details on format, subjects, accepted universities, and official links.
+
+### Why It's Useful
+- **Centralized Info**: Students no longer need to visit each test's website separately
+- **University Mapping**: See which universities accept which test at a glance
+- **Test Periods**: Know when each test is typically held
+- **Official Links**: Direct access to registration portals
+
+### Tests Covered
+| Test | Conductor | Universities |
+|------|-----------|-------------|
+| NET | NUST | NUST |
+| SAT | College Board | LUMS, IBA, NUST (Business), Habib, Bahria, FAST |
+| FAST NU Test | FAST-NUCES | All FAST campuses |
+| ECAT | UET | UET Lahore, UET Taxila |
+| GIKI Test | GIKI | GIKI |
+| IBA Aptitude Test | IBA Karachi | IBA |
+| PIEAS Test | PIEAS | PIEAS |
+| NED Entry Test | NED University | NED |
+| Air University Test | Air University | Air University |
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `src/components/EntryTests/EntryTests.js` | Entry test cards UI |
+| `src/data/entryTestsData.js` | Test data (also imported inline) |
+
+---
+
+## 13. Scholarships & Financial Aid
+
+### What It Does
+A searchable scholarship database with two display modes: an inline section and a full overlay panel, targeting underprivileged students with need-based aid, government schemes, and university-specific support.
+
+### Why It's Useful
+- **Financial Aid Access**: Aggregates scholarship info from multiple sources
+- **Filterable**: Filter by type (need-based, merit-based, government, university)
+- **Sortable**: Sort by coverage, provider, or default order
+- **Actionable**: Direct links to application portals
+- **Focus on Need**: Highlights scholarships for underprivileged students
+
+### Components
+| Component | Purpose |
+|-----------|---------|
+| `ScholarshipsSection` | Inline scholarships listing with type filter |
+| `ScholarshipsPanel` | Full overlay panel with sorting, quick links |
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `src/components/ScholarshipsSection/ScholarshipsSection.js` | Section UI |
+| `src/components/ScholarshipsPanel/ScholarshipsPanel.js` | Overlay panel UI |
+| `src/data/scholarships.js` | Scholarship data, categories, and quick links |
+
+---
+
+## 14. Top Picks Recommendations
+
+### What It Does
+Shows the top 5 university recommendations based on current filter selections, with match percentages, match reasons, and expandable details.
+
+### Why It's Useful
+- **Instant Results**: No swiping needed — see top matches immediately
+- **Explainable**: Shows *why* each university is recommended (match reasons)
+- **Actionable**: Save to list directly from recommendations
+- **Bridges to Swiping**: CTA button to swipe through all matches
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `src/components/RecommendationsSection/RecommendationsSection.js` | Recommendations UI |
+| `src/utils/ranking.js` | `getMatchPercentage()`, `getMatchReasons()`, `getFieldRank()` |
+
+---
+
+## 15. Similar Universities Suggestions
+
+### What It Does
+Suggests up to 5 unsaved universities similar to the user's saved list, prioritizing universities in the same cities.
+
+### Why It's Useful
+- **Discovery**: Helps students find universities they might have missed
+- **Context-Aware**: Uses saved list cities and filter matches
+- **Frictionless**: One-click save functionality
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `src/components/SimilarUniversities/SimilarUniversities.js` | Suggestions UI |
+| `getSimilarCandidates()` function | Similarity algorithm |
+
+---
+
+## 16. Toast Notifications
+
+### What It Does
+Auto-dismissing toast notifications that confirm user actions like saving or removing a university.
+
+### Why It's Useful
+- **Feedback**: Confirms actions without interrupting flow
+- **Accessible**: Uses `role="alert"` for screen readers
+- **Non-intrusive**: Auto-dismisses after 3 seconds
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `src/components/Toast/Toast.js` | Toast notification component |
+
+---
+
+## 17. Scroll to Top
+
+### What It Does
+A floating button that appears after scrolling 400px, allowing users to smoothly scroll back to the top of the page.
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `src/components/ScrollToTop/ScrollToTop.js` | Button component |
+
+---
+
+## 18. SVG Icon System
+
+### What It Does
+A shared SVG icon library replacing emoji icons for better accessibility and visual consistency across themes.
+
+### Icons Available
+`IconBookmark`, `IconClose`, `IconCheck`, `IconArrowRight`, `IconArrowLeft`, `IconChevronUp`, `IconChevronDown`, `IconNote`, `IconCelebrate`, `IconScholarship`
+
+### Where Implemented
+| File | Purpose |
+|------|---------|
+| `src/components/Icons/Icons.js` | 10 SVG icon components |
+
+---
+
 ## Feature Location Quick Reference
 
 | Feature | Main Component | Data Source |
 |---------|----------------|-------------|
 | Swipe Cards | `SwipeCard/` | `universities.js` |
 | Filters | `FilterSection/` | `universities.js` (filterOptions) |
-| Saved List | `SavedList/` | localStorage |
+| Saved List | `SavedList/` | `savedStorage.js` (versioned localStorage) |
 | Predictor | `AdmissionPredictor/` | Internal `admissionCriteria` |
 | Comparison | `UniversityComparison/` | `departmentData.js` |
 | Deadlines | `AdmissionsDeadlines/` | `universities.js` (upcomingDeadlines) |
 | Uni List | `UniversityList/` | `universities.js` |
 | Themes | `ThemeToggle/`, `ThemeContext` | localStorage |
 | Data Pipeline | `scripts/scrapers/` | University websites (scraped) |
+| Entry Tests | `EntryTests/` | `entryTestsData.js` |
+| Scholarships | `ScholarshipsSection/`, `ScholarshipsPanel/` | `scholarships.js` |
+| Recommendations | `RecommendationsSection/` | `universities.js` + `ranking.js` |
+| Similar Unis | `SimilarUniversities/` | `universities.js` + `ranking.js` |
+| Toast | `Toast/` | Internal state |
+| Scroll to Top | `ScrollToTop/` | Internal state |
+| Icons | `Icons/` | SVG definitions |
 
 ---
 

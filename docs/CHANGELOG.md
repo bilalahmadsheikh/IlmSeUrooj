@@ -14,6 +14,7 @@ All iterations of the IlmSeUrooj (UniMatch) project documented in one place.
 | 4 | 2026-01-25 | Campus-specific data, 28 universities |
 | 5 | 2026-02-19 | Automated CI/CD pipeline, scraper engine, validators |
 | 6 | 2026-02-19 | Functional scraper implementations, AST file updates, workflow fixes |
+| 7 | 2026-02-20 | Entry tests, scholarships, recommendations, UX enhancements, Supabase |
 
 ---
 
@@ -361,14 +362,15 @@ Dry run with `DATA_TIER=critical`:
 | Total Universities | 28 (campus-specific) |
 | Single Campus Unis | 11 |
 | Multi-Campus Unis | 4 (17 campuses total) |
-| Major Components | 12 |
+| Major Components | 19 |
 | Theme Modes | 3 |
 | Admission Criteria Entries | 22 |
+| Data Files | 4 (universities, departments, entry tests, scholarships) |
 | Data Points per Uni | 15+ |
-| GitHub Actions Workflows | 4 |
-| Validation Scripts | 5 |
+| GitHub Actions Workflows | 6 |
+| Validation Scripts | 6 |
 | Scraper Configs | 16 |
-| Lines of Code | ~10,000+ |
+| Lines of Code | ~15,000+ |
 
 ---
 
@@ -476,6 +478,89 @@ Replaced all placeholder implementations with fully functional code that actuall
 
 ---
 
+## Iteration 7: Entry Tests, Scholarships, and UX Enhancements
+**Date**: 2026-02-20 | **Status**: ✅ Complete
+
+### Overview
+Major feature expansion adding entry tests guide, scholarships database, top-picks recommendations, similar universities suggestions, and multiple UX improvements including toast notifications, scroll-to-top, and an SVG icon system. Also introduced Supabase integration for future backend needs.
+
+### Features Implemented
+
+#### Entry Tests Guide
+- Info cards for 9 major entry tests (NET, SAT, ECAT, FAST NU Test, GIKI Test, IBA Test, PIEAS Test, NED Test, Air University Test)
+- Expandable cards with test details, subjects, and scoring info
+- Shows which universities accept each test
+- Test periods and official website links
+
+#### Scholarships & Financial Aid
+- New `scholarships.js` data file with need-based, merit-based, government, and university-specific scholarships
+- `ScholarshipsSection` component — inline listings with type filter
+- `ScholarshipsPanel` component — full overlay panel with sorting, categories, quick links
+- Focus on underprivileged students with eligibility, coverage, and apply URLs
+
+#### Top Picks Recommendations
+- `RecommendationsSection` showing top 5 matches based on filters
+- Match percentage and match reasons display
+- Expandable details with fee, campus type, highlights
+- CTA to swipe through all matches
+
+#### Similar Universities ("You might also like")
+- `SimilarUniversities` displaying up to 5 suggestions based on saved list
+- Prioritizes universities in same cities as saved list
+- Falls back to top filter matches
+
+#### UX Enhancements
+- **Toast notifications** — auto-dismissing save/remove confirmations (`Toast` component)
+- **Scroll to top** — floating button appears after 400px scroll (`ScrollToTop` component)
+- **SVG icon system** — 10 accessible SVG icons replacing emoji usage (`Icons` component)
+- **Versioned localStorage** — new `savedStorage.js` utility with versioned data persistence
+- **Enhanced ranking utils** — `getMatchPercentage()`, `getMatchReasons()`, `getFieldRank()` in `ranking.js`
+
+#### Data Update Reminder
+- New workflow `data-update-reminder.yml` — every 20 days email reminder for manual review
+
+#### Supabase Integration
+- Supabase project created (`ilmseurroj`, region: ap-northeast-2)
+- MCP server connected for future backend features
+
+### Technical Changes
+
+#### New Files Created
+| File | Purpose |
+|------|--------|
+| `src/components/EntryTests/EntryTests.js` | Entry test cards UI |
+| `src/components/Icons/Icons.js` | SVG icon library (10 icons) |
+| `src/components/RecommendationsSection/RecommendationsSection.js` | Top picks UI |
+| `src/components/ScholarshipsPanel/ScholarshipsPanel.js` | Scholarship overlay panel |
+| `src/components/ScholarshipsSection/ScholarshipsSection.js` | Scholarships section |
+| `src/components/ScrollToTop/ScrollToTop.js` | Scroll-to-top button |
+| `src/components/SimilarUniversities/SimilarUniversities.js` | Similar unis suggestions |
+| `src/components/Toast/Toast.js` | Toast notifications |
+| `src/data/entryTestsData.js` | Entry test details data |
+| `src/data/scholarships.js` | Scholarships data |
+| `src/utils/savedStorage.js` | Versioned localStorage persistence |
+| `scripts/scrapers/deadline_scraper.py` | Python-based deadline scraper |
+| `scripts/utils/test-urls.js` | URL testing utilities |
+| `.github/workflows/data-update-reminder.yml` | 20-day email reminder |
+
+#### Modified Files
+| File | Change |
+|------|--------|
+| `src/app/page.js` | Expanded to ~13KB; integrated all new components |
+| `src/utils/ranking.js` | Added `getMatchPercentage()`, `getMatchReasons()`, `getFieldRank()` |
+| `package.json` | Added `sharp` dev dependency |
+| `.gitignore` | Added `.gemini/` directory |
+| All CSS module files | New component styles |
+
+### Impact
+- Component count grew from 12 to 19
+- Data files grew from 2 to 4
+- Workflows grew from 5 to 6
+- Significantly improved UX with recommendations, toast feedback, and scroll behavior
+- Accessibility improved with SVG icons replacing emojis
+
+---
+
 ## Future Roadmap (Planned)
 
 - [ ] AI-powered university recommender
@@ -483,7 +568,7 @@ Replaced all placeholder implementations with fully functional code that actuall
 - [ ] Urdu language support
 - [ ] PWA with offline mode & push notifications
 - [ ] User accounts and saved preferences
-- [ ] Scholarship information database
+- [x] ~~Scholarship information database~~ (Implemented in Iteration 7)
 - [ ] More universities (medical colleges, smaller unis)
 - [ ] Interactive university map
 - [ ] Application checklist generator

@@ -12,6 +12,8 @@ Complete documentation of all CI/CD workflows that automate university data mana
 | [Semester Data Update](#2-semester-data-update) | `semester-data-update.yml` | March 1 & Sep 1 | Semester-cycle refresh of all data |
 | [Annual Merit Update](#3-annual-merit-update) | `annual-merit-update.yml` | Nov 1 yearly | Scrape new merit cutoffs after results |
 | [Website Health Check](#4-website-health-check) | `website-health-check.yml` | Weekly (Mondays) | Verify all university URLs are alive |
+| [Deadline Verification](#5-deadline-verification) | `deadline-verification.yml` | Every 20 days | Auto-verify and commit deadline changes |
+| [Data Update Reminder](#6-data-update-reminder) | `data-update-reminder.yml` | Every 20 days | Email reminder for manual data review |
 
 ---
 
@@ -145,6 +147,26 @@ Dedicated workflow for ensuring admission deadlines are always accurate. It uses
 - Updates `universities.js` with new dates and timestamps
 - Uploads verification report artifact (`reports/deadline-verification-report.md`)
 - Sends email notification only on failure
+
+---
+
+## 6. Data Update Reminder
+
+**File**: `.github/workflows/data-update-reminder.yml`
+**Trigger**: Every 20 days (`0 4 */20 * *`) or Manual dispatch
+
+### Purpose
+Sends an email reminder to manually review university data that may not be captured by automated scrapers. Serves as a safety net for data that requires human verification.
+
+### What It Reminds About
+- Admission deadlines — verify dates on university websites
+- Test dates — check for schedule changes
+- Merit lists — update if new data is available
+- New programs or fee changes
+
+### Output
+- Email to configured address (`ba8516127@gmail.com`)
+- Quick links to GitHub Actions and data file
 
 ---
 

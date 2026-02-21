@@ -23,7 +23,7 @@
 | Document | Description |
 |----------|-------------|
 | [Architecture](./architecture.md) | Component structure, data flow, and CI/CD pipeline |
-| [CHANGELOG](./CHANGELOG.md) | Complete development history (Iterations 1–5) |
+| [CHANGELOG](./CHANGELOG.md) | Complete development history (Iterations 1–7) |
 | [FEATURES](./FEATURES.md) | Detailed feature documentation |
 | [FILES](./FILES.md) | File-by-file reference |
 | [DATA-SOURCES](./DATA-SOURCES.md) | All data sources with links |
@@ -44,12 +44,13 @@
 |--------|-------|
 | Total Universities | 28 (campus-specific entries) |
 | Multi-Campus Universities | FAST (5), COMSATS (7), Bahria (3), UET (2) |
-| Major Components | 12 |
+| Major Components | 19 |
 | Theme Modes | 3 (Dark, Light, Treasure Map) |
+| Data Files | 4 (universities, departments, entry tests, scholarships) |
 | Data Points per University | 15+ attributes |
-| GitHub Actions Workflows | 4 |
+| GitHub Actions Workflows | 6 |
 | Scraper Configs | 16 |
-| Validation Scripts | 5 |
+| Validation Scripts | 6 |
 
 ---
 
@@ -97,14 +98,16 @@ NUST, LUMS, IBA, GIKI, PIEAS, NED, Habib, AKU, Air University, SZABIST, ITU
 
 ## Technical Stack
 
-- **Framework**: Next.js 16+ (App Router)
+- **Framework**: Next.js 16.1.1 (App Router)
 - **Styling**: CSS Modules with custom design system
 - **State Management**: React useState + Context API
-- **Persistence**: localStorage for saved universities
+- **Persistence**: Versioned localStorage (`savedStorage.js`)
+- **Icons**: Custom SVG icon library (`Icons.js`)
+- **Images**: Sharp for image processing
 - **Scraping**: Cheerio (static sites) + Puppeteer (JavaScript-heavy sites)
 - **HTTP Client**: Axios with retry logic
 - **File Updates**: Babel AST + Recast (preserves formatting)
-- **CI/CD**: GitHub Actions (4 workflows)
+- **CI/CD**: GitHub Actions (6 workflows)
 - **Validation**: Custom Node.js validator scripts
 - **Design**: Mobile-first responsive, treasure map theme
 

@@ -37,7 +37,8 @@ A detailed documentation of every file in the project, explaining what each file
 - `react-dom`: ^19.2.3 - React DOM renderer
 
 **Dev Dependencies**:
-- `cheerio`: ^1.0.0 - HTML parsing for static sites
+- `cheerio`: ^1.2.0 - HTML parsing for static sites
+- `sharp`: ^0.34.5 - Image processing
 - `puppeteer`: ^21.0.0 - Headless browser for JavaScript-heavy sites
 - `axios`: ^1.6.0 - HTTP client with retry logic
 - `@babel/parser`: ^7.23.0 - Parse JavaScript to AST
@@ -110,6 +111,8 @@ export default nextConfig;
 - `.next/` - Build output
 - `.env*` - Environment variables
 - `*.log` - Log files
+- `reports/` - Auto-generated scraper reports
+- `.gemini/` - Gemini AI configuration
 
 ---
 
@@ -141,27 +144,35 @@ export default function RootLayout({ children }) {
 ---
 
 #### `src/app/page.js`
-**Purpose**: Main homepage component (~600 lines)
+**Purpose**: Main homepage component (~13,000 bytes)
 
 **What it contains**:
 - Filter state management (6 filters)
-- Saved universities state (with localStorage)
+- Saved universities state (with versioned localStorage via `savedStorage.js`)
 - University ranking/sorting logic
+- Toast notification state
 - All section components rendered
 
 **Sections rendered**:
 1. `FilterSection` - Dropdown filters
-2. `SwipeCard` - Tinder-style cards
-3. `SavedList` - Saved universities panel
-4. `UniversityList` - Expandable list
-5. `AdmissionPredictor` - Merit calculator
-6. `UniversityComparison` - Side-by-side comparison
-7. `AdmissionsDeadlines` - Deadline tracker
+2. `RecommendationsSection` - Top picks based on filters
+3. `SwipeCard` - Tinder-style cards
+4. `SavedList` - Saved universities panel
+5. `UniversityList` - Expandable list
+6. `AdmissionPredictor` - Merit calculator
+7. `EntryTests` - Entry test information cards
+8. `UniversityComparison` - Side-by-side comparison
+9. `AdmissionsDeadlines` - Deadline tracker
+10. `ScholarshipsSection` - Scholarships & financial aid
+11. `SimilarUniversities` - "You might also like" suggestions
+12. `ScrollToTop` - Scroll-to-top floating button
+13. `Toast` - Toast notification display
 
 **Key functions**:
 - `handleSave(university)` - Add to saved list
 - `handleSkip()` - Move to next card
 - `handleRemove(id)` - Remove from saved
+- `showToast(message, type)` - Display toast notification
 
 ---
 
@@ -557,6 +568,170 @@ function calculateUserAggregate(fsc, matric, testScore, uniName, educationStatus
 
 ---
 
+#### `src/components/EntryTests/EntryTests.js`
+**Purpose**: Entry test information cards (~195 lines)
+
+**What it does**:
+- Displays info cards for major Pakistani entry tests
+- Shows test name, conductor, period, accepted universities
+- Expandable cards with additional details
+- Links to official test websites
+
+**Tests covered**: NET, SAT, FAST NU Test, ECAT, GIKI Test, IBA Aptitude Test, PIEAS Test, NED Entry Test, Air University Test
+
+---
+
+#### `src/components/EntryTests/EntryTests.module.css`
+**Purpose**: Entry test card styling
+
+---
+
+#### `src/components/Icons/Icons.js`
+**Purpose**: Shared SVG icon library (~86 lines)
+
+**Icons provided**:
+- `IconBookmark` - Save/bookmark icon
+- `IconClose` - Close/dismiss icon
+- `IconCheck` - Checkmark icon
+- `IconArrowRight` / `IconArrowLeft` - Navigation arrows
+- `IconChevronUp` / `IconChevronDown` - Expand/collapse
+- `IconNote` - Note/info icon
+- `IconCelebrate` - Celebration/success icon
+- `IconScholarship` - Scholarship icon
+
+**Design**: All icons use `currentColor` for theme compatibility, include `aria-hidden="true"` for accessibility.
+
+---
+
+#### `src/components/RecommendationsSection/RecommendationsSection.js`
+**Purpose**: Top university recommendations (~157 lines)
+
+**What it does**:
+- Shows top 5 university picks based on current filters
+- Match percentage and match reasons
+- Expandable details (fee, campus, focus area, highlights)
+- "Why recommended" toggle
+- Save to list functionality
+- CTA to swipe through all matches
+
+**Props**:
+| Prop | Type | Purpose |
+|------|------|---------|
+| `rankedUniversities` | Array | Sorted universities |
+| `filters` | Object | Current filter values |
+| `onStartSwiping` | Function | Navigate to swipe section |
+| `onSave` | Function | Save handler |
+| `savedIds` | Set | IDs of already-saved unis |
+
+---
+
+#### `src/components/RecommendationsSection/RecommendationsSection.module.css`
+**Purpose**: Recommendations section styling
+
+---
+
+#### `src/components/ScholarshipsSection/ScholarshipsSection.js`
+**Purpose**: Scholarships & financial aid section (~114 lines)
+
+**What it does**:
+- Displays scholarship categories (need-based, merit, government, university)
+- Expandable cards with eligibility and apply links
+- Category filter buttons
+- Tips for applicants
+
+---
+
+#### `src/components/ScholarshipsSection/ScholarshipsSection.module.css`
+**Purpose**: Scholarships section styling
+
+---
+
+#### `src/components/ScholarshipsPanel/ScholarshipsPanel.js`
+**Purpose**: Full scholarship overlay panel (~267 lines)
+
+**What it does**:
+- Full-screen overlay with detailed scholarship info
+- Category filtering (all, need-based, merit, government, university)
+- Sorting (default, full coverage first, provider A–Z)
+- Quick links to HEC, Ehsaas, and university aid pages
+- Expandable cards with eligibility, coverage, and deadline
+- Keyboard accessible (Escape to close)
+
+**Props**:
+| Prop | Type | Purpose |
+|------|------|---------|
+| `onClose` | Function | Close handler |
+
+---
+
+#### `src/components/ScholarshipsPanel/ScholarshipsPanel.module.css`
+**Purpose**: Scholarship panel overlay styling
+
+---
+
+#### `src/components/ScrollToTop/ScrollToTop.js`
+**Purpose**: Scroll-to-top floating button (~35 lines)
+
+**What it does**:
+- Appears after scrolling 400px
+- Smooth scroll-to-top on click
+- Accessible with aria-label
+
+---
+
+#### `src/components/ScrollToTop/ScrollToTop.module.css`
+**Purpose**: Scroll-to-top button styling
+
+---
+
+#### `src/components/SimilarUniversities/SimilarUniversities.js`
+**Purpose**: "You might also like" suggestions (~88 lines)
+
+**What it does**:
+- Shows up to 5 unsaved unis similar to saved list
+- Prioritizes same city as saved universities
+- Falls back to top filter matches
+- One-click save functionality
+- Match percentage display
+
+**Props**:
+| Prop | Type | Purpose |
+|------|------|---------|
+| `universities` | Array | All universities |
+| `savedList` | Array | User's saved list |
+| `filters` | Object | Current filters |
+| `onSave` | Function | Save handler |
+
+---
+
+#### `src/components/SimilarUniversities/SimilarUniversities.module.css`
+**Purpose**: Similar universities styling
+
+---
+
+#### `src/components/Toast/Toast.js`
+**Purpose**: Toast notification component (~25 lines)
+
+**What it does**:
+- Auto-dismissing notification (3 second timeout)
+- Success and removed states
+- Uses `role="alert"` for screen readers
+- Dismiss button
+
+**Props**:
+| Prop | Type | Purpose |
+|------|------|---------|
+| `message` | String | Notification text |
+| `type` | String | 'success' or 'removed' |
+| `onDismiss` | Function | Dismiss handler |
+
+---
+
+#### `src/components/Toast/Toast.module.css`
+**Purpose**: Toast notification styling
+
+---
+
 ### `src/context/`
 
 #### `src/context/ThemeContext.js`
@@ -660,14 +835,46 @@ For each university and department:
 
 ---
 
+#### `src/data/entryTestsData.js`
+**Purpose**: Entry test information data
+
+**What it contains**:
+Array of entry tests:
+```javascript
+{
+  id: "net",
+  name: "NET (NUST Entry Test)",
+  conductor: "NUST",
+  icon: "🎯",
+  period: "Jan – Jul (Series I, II, III)",
+  acceptedBy: ["NUST"],
+  website: "https://nust.edu.pk"
+}
+```
+
+---
+
+#### `src/data/scholarships.js`
+**Purpose**: Scholarships & financial aid data
+
+**What it contains**:
+- `scholarships` array - Scholarship entries with name, provider, type, coverage, eligibility, and apply URLs
+- `scholarshipCategories` - Category definitions (need-based, merit-based, government, university)
+- `quickLinks` - Direct links to HEC, Ehsaas, and university aid pages
+
+---
+
 ### `src/utils/`
 
 #### `src/utils/ranking.js`
-**Purpose**: University ranking algorithm (~100 lines)
+**Purpose**: University ranking and matching algorithm
 
 **What it contains**:
 - `calculateMatchScore(university, filters)` - Match percentage
 - `sortByRanking(universities, field)` - Field-specific sorting
+- `getMatchPercentage(university, filters)` - User-facing match %
+- `getMatchReasons(university, filters)` - List of why a uni matches
+- `getFieldRank(university, field)` - Field-specific ranking
 
 **Scoring logic**:
 ```javascript
@@ -678,6 +885,18 @@ Hostel Match: 15 points
 City Match: 10 points
 Campus Type Match: 5 points
 ```
+
+---
+
+#### `src/utils/savedStorage.js`
+**Purpose**: Versioned localStorage persistence (~37 lines)
+
+**What it does**:
+- `loadSavedFromStorage()` - Load saved list from localStorage
+- `saveToStorage(items)` - Persist saved list to localStorage
+- Stores `{ version, items: [{ id, savedAt, tag, note }] }`
+- SSR-safe (checks `typeof window`)
+- Graceful error handling with fallbacks
 
 ---
 
