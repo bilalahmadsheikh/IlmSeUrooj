@@ -45,3 +45,6 @@ reports/
 
 # gemini
 .gemini/
+
+# agent
+.agent/
