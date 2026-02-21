@@ -105,6 +105,33 @@
     gap: var(--space-4);
 }
 
+/* Nav Links (Profile, Applications, Extension) */
+.navLink {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--transition-base);
+}
+
+.navLink:hover {
+    border-color: var(--color-primary);
+    transform: scale(1.02);
+    background: var(--glass-bg);
+}
+
+.navLinkText {
+    position: relative;
+    z-index: 1;
+}
+
 /* Scholarships Button */
 .scholarshipsBtn {
     display: flex;
@@ -227,9 +254,11 @@
         transform: scale(0);
         opacity: 0;
     }
+
     70% {
         transform: scale(1.15);
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
@@ -252,12 +281,14 @@
     }
 
     .savedText,
-    .scholarshipsText {
+    .scholarshipsText,
+    .navLinkText {
         display: none;
     }
 
     .savedBtn,
-    .scholarshipsBtn {
+    .scholarshipsBtn,
+    .navLink {
         padding: var(--space-2);
     }
 

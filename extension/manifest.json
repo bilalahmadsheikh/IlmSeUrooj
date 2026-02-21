@@ -1,0 +1,74 @@
+{
+    "manifest_version": 3,
+    "name": "UniMatch — UCAS Bridge",
+    "description": "Autofill Pakistani university application forms from a single student profile.",
+    "version": "0.1.0",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "*://*.nust.edu.pk/*",
+        "*://*.nu.edu.pk/*",
+        "*://*.lums.edu.pk/*",
+        "*://*.comsats.edu.pk/*",
+        "*://*.iba.edu.pk/*",
+        "*://*.giki.edu.pk/*",
+        "*://*.ned.edu.pk/*",
+        "*://*.bahria.edu.pk/*",
+        "*://*.uet.edu.pk/*",
+        "*://*.pieas.edu.pk/*",
+        "*://*.szabist.edu.pk/*",
+        "*://*.itu.edu.pk/*",
+        "*://*.aku.edu/*",
+        "*://*.pucit.edu.pk/*",
+        "*://*.uol.edu.pk/*",
+        "*://*.ucp.edu.pk/*",
+        "*://*.riphah.edu.pk/*",
+        "*://*.qau.edu.pk/*",
+        "*://*.iiu.edu.pk/*",
+        "*://*.lse.edu.pk/*",
+        "*://*.uos.edu.pk/*",
+        "*://*.bzu.edu.pk/*",
+        "*://*.uop.edu.pk/*",
+        "*://*.uob.edu.pk/*",
+        "*://*.muet.edu.pk/*",
+        "*://*.ssuet.edu.pk/*",
+        "*://*.lumhs.edu.pk/*",
+        "*://*.duhs.edu.pk/*"
+    ],
+    "background": {
+        "service_worker": "background/service-worker.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content/content.js"
+            ],
+            "css": [
+                "styles/sidebar.css"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_icon": {
+            "128": "icons/icon128.png"
+        }
+    },
+    "icons": {
+        "128": "icons/icon128.png"
+    },
+    "externally_connectable": {
+        "matches": [
+            "http://localhost:3000/*",
+            "https://*.vercel.app/*"
+        ]
+    }
+}
