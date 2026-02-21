@@ -13,11 +13,15 @@ const szabist_isb = {
     formType: 'requires_login_first',
 
     fieldMap: {
+        first_name: '[name="firstName"], [name="first_name"], [name="fname"], #firstName',
+        middle_name: '[name="middleName"], [name="middle_name"], [name="mname"], #middleName',
+        last_name: '[name="lastName"], [name="last_name"], [name="surname"], [name="lname"], #lastName',
         full_name: '[name="name"], [name="fullName"], [name="ApplicantName"], #name',
         father_name: '[name="fatherName"], [name="father_name"], #fatherName',
         cnic: '[name="cnic"], [name="CNIC"], #cnic',
         date_of_birth: '[name="dob"], [name="DOB"], #dob',
         gender: '[name="gender"], [name="Gender"], #gender',
+        nationality: '[name="nationality"], [name="country"], #nationality, #country',
         email: '[name="email"], [type="email"], #email',
         phone: '[name="phone"], [name="mobile"], #phone',
         address: '[name="address"], #address',
@@ -40,7 +44,14 @@ const szabist_isb = {
         }
     },
 
-    transforms: { cnic: 'cnic_dashes', phone: 'phone_pak', date_of_birth: 'date_dmy' },
+    transforms: {
+        cnic: 'cnic_dashes',
+        phone: 'phone_pak',
+        date_of_birth: 'date_dmy',
+        first_name: 'first_name',
+        last_name: 'last_name',
+        middle_name: 'middle_name',
+    },
 
     verified: false,
     lastVerified: '2026-02-21',

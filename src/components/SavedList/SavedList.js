@@ -210,143 +210,143 @@ export default function SavedList({
                   {searchQuery.trim() ? 'No saved universities match your search.' : 'No items.'}
                 </p>
               ) : (
-              filteredItems.map((item, index) => {
-                const uni = item.university;
-                const isSelected = compareSelected.has(uni.id);
-                const canMoveUp = sortBy === 'manual' && index > 0;
-                const canMoveDown = sortBy === 'manual' && index < filteredItems.length - 1;
-                const originalIndex = savedItems.findIndex((i) => i.university.id === uni.id);
+                filteredItems.map((item, index) => {
+                  const uni = item.university;
+                  const isSelected = compareSelected.has(uni.id);
+                  const canMoveUp = sortBy === 'manual' && index > 0;
+                  const canMoveDown = sortBy === 'manual' && index < filteredItems.length - 1;
+                  const originalIndex = savedItems.findIndex((i) => i.university.id === uni.id);
 
-                return (
-                  <div key={uni.id} className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}>
-                    {compareMode && (
-                      <button
-                        type="button"
-                        className={styles.compareCheck}
-                        onClick={() => toggleCompareSelect(uni.id)}
-                        aria-pressed={isSelected}
-                      >
-                        {isSelected ? <IconCheck aria-hidden /> : null}
-                      </button>
-                    )}
-                    <div className={styles.itemMain}>
-                      <div className={styles.itemLogo}>
-                        <span>{uni.shortName.charAt(0)}</span>
-                      </div>
-                      <div className={styles.itemInfo}>
-                        <div className={styles.itemRow}>
-                          <h3 className={styles.itemName}>{uni.shortName}</h3>
-                          {uni.ranking != null && (
-                            <span className={styles.rankBadge}>#{uni.ranking}</span>
-                          )}
+                  return (
+                    <div key={uni.id} className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}>
+                      {compareMode && (
+                        <button
+                          type="button"
+                          className={styles.compareCheck}
+                          onClick={() => toggleCompareSelect(uni.id)}
+                          aria-pressed={isSelected}
+                        >
+                          {isSelected ? <IconCheck aria-hidden /> : null}
+                        </button>
+                      )}
+                      <div className={styles.itemMain}>
+                        <div className={styles.itemLogo}>
+                          <span>{uni.shortName.charAt(0)}</span>
                         </div>
-                        <p className={styles.itemDetails}>
-                          <span>{uni.city}</span>
-                          <span>•</span>
-                          <span>{uni.type}</span>
-                        </p>
-                        {formatDeadline(uni) && (
-                          <p className={styles.deadline}>
-                            Apply by {formatDeadline(uni)}
+                        <div className={styles.itemInfo}>
+                          <div className={styles.itemRow}>
+                            <h3 className={styles.itemName}>{uni.shortName}</h3>
+                            {uni.ranking != null && (
+                              <span className={styles.rankBadge}>#{uni.ranking}</span>
+                            )}
+                          </div>
+                          <p className={styles.itemDetails}>
+                            <span>{uni.city}</span>
+                            <span>•</span>
+                            <span>{uni.type}</span>
                           </p>
-                        )}
-                        <div className={styles.tagRow}>
-                          <select
-                            className={styles.tagSelect}
-                            value={item.tag ?? ''}
-                            onChange={(e) =>
-                              onUpdateItem(uni.id, {
-                                tag: e.target.value === '' ? null : e.target.value,
-                              })
-                            }
-                          >
-                            {TAGS.map((t) => (
-                              <option key={String(t.value)} value={t.value ?? ''}>
-                                {t.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        {expandedNoteId === uni.id ? (
-                          <div className={styles.noteBlock}>
-                            <textarea
-                              className={styles.noteInput}
-                              placeholder="Add a note (visits, preferences…)"
-                              value={item.note}
-                              onChange={(e) => onUpdateItem(uni.id, { note: e.target.value })}
-                              rows={2}
-                            />
+                          {formatDeadline(uni) && (
+                            <p className={styles.deadline}>
+                              Apply by {formatDeadline(uni)}
+                            </p>
+                          )}
+                          <div className={styles.tagRow}>
+                            <select
+                              className={styles.tagSelect}
+                              value={item.tag ?? ''}
+                              onChange={(e) =>
+                                onUpdateItem(uni.id, {
+                                  tag: e.target.value === '' ? null : e.target.value,
+                                })
+                              }
+                            >
+                              {TAGS.map((t) => (
+                                <option key={String(t.value)} value={t.value ?? ''}>
+                                  {t.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          {expandedNoteId === uni.id ? (
+                            <div className={styles.noteBlock}>
+                              <textarea
+                                className={styles.noteInput}
+                                placeholder="Add a note (visits, preferences…)"
+                                value={item.note}
+                                onChange={(e) => onUpdateItem(uni.id, { note: e.target.value })}
+                                rows={2}
+                              />
+                              <button
+                                type="button"
+                                className={styles.noteClose}
+                                onClick={() => setExpandedNoteId(null)}
+                              >
+                                Done
+                              </button>
+                            </div>
+                          ) : (
                             <button
                               type="button"
-                              className={styles.noteClose}
-                              onClick={() => setExpandedNoteId(null)}
+                              className={styles.noteTrigger}
+                              onClick={() => setExpandedNoteId(uni.id)}
                             >
-                              Done
+                              {item.note ? (
+                                <>
+                                  <IconNote className={styles.noteIcon} aria-hidden />
+                                  {item.note.slice(0, 30)}{item.note.length > 30 ? '…' : ''}
+                                </>
+                              ) : (
+                                '+ Add note'
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className={styles.itemActions}>
+                        {sortBy === 'manual' && (
+                          <div className={styles.reorderBtns}>
+                            <button
+                              type="button"
+                              className={styles.reorderBtn}
+                              onClick={() => onReorder(originalIndex, originalIndex - 1)}
+                              disabled={!canMoveUp}
+                              aria-label="Move up"
+                            >
+                              <IconChevronUp aria-hidden />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.reorderBtn}
+                              onClick={() => onReorder(originalIndex, originalIndex + 1)}
+                              disabled={!canMoveDown}
+                              aria-label="Move down"
+                            >
+                              <IconChevronDown aria-hidden />
                             </button>
                           </div>
-                        ) : (
-                          <button
-                            type="button"
-                            className={styles.noteTrigger}
-                            onClick={() => setExpandedNoteId(uni.id)}
-                          >
-                            {item.note ? (
-                              <>
-                                <IconNote className={styles.noteIcon} aria-hidden />
-                                {item.note.slice(0, 30)}{item.note.length > 30 ? '…' : ''}
-                              </>
-                            ) : (
-                              '+ Add note'
-                            )}
-                          </button>
                         )}
+                        {uni.website && (
+                          <a
+                            href={uni.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.linkBtn}
+                          >
+                            Site
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.removeBtn}
+                          onClick={() => onRemove(uni.id)}
+                          aria-label={`Remove ${uni.shortName}`}
+                        >
+                          <IconClose aria-hidden />
+                        </button>
                       </div>
                     </div>
-                    <div className={styles.itemActions}>
-                      {sortBy === 'manual' && (
-                        <div className={styles.reorderBtns}>
-                          <button
-                            type="button"
-                            className={styles.reorderBtn}
-                            onClick={() => onReorder(originalIndex, originalIndex - 1)}
-                            disabled={!canMoveUp}
-                            aria-label="Move up"
-                          >
-                            <IconChevronUp aria-hidden />
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.reorderBtn}
-                            onClick={() => onReorder(originalIndex, originalIndex + 1)}
-                            disabled={!canMoveDown}
-                            aria-label="Move down"
-                          >
-                            <IconChevronDown aria-hidden />
-                          </button>
-                        </div>
-                      )}
-                      {uni.website && (
-                        <a
-                          href={uni.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.linkBtn}
-                        >
-                          Site
-                        </a>
-                      )}
-                      <button
-                        type="button"
-                        className={styles.removeBtn}
-                        onClick={() => onRemove(uni.id)}
-                        aria-label={`Remove ${uni.shortName}`}
-                      >
-                        <IconClose aria-hidden />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
+                  );
+                })
               )}
             </div>
 
@@ -371,7 +371,7 @@ export default function SavedList({
                       <div className={styles.applyDropdown}>
                         {applyLinks.map(({ name, url }) => (
                           <a
-                            key={url}
+                            key={`${name}-${url}`}
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"

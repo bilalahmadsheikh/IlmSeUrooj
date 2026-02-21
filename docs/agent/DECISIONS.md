@@ -49,3 +49,18 @@
 **Date:** Feb 21, 2026 | **Phase:** 7
 **Choice:** Detect login/register/application pages using URL, title, heading, and form structure analysis.
 **Rationale:** University portals often have separate login and registration pages. Showing "Register first" on login pages saves students from confusion.
+
+## Decision 11: Name Splitting via Virtual Profile Keys
+**Date:** Feb 22, 2026 | **Phase:** 9
+**Choice:** Add `first_name`, `last_name`, `middle_name` as virtual profile keys derived from `full_name` using transforms.
+**Rationale:** Many university forms (SZABIST, LUMS) ask for first/middle/last name separately. Storing these as separate profile fields would mean students fill 4 name fields. Instead, we store one `full_name` and split on-the-fly: first word → first name, last word → last name, middle words → middle name.
+
+## Decision 12: Extension Context Guard with Refresh UI
+**Date:** Feb 22, 2026 | **Phase:** 9
+**Choice:** Check `chrome.runtime.id` before every Chrome API call and show a "Refresh Page" UI when the extension context is invalidated.
+**Rationale:** When the extension is reloaded in chrome://extensions, old content scripts lose their connection. Instead of showing cryptic errors, we show a friendly one-click refresh button.
+
+## Decision 13: Skip Tier 2 AI for Known Universities
+**Date:** Feb 22, 2026 | **Phase:** 9
+**Choice:** Only invoke Tier 2 (Ollama AI field mapping) when no university config exists. If Tier 1 has a config but matched 0 fields, skip directly to Tier 3 heuristics.
+**Rationale:** On login pages of known universities (e.g., Bahria CMS), Tier 1 finds the config but no application form fields. Calling Ollama here fails (if not running) and is wasteful. Heuristic matching (Tier 3) handles login forms well enough.

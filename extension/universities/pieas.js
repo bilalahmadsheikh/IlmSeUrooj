@@ -15,7 +15,7 @@ const pieas = {
     fieldMap: {
         full_name: '[name$="txtName"], [name$="txtFullName"], [id$="txtName"]',
         father_name: '[name$="txtFatherName"], [id$="txtFatherName"]',
-        cnic: '[name$="txtCNIC"], [name$="txtCnic"], [id$="txtCNIC"]',
+        cnic: '#txtRegNo, [name$="txtCNIC"], [name$="txtCnic"], [id$="txtCNIC"]',
         date_of_birth: '[name$="txtDOB"], [id$="txtDOB"]',
         gender: '[name$="ddlGender"], [id$="ddlGender"]',
         email: '[name$="txtEmail"], [id$="txtEmail"], [type="email"]',

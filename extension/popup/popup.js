@@ -27,10 +27,32 @@ function showSignedOut() {
       <div class="empty-icon">🎓</div>
       <h3>Welcome to Ilm Se Urooj</h3>
       <p>Sign in to manage your university applications.</p>
+      
+      <div id="manual-token-section" style="display: none; margin-top: 15px; text-align: left;">
+        <p style="font-size: 12px; color: #a1a1aa; margin-bottom: 5px;">If automatic sign-in fails, paste your token here:</p>
+        <input type="text" id="manual-token-input" placeholder="eyJh..." style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 6px; border: 1px solid #3f3f46; background: #18181b; color: white; font-family: monospace; font-size: 11px;">
+        <button id="btn-save-token" class="btn-primary" style="margin-top: 8px; width: 100%; padding: 6px;">Submit Token</button>
+      </div>
+      <button id="btn-show-manual" class="btn-secondary" style="margin-top: 15px; width: 100%; font-size: 12px; padding: 6px;">Having trouble signing in?</button>
     </div>
   `;
   signinBtn.classList.remove('hidden');
   signoutBtn.classList.add('hidden');
+
+  document.getElementById('btn-show-manual').addEventListener('click', (e) => {
+    e.target.style.display = 'none';
+    document.getElementById('manual-token-section').style.display = 'block';
+  });
+
+  document.getElementById('btn-save-token').addEventListener('click', async () => {
+    const token = document.getElementById('manual-token-input').value.trim();
+    if (!token) return;
+
+    // Send token to background to store and verify
+    contentEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    await chrome.runtime.sendMessage({ type: 'AUTH_TOKEN', token });
+    init(); // Refresh UI
+  });
 }
 
 async function showApplications(profile) {

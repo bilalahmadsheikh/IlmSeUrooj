@@ -52,10 +52,29 @@
 - Updated manifest with new host permissions (neduet, uettaxila, szabist-isb, au, habib)
 - All portal URLs verified via web research
 
+### Phase 9: Apply URL Corrections & Autofill Fixes (Feb 22, 2026) ✅
+- **Corrected apply URLs** for 10 universities in `src/data/universities.js` (both university cards and upcoming deadlines):
+  - FAST → `admissions.nu.edu.pk`
+  - COMSATS → `admissions.comsats.edu.pk`
+  - IBA → `onlineadmission.iba.edu.pk`
+  - UET Lahore → `admission.uet.edu.pk/Modules/EntryTest/Default.aspx`
+  - UET Taxila → `admissions.uettaxila.edu.pk`
+  - NED → `www.neduet.edu.pk/admission`
+  - Air University → `portals.au.edu.pk/admissions`
+  - Bahria → `cms.bahria.edu.pk/Logins/candidate/Login.aspx`
+  - Habib → `eapplication.habib.edu.pk/login.aspx`
+  - SZABIST → `admissions.szabist.edu.pk`
+  - AKU → `akuross.aku.edu/psc/csonadm/.../AKU_OA_LOGIN_CMP.GBL`
+- **Added 20+ missing portal subdomains** to `UNIVERSITY_DOMAINS` in `content.js` for sidebar detection
+- **Extension context guard**: `isExtensionValid()` + "Please Refresh" UI for stale extension contexts
+- **Null safety in Tier 2**: try/catch around AI field map fallback, skip Tier 2 for known universities
+- **Name splitting**: `first_name`, `last_name`, `middle_name` transforms derived from `full_name`
+- **Field exclusion list**: captcha, login, verification, OTP fields excluded from heuristic autofill
+
 ---
 
 ## Build Status
-- **Last build**: ✅ Syntax check passed (Feb 21, 2026)
+- **Last build**: ✅ Syntax check passed (Feb 22, 2026)
 - **AI Backend**: Local Ollama (llama3), no API keys needed
 - **Supabase**: nqmvfierglxgjgqjmxmp
 
@@ -66,3 +85,5 @@ Most Pakistani university admission portals require login first. Many return 403
 - Load extension in Chrome, navigate to each portal, verify selectors fill fields
 - Set `verified: true` in each config after confirming on-screen fill
 - Update selectors when portals change between admission cycles
+- Test name splitting on forms with First/Middle/Last name fields
+- Verify password consistency across portal registrations

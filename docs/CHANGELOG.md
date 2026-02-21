@@ -15,6 +15,8 @@ All iterations of the IlmSeUrooj (UniMatch) project documented in one place.
 | 5 | 2026-02-19 | Automated CI/CD pipeline, scraper engine, validators |
 | 6 | 2026-02-19 | Functional scraper implementations, AST file updates, workflow fixes |
 | 7 | 2026-02-20 | Entry tests, scholarships, recommendations, UX enhancements, Supabase |
+| 8 | 2026-02-21 | Chrome extension, 3-tier autofill engine, 17 university configs |
+| 9 | 2026-02-22 | Apply URL corrections, name splitting, extension detection fixes |
 
 ---
 
@@ -355,6 +357,125 @@ Dry run with `DATA_TIER=critical`:
 
 ---
 
+## Iteration 8: Chrome Extension & Deterministic Autofill Engine
+**Date**: 2026-02-21 | **Status**: ✅ Complete
+
+### Overview
+Built the full Chrome extension (MV3) with Supabase backend, 3-tier autofill engine, and 17 per-university config files for deterministic form filling across Pakistani university portals.
+
+### Features Implemented
+
+#### Supabase Backend (Phase 1)
+- 4 tables: `profiles`, `field_maps`, `applications`, `remembered_answers`
+- RLS policies on all student-data tables
+- 5 API routes: `profile`, `fieldmap`, `applications`, `remembered-answers`, `sop-draft`
+
+#### Chrome Extension Shell (Phase 2)
+- MV3 manifest with 32+ university host permissions
+- Service worker with token management + API communication
+- Content script with sidebar injection + domain detection
+- Popup with auth state management
+
+#### AI Field Mapping (Phase 3)
+- Local Ollama integration (llama3 model)
+- Field map caching in Supabase
+- 8 transform functions (CNIC, dates, marks, phone formatting)
+- React/Vue-compatible input filling via native setter
+
+#### Pre-submit Review & Submission Tracking (Phase 4)
+- Validator for CNIC format, marks ranges, test data detection
+- Green/amber/red review lists with Jump to Field
+- Confirmation number extraction + save
+
+#### Manual Fields & SOP Helper (Phase 5)
+- Fill Gap modal with remembered answer suggestions
+- SOP/Essay AI drafting with Ollama
+- Password vault with consistent password system
+
+#### Deterministic Autofill Engine (Phase 8)
+- **17 per-university config files** in `extension/universities/`
+- Each config: slug, name, portalDomains, fieldMap (multi-selector CSS), selectOptions, transforms
+- **3-tier autofill engine**:
+  1. Deterministic per-university selectors
+  2. AI-generated field maps (Ollama fallback)
+  3. Heuristic fallback (name/id/label analysis)
+- **Universities mapped**: NUST, FAST, COMSATS, LUMS, IBA, GIKI, PIEAS, NED, Habib, AKU, Air Uni, SZABIST Isb, SZABIST Khi, ITU, Bahria, UET Lahore, UET Taxila
+
+### Technical Changes
+
+#### New Files Created
+| File | Purpose |
+|------|---------|
+| `extension/manifest.json` | Chrome MV3 manifest |
+| `extension/content/content.js` | Sidebar + 3-tier autofill engine |
+| `extension/background/service-worker.js` | API communication, token mgmt |
+| `extension/popup/popup.html + popup.js` | Auth popup |
+| `extension/styles/sidebar.css` | Sidebar styling |
+| `extension/universities/index.js` | Central university config registry |
+| `extension/universities/*.js` (17 files) | Per-university configs |
+| `src/app/api/*/route.ts` (5 files) | Supabase API routes |
+| `src/app/extension/page.js` | Extension landing page |
+
+---
+
+## Iteration 9: Apply URL Corrections & Autofill Intelligence Fixes
+**Date**: 2026-02-22 | **Status**: ✅ Complete
+
+### Overview
+Corrected all university application form URLs, fixed extension sidebar detection for multiple portals, and improved autofill intelligence with name splitting, field exclusion, and extension context handling.
+
+### Features Implemented
+
+#### Corrected Application Form URLs
+Updated `src/data/universities.js` (both university cards and upcoming deadlines) with verified portal links:
+
+| University | New Apply URL |
+|---|---|
+| FAST (all 5 campuses) | `https://admissions.nu.edu.pk` |
+| COMSATS (all 7 campuses) | `https://admissions.comsats.edu.pk` |
+| IBA | `https://onlineadmission.iba.edu.pk` |
+| UET Lahore | `https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx` |
+| UET Taxila | `https://admissions.uettaxila.edu.pk` |
+| NED | `https://www.neduet.edu.pk/admission` |
+| Air University | `https://portals.au.edu.pk/admissions` |
+| Bahria (all 3 campuses) | `https://cms.bahria.edu.pk/Logins/candidate/Login.aspx` |
+| Habib | `https://eapplication.habib.edu.pk/login.aspx` |
+| SZABIST | `https://admissions.szabist.edu.pk` |
+| AKU | `https://akuross.aku.edu/...` |
+
+#### Extension Sidebar Detection Fixes
+- Added 20+ missing portal subdomains to `UNIVERSITY_DOMAINS` in `content.js`
+- Extension now activates on: `portals.au.edu.pk`, `cms.bahria.edu.pk`, `eapplication.habib.edu.pk`, `onlineadmission.iba.edu.pk`, `admissions.uettaxila.edu.pk`, etc.
+
+#### Name Splitting Transforms
+- Added `first_name`, `last_name`, `middle_name` virtual profile keys
+- "Bilal Ahmad" → First: "Bilal", Last: "Ahmad", Middle: "" (for 2-word names)
+- Forms with First/Middle/Last fields now get the correct portion
+
+#### Field Exclusion List
+- Captcha, login, verification, OTP, CSRF fields excluded from heuristic autofill
+- Prevents CNIC from being written into CAPTCHA inputs
+
+#### Extension Context Guard
+- `isExtensionValid()` check before Chrome API calls
+- "Please Refresh" UI when extension context is invalidated
+
+#### Skip Tier 2 for Known Universities
+- Only call Ollama AI mapping for unknown universities
+- Login pages of known universities skip to Tier 3 heuristics
+
+### Technical Changes
+| File | Change |
+|------|--------|
+| `src/data/universities.js` | Corrected 30+ applyUrl entries |
+| `extension/content/content.js` | Name splitting, exclusions, context guard, 20+ domains |
+| `extension/universities/index.js` | Added portal subdomains for Air Uni, Bahria, IBA, UET, FAST |
+| `docs/DATA-SOURCES.md` | Added Application Form Link column |
+| `docs/agent/PROGRESS.md` | Added Phase 9 |
+| `docs/agent/DECISIONS.md` | Added Decisions 11-13 |
+
+---
+
 ## Current Project Stats
 
 | Metric | Value |
@@ -370,194 +491,8 @@ Dry run with `DATA_TIER=critical`:
 | GitHub Actions Workflows | 6 |
 | Validation Scripts | 6 |
 | Scraper Configs | 16 |
-| Lines of Code | ~15,000+ |
-
----
-
-## Iteration 6: Deadline Verification & Auto-Updates
-**Date**: 2026-02-19 | **Status**: ✅ Complete
-
-### Overview
-Implemented a robust "set and forget" system for admission deadlines. The new system automatically verifies dates against official websites, sorts them by urgency, and commits updates directly to the repository without manual intervention.
-
-### Features Implemented
-
-#### Automated Deadline Verification
-- **Standalone Scraper**: Dedicated script just for deadlines (every 20 days)
-- **Auto-Commit**: Workflow pushes changes directly if validated (no PR bottleneck)
-- **Fallback Protection**: Keeps existing verified data if university sites are down
-- **Session Intelligence**: Distinguishes "Spring" vs "Fall" dates to prevent overwriting
-
-#### Sorting & display
-- **Sorted Data**: `universities.js` is now physically sorted by closest deadline
-- **UI Sorting**: `AdmissionsDeadlines` component explicitly sorts by closest date
-- **Urgency Logic**: Upcoming deadlines shown first, elapsed shown last
-
-### Technical Changes
-- **New Workflow**: `.github/workflows/deadline-verification.yml`
-- **New Script**: `scripts/scrapers/deadline-scraper.js`
-- **Updated Data**: `src/data/universities.js` (added `lastVerified` + sorted)
-
----
-
-## Iteration 6: Functional Scraper Implementations
-**Date**: 2026-02-19 | **Status**: ✅ Complete
-
-### Overview
-Replaced all placeholder implementations with fully functional code that actually scrapes data from university websites and updates repository files.
-
-### Major Changes
-
-#### Dependencies Added
-- `cheerio` - HTML parsing for static sites
-- `puppeteer` - Headless browser for JavaScript-heavy sites
-- `axios` - HTTP client with retry logic
-- `@babel/parser`, `@babel/traverse`, `@babel/generator` - AST manipulation
-- `recast` - Preserve formatting when updating files
-
-#### New Utility Modules
-- **`scripts/utils/http-client.js`** - HTTP requests with retry logic and exponential backoff
-- **`scripts/utils/ast-manipulator.js`** - Safely update JavaScript files using AST parsing
-- **`scripts/utils/rate-limiter.js`** - Rate limiting to prevent server overload
-
-#### Scraper Implementations
-- **`scripts/scrapers/base-scraper.js`** - Base class with common scraping utilities
-- **`scripts/scrapers/recruiter-scraper.js`** - Scrapes top recruiters from career pages
-- **`scripts/scrapers/salary-scraper.js`** - Scrapes salary data with fallbacks
-- **`scripts/scrapers/facilities-scraper.js`** - Scrapes facilities information
-- **Enhanced `scripts/scrapers/merit-scraper.js`** - Now uses Cheerio + Puppeteer for actual scraping
-
-#### Functional Updates
-- **`scripts/fetch-university-data.js`** - Now actually scrapes deadlines, fees, and test dates
-- **`scripts/utils/url-checker.js`** - Makes real HTTP requests to validate URLs
-- **`scripts/validators/semester-data-validator.js`** - Validates scraped semester data
-
-#### Workflow Fixes
-- Fixed template variable interpolation in health check workflow
-- Added git config for proper commit authorship
-- Added timeout-minutes to prevent hanging jobs
-- Added concurrency groups to prevent duplicate runs
-- Fixed duplicate data fetching in update-university-data workflow
-- Added failure notification job to semester-data-update workflow
-
-#### Testing
-- **`scripts/test-scrapers.js`** - Tests all scraper implementations
-- **`scripts/test-file-updates.js`** - Tests AST manipulation with backup/restore
-
-### Technical Details
-
-#### AST-Based File Updates
-- Uses Babel parser to parse `universities.js`
-- Traverses AST to find university nodes by shortName or id
-- Updates specific fields while preserving formatting and comments
-- Uses Recast to regenerate code with original formatting
-
-#### Scraping Strategy
-- **Cheerio** for static HTML sites (NUST, COMSATS, UET)
-- **Puppeteer** for JavaScript-heavy sites (LUMS, FAST)
-- Automatic fallback if one method fails
-- Rate limiting (1-2 seconds between requests)
-
-#### Error Handling
-- Comprehensive try-catch blocks
-- Retry logic with exponential backoff
-- Partial results if some universities fail
-- Detailed error logging
-- Fallback data for known values
-
-### Files Changed
-- **Modified**: 9 files (workflows, scrapers, utilities)
-- **Created**: 10 new files (scrapers, utilities, tests)
-
-### Impact
-- Workflows now create PRs with actual data changes
-- URL checker validates real URLs
-- Data files are automatically updated
-- Reduced manual data entry
-- Improved data accuracy
-
----
-
-## Iteration 7: Entry Tests, Scholarships, and UX Enhancements
-**Date**: 2026-02-20 | **Status**: ✅ Complete
-
-### Overview
-Major feature expansion adding entry tests guide, scholarships database, top-picks recommendations, similar universities suggestions, and multiple UX improvements including toast notifications, scroll-to-top, and an SVG icon system. Also introduced Supabase integration for future backend needs.
-
-### Features Implemented
-
-#### Entry Tests Guide
-- Info cards for 9 major entry tests (NET, SAT, ECAT, FAST NU Test, GIKI Test, IBA Test, PIEAS Test, NED Test, Air University Test)
-- Expandable cards with test details, subjects, and scoring info
-- Shows which universities accept each test
-- Test periods and official website links
-
-#### Scholarships & Financial Aid
-- New `scholarships.js` data file with need-based, merit-based, government, and university-specific scholarships
-- `ScholarshipsSection` component — inline listings with type filter
-- `ScholarshipsPanel` component — full overlay panel with sorting, categories, quick links
-- Focus on underprivileged students with eligibility, coverage, and apply URLs
-
-#### Top Picks Recommendations
-- `RecommendationsSection` showing top 5 matches based on filters
-- Match percentage and match reasons display
-- Expandable details with fee, campus type, highlights
-- CTA to swipe through all matches
-
-#### Similar Universities ("You might also like")
-- `SimilarUniversities` displaying up to 5 suggestions based on saved list
-- Prioritizes universities in same cities as saved list
-- Falls back to top filter matches
-
-#### UX Enhancements
-- **Toast notifications** — auto-dismissing save/remove confirmations (`Toast` component)
-- **Scroll to top** — floating button appears after 400px scroll (`ScrollToTop` component)
-- **SVG icon system** — 10 accessible SVG icons replacing emoji usage (`Icons` component)
-- **Versioned localStorage** — new `savedStorage.js` utility with versioned data persistence
-- **Enhanced ranking utils** — `getMatchPercentage()`, `getMatchReasons()`, `getFieldRank()` in `ranking.js`
-
-#### Data Update Reminder
-- New workflow `data-update-reminder.yml` — every 20 days email reminder for manual review
-
-#### Supabase Integration
-- Supabase project created (`ilmseurroj`, region: ap-northeast-2)
-- MCP server connected for future backend features
-
-### Technical Changes
-
-#### New Files Created
-| File | Purpose |
-|------|--------|
-| `src/components/EntryTests/EntryTests.js` | Entry test cards UI |
-| `src/components/Icons/Icons.js` | SVG icon library (10 icons) |
-| `src/components/RecommendationsSection/RecommendationsSection.js` | Top picks UI |
-| `src/components/ScholarshipsPanel/ScholarshipsPanel.js` | Scholarship overlay panel |
-| `src/components/ScholarshipsSection/ScholarshipsSection.js` | Scholarships section |
-| `src/components/ScrollToTop/ScrollToTop.js` | Scroll-to-top button |
-| `src/components/SimilarUniversities/SimilarUniversities.js` | Similar unis suggestions |
-| `src/components/Toast/Toast.js` | Toast notifications |
-| `src/data/entryTestsData.js` | Entry test details data |
-| `src/data/scholarships.js` | Scholarships data |
-| `src/utils/savedStorage.js` | Versioned localStorage persistence |
-| `scripts/scrapers/deadline_scraper.py` | Python-based deadline scraper |
-| `scripts/utils/test-urls.js` | URL testing utilities |
-| `.github/workflows/data-update-reminder.yml` | 20-day email reminder |
-
-#### Modified Files
-| File | Change |
-|------|--------|
-| `src/app/page.js` | Expanded to ~13KB; integrated all new components |
-| `src/utils/ranking.js` | Added `getMatchPercentage()`, `getMatchReasons()`, `getFieldRank()` |
-| `package.json` | Added `sharp` dev dependency |
-| `.gitignore` | Added `.gemini/` directory |
-| All CSS module files | New component styles |
-
-### Impact
-- Component count grew from 12 to 19
-- Data files grew from 2 to 4
-- Workflows grew from 5 to 6
-- Significantly improved UX with recommendations, toast feedback, and scroll behavior
-- Accessibility improved with SVG icons replacing emojis
+| Extension University Configs | 17 |
+| Lines of Code | ~20,000+ |
 
 ---
 
@@ -567,10 +502,11 @@ Major feature expansion adding entry tests guide, scholarships database, top-pic
 - [ ] Individual university pages (SEO)
 - [ ] Urdu language support
 - [ ] PWA with offline mode & push notifications
-- [ ] User accounts and saved preferences
+- [x] ~~User accounts and saved preferences~~ (Implemented via Supabase in Iteration 8)
 - [x] ~~Scholarship information database~~ (Implemented in Iteration 7)
 - [ ] More universities (medical colleges, smaller unis)
 - [ ] Interactive university map
-- [ ] Application checklist generator
+- [x] ~~Application checklist generator~~ (Pre-submit review in Iteration 8)
 - [ ] University reviews from students
+- [ ] Extension auto-update when university portals change
 

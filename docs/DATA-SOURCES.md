@@ -11,23 +11,24 @@ Data is automatically fetched from these official sources by the `university-scr
 ### Tier 1: Critical Data (Every 20 Days)
 **Target Fields**: Admission Deadline, Test Date, Test Name
 
-| University | Scrape Target URL | Config Key |
-|------------|-------------------|------------|
-| NUST | `https://ugadmissions.nust.edu.pk` | `NUST` |
-| LUMS | `https://lums.edu.pk/admissions` | `LUMS` |
-| FAST-NUCES | `https://admissions.nu.edu.pk` | `FAST` |
-| COMSATS | `https://admissions.comsats.edu.pk` | `COMSATS` |
-| IBA | `https://www.iba.edu.pk` | `IBA` |
-| GIKI | `https://giki.edu.pk/admissions/` | `GIKI` |
-| UET Lahore | `https://admission.uet.edu.pk` | `UET` |
-| PIEAS | `http://admissions.pieas.edu.pk` | `PIEAS` |
-| NED | `https://www.neduet.edu.pk/admissions` | `NED` |
-| Bahria | `https://bahria.edu.pk/admissions` | `Bahria` |
-| Air University | `https://au.edu.pk/pages/admissions` | `Air` |
-| SZABIST | `https://szabist-isb.edu.pk/admissions` | `SZABIST` |
-| Habib | `https://habib.edu.pk/admissions` | `Habib` |
-| AKU | `https://www.aku.edu/admissions` | `AKU` |
-| ITU | `https://itu.edu.pk/admissions` | `ITU` |
+| University | Scrape Target URL | Config Key | Application Form Link |
+|------------|-------------------|------------|----------------------|
+| NUST | `https://ugadmissions.nust.edu.pk` | `NUST` | `https://ugadmissions.nust.edu.pk` |
+| LUMS | `https://lums.edu.pk/admissions` | `LUMS` | `https://admissions.lums.edu.pk` |
+| FAST-NUCES | `https://admissions.nu.edu.pk` | `FAST` | `https://admissions.nu.edu.pk` |
+| COMSATS | `https://admissions.comsats.edu.pk` | `COMSATS` | `https://admissions.comsats.edu.pk` |
+| IBA | `https://www.iba.edu.pk` | `IBA` | `https://onlineadmission.iba.edu.pk` |
+| GIKI | `https://giki.edu.pk/admissions/` | `GIKI` | `https://admissions.giki.edu.pk` |
+| UET Lahore | `https://admission.uet.edu.pk` | `UET` | `https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx` |
+| PIEAS | `http://admissions.pieas.edu.pk` | `PIEAS` | `https://red.pieas.edu.pk/pieasadmission/lgn.aspx` |
+| NED | `https://www.neduet.edu.pk/admissions` | `NED` | `https://www.neduet.edu.pk/admission` |
+| Bahria | `https://bahria.edu.pk/admissions` | `Bahria` | `https://cms.bahria.edu.pk/Logins/candidate/Login.aspx` |
+| Air University | `https://au.edu.pk/pages/admissions` | `Air` | `https://portals.au.edu.pk/admissions` |
+| SZABIST | `https://szabist-isb.edu.pk/admissions` | `SZABIST` | `https://admissions.szabist.edu.pk` |
+| Habib | `https://habib.edu.pk/admissions` | `Habib` | `https://eapplication.habib.edu.pk/login.aspx` |
+| AKU | `https://www.aku.edu/admissions` | `AKU` | `https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL` |
+| ITU | `https://itu.edu.pk/admissions` | `ITU` | `https://itu.edu.pk/admissions` |
+| UET Taxila | — | `UET-Taxila` | `https://admissions.uettaxila.edu.pk` |
 
 ### Tier 2: General Data (Bimonthly)
 **Target Fields**: Fees (`avgFee`), Website URL, Description
@@ -38,24 +39,24 @@ Data is automatically fetched from these official sources by the `university-scr
 
 ---
 
-| University | Official Website | Admission Portal |
-|------------|------------------|------------------|
-| NUST | https://nust.edu.pk | https://ugadmissions.nust.edu.pk |
-| LUMS | https://lums.edu.pk | https://lums.edu.pk/admissions |
-| FAST-NUCES | https://nu.edu.pk | https://admissions.nu.edu.pk |
-| COMSATS | https://www.comsats.edu.pk | https://admissions.comsats.edu.pk |
-| IBA Karachi | https://iba.edu.pk | https://iba.edu.pk (Admissions section) |
-| UET Lahore | https://www.uet.edu.pk | https://admission.uet.edu.pk |
-| UET Taxila | https://www.uettaxila.edu.pk | https://www.uettaxila.edu.pk/admissions |
-| GIKI | https://giki.edu.pk | https://admissions.giki.edu.pk |
-| PIEAS | https://www.pieas.edu.pk | https://admissions.pieas.edu.pk |
-| Bahria | https://www.bahria.edu.pk | https://www.bahria.edu.pk (Online Apply) |
-| NED | https://www.neduet.edu.pk | https://www.neduet.edu.pk/admissions |
-| Habib | https://habib.edu.pk | https://habib.edu.pk/admissions (E-Application) |
-| AKU | https://www.aku.edu | https://www.aku.edu/admissions |
-| Air University | https://www.au.edu.pk | https://www.au.edu.pk (Online Admission Portal) |
-| SZABIST | https://szabist.edu.pk | https://szabist.edu.pk (Admissions Portal) |
-| ITU Lahore | https://itu.edu.pk | https://itu.edu.pk/admissions |
+| University | Official Website | Admission Portal | Application Form Link (Verified Feb 2026) |
+|------------|------------------|------------------|-------------------------------------------|
+| NUST | https://nust.edu.pk | https://ugadmissions.nust.edu.pk | https://ugadmissions.nust.edu.pk |
+| LUMS | https://lums.edu.pk | https://lums.edu.pk/admissions | https://admissions.lums.edu.pk |
+| FAST-NUCES | https://nu.edu.pk | https://admissions.nu.edu.pk | https://admissions.nu.edu.pk |
+| COMSATS | https://www.comsats.edu.pk | https://admissions.comsats.edu.pk | https://admissions.comsats.edu.pk |
+| IBA Karachi | https://iba.edu.pk | https://iba.edu.pk (Admissions section) | https://onlineadmission.iba.edu.pk |
+| UET Lahore | https://www.uet.edu.pk | https://admission.uet.edu.pk | https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx |
+| UET Taxila | https://www.uettaxila.edu.pk | https://www.uettaxila.edu.pk/admissions | https://admissions.uettaxila.edu.pk |
+| GIKI | https://giki.edu.pk | https://admissions.giki.edu.pk | https://admissions.giki.edu.pk |
+| PIEAS | https://www.pieas.edu.pk | https://admissions.pieas.edu.pk | https://red.pieas.edu.pk/pieasadmission/lgn.aspx |
+| Bahria | https://www.bahria.edu.pk | https://www.bahria.edu.pk (Online Apply) | https://cms.bahria.edu.pk/Logins/candidate/Login.aspx |
+| NED | https://www.neduet.edu.pk | https://www.neduet.edu.pk/admissions | https://www.neduet.edu.pk/admission |
+| Habib | https://habib.edu.pk | https://habib.edu.pk/admissions (E-Application) | https://eapplication.habib.edu.pk/login.aspx |
+| AKU | https://www.aku.edu | https://www.aku.edu/admissions | https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL |
+| Air University | https://www.au.edu.pk | https://www.au.edu.pk (Online Admission Portal) | https://portals.au.edu.pk/admissions |
+| SZABIST | https://szabist.edu.pk | https://szabist.edu.pk (Admissions Portal) | https://admissions.szabist.edu.pk |
+| ITU Lahore | https://itu.edu.pk | https://itu.edu.pk/admissions | https://itu.edu.pk/admissions |
 
 ---
 
@@ -548,3 +549,4 @@ Data is automatically fetched from these official sources by the `university-scr
 - **Data Date**: January 2026
 - **Merit Data**: Based on 2024 admission cycle
 - **Fee Data**: 2024-2025 academic year
+- **Application Form Links**: Verified February 22, 2026

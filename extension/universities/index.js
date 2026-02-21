@@ -54,7 +54,7 @@ ALL_UNIVERSITIES.push({
     fullName: 'National University of Computer and Emerging Sciences',
     registrationUrl: 'https://admissions.nu.edu.pk',
     loginUrl: 'https://admissions.nu.edu.pk',
-    portalDomains: ['admissions.nu.edu.pk'],
+    portalDomains: ['admissions.nu.edu.pk', 'nu.edu.pk'],
     formType: 'requires_login_first',
     fieldMap: {
         full_name: '[name="name"], [name="applicantName"], [name="fullName"], #name, #applicantName',
@@ -163,7 +163,7 @@ ALL_UNIVERSITIES.push({
     fullName: 'Institute of Business Administration',
     registrationUrl: 'https://onlineadmission.iba.edu.pk',
     loginUrl: 'https://onlineadmission.iba.edu.pk',
-    portalDomains: ['onlineadmission.iba.edu.pk', 'admissions.iba.edu.pk'],
+    portalDomains: ['onlineadmission.iba.edu.pk', 'admissions.iba.edu.pk', 'iba.edu.pk'],
     formType: 'requires_login_first',
     fieldMap: {
         full_name: '[name="full_name"], [name="name"], [name="applicant_name"], #full_name, #name',
@@ -238,7 +238,7 @@ ALL_UNIVERSITIES.push({
     fieldMap: {
         full_name: '[name$="txtName"], [name$="txtFullName"], [id$="txtName"]',
         father_name: '[name$="txtFatherName"], [id$="txtFatherName"]',
-        cnic: '[name$="txtCNIC"], [name$="txtCnic"], [id$="txtCNIC"]',
+        cnic: '#txtRegNo, [name$="txtCNIC"], [name$="txtCnic"], [id$="txtCNIC"]',
         date_of_birth: '[name$="txtDOB"], [id$="txtDOB"]',
         gender: '[name$="ddlGender"], [id$="ddlGender"]',
         email: '[name$="txtEmail"], [id$="txtEmail"], [type="email"]',
@@ -340,7 +340,7 @@ ALL_UNIVERSITIES.push({
     fullName: 'The Aga Khan University',
     registrationUrl: 'https://www.aku.edu/admissions',
     loginUrl: null,
-    portalDomains: ['aku.edu', 'www.aku.edu'],
+    portalDomains: ['aku.edu', 'www.aku.edu', 'akuross.aku.edu'],
     formType: 'requires_login_first',
     fieldMap: {
         full_name: '[name="name"], [name="fullName"], [name="applicantName"], #name',
@@ -375,7 +375,7 @@ ALL_UNIVERSITIES.push({
     fullName: 'Air University',
     registrationUrl: 'https://portals.au.edu.pk/admissions/Accounts/SignUp',
     loginUrl: 'https://portals.au.edu.pk/admissions',
-    portalDomains: ['portals.au.edu.pk', 'au.edu.pk'],
+    portalDomains: ['portals.au.edu.pk', 'au.edu.pk', 'webdata.au.edu.pk'],
     formType: 'requires_login_first',
     fieldMap: {
         full_name: '[name="FullName"], [name="Name"], [name="ApplicantName"], #FullName, #Name',
@@ -551,7 +551,7 @@ ALL_UNIVERSITIES.push({
     fullName: 'University of Engineering & Technology Lahore',
     registrationUrl: 'https://admission.uet.edu.pk',
     loginUrl: 'https://admission.uet.edu.pk',
-    portalDomains: ['admission.uet.edu.pk'],
+    portalDomains: ['admission.uet.edu.pk', 'uet.edu.pk'],
     formType: 'requires_login_first',
     fieldMap: {
         full_name: '[name="name"], [name="full_name"], [name="applicant_name"], #name, #applicant_name',
@@ -588,7 +588,7 @@ ALL_UNIVERSITIES.push({
     fullName: 'University of Engineering & Technology Taxila',
     registrationUrl: 'https://admission.uettaxila.edu.pk',
     loginUrl: 'https://admission.uettaxila.edu.pk',
-    portalDomains: ['admission.uettaxila.edu.pk', 'uettaxila.edu.pk'],
+    portalDomains: ['admissions.uettaxila.edu.pk', 'admission.uettaxila.edu.pk', 'uettaxila.edu.pk'],
     formType: 'requires_login_first',
     fieldMap: {
         full_name: '[name="name"], [name="full_name"], [name="applicant_name"], #name',

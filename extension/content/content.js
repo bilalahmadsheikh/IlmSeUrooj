@@ -8,18 +8,38 @@
 const UNIVERSITY_DOMAINS = {
   'admissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
   'ugadmissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
+  'pgadmission.nust.edu.pk': { slug: 'nust', name: 'NUST' },
   'nu.edu.pk': { slug: 'fast', name: 'FAST-NUCES' },
+  'admissions.nu.edu.pk': { slug: 'fast', name: 'FAST-NUCES' },
   'lums.edu.pk': { slug: 'lums', name: 'LUMS' },
+  'admissions.lums.edu.pk': { slug: 'lums', name: 'LUMS' },
   'comsats.edu.pk': { slug: 'comsats', name: 'COMSATS' },
+  'admissions.comsats.edu.pk': { slug: 'comsats', name: 'COMSATS' },
   'iba.edu.pk': { slug: 'iba', name: 'IBA' },
+  'onlineadmission.iba.edu.pk': { slug: 'iba', name: 'IBA' },
   'giki.edu.pk': { slug: 'giki', name: 'GIKI' },
-  'ned.edu.pk': { slug: 'ned', name: 'NED' },
+  'neduet.edu.pk': { slug: 'ned', name: 'NED' },
+  'www.neduet.edu.pk': { slug: 'ned', name: 'NED' },
   'bahria.edu.pk': { slug: 'bahria', name: 'Bahria' },
-  'uet.edu.pk': { slug: 'uet', name: 'UET' },
+  'cms.bahria.edu.pk': { slug: 'bahria', name: 'Bahria' },
+  'uet.edu.pk': { slug: 'uet', name: 'UET Lahore' },
+  'admission.uet.edu.pk': { slug: 'uet', name: 'UET Lahore' },
+  'uettaxila.edu.pk': { slug: 'uet-taxila', name: 'UET Taxila' },
+  'admissions.uettaxila.edu.pk': { slug: 'uet-taxila', name: 'UET Taxila' },
   'pieas.edu.pk': { slug: 'pieas', name: 'PIEAS' },
+  'red.pieas.edu.pk': { slug: 'pieas', name: 'PIEAS' },
   'szabist.edu.pk': { slug: 'szabist', name: 'SZABIST' },
+  'admissions.szabist.edu.pk': { slug: 'szabist', name: 'SZABIST' },
+  'szabist-isb.edu.pk': { slug: 'szabist-isb', name: 'SZABIST Islamabad' },
+  'admissions.szabist-isb.edu.pk': { slug: 'szabist-isb', name: 'SZABIST Islamabad' },
   'itu.edu.pk': { slug: 'itu', name: 'ITU' },
   'aku.edu': { slug: 'aku', name: 'Aga Khan University' },
+  'akuross.aku.edu': { slug: 'aku', name: 'Aga Khan University' },
+  'au.edu.pk': { slug: 'airuni', name: 'Air University' },
+  'portals.au.edu.pk': { slug: 'airuni', name: 'Air University' },
+  'webdata.au.edu.pk': { slug: 'airuni', name: 'Air University' },
+  'habib.edu.pk': { slug: 'habib', name: 'Habib University' },
+  'eapplication.habib.edu.pk': { slug: 'habib', name: 'Habib University' },
   'pucit.edu.pk': { slug: 'pucit', name: 'PUCIT' },
   'uol.edu.pk': { slug: 'uol', name: 'University of Lahore' },
   'ucp.edu.pk': { slug: 'ucp', name: 'UCP' },
@@ -48,9 +68,30 @@ const TRANSFORMS = {
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
   },
   date_ymd: (v) => v,
-  phone_pak: (v) => (v && v.startsWith('0') ? v : '0' + v),
-  cnic_dashes: (v) => v ? v.replace(/(\d{5})(\d{7})(\d)/, '$1-$2-$3') : v,
-  cnic_no_dashes: (v) => v ? v.replace(/-/g, '') : v,
+  phone_pak: (v) => {
+    const str = String(v ?? '');
+    return str && str.startsWith('0') ? str : '0' + str;
+  },
+  cnic_dashes: (v) => {
+    const str = String(v ?? '');
+    return str ? str.replace(/(\d{5})(\d{7})(\d)/, '$1-$2-$3') : str;
+  },
+  cnic_no_dashes: (v) => {
+    const str = String(v ?? '');
+    return str ? str.replace(/-/g, '') : str;
+  },
+  first_name: (v) => {
+    const parts = String(v ?? '').trim().split(/\s+/);
+    return parts[0] || '';
+  },
+  last_name: (v) => {
+    const parts = String(v ?? '').trim().split(/\s+/);
+    return parts.length > 1 ? parts[parts.length - 1] : '';
+  },
+  middle_name: (v) => {
+    const parts = String(v ?? '').trim().split(/\s+/);
+    return parts.length > 2 ? parts.slice(1, -1).join(' ') : '';
+  },
 };
 
 // ─── Heuristic Field Detection ─────────────────────────────────
@@ -58,9 +99,13 @@ const TRANSFORMS = {
 
 const FIELD_HEURISTICS = [
   { match: ['email', 'e-mail', 'e_mail', 'emailaddress', 'email_address'], profileKey: 'email', priority: 10 },
-  { match: ['cnic', 'nic', 'national_id', 'nationalid', 'id_card', 'idcard', 'cnic_no'], profileKey: 'cnic', priority: 9 },
+  { match: ['cnic', 'nic', 'national_id', 'nationalid', 'id_card', 'idcard', 'cnic_no', 'b_form', 'bform', 'nicop'], profileKey: 'cnic', priority: 9 },
   { match: ['phone', 'mobile', 'cell', 'contact', 'tel', 'telephone', 'phone_number', 'mobileno', 'contact_no'], profileKey: 'phone', priority: 8 },
-  { match: ['full_name', 'fullname', 'applicant_name', 'student_name', 'candidatename', 'name'], profileKey: 'full_name', priority: 7 },
+  // First/Last/Middle name MUST be checked BEFORE full_name
+  { match: ['first_name', 'firstname', 'first name', 'fname'], profileKey: 'first_name', priority: 11 },
+  { match: ['last_name', 'lastname', 'last name', 'lname', 'surname'], profileKey: 'last_name', priority: 11 },
+  { match: ['middle_name', 'middlename', 'middle name', 'mname'], profileKey: 'middle_name', priority: 11 },
+  { match: ['full_name', 'fullname', 'applicant_name', 'student_name', 'candidatename'], profileKey: 'full_name', priority: 7 },
   { match: ['father', 'fathername', 'father_name', 'fathersname', 'guardian'], profileKey: 'father_name', priority: 7 },
   { match: ['dob', 'date_of_birth', 'dateofbirth', 'birthdate', 'birth_date'], profileKey: 'date_of_birth', priority: 6, inputType: 'date' },
   { match: ['gender', 'sex'], profileKey: 'gender', priority: 5 },
@@ -80,6 +125,17 @@ const FIELD_HEURISTICS = [
   { match: ['matric_total', 'matrictotal', 'ssc_total'], profileKey: 'matric_total', priority: 5 },
 ];
 
+// Fields that should NEVER be autofilled by heuristics
+const EXCLUDED_FIELD_PATTERNS = [
+  'captcha', 'verification', 'verify', 'otp', 'token', 'csrf',
+  'login', 'userid', 'user_id',
+  'recaptcha', 'security_code', 'securitycode', 'answer',
+  'pin_code', 'pincode',
+  // ASP.NET style verification fields
+  'txtverif', 'txtcaptcha', 'imgcode', 'securityimage', 'imgverif',
+  'verificationcode', 'verification_code',
+];
+
 /**
  * Try to match a form element to a profile key using heuristics.
  * Analyzes: name, id, placeholder, label text, aria-label.
@@ -97,10 +153,50 @@ function matchFieldHeuristically(el) {
   const signals = [name, id, placeholder, ariaLabel, labelText, autocomplete].filter(Boolean);
   if (signals.length === 0) return null;
 
+  // Exclude password fields early
+  if (el.type === 'password') return null;
+
+  // Exclude captcha, login, verification, and other non-profile fields
+  const allSignals = signals.join(' ');
+  if (EXCLUDED_FIELD_PATTERNS.some(p => allSignals.includes(p))) return null;
+
+  // Proximity-based CAPTCHA detection:
+  // Only check DIRECT siblings of this input for CAPTCHA images — not the whole form.
+  const isCaptchaImg = (img) => {
+    const s = ((img.src || '') + ' ' + (img.alt || '') + ' ' + (img.className || '')).toLowerCase();
+    return /captcha|verify|security|securityimage|imgcode/.test(s);
+  };
+  // Check previous and next siblings
+  let sibling = el.previousElementSibling;
+  if (sibling && sibling.tagName === 'IMG' && isCaptchaImg(sibling)) return null;
+  sibling = el.nextElementSibling;
+  if (sibling && sibling.tagName === 'IMG' && isCaptchaImg(sibling)) return null;
+  // Check parent's direct child images (only immediate parent, not grandparent)
+  const parentEl = el.parentElement;
+  if (parentEl) {
+    for (const child of parentEl.children) {
+      if (child.tagName === 'IMG' && isCaptchaImg(child)) return null;
+    }
+  }
+
   // Check input type shortcuts
   if (el.type === 'email') return 'email';
   if (el.type === 'tel') return 'phone';
   if (el.type === 'date' && signals.some(s => s.includes('birth') || s.includes('dob'))) return 'date_of_birth';
+
+  // Special handling: if a label/name says "first name", "last name", "middle name"
+  // use the split version, not full_name
+  if (signals.some(s => /\bfirst\s*name\b/.test(s) || s === 'fname' || s === 'firstname' || s === 'first_name')) return 'first_name';
+  if (signals.some(s => /\blast\s*name\b/.test(s) || /\bsurname\b/.test(s) || s === 'lname' || s === 'lastname' || s === 'last_name')) return 'last_name';
+  if (signals.some(s => /\bmiddle\s*name\b/.test(s) || s === 'mname' || s === 'middlename' || s === 'middle_name')) return 'middle_name';
+
+  // If the signal contains generic "name" (not first/middle/last/login), use full_name
+  if (signals.some(s => {
+    if (!/\bname\b/i.test(s)) return false;
+    // Exclude if it also contains first/last/middle/login/sur — those are handled above or excluded
+    if (/\b(first|last|middle|login|sur)\b/i.test(s)) return false;
+    return true;
+  }) || signals.some(s => s === 'fullname' || s === 'full_name' || s === 'applicantname' || s === 'applicant_name' || s === 'username' || s === 'user_name')) return 'full_name';
 
   // Try each heuristic pattern
   let bestMatch = null;
@@ -126,9 +222,6 @@ function matchFieldHeuristically(el) {
       }
     }
   }
-
-  // Exclude password fields
-  if (el.type === 'password') return null;
 
   return bestMatch;
 }
@@ -299,15 +392,31 @@ async function fillInput(el, value) {
     return fillCheckbox(el, value);
   }
 
-  // Handle text/textarea/number inputs
+  // Handle text/textarea/number/email inputs
   el.focus();
 
-  // Use native setter for React compatibility
+  // Clear existing value first
   const proto = tagName === 'textarea'
     ? window.HTMLTextAreaElement.prototype
     : window.HTMLInputElement.prototype;
   const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
 
+  // For email and URL inputs, use direct value assignment
+  // React native setter can cause garbling on special-type inputs
+  if (inputType === 'email' || inputType === 'url') {
+    // Clear first
+    el.value = '';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    // Set the full value at once
+    el.value = String(value);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+    return true;
+  }
+
+  // For other inputs, use native setter for React/Vue compatibility
   if (nativeSetter) {
     nativeSetter.call(el, String(value));
   } else {
@@ -436,6 +545,28 @@ function buildSidebarHTML(university) {
   `;
 }
 
+// ─── Extension Context Guard ────────────────────────────────
+
+function isExtensionValid() {
+  try {
+    return !!chrome.runtime?.id;
+  } catch (e) {
+    return false;
+  }
+}
+
+function showRefreshNeeded(contentEl) {
+  if (!contentEl) return;
+  contentEl.innerHTML = `
+    <div class="state-card">
+      <div class="state-icon">🔄</div>
+      <h3>Please Refresh This Page</h3>
+      <p style="font-size:12px; color:#a1a1aa;">The extension was updated. Press <strong>Ctrl+F5</strong> to reload.</p>
+      <button class="btn-primary" onclick="location.reload()" style="margin-top:8px;">🔄 Refresh Now</button>
+    </div>
+  `;
+}
+
 // ─── Sidebar State Management ──────────────────────────────────
 
 async function initSidebarState(university) {
@@ -447,24 +578,32 @@ async function initSidebarState(university) {
     document.getElementById('unimatch-toggle')?.classList.remove('sidebar-open');
   });
 
-  const authResult = await chrome.runtime.sendMessage({ type: 'CHECK_AUTH' });
-  if (!authResult.authenticated) {
+  // Read profile DIRECTLY from chrome.storage.local — no service worker round-trip
+  // This is instant because it's a local read, not a network call
+  if (!isExtensionValid()) {
+    showRefreshNeeded(contentEl);
+    return;
+  }
+
+  let stored;
+  try {
+    stored = await chrome.storage.local.get(['unimatch_token', 'unimatch_profile']);
+  } catch (e) {
+    showRefreshNeeded(contentEl);
+    return;
+  }
+
+  if (!stored.unimatch_token || !stored.unimatch_profile) {
     renderState(contentEl, 'not_logged_in');
     return;
   }
 
-  renderState(contentEl, 'loading');
-
-  const profileResult = await chrome.runtime.sendMessage({ type: 'GET_PROFILE' });
-  if (!profileResult.profile) {
-    renderState(contentEl, 'not_logged_in');
-    return;
-  }
+  const profile = stored.unimatch_profile;
 
   // Store context for autofill
   window.__unimatch = {
     university,
-    profile: profileResult.profile,
+    profile,
     fieldMap: null,
     filledFields: 0,
     manualFields: 0,
@@ -472,7 +611,7 @@ async function initSidebarState(university) {
     manualSelectors: [],
   };
 
-  renderState(contentEl, 'ready', { profile: profileResult.profile, university });
+  renderState(contentEl, 'ready', { profile, university });
 }
 
 // ─── State Renderer ────────────────────────────────────────────
@@ -715,20 +854,26 @@ function calculateCompleteness(profile) {
 // ─── Multi-Selector Helper ─────────────────────────────────────
 
 /**
- * Try multiple comma-separated CSS selectors and return the first match.
+ * Try multiple comma-separated CSS selectors and return ALL matches.
  * University configs use selectors like: '[name="email"], [type="email"], #email'
  */
-function tryMultiSelector(selectorString) {
-  const selectors = selectorString.split(',').map(s => s.trim()).filter(Boolean);
-  for (const sel of selectors) {
-    try {
-      const el = document.querySelector(sel);
-      if (el) return el;
-    } catch (e) {
-      // Invalid selector — skip
+function tryMultiSelectorAll(selectorString) {
+  try {
+    return Array.from(document.querySelectorAll(selectorString));
+  } catch (e) {
+    // If the selector is invalid, fallback to splitting by comma and combining
+    const selectors = selectorString.split(',').map(s => s.trim()).filter(Boolean);
+    const elements = [];
+    for (const sel of selectors) {
+      try {
+        const els = Array.from(document.querySelectorAll(sel));
+        for (const el of els) {
+          if (!elements.includes(el)) elements.push(el);
+        }
+      } catch (err) { }
     }
+    return elements;
   }
-  return null;
 }
 
 /**
@@ -752,12 +897,51 @@ function fillSelectWithMapping(el, value, optionMap) {
   return false;
 }
 
+// ─── Extension Context Guard ───────────────────────────────────
+
+/**
+ * Check if the extension context is still valid.
+ * When the extension is reloaded in chrome://extensions, old content scripts
+ * lose their connection and chrome.runtime.id becomes undefined.
+ */
+function isExtensionValid() {
+  try {
+    return !!(chrome.runtime && chrome.runtime.id);
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Show a friendly "refresh needed" message when the extension context is gone.
+ */
+function showContextInvalidatedUI(container) {
+  container.innerHTML = `
+    <div class="state-card">
+      <div class="state-icon" style="font-size:32px">🔄</div>
+      <h3 style="margin:8px 0 4px">Extension Updated</h3>
+      <p style="font-size:12px;color:#a1a1aa;margin-bottom:12px">
+        The extension was reloaded. Please refresh this page to reconnect.
+      </p>
+      <button class="btn-primary" onclick="window.location.reload()">
+        ↻ Refresh Page
+      </button>
+    </div>
+  `;
+}
+
 // ─── Core Autofill Logic ───────────────────────────────────────
 
 async function handleAutofill() {
   const contentEl = document.getElementById('unimatch-content');
   const ctx = window.__unimatch;
   if (!contentEl || !ctx) return;
+
+  // Guard: check extension context before any chrome.runtime calls
+  if (!isExtensionValid()) {
+    showContextInvalidatedUI(contentEl);
+    return;
+  }
 
   renderState(contentEl, 'loading');
 
@@ -780,73 +964,83 @@ async function handleAutofill() {
       console.log(`[IlmSeUrooj] Form type: ${uniConfig.formType}, Verified: ${uniConfig.verified}`);
 
       for (const [profileKey, selectorString] of Object.entries(uniConfig.fieldMap)) {
-        const el = tryMultiSelector(selectorString);
-        const rawValue = ctx.profile?.[profileKey];
+        const els = tryMultiSelectorAll(selectorString);
 
-        if (!el) {
+        if (els.length === 0) {
           skippedCount++;
           console.log(`[IlmSeUrooj] ⏭ Skipped ${profileKey}: no element matched`);
           continue;
         }
 
-        alreadyHandled.add(el);
-
-        if (rawValue == null || rawValue === '') {
-          // No value — highlight amber
-          el.style.outline = '2px solid #fbbf24';
-          el.style.outlineOffset = '2px';
-          el.classList.add('unimatch-manual');
-          el.classList.remove('unimatch-filled');
-          manualCount++;
-          manualSelectors.push(selectorString);
-          continue;
-        }
-
-        // Apply transform
-        const transformKey = uniConfig.transforms?.[profileKey];
-        let value = rawValue;
-        if (transformKey && TRANSFORMS[transformKey]) {
-          if (transformKey === 'marks_to_percent') {
-            const total = profileKey.includes('fsc') ? ctx.profile.fsc_total : ctx.profile.matric_total;
-            value = TRANSFORMS[transformKey](value, total);
+        for (const el of els) {
+          // Resolve value — virtual keys (first_name, last_name, middle_name) derive from full_name
+          let rawValue;
+          if (['first_name', 'last_name', 'middle_name'].includes(profileKey)) {
+            const fullName = ctx.profile?.full_name;
+            rawValue = fullName ? TRANSFORMS[profileKey](fullName) : '';
           } else {
-            value = TRANSFORMS[transformKey](value);
+            rawValue = ctx.profile?.[profileKey];
           }
-        }
 
-        // Fill based on element type
-        let filled = false;
-        if (el.tagName === 'SELECT') {
-          filled = fillSelectWithMapping(el, value, uniConfig.selectOptions?.[profileKey]);
-        } else if (el.type === 'radio') {
-          // Handle radio buttons
-          const radioName = el.name;
-          if (radioName) {
-            document.querySelectorAll(`[name="${radioName}"]`).forEach(r => {
-              if (r.value.toLowerCase() === String(value).toLowerCase()) {
-                r.checked = true;
-                r.dispatchEvent(new Event('change', { bubbles: true }));
-                filled = true;
-              }
-            });
+          alreadyHandled.add(el);
+
+          if (rawValue == null || rawValue === '') {
+            // No value — highlight amber
+            el.style.outline = '2px solid #fbbf24';
+            el.style.outlineOffset = '2px';
+            el.classList.add('unimatch-manual');
+            el.classList.remove('unimatch-filled');
+            manualCount++;
+            manualSelectors.push(selectorString);
+            continue;
           }
-        } else {
-          filled = await fillInput(el, String(value));
-        }
 
-        if (filled) {
-          el.style.outline = '2px solid #4ade80';
-          el.style.outlineOffset = '2px';
-          el.classList.add('unimatch-filled');
-          el.classList.remove('unimatch-manual');
-          filledCount++;
-          filledSelectors.push(selectorString);
-        } else {
-          el.style.outline = '2px solid #fbbf24';
-          el.style.outlineOffset = '2px';
-          el.classList.add('unimatch-manual');
-          manualCount++;
-          manualSelectors.push(selectorString);
+          // Apply transform (skip if already applied for name-split keys)
+          const transformKey = uniConfig.transforms?.[profileKey];
+          let value = rawValue;
+          if (transformKey && TRANSFORMS[transformKey] && !['first_name', 'last_name', 'middle_name'].includes(transformKey)) {
+            if (transformKey === 'marks_to_percent') {
+              const total = profileKey.includes('fsc') ? ctx.profile.fsc_total : ctx.profile.matric_total;
+              value = TRANSFORMS[transformKey](value, total);
+            } else {
+              value = TRANSFORMS[transformKey](value);
+            }
+          }
+
+          // Fill based on element type
+          let filled = false;
+          if (el.tagName === 'SELECT') {
+            filled = fillSelectWithMapping(el, value, uniConfig.selectOptions?.[profileKey]);
+          } else if (el.type === 'radio') {
+            // Handle radio buttons
+            const radioName = el.name;
+            if (radioName) {
+              document.querySelectorAll(`[name="${radioName}"]`).forEach(r => {
+                if (r.value.toLowerCase() === String(value).toLowerCase()) {
+                  r.checked = true;
+                  r.dispatchEvent(new Event('change', { bubbles: true }));
+                  filled = true;
+                }
+              });
+            }
+          } else {
+            filled = await fillInput(el, String(value));
+          }
+
+          if (filled) {
+            el.style.outline = '2px solid #4ade80';
+            el.style.outlineOffset = '2px';
+            el.classList.add('unimatch-filled');
+            el.classList.remove('unimatch-manual');
+            filledCount++;
+            filledSelectors.push(selectorString);
+          } else {
+            el.style.outline = '2px solid #fbbf24';
+            el.style.outlineOffset = '2px';
+            el.classList.add('unimatch-manual');
+            manualCount++;
+            manualSelectors.push(selectorString);
+          }
         }
       }
 
@@ -856,21 +1050,27 @@ async function handleAutofill() {
     }
 
     // ─── TIER 2: AI-generated field map (fallback) ─────────────
+    // Only use AI mapping for unknown universities — if we have a config,
+    // the login page just doesn't have application fields yet. Skip to Tier 3.
     let fieldMap = ctx.fieldMap;
-    if (!fieldMap && filledCount === 0) {
+    if (!fieldMap && filledCount === 0 && !uniConfig) {
       const formHTML = getFormHTML();
-      const result = await chrome.runtime.sendMessage({
-        type: 'GET_FIELD_MAP',
-        domain: hostname,
-      });
+      try {
+        const result = await chrome.runtime.sendMessage({
+          type: 'GET_FIELD_MAP',
+          domain: hostname,
+        });
 
-      if (result.fieldMap?.mapping) {
-        fieldMap = result.fieldMap.mapping;
-      } else if (formHTML) {
-        const mapResult = await fetchFieldMap(ctx.university, formHTML);
-        if (mapResult?.mapping) {
-          fieldMap = mapResult.mapping;
+        if (result && result.fieldMap?.mapping) {
+          fieldMap = result.fieldMap.mapping;
+        } else if (formHTML) {
+          const mapResult = await fetchFieldMap(ctx.university, formHTML);
+          if (mapResult?.mapping) {
+            fieldMap = mapResult.mapping;
+          }
         }
+      } catch (tier2Err) {
+        console.warn('[IlmSeUrooj] Tier 2 AI field map failed, falling through to heuristics:', tier2Err.message);
       }
       ctx.fieldMap = fieldMap;
     }
@@ -954,17 +1154,35 @@ async function handleAutofill() {
 
       // Heuristic match
       const profileKey = matchFieldHeuristically(input);
-      if (profileKey && ctx.profile[profileKey]) {
-        let value = ctx.profile[profileKey];
-
-        if (profileKey === 'cnic') {
-          const accepts = (input.maxLength === 13 || input.name?.includes('no_dash'));
-          value = accepts ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
+      if (!profileKey) {
+        // Mark unfilled required fields
+        if (input.required && !input.value) {
+          input.style.outline = '2px solid #fbbf24';
+          input.classList.add('unimatch-manual');
+          manualCount++;
         }
-        if (profileKey === 'phone') {
-          value = TRANSFORMS.phone_pak(value);
-        }
+        continue;
+      }
 
+      // Resolve the value — virtual keys (first_name, last_name, middle_name)
+      // are derived from full_name using transforms
+      let value;
+      if (['first_name', 'last_name', 'middle_name'].includes(profileKey)) {
+        const fullName = ctx.profile.full_name;
+        value = fullName ? TRANSFORMS[profileKey](fullName) : '';
+      } else {
+        value = ctx.profile[profileKey];
+      }
+
+      if (profileKey === 'cnic' && value) {
+        const accepts = (input.maxLength === 13 || input.name?.includes('no_dash'));
+        value = accepts ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
+      }
+      if (profileKey === 'phone' && value) {
+        value = TRANSFORMS.phone_pak(value);
+      }
+
+      if (value != null && value !== '') {
         if (input.tagName === 'SELECT') {
           const filled = fillSelect(input, value);
           if (filled) {
@@ -973,7 +1191,7 @@ async function handleAutofill() {
             filledCount++;
           }
         } else {
-          const filled = await fillInput(input, value);
+          const filled = await fillInput(input, String(value));
           if (filled) {
             input.style.outline = '2px solid #4ade80';
             input.classList.add('unimatch-filled');
@@ -1006,25 +1224,34 @@ async function handleAutofill() {
 
   } catch (err) {
     console.error('[IlmSeUrooj] Autofill error:', err);
-    renderState(contentEl, 'filled', { filled: 0, manual: 0 });
+    if (err.message?.includes('Extension context invalidated') || !isExtensionValid()) {
+      showRefreshNeeded(contentEl);
+    } else {
+      renderState(contentEl, 'filled', { filled: 0, manual: 0 });
+    }
   }
 }
 
 /**
  * Fetch field map from the API (AI-powered).
+ * Delegates to service worker to avoid mixed content errors on HTTPS pages.
  */
 async function fetchFieldMap(university, formHTML) {
   try {
-    const response = await fetch('http://localhost:3000/api/fieldmap', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const data = await chrome.runtime.sendMessage({
+      type: 'POST_FIELD_MAP',
+      data: {
         domain: window.location.hostname,
         formHTML: formHTML,
         universitySlug: university.slug,
-      }),
+      }
     });
-    const data = await response.json();
+
+    if (data.error) {
+      console.error('[UniMatch] Field map generation error:', data.error);
+      return null;
+    }
+
     return data.fieldMap;
   } catch (err) {
     console.error('[UniMatch] Failed to fetch field map:', err);
@@ -1720,6 +1947,176 @@ async function setupPasswordVault() {
       data: { portal_password_hint: password },
     });
   });
+}
+
+// ─── Initialize ────────────────────────────────────────────────
+
+// ─── Missing Event Handlers ────────────────────────────────────
+
+function handleScanFields() {
+  const contentEl = document.getElementById('unimatch-content');
+  const ctx = window.__unimatch;
+  if (!contentEl || !ctx) return;
+
+  // Scan all visible form fields and figure out what we can autofill
+  const allInputs = document.querySelectorAll(
+    'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]), select, textarea'
+  );
+
+  const hostname = window.location.hostname;
+  const uniConfig = (typeof getConfigForDomain === 'function') ? getConfigForDomain(hostname) : null;
+
+  let matchedFields = [];
+  let unmatchedFields = [];
+  let passwordFields = 0;
+
+  for (const input of allInputs) {
+    if (input.type === 'password') {
+      passwordFields++;
+      matchedFields.push({ label: 'Password', profileKey: '(auto-generated)', selector: '' });
+      continue;
+    }
+
+    // Check deterministic config first
+    let found = false;
+    if (uniConfig && uniConfig.fieldMap) {
+      for (const [profileKey, selectorString] of Object.entries(uniConfig.fieldMap)) {
+        let isMatch = false;
+        try {
+          // Native DOM match (handles comma-separated lists)
+          isMatch = input.matches(selectorString);
+        } catch (e) {
+          // Fallback if the selector contains pseudo-classes not allowed in matches()
+          const els = tryMultiSelectorAll(selectorString);
+          isMatch = els.includes(input);
+        }
+
+        if (isMatch) {
+          const hasValue = ctx.profile?.[profileKey] != null && ctx.profile?.[profileKey] !== '';
+          matchedFields.push({
+            label: profileKey.replace(/_/g, ' '),
+            profileKey,
+            hasValue,
+            selector: selectorString,
+          });
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found) {
+      // Try heuristic match
+      const profileKey = matchFieldHeuristically(input);
+      if (profileKey) {
+        const hasValue = ctx.profile?.[profileKey] != null && ctx.profile?.[profileKey] !== '';
+        matchedFields.push({
+          label: profileKey.replace(/_/g, ' '),
+          profileKey,
+          hasValue,
+          selector: input.id ? `#${input.id}` : `[name="${input.name}"]`,
+        });
+      } else {
+        const label = input.labels?.[0]?.textContent?.trim() || input.placeholder || input.name || input.id || 'Unknown field';
+        unmatchedFields.push({ label: label.substring(0, 40) });
+      }
+    }
+  }
+
+  // Render scan results in the sidebar
+  const canFill = matchedFields.filter(f => f.hasValue !== false).length;
+  const needsInput = matchedFields.filter(f => f.hasValue === false).length;
+
+  contentEl.innerHTML = `
+    <div class="state-card">
+      <h3 style="margin:0 0 10px; font-size:14px;">🔍 Scan Results</h3>
+      <div class="fill-results">
+        <div class="stat-row filled">
+          <span class="stat-dot green"></span>
+          <span>${canFill} fields we can fill</span>
+        </div>
+        <div class="stat-row manual">
+          <span class="stat-dot amber"></span>
+          <span>${needsInput} fields missing from profile</span>
+        </div>
+        ${unmatchedFields.length > 0 ? `
+          <div class="stat-row" style="margin-top:4px;">
+            <span style="color:#a1a1aa; font-size:11px;">📋 ${unmatchedFields.length} fields not recognized</span>
+          </div>
+        ` : ''}
+        ${passwordFields > 0 ? `
+          <div class="stat-row" style="margin-top:4px;">
+            <span style="color:#a1a1aa; font-size:11px;">🔑 ${passwordFields} password field(s) → auto-generated</span>
+          </div>
+        ` : ''}
+      </div>
+      <div style="max-height:180px; overflow-y:auto; margin:10px 0; font-size:11px;">
+        ${matchedFields.map(f => `
+          <div style="padding:4px 8px; margin:2px 0; background:${f.hasValue !== false ? 'rgba(74,222,128,0.08)' : 'rgba(251,191,36,0.08)'}; border-radius:6px; display:flex; justify-content:space-between;">
+            <span>${f.label}</span>
+            <span style="color:${f.hasValue !== false ? '#4ade80' : '#fbbf24'}">${f.hasValue !== false ? '✓' : '✗'}</span>
+          </div>
+        `).join('')}
+        ${unmatchedFields.length > 0 ? `
+          <div style="margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.05);">
+            <div style="color:#71717a; font-size:10px; margin-bottom:4px;">Unrecognized:</div>
+            ${unmatchedFields.map(f => `
+              <div style="padding:3px 8px; margin:2px 0; color:#71717a; font-size:10px;">
+                ${f.label}
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+      <button class="btn-primary btn-autofill" id="unimatch-autofill">⚡ Autofill Now</button>
+      <button class="btn-secondary" id="unimatch-back-ready" style="margin-top:6px;">← Back</button>
+    </div>
+  `;
+
+  document.getElementById('unimatch-autofill')?.addEventListener('click', handleAutofill);
+  document.getElementById('unimatch-back-ready')?.addEventListener('click', () => {
+    renderState(contentEl, 'ready', { profile: ctx.profile, university: ctx.university });
+  });
+}
+
+function handlePreSubmitCheck() {
+  const contentEl = document.getElementById('unimatch-content');
+  const ctx = window.__unimatch;
+  if (!contentEl || !ctx) return;
+
+  // Basic mock check for now
+  const greenList = ctx.filledSelectors.map(sel => ({ label: 'Verified', selector: sel }));
+  const amberList = ctx.manualSelectors.map(sel => ({ label: 'Missing', msg: 'Needs input', selector: sel }));
+
+  renderState(contentEl, 'review', { greenList, amberList, redList: [] });
+}
+
+function handleSaveProgress() {
+  alert('Progress saved locally.');
+}
+
+function handleSaveConfirmation() {
+  const input = document.getElementById('unimatch-confirm-input');
+  if (input && input.value) {
+    alert('Confirmation number ' + input.value + ' saved.');
+  } else {
+    alert('Please enter a confirmation number.');
+  }
+}
+
+function showFillGapModal(label, selector) {
+  const val = prompt(`Enter value for ${label} (This will be saved for future forms):`);
+  if (val) {
+    const el = document.querySelector(selector);
+    if (el) {
+      fillInput(el, val).then(() => {
+        el.style.outline = '2px solid #4ade80';
+        el.classList.add('unimatch-filled');
+        el.classList.remove('unimatch-manual');
+        alert('Filled!');
+      });
+    }
+  }
 }
 
 // ─── Initialize ────────────────────────────────────────────────

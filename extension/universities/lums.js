@@ -13,11 +13,15 @@ const lums = {
     formType: 'requires_login_first',
 
     fieldMap: {
+        first_name: '[name="firstName"], [name="first_name"], [name="fname"], #firstName',
+        middle_name: '[name="middleName"], [name="middle_name"], [name="mname"], #middleName',
+        last_name: '[name="lastName"], [name="last_name"], [name="surname"], [name="lname"], #lastName',
         full_name: '[name="fullName"], [name="name"], [name="applicantName"], #fullName',
         father_name: '[name="fatherName"], [name="father_name"], #fatherName',
-        cnic: '[name="cnic"], [name="cnicNo"], #cnic',
+        cnic: '[name="cnic"], [name="cnicNo"], [name="nic"], #cnic',
         date_of_birth: '[name="dob"], [name="dateOfBirth"], #dob',
         gender: '[name="gender"], #gender',
+        nationality: '[name="nationality"], #nationality',
         email: '[name="email"], [type="email"], #email',
         phone: '[name="phone"], [name="mobile"], [name="contactNo"], #phone',
         address: '[name="address"], [name="permanentAddress"], #address',
@@ -46,6 +50,9 @@ const lums = {
         cnic: 'cnic_dashes',
         phone: 'phone_pak',
         date_of_birth: 'date_ymd',
+        first_name: 'first_name',
+        last_name: 'last_name',
+        middle_name: 'middle_name',
     },
 
     verified: false,
