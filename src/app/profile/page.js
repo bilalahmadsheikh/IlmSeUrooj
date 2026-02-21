@@ -206,7 +206,10 @@ export default function ProfilePage() {
                             <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                             <path d="M6 12v5c6 3 10 3 16 0v-5" />
                         </svg>
-                        UniMatch
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span>Ilm Se Urooj</span>
+                            <span style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif", fontSize: 13, color: '#a1a1aa', lineHeight: 1, marginTop: -2 }}>علم سے عروج</span>
+                        </div>
                     </Link>
                     <div className="pf-nav-links">
                         <Link href="/">Home</Link>
@@ -264,7 +267,10 @@ export default function ProfilePage() {
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                         <path d="M6 12v5c6 3 10 3 16 0v-5" />
                     </svg>
-                    UniMatch
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span>Ilm Se Urooj</span>
+                        <span style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif", fontSize: 13, color: '#a1a1aa', lineHeight: 1, marginTop: -2 }}>علم سے عروج</span>
+                    </div>
                 </Link>
                 <div className="pf-nav-links">
                     <Link href="/">Home</Link>

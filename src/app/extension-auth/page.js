@@ -115,7 +115,10 @@ export default function ExtensionAuthPage() {
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                         <path d="M6 12v5c6 3 10 3 16 0v-5" />
                     </svg>
-                    <h1 style={styles.title}>UniMatch</h1>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <h1 style={styles.title}>Ilm Se Urooj</h1>
+                        <span style={styles.urduText}>علم سے عروج</span>
+                    </div>
                 </div>
 
                 <p style={styles.subtitle}>Sign in to connect your profile to the extension.</p>
@@ -228,6 +231,14 @@ const styles = {
         color: '#a1a1aa',
         marginBottom: 20,
         lineHeight: 1.5,
+    },
+    urduText: {
+        fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif",
+        fontSize: 16,
+        color: '#a1a1aa',
+        lineHeight: 1,
+        textAlign: 'right',
+        marginTop: -4,
     },
     form: {
         display: 'flex',

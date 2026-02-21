@@ -39,7 +39,7 @@ export default function ApplicationsPage() {
                             <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                             <path d="M6 12v5c6 3 10 3 16 0v-5" />
                         </svg>
-                        <h1 style={styles.title}>UniMatch</h1>
+                        <h1 style={styles.title}>Ilm Se Urooj</h1>
                     </div>
                     <p style={styles.subtitle}>Application Dashboard</p>
                 </div>
@@ -67,7 +67,7 @@ export default function ApplicationsPage() {
                             <span style={{ fontSize: 48 }}>🎓</span>
                             <h2 style={{ margin: '12px 0 4px', color: '#e4e4e7' }}>No applications yet</h2>
                             <p style={{ color: '#a1a1aa', fontSize: 13 }}>
-                                Install the UniMatch Chrome extension and visit a university portal to get started.
+                                Install the Ilm Se Urooj Chrome extension and visit a university portal to get started.
                             </p>
                         </div>
                     ) : (

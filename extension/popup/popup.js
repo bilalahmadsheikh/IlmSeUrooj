@@ -1,5 +1,5 @@
 /**
- * UniMatch Popup Script
+ * Ilm Se Urooj Popup Script
  * Shows application list and auth controls.
  */
 
@@ -25,7 +25,7 @@ function showSignedOut() {
   contentEl.innerHTML = `
     <div class="empty-state">
       <div class="empty-icon">🎓</div>
-      <h3>Welcome to UniMatch</h3>
+      <h3>Welcome to Ilm Se Urooj</h3>
       <p>Sign in to manage your university applications.</p>
     </div>
   `;

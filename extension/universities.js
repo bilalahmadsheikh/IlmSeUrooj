@@ -1,5 +1,5 @@
 /**
- * UniMatch University Configuration
+ * Ilm Se Urooj (UniMatch) University Configuration
  * Complete config for all 28 supported Pakistani universities.
  * URLs researched and verified February 2026.
  */

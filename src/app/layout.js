@@ -13,7 +13,7 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "UniMatch - Find Your Perfect University in Pakistan",
+  title: "Ilm Se Urooj - Find Your Perfect University in Pakistan",
   description: "Discover universities across Pakistan with our smart matching system. Swipe right on your favorites! Like UCAS, but for Pakistan.",
   keywords: "university, Pakistan, admission, NUST, LUMS, FAST, COMSATS, engineering, computer science",
 };

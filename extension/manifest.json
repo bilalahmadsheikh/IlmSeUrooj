@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "UniMatch — UCAS Bridge",
+    "name": "Ilm Se Urooj — UCAS Bridge",
     "description": "Autofill Pakistani university application forms from a single student profile.",
     "version": "0.1.0",
     "permissions": [

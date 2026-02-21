@@ -122,7 +122,10 @@ export default function ExtensionPage() {
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                         <path d="M6 12v5c6 3 10 3 16 0v-5" />
                     </svg>
-                    UniMatch
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span>Ilm Se Urooj</span>
+                        <span style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif", fontSize: 13, color: '#a1a1aa', lineHeight: 1, marginTop: -2 }}>علم سے عروج</span>
+                    </div>
                 </Link>
                 <div className="ext-nav-links">
                     <Link href="/">Home</Link>
@@ -216,7 +219,7 @@ export default function ExtensionPage() {
                                 <div className="step-num">4</div>
                                 <div className="step-text">
                                     <h4>Visit a University Portal</h4>
-                                    <p>Go to any supported university's admissions page. The UniMatch sidebar will appear automatically!</p>
+                                    <p>Go to any supported university's admissions page. The Ilm Se Urooj sidebar will appear automatically!</p>
                                 </div>
                             </div>
                         </>

@@ -43,9 +43,12 @@ export default function Header({ savedCount, onShowSaved, onShowScholarships }) 
                             />
                         </svg>
                     </div>
-                    <span className={styles.logoText}>
-                        Uni<span className={styles.highlight}>Match</span>
-                    </span>
+                    <div className={styles.logoTextWrapper}>
+                        <span className={styles.logoText}>
+                            Ilm Se <span className={styles.highlight}>Urooj</span>
+                        </span>
+                        <span className={styles.urduText}>علم سے عروج</span>
+                    </div>
                 </div>
 
                 <nav className={styles.nav}>
@@ -69,7 +72,7 @@ export default function Header({ savedCount, onShowSaved, onShowScholarships }) 
                         <span className={styles.navLinkText}>Applications</span>
                     </Link>
 
-                    <Link href="/extension" className={styles.navLink} title="Get the UniMatch extension">
+                    <Link href="/extension" className={styles.navLink} title="Get the Ilm Se Urooj extension">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
                         </svg>

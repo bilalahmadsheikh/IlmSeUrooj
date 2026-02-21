@@ -83,6 +83,21 @@
     }
 }
 
+.logoTextWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.urduText {
+    font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif;
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    line-height: 0.8;
+    text-align: right;
+    margin-top: -2px;
+}
+
 .logoText {
     font-family: var(--font-display);
     font-size: var(--font-size-2xl);
