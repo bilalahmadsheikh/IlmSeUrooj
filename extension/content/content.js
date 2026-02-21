@@ -712,6 +712,46 @@ function calculateCompleteness(profile) {
   return Math.round((filled / fields.length) * 100);
 }
 
+// ─── Multi-Selector Helper ─────────────────────────────────────
+
+/**
+ * Try multiple comma-separated CSS selectors and return the first match.
+ * University configs use selectors like: '[name="email"], [type="email"], #email'
+ */
+function tryMultiSelector(selectorString) {
+  const selectors = selectorString.split(',').map(s => s.trim()).filter(Boolean);
+  for (const sel of selectors) {
+    try {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    } catch (e) {
+      // Invalid selector — skip
+    }
+  }
+  return null;
+}
+
+/**
+ * Fill a select element using option text/value matching with optional mapping.
+ */
+function fillSelectWithMapping(el, value, optionMap) {
+  const options = Array.from(el.options);
+  const mappedValue = optionMap?.[String(value).toLowerCase()] || value;
+
+  const match = options.find(o =>
+    o.value.toLowerCase() === String(mappedValue).toLowerCase() ||
+    o.text.toLowerCase() === String(mappedValue).toLowerCase() ||
+    o.text.toLowerCase().includes(String(mappedValue).toLowerCase())
+  );
+
+  if (match) {
+    el.value = match.value;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+  }
+  return false;
+}
+
 // ─── Core Autofill Logic ───────────────────────────────────────
 
 async function handleAutofill() {
@@ -722,131 +762,205 @@ async function handleAutofill() {
   renderState(contentEl, 'loading');
 
   try {
-    // 1. Get field map (from cache or AI)
+    let filledCount = 0;
+    let manualCount = 0;
+    let skippedCount = 0;
+    const filledSelectors = [];
+    const manualSelectors = [];
+    const alreadyHandled = new Set();
+    const masterPassword = await getConsistentPassword();
+
+    // ─── TIER 1: Deterministic per-university config ───────────
+    // Uses verified CSS selectors from extension/universities/index.js
+    const hostname = window.location.hostname;
+    const uniConfig = (typeof getConfigForDomain === 'function') ? getConfigForDomain(hostname) : null;
+
+    if (uniConfig && uniConfig.fieldMap) {
+      console.log(`[IlmSeUrooj] ✅ Found config for ${uniConfig.name} (${uniConfig.slug})`);
+      console.log(`[IlmSeUrooj] Form type: ${uniConfig.formType}, Verified: ${uniConfig.verified}`);
+
+      for (const [profileKey, selectorString] of Object.entries(uniConfig.fieldMap)) {
+        const el = tryMultiSelector(selectorString);
+        const rawValue = ctx.profile?.[profileKey];
+
+        if (!el) {
+          skippedCount++;
+          console.log(`[IlmSeUrooj] ⏭ Skipped ${profileKey}: no element matched`);
+          continue;
+        }
+
+        alreadyHandled.add(el);
+
+        if (rawValue == null || rawValue === '') {
+          // No value — highlight amber
+          el.style.outline = '2px solid #fbbf24';
+          el.style.outlineOffset = '2px';
+          el.classList.add('unimatch-manual');
+          el.classList.remove('unimatch-filled');
+          manualCount++;
+          manualSelectors.push(selectorString);
+          continue;
+        }
+
+        // Apply transform
+        const transformKey = uniConfig.transforms?.[profileKey];
+        let value = rawValue;
+        if (transformKey && TRANSFORMS[transformKey]) {
+          if (transformKey === 'marks_to_percent') {
+            const total = profileKey.includes('fsc') ? ctx.profile.fsc_total : ctx.profile.matric_total;
+            value = TRANSFORMS[transformKey](value, total);
+          } else {
+            value = TRANSFORMS[transformKey](value);
+          }
+        }
+
+        // Fill based on element type
+        let filled = false;
+        if (el.tagName === 'SELECT') {
+          filled = fillSelectWithMapping(el, value, uniConfig.selectOptions?.[profileKey]);
+        } else if (el.type === 'radio') {
+          // Handle radio buttons
+          const radioName = el.name;
+          if (radioName) {
+            document.querySelectorAll(`[name="${radioName}"]`).forEach(r => {
+              if (r.value.toLowerCase() === String(value).toLowerCase()) {
+                r.checked = true;
+                r.dispatchEvent(new Event('change', { bubbles: true }));
+                filled = true;
+              }
+            });
+          }
+        } else {
+          filled = await fillInput(el, String(value));
+        }
+
+        if (filled) {
+          el.style.outline = '2px solid #4ade80';
+          el.style.outlineOffset = '2px';
+          el.classList.add('unimatch-filled');
+          el.classList.remove('unimatch-manual');
+          filledCount++;
+          filledSelectors.push(selectorString);
+        } else {
+          el.style.outline = '2px solid #fbbf24';
+          el.style.outlineOffset = '2px';
+          el.classList.add('unimatch-manual');
+          manualCount++;
+          manualSelectors.push(selectorString);
+        }
+      }
+
+      console.log(`[IlmSeUrooj] Config fill: ${filledCount} filled, ${manualCount} manual, ${skippedCount} skipped`);
+    } else {
+      console.log(`[IlmSeUrooj] No deterministic config for ${hostname} — using AI/heuristic fallback`);
+    }
+
+    // ─── TIER 2: AI-generated field map (fallback) ─────────────
     let fieldMap = ctx.fieldMap;
-    if (!fieldMap) {
+    if (!fieldMap && filledCount === 0) {
       const formHTML = getFormHTML();
       const result = await chrome.runtime.sendMessage({
         type: 'GET_FIELD_MAP',
-        domain: window.location.hostname,
+        domain: hostname,
       });
 
       if (result.fieldMap?.mapping) {
         fieldMap = result.fieldMap.mapping;
       } else if (formHTML) {
-        // Need AI mapping — send form HTML to backend
         const mapResult = await fetchFieldMap(ctx.university, formHTML);
         if (mapResult?.mapping) {
           fieldMap = mapResult.mapping;
         }
       }
-
       ctx.fieldMap = fieldMap;
     }
 
-    if (!fieldMap || !Array.isArray(fieldMap)) {
-      renderState(contentEl, 'filled', { filled: 0, manual: 0 });
-      return;
-    }
-
-    // 2. Get remembered answers
-    let rememberedAnswers = {};
-    try {
-      const answersResult = await chrome.runtime.sendMessage({ type: 'GET_REMEMBERED_ANSWERS' });
-      if (answersResult.answers) {
-        for (const ans of answersResult.answers) {
-          rememberedAnswers[ans.field_label.toLowerCase()] = ans.field_value;
+    if (fieldMap && Array.isArray(fieldMap)) {
+      // Get remembered answers
+      let rememberedAnswers = {};
+      try {
+        const answersResult = await chrome.runtime.sendMessage({ type: 'GET_REMEMBERED_ANSWERS' });
+        if (answersResult.answers) {
+          for (const ans of answersResult.answers) {
+            rememberedAnswers[ans.field_label.toLowerCase()] = ans.field_value;
+          }
         }
+      } catch (e) {
+        console.log('[IlmSeUrooj] No remembered answers available');
       }
-    } catch (e) {
-      console.log('[UniMatch] No remembered answers available');
-    }
 
-    // 3. Fill fields from AI map
-    let filledCount = 0;
-    let manualCount = 0;
-    const filledSelectors = [];
-    const manualSelectors = [];
-    const alreadyHandled = new Set();
+      for (const field of fieldMap) {
+        const el = document.querySelector(field.selector);
+        if (!el || alreadyHandled.has(el)) continue;
+        alreadyHandled.add(el);
 
-    for (const field of fieldMap) {
-      const el = document.querySelector(field.selector);
-      if (!el) {
-        console.log(`[UniMatch] Selector not found: ${field.selector}`);
-        continue;
-      }
-      alreadyHandled.add(el);
+        let value = ctx.profile[field.profileKey];
 
-      // Get value from profile
-      let value = ctx.profile[field.profileKey];
-
-      // Apply transform if specified
-      if (field.transform && TRANSFORMS[field.transform]) {
-        if (field.transform === 'marks_to_percent') {
-          const total = field.profileKey.includes('fsc') ? ctx.profile.fsc_total : ctx.profile.matric_total;
-          value = TRANSFORMS[field.transform](value, total);
-        } else {
-          value = TRANSFORMS[field.transform](value);
+        if (field.transform && TRANSFORMS[field.transform]) {
+          if (field.transform === 'marks_to_percent') {
+            const total = field.profileKey.includes('fsc') ? ctx.profile.fsc_total : ctx.profile.matric_total;
+            value = TRANSFORMS[field.transform](value, total);
+          } else {
+            value = TRANSFORMS[field.transform](value);
+          }
         }
-      }
 
-      // Try remembered answer if no profile value
-      if ((value == null || value === '') && field.label) {
-        const remembered = rememberedAnswers[field.label.toLowerCase()];
-        if (remembered) value = remembered;
-      }
+        if ((value == null || value === '') && field.label) {
+          const remembered = rememberedAnswers[field.label.toLowerCase()];
+          if (remembered) value = remembered;
+        }
 
-      if (value != null && value !== '') {
-        const filled = await fillInput(el, value);
-        if (filled) {
-          el.classList.add('unimatch-filled');
-          el.classList.remove('unimatch-manual');
-          filledCount++;
-          filledSelectors.push(field.selector);
+        if (value != null && value !== '') {
+          const filled = await fillInput(el, value);
+          if (filled) {
+            el.style.outline = '2px solid #4ade80';
+            el.style.outlineOffset = '2px';
+            el.classList.add('unimatch-filled');
+            filledCount++;
+            filledSelectors.push(field.selector);
+          } else {
+            el.style.outline = '2px solid #fbbf24';
+            el.classList.add('unimatch-manual');
+            manualCount++;
+            manualSelectors.push(field.selector);
+          }
         } else {
+          el.style.outline = '2px solid #fbbf24';
           el.classList.add('unimatch-manual');
-          el.classList.remove('unimatch-filled');
           manualCount++;
           manualSelectors.push(field.selector);
         }
-      } else {
-        // No value available — mark as manual
-        el.classList.add('unimatch-manual');
-        el.classList.remove('unimatch-filled');
-        manualCount++;
-        manualSelectors.push(field.selector);
       }
     }
 
-    // 4. Heuristic filling — detect common fields not in AI map
-    const allInputs = document.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]), select, textarea');
-    const masterPassword = await getConsistentPassword();
+    // ─── TIER 3: Heuristic fallback for remaining fields ───────
+    const allInputs = document.querySelectorAll(
+      'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]), select, textarea'
+    );
 
     for (const input of allInputs) {
       if (alreadyHandled.has(input)) continue;
-      if (input.value && input.value.trim() !== '') continue; // already has a value
+      if (input.value && input.value.trim() !== '') continue;
 
-      // Password fields — fill with consistent password
+      // Password fields — consistent password
       if (input.type === 'password') {
         await fillInput(input, masterPassword);
+        input.style.outline = '2px solid #4ade80';
         input.classList.add('unimatch-filled');
         filledCount++;
         alreadyHandled.add(input);
         continue;
       }
 
-      // Try heuristic match
+      // Heuristic match
       const profileKey = matchFieldHeuristically(input);
       if (profileKey && ctx.profile[profileKey]) {
         let value = ctx.profile[profileKey];
 
-        // Apply CNIC formatting if needed
         if (profileKey === 'cnic') {
           const accepts = (input.maxLength === 13 || input.name?.includes('no_dash'));
           value = accepts ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
         }
-
-        // Phone formatting
         if (profileKey === 'phone') {
           value = TRANSFORMS.phone_pak(value);
         }
@@ -854,12 +968,14 @@ async function handleAutofill() {
         if (input.tagName === 'SELECT') {
           const filled = fillSelect(input, value);
           if (filled) {
+            input.style.outline = '2px solid #4ade80';
             input.classList.add('unimatch-filled');
             filledCount++;
           }
         } else {
           const filled = await fillInput(input, value);
           if (filled) {
+            input.style.outline = '2px solid #4ade80';
             input.classList.add('unimatch-filled');
             filledCount++;
           }
@@ -870,23 +986,26 @@ async function handleAutofill() {
 
       // Mark unfilled required fields
       if (input.required && !input.value) {
+        input.style.outline = '2px solid #fbbf24';
         input.classList.add('unimatch-manual');
         manualCount++;
       }
     }
 
-    // 5. Update context + store password
+    // Update context
     ctx.filledFields = filledCount;
     ctx.manualFields = manualCount;
     ctx.filledSelectors = filledSelectors;
     ctx.manualSelectors = manualSelectors;
     ctx.generatedPassword = masterPassword;
+    ctx.uniConfig = uniConfig;
 
-    // 6. Show results
+    // Show results
     renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount });
+    console.log(`[IlmSeUrooj] ✅ Autofill complete: ${filledCount} filled, ${manualCount} need input`);
 
   } catch (err) {
-    console.error('[UniMatch] Autofill error:', err);
+    console.error('[IlmSeUrooj] Autofill error:', err);
     renderState(contentEl, 'filled', { filled: 0, manual: 0 });
   }
 }

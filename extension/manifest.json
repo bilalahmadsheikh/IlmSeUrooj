@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Ilm Se Urooj — UCAS Bridge",
+    "name": "Ilm Se Urooj — Pakistan University Bridge",
     "description": "Autofill Pakistani university application forms from a single student profile.",
     "version": "0.1.0",
     "permissions": [
@@ -15,13 +15,17 @@
         "*://*.comsats.edu.pk/*",
         "*://*.iba.edu.pk/*",
         "*://*.giki.edu.pk/*",
-        "*://*.ned.edu.pk/*",
+        "*://*.neduet.edu.pk/*",
         "*://*.bahria.edu.pk/*",
         "*://*.uet.edu.pk/*",
+        "*://*.uettaxila.edu.pk/*",
         "*://*.pieas.edu.pk/*",
         "*://*.szabist.edu.pk/*",
+        "*://*.szabist-isb.edu.pk/*",
         "*://*.itu.edu.pk/*",
         "*://*.aku.edu/*",
+        "*://*.au.edu.pk/*",
+        "*://*.habib.edu.pk/*",
         "*://*.pucit.edu.pk/*",
         "*://*.uol.edu.pk/*",
         "*://*.ucp.edu.pk/*",
@@ -48,6 +52,7 @@
                 "<all_urls>"
             ],
             "js": [
+                "universities/index.js",
                 "content/content.js"
             ],
             "css": [

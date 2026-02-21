@@ -1,21 +1,20 @@
-# UniMatch — Progress Tracker
+# IlmSeUrooj — Progress Tracker
 
-## Current Status: ✅ All Phases Complete + UI Enhancements
+## Current Status: ✅ All Phases Complete + Autofill Engine Rebuilt
 
 ### Phase 1: Supabase Foundation ✅
 - 4 tables: profiles, field_maps, applications, remembered_answers
-- RLS policies on all student-data tables (fixed WITH CHECK for profiles)
+- RLS policies on all student-data tables
 - 5 API routes: profile, fieldmap, applications, remembered-answers, sop-draft
-- Storage bucket for documents
 
 ### Phase 2: Chrome Extension Shell ✅
-- MV3 manifest with 28+ university host permissions
+- MV3 manifest with 32+ university host permissions
 - Service worker with token management + API communication
 - Content script with sidebar injection + domain detection
 - Popup with auth state management
 
 ### Phase 3: AI Field Mapping Engine ✅
-- Local Ollama integration (llama3 model, localhost:11434)
+- Local Ollama integration (llama3 model)
 - Field map caching in Supabase
 - 8 transform functions (CNIC, dates, marks, phone formatting)
 - React/Vue-compatible input filling
@@ -23,40 +22,47 @@
 ### Phase 4: Pre-submit Review & Submission Tracking ✅
 - Validator for CNIC format, marks ranges, test data detection
 - Green/amber/red review lists with Jump to Field
-- Form submission + fetch + XHR interception
 - Confirmation number extraction + save
-- Application dashboard page
 
 ### Phase 5: Manual Fields & SOP Helper ✅
 - Fill Gap modal with remembered answer suggestions
-- SOP/Essay AI drafting with Ollama (20-char edit requirement)
+- SOP/Essay AI drafting with Ollama
 - Password vault with consistent password system
 
 ### Phase 6: University Config & Polish ✅
 - 28 university configs with researched portal URLs
 - Final documentation + README
 
-### Phase 7: UI Pages & Intelligence (Feb 21, 2026) ✅
-- `/extension` landing page with hero, 6 feature cards, 3-tab install guide
-- `/profile` page with Supabase auth + 17-field form + completeness bar
+### Phase 7: UI Pages & Intelligence ✅
+- `/extension` landing page, `/profile` page
 - Extension-auth page with reliable token passing
-- Header nav links: Profile, Applications, Extension
-- **Heuristic field detection**: 20+ field patterns (email, phone, CNIC, name, etc.)
-- **Consistent password**: One strong password reused across all portals (14+ chars, meets all constraints)
-- **Page type detection**: Login vs register vs application form
-- **Smart suggestions**: Contextual hints + register link detection
-- Fixed RLS policy on profiles (added WITH CHECK for INSERT)
-- Fixed profile page column mismatch (user_id → id)
-- Popup now passes extension ID for auth flow
+- Heuristic field detection, consistent password, page type detection
+
+### Phase 8: Deterministic Autofill Engine (Feb 21, 2026) ✅
+- **17 per-university config files** in `extension/universities/`
+- Each config has: slug, name, portalDomains, fieldMap (multi-selector CSS), selectOptions, transforms
+- **Universities mapped**: NUST, FAST, COMSATS, LUMS, IBA, GIKI, PIEAS, NED, Habib, AKU, Air Uni, SZABIST Isb, SZABIST Khi, ITU, Bahria, UET Lahore, UET Taxila
+- **Central registry** `extension/universities/index.js` with `getConfigForDomain()`
+- **3-tier autofill engine**:
+  1. Deterministic per-university selectors (new)
+  2. AI-generated field maps (existing)
+  3. Heuristic fallback (existing)
+- **New helpers**: `tryMultiSelector()` for comma-separated selectors, `fillSelectWithMapping()` for dropdown value mapping
+- **Visual feedback**: Green outline (#4ade80) = filled, Amber outline (#fbbf24) = needs input
+- Updated manifest with new host permissions (neduet, uettaxila, szabist-isb, au, habib)
+- All portal URLs verified via web research
 
 ---
 
 ## Build Status
-- **Last build**: ✅ 13 pages, exit 0 (Feb 21, 2026)
+- **Last build**: ✅ Syntax check passed (Feb 21, 2026)
 - **AI Backend**: Local Ollama (llama3), no API keys needed
 - **Supabase**: nqmvfierglxgjgqjmxmp
 
+## Portal Status
+Most Pakistani university admission portals require login first. Many return 403 or DNS errors when admissions are closed. Configs marked `verified: false` need browser testing during active admissions.
+
 ## Next Steps (Manual)
-- Test extension on each university portal
-- Mark `verified: true` in universities.js after testing
-- Deploy to production when ready
+- Load extension in Chrome, navigate to each portal, verify selectors fill fields
+- Set `verified: true` in each config after confirming on-screen fill
+- Update selectors when portals change between admission cycles
