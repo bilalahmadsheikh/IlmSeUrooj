@@ -202,50 +202,8 @@ export default function Home() {
         onShowScholarships={() => setShowScholarships(true)}
       />
 
-      {/* Personalized Dashboard Strip for logged-in users */}
-      {isLoggedIn && !isSwipeMode && (
-        <section className={styles.dashboardStrip}>
-          <div className={styles.dashGreeting}>
-            <h2>Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {profile.full_name?.split(' ')[0] || 'Student'}.</h2>
-            <Link href="/applications" className={styles.dashViewAll}>View All →</Link>
-          </div>
-          <div className={styles.dashCards}>
-            <Link href="/applications" className={styles.dashCard}>
-              <span className={styles.dashCardIcon}>📚</span>
-              <strong>{savedItems.length} Saved</strong>
-              <span>Universities</span>
-              <span className={styles.dashCardCta}>Continue →</span>
-            </Link>
-            <Link href="/profile" className={styles.dashCard}>
-              <span className={styles.dashCardIcon}>👤</span>
-              <strong>Profile {profile.profile_completion || 0}%</strong>
-              <span>Complete</span>
-              <span className={styles.dashCardCta}>Complete →</span>
-            </Link>
-            <div className={styles.dashCard}>
-              <span className={styles.dashCardIcon}>⏰</span>
-              <strong>Deadlines</strong>
-              <span>This Month</span>
-            </div>
-            {['part1_only', 'appearing'].includes(profile.inter_status) && (
-              <div className={`${styles.dashCard} ${styles.dashCardAmber}`}>
-                <span className={styles.dashCardIcon}>⚠️</span>
-                <strong>Projected</strong>
-                <span>Marks Active</span>
-                <span className={styles.dashCardNote}>Update when result arrives</span>
-              </div>
-            )}
-            {profile.education_system === 'cambridge' && !profile.ibcc_equivalent_inter && (
-              <Link href="/profile" className={`${styles.dashCard} ${styles.dashCardAmber}`}>
-                <span className={styles.dashCardIcon}>🌍</span>
-                <strong>IBCC Missing</strong>
-                <span>Required for all Pakistani unis</span>
-                <span className={styles.dashCardCta}>Add Now →</span>
-              </Link>
-            )}
-          </div>
-        </section>
-      )}
+
+
 
       {/* Social proof for non-logged-in users */}
       {!isLoggedIn && !isSwipeMode && (
