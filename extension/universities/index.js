@@ -645,3 +645,83 @@ function getAllPortalDomains() {
     });
     return [...domains];
 }
+
+// ─── Education System Helpers ──────────────────────────────────────
+// These branch on education_system and inter_status to return the
+// correct marks/percentage for autofilling university forms.
+
+/**
+ * Get effective intermediate marks for autofilling.
+ * Cambridge students use IBCC equivalence. Part-I students use projected marks.
+ */
+function getInterMarks(profile) {
+    if (!profile) return null;
+    if (profile.education_system === 'cambridge') {
+        return profile.ibcc_equivalent_inter || null;
+    }
+    switch (profile.inter_status) {
+        case 'not_started':
+            return null;
+        case 'part1_only':
+        case 'appearing':
+            if (profile.fsc_projected_marks) return profile.fsc_projected_marks;
+            if (profile.fsc_part1_marks && profile.fsc_part1_total) {
+                return Math.round(
+                    (profile.fsc_part1_marks / profile.fsc_part1_total) *
+                    (profile.fsc_total || 1100)
+                );
+            }
+            return null;
+        case 'result_awaited':
+        case 'complete':
+        default:
+            return profile.fsc_marks || null;
+    }
+}
+
+/**
+ * Get effective intermediate total marks.
+ */
+function getInterTotal(profile) {
+    if (!profile) return null;
+    if (profile.education_system === 'cambridge') return 100;
+    switch (profile.inter_status) {
+        case 'not_started': return null;
+        case 'part1_only':
+        case 'appearing':
+            return profile.fsc_total || 1100;
+        default:
+            return profile.fsc_total || 1100;
+    }
+}
+
+/**
+ * Get effective intermediate percentage.
+ */
+function getInterPercentage(profile) {
+    if (!profile) return null;
+    if (profile.education_system === 'cambridge') {
+        return profile.ibcc_equivalent_inter || null;
+    }
+    switch (profile.inter_status) {
+        case 'not_started':
+            return null;
+        case 'part1_only':
+        case 'appearing':
+            return profile.fsc_projected_percentage ||
+                profile.fsc_part1_percentage || null;
+        default:
+            return profile.fsc_percentage || null;
+    }
+}
+
+/**
+ * Get effective matric percentage.
+ */
+function getMatricPercentage(profile) {
+    if (!profile) return null;
+    if (profile.education_system === 'cambridge') {
+        return profile.ibcc_equivalent_matric || null;
+    }
+    return profile.matric_percentage || null;
+}
