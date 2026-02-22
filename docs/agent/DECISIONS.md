@@ -64,3 +64,46 @@
 **Date:** Feb 22, 2026 | **Phase:** 9
 **Choice:** Only invoke Tier 2 (Ollama AI field mapping) when no university config exists. If Tier 1 has a config but matched 0 fields, skip directly to Tier 3 heuristics.
 **Rationale:** On login pages of known universities (e.g., Bahria CMS), Tier 1 finds the config but no application form fields. Calling Ollama here fails (if not running) and is wasteful. Heuristic matching (Tier 3) handles login forms well enough.
+
+## Decision 14: Per-University JS Files Instead of Single Config Object
+**Date:** Feb 22, 2026 | **Phase:** 6
+**Choice:** Each university has its own JS file in `extension/universities/` rather than one monolith config.
+**Rejected:** Single `university-configs.json` file.
+**Reason:** Each university's portal is different enough to warrant separate files. This makes it easy to add/remove universities, test individually, and assign ownership. The index.js file re-exports all configs with domain-based lookup.
+
+## Decision 15: IBCC Equivalence as Separate Field (Not Calculated)
+**Date:** Feb 22, 2026 | **Phase:** 10
+**Choice:** Store `ibcc_equivalent_inter` and `ibcc_equivalent_matric` as explicit numeric fields rather than calculating from A-Level/O-Level grades.
+**Rejected:** Auto-calculation from subject grades using IBCC formula.
+**Reason:** IBCC equivalence is a formal certificate issued by ibcc.edu.pk with specific marks. The conversion formula varies by year and exam board. Students know their exact IBCC marks from the certificate — storing it directly is more accurate than calculating.
+
+## Decision 16: Five inter_status Values
+**Date:** Feb 22, 2026 | **Phase:** 10
+**Choice:** `inter_status` has 5 values: not_started, part1_only, appearing, result_awaited, complete.
+**Rejected:** Simple boolean `results_available`.
+**Reason:** Each status triggers different behavior: `not_started` shows warning, `part1_only` uses projected marks (Part-I × 2), `appearing` also uses projection, `result_awaited` keeps projection, `complete` uses actual marks. These aren't collapsible.
+
+## Decision 17: Store Projected Marks in DB
+**Date:** Feb 22, 2026 | **Phase:** 10
+**Choice:** Store `fsc_projected_marks` and `fsc_projected_percentage` in the profiles table rather than calculating on-the-fly.
+**Rejected:** Calculate Part-I × 2 each time.
+**Reason:** The student may want to manually adjust their projected marks (e.g., they know they'll improve). Storing allows manual override. Auto-calculation (Part-I × 2) is the default but overridable.
+
+## Decision 18: portal_email and portal_password on profiles (not per-application)
+**Date:** Feb 22, 2026 | **Phase:** 10
+**Choice:** Store one `portal_email` and `portal_password` on the profiles table, not per application.
+**Rejected:** Separate credentials per `applications` row.
+**Reason:** Students want ONE consistent login across all portals. The extension fills the same email/password everywhere. If a portal requires a different password, the applications table has its own `portal_password` column as override.
+
+## Decision 19: useProfile() Reads Supabase Directly
+**Date:** Feb 22, 2026 | **Phase:** 10
+**Choice:** `useProfile()` hook calls Supabase JS client directly, not `/api/profile`.
+**Rejected:** Fetch from API route.
+**Reason:** Profile data is read-heavy and auth-scoped. Supabase JS client handles RLS automatically, so there's no security benefit from going through an API route. Direct reads are faster (no server round-trip) and simpler.
+
+## Decision 20: Supabase Real-Time for Applications Page
+**Date:** Feb 22, 2026 | **Phase:** 11
+**Choice:** Use Supabase real-time subscriptions on the applications kanban page instead of polling.
+**Rejected:** Polling every N seconds, or manual refresh.
+**Reason:** The extension creates/updates application rows from any tab. Real-time subscriptions ensure the kanban board stays in sync instantly when the extension autofills a form or records a submission on another tab.
+

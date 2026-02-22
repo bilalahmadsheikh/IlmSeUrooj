@@ -1,174 +1,160 @@
-# Database Schema
-# Updated by agent after every database change.
-
-## Status: ✅ LIVE — Phase 10 Complete (2026-02-22)
-
-**Supabase Project:** `nqmvfierglxgjgqjmxmp` (ilmseurroj)  
-**Region:** ap-northeast-2  
-**URL:** https://nqmvfierglxgjgqjmxmp.supabase.co
+# UniMatch — Database Schema
+**Source of truth:** Supabase project `nqmvfierglxgjgqjmxmp`
+Last verified: 2026-02-22
 
 ---
 
-## Tables
+## Table: profiles
+**Purpose:** Stores all student personal, academic, and portal information.
+**RLS:** Enabled — students can only read/write their own row (`auth.uid() = id`).
 
-### `profiles` (RLS ✅)
-Student master profile — one row per authenticated user.
-
-| Column | Type | Nullable | Default | Notes |
-|--------|------|----------|---------|-------|
-| id | UUID (PK) | ✗ | — | FK → auth.users(id), CASCADE |
-| full_name | TEXT | ✗ | — | |
-| father_name | TEXT | ✓ | — | |
-| mother_name | TEXT | ✓ | — | |
-| cnic | TEXT | ✓ | — | Format: XXXXX-XXXXXXX-X |
-| date_of_birth | DATE | ✓ | — | |
-| gender | TEXT | ✓ | — | CHECK: male/female/other |
-| nationality | TEXT | ✓ | 'Pakistani' | |
-| religion | TEXT | ✓ | — | |
-| blood_group | TEXT | ✓ | — | |
-| email | TEXT | ✗ | — | |
-| phone | TEXT | ✓ | — | |
-| whatsapp | TEXT | ✓ | — | |
-| address | TEXT | ✓ | — | |
-| city | TEXT | ✓ | — | |
-| province | TEXT | ✓ | — | |
-| postal_code | TEXT | ✓ | — | |
-| domicile_province | TEXT | ✓ | — | |
-| domicile_district | TEXT | ✓ | — | |
-| education_system | TEXT | ✓ | 'pakistani' | CHECK: pakistani/cambridge |
-| inter_type | TEXT | ✓ | — | CHECK: fsc/a_level/ics/icom/fa |
-| inter_status | TEXT | ✓ | 'complete' | CHECK: not_started/part1_only/appearing/result_awaited/complete |
-| secondary_type | TEXT | ✓ | — | CHECK: matric/o_level |
-| fsc_stream | TEXT | ✓ | — | CHECK: pre_engineering/pre_medical/computer_science/commerce/arts/general |
-| fsc_marks | INTEGER | ✓ | — | |
-| fsc_total | INTEGER | ✓ | 1100 | |
-| fsc_percentage | DECIMAL(5,2) | ✓ | — | Auto-calculated |
-| fsc_year | INTEGER | ✓ | — | |
-| fsc_board | TEXT | ✓ | — | |
-| fsc_roll_no | TEXT | ✓ | — | |
-| fsc_school | TEXT | ✓ | — | |
-| fsc_part1_marks | INTEGER | ✓ | — | Part-I only applicants |
-| fsc_part1_total | INTEGER | ✓ | 550 | |
-| fsc_part1_percentage | DECIMAL(5,2) | ✓ | — | |
-| fsc_projected_marks | INTEGER | ✓ | — | (part1/part1_total) × fsc_total |
-| fsc_projected_percentage | DECIMAL(5,2) | ✓ | — | |
-| alevel_board | TEXT | ✓ | — | CHECK: cambridge/edexcel/ib/other |
-| alevel_subjects | JSONB | ✓ | — | [{subject, as_grade, a2_grade, as_marks, a2_marks, predicted}] |
-| alevel_predicted | BOOLEAN | ✓ | false | |
-| ibcc_equivalent_inter | DECIMAL(5,2) | ✓ | — | IBCC equivalent % for FSc |
-| ibcc_certificate_url | TEXT | ✓ | — | |
-| ibcc_equivalent_matric | DECIMAL(5,2) | ✓ | — | IBCC equivalent % for Matric |
-| matric_marks | INTEGER | ✓ | — | |
-| matric_total | INTEGER | ✓ | 1050 | |
-| matric_percentage | DECIMAL(5,2) | ✓ | — | Auto-calculated |
-| matric_year | INTEGER | ✓ | — | |
-| matric_board | TEXT | ✓ | — | |
-| matric_roll_no | TEXT | ✓ | — | |
-| matric_school | TEXT | ✓ | — | |
-| olevel_board | TEXT | ✓ | — | CHECK: cambridge/edexcel/other |
-| olevel_subjects | JSONB | ✓ | — | [{subject, grade, marks}] |
-| board_name | TEXT | ✓ | — | Legacy — use fsc_board/matric_board |
-| passing_year | INTEGER | ✓ | — | Legacy — use fsc_year |
-| school_name | TEXT | ✓ | — | Legacy — use fsc_school |
-| net_score | DECIMAL(5,2) | ✓ | — | NUST NET /200 |
-| net_year | INTEGER | ✓ | — | |
-| sat_score | INTEGER | ✓ | — | SAT I /1600 |
-| sat_subject_score | INTEGER | ✓ | — | SAT II /800 |
-| ecat_score | DECIMAL(5,2) | ✓ | — | % |
-| mdcat_score | DECIMAL(5,2) | ✓ | — | % |
-| nmdcat_score | DECIMAL(5,2) | ✓ | — | % |
-| lcat_score | DECIMAL(5,2) | ✓ | — | LUMS LCAT /100 |
-| gat_score | DECIMAL(5,2) | ✓ | — | GAT General /100 |
-| father_cnic | TEXT | ✓ | — | |
-| father_occupation | TEXT | ✓ | — | |
-| guardian_phone | TEXT | ✓ | — | |
-| portal_email | TEXT | ✓ | — | For university portal accounts |
-| portal_password | TEXT | ✓ | — | Auto-generated on first load |
-| preferred_field | TEXT | ✓ | — | |
-| preferred_cities | TEXT[] | ✓ | — | |
-| preferred_degree | TEXT | ✓ | 'BS' | |
-| profile_completion | INTEGER | ✓ | 0 | Calculated on save |
-| photo_url | TEXT | ✓ | — | |
-| cnic_url | TEXT | ✓ | — | |
-| result_card_url | TEXT | ✓ | — | |
-| profile_complete | BOOLEAN | ✓ | false | Legacy |
-| created_at | TIMESTAMPTZ | ✓ | NOW() | |
-| updated_at | TIMESTAMPTZ | ✓ | NOW() | |
-
-**RLS Policy:** `own_profile_only` — `auth.uid() = id`
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | — | Primary key, matches auth.users.id |
+| full_name | text | NO | — | Student's full name |
+| father_name | text | YES | — | Father's name |
+| cnic | text | YES | — | CNIC number (XXXXX-XXXXXXX-X) |
+| date_of_birth | date | YES | — | Date of birth |
+| gender | text | YES | — | Male/Female/Other |
+| nationality | text | YES | 'Pakistani' | Nationality |
+| religion | text | YES | — | Religion |
+| email | text | NO | — | Primary email (from auth) |
+| phone | text | YES | — | Mobile number |
+| whatsapp | text | YES | — | WhatsApp number |
+| address | text | YES | — | Street address |
+| city | text | YES | — | City |
+| province | text | YES | — | Province |
+| postal_code | text | YES | — | Postal code |
+| education_system | text | YES | 'pakistani' | 'pakistani' or 'cambridge' |
+| inter_type | text | YES | — | FSc Pre-Engineering, Pre-Medical, ICS, etc. |
+| inter_status | text | YES | 'complete' | not_started, part1_only, appearing, result_awaited, complete |
+| secondary_type | text | YES | — | Matric Science, Matric Arts, etc. |
+| fsc_marks | integer | YES | — | FSc total marks obtained (complete) |
+| fsc_total | integer | YES | 1100 | FSc total possible marks |
+| fsc_percentage | numeric | YES | — | FSc percentage |
+| fsc_stream | text | YES | — | FSc group/stream |
+| fsc_year | integer | YES | — | FSc passing year |
+| fsc_board | text | YES | — | FSc board name |
+| fsc_roll_no | text | YES | — | FSc roll number |
+| fsc_school | text | YES | — | FSc college/school name |
+| fsc_part1_marks | integer | YES | — | FSc Part-I marks obtained |
+| fsc_part1_total | integer | YES | 550 | FSc Part-I total marks |
+| fsc_part1_percentage | numeric | YES | — | FSc Part-I percentage |
+| fsc_projected_marks | integer | YES | — | Projected full FSc marks (Part1 × 2) |
+| fsc_projected_percentage | numeric | YES | — | Projected FSc percentage |
+| matric_marks | integer | YES | — | Matric marks obtained |
+| matric_total | integer | YES | 1050 | Matric total marks |
+| matric_percentage | numeric | YES | — | Matric percentage |
+| matric_year | integer | YES | — | Matric passing year |
+| matric_board | text | YES | — | Matric board name |
+| matric_roll_no | text | YES | — | Matric roll number |
+| matric_school | text | YES | — | Matric school name |
+| board_name | text | YES | — | General board name (legacy) |
+| passing_year | integer | YES | — | General passing year (legacy) |
+| school_name | text | YES | — | General school name (legacy) |
+| alevel_board | text | YES | — | A-Level exam board (CIE, Edexcel, etc.) |
+| alevel_subjects | jsonb | YES | — | A-Level subjects with grades `[{subject, grade}]` |
+| alevel_predicted | boolean | YES | false | Whether A-Level grades are predicted |
+| ibcc_equivalent_inter | numeric | YES | — | IBCC equivalent intermediate percentage |
+| ibcc_certificate_url | text | YES | — | IBCC certificate file URL |
+| ibcc_equivalent_matric | numeric | YES | — | IBCC equivalent matric percentage |
+| olevel_board | text | YES | — | O-Level exam board |
+| olevel_subjects | jsonb | YES | — | O-Level subjects with grades `[{subject, grade}]` |
+| net_score | numeric | YES | — | NET entrance test score |
+| net_year | integer | YES | — | NET test year |
+| sat_score | integer | YES | — | SAT total score |
+| sat_subject_score | integer | YES | — | SAT subject test score |
+| ecat_score | numeric | YES | — | ECAT score |
+| mdcat_score | numeric | YES | — | MDCAT score |
+| nmdcat_score | numeric | YES | — | National MDCAT score |
+| lcat_score | numeric | YES | — | LCAT score |
+| gat_score | numeric | YES | — | GAT score |
+| mother_name | text | YES | — | Mother's name |
+| domicile_province | text | YES | — | Domicile province |
+| domicile_district | text | YES | — | Domicile district |
+| blood_group | text | YES | — | Blood group |
+| father_cnic | text | YES | — | Father's CNIC |
+| father_occupation | text | YES | — | Father's occupation |
+| guardian_phone | text | YES | — | Guardian's phone number |
+| portal_email | text | YES | — | Consistent email for university portals |
+| portal_password | text | YES | — | Consistent password for university portals |
+| preferred_field | text | YES | — | Preferred field of study |
+| preferred_cities | text[] | YES | — | Preferred cities for university |
+| preferred_degree | text | YES | 'BS' | Preferred degree level |
+| profile_completion | integer | YES | 0 | Profile completion percentage (0-100) |
+| photo_url | text | YES | — | Student photo file URL |
+| cnic_url | text | YES | — | CNIC scan file URL |
+| result_card_url | text | YES | — | Result card file URL |
+| profile_complete | boolean | YES | false | Legacy completion flag |
+| created_at | timestamptz | YES | now() | Row creation timestamp |
+| updated_at | timestamptz | YES | now() | Last update timestamp |
 
 ---
 
-### `field_maps` (RLS ❌ — intentionally public)
-AI form field mappings per university domain. Shared data, no user-specific content.
+## Table: applications
+**Purpose:** Tracks each university application through its lifecycle.
+**RLS:** Enabled — students can only read/write their own applications (`auth.uid() = student_id`).
 
-| Column | Type | Nullable | Default | Notes |
-|--------|------|----------|---------|-------|
-| id | UUID (PK) | ✗ | gen_random_uuid() | |
-| domain | TEXT (UNIQUE) | ✗ | — | e.g. admissions.nust.edu.pk |
-| university_slug | TEXT | ✗ | — | e.g. nust |
-| mapping | JSONB | ✗ | — | AI-generated field map |
-| created_at | TIMESTAMPTZ | ✓ | NOW() | |
-| last_verified | TIMESTAMPTZ | ✓ | NOW() | |
-| verified_working | BOOLEAN | ✓ | true | |
-
----
-
-### `applications` (RLS ✅)
-Per-student application records for each university.
-
-| Column | Type | Nullable | Default | Notes |
-|--------|------|----------|---------|-------|
-| id | UUID (PK) | ✗ | gen_random_uuid() | |
-| student_id | UUID (FK) | ✓ | — | FK → profiles(id), CASCADE |
-| university_slug | TEXT | ✗ | — | |
-| university_name | TEXT | ✗ | — | |
-| portal_domain | TEXT | ✗ | — | |
-| status | TEXT | ✓ | 'pending' | CHECK: pending/account_created/form_filling/awaiting_review/submitted/error/accepted/rejected/waitlisted |
-| portal_username | TEXT | ✓ | — | |
-| portal_password | TEXT | ✓ | — | Encrypted in Phase 5 |
-| confirmation_number | TEXT | ✓ | — | |
-| program_applied | TEXT | ✓ | — | |
-| remembered_answers | JSONB | ✓ | '{}' | |
-| error_message | TEXT | ✓ | — | |
-| submitted_at | TIMESTAMPTZ | ✓ | — | |
-| created_at | TIMESTAMPTZ | ✓ | NOW() | |
-| updated_at | TIMESTAMPTZ | ✓ | NOW() | |
-
-**RLS Policy:** `own_applications_only` — `auth.uid() = student_id`
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | Primary key |
+| student_id | uuid | YES | — | Foreign key → profiles.id |
+| university_slug | text | NO | — | University identifier |
+| university_name | text | NO | — | University display name |
+| portal_domain | text | NO | — | Portal hostname |
+| status | text | YES | 'pending' | pending, saved, account_created, form_filling, awaiting_review, submitted, accepted, rejected, waitlisted |
+| portal_username | text | YES | — | Username used on this portal |
+| portal_password | text | YES | — | Password used on this portal |
+| confirmation_number | text | YES | — | Submission confirmation number |
+| program_applied | text | YES | — | Program applied to |
+| remembered_answers | jsonb | YES | '{}' | Portal-specific remembered answers |
+| error_message | text | YES | — | Last error message |
+| notes | text | YES | — | Student's notes about this application |
+| submitted_at | timestamptz | YES | — | When the application was submitted |
+| created_at | timestamptz | YES | now() | Row creation timestamp |
+| updated_at | timestamptz | YES | now() | Last update timestamp |
 
 ---
 
-### `remembered_answers` (RLS ✅)
-Cross-university answer cache — remembers answers to manual fields.
+## Table: field_maps
+**Purpose:** Caches AI-generated field mappings per university portal domain. Shared across all users.
+**RLS:** Disabled — shared resource, no student-specific data.
 
-| Column | Type | Nullable | Default | Notes |
-|--------|------|----------|---------|-------|
-| id | UUID (PK) | ✗ | gen_random_uuid() | |
-| student_id | UUID (FK) | ✓ | — | FK → profiles(id), CASCADE |
-| field_label | TEXT | ✗ | — | UNIQUE with student_id |
-| field_value | TEXT | ✗ | — | |
-| last_used_at | TIMESTAMPTZ | ✓ | NOW() | |
-| use_count | INTEGER | ✓ | 1 | |
-
-**RLS Policy:** `own_answers_only` — `auth.uid() = student_id`  
-**Unique Constraint:** `(student_id, field_label)`
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | Primary key |
+| domain | text | NO | — | Portal hostname |
+| university_slug | text | NO | — | University identifier |
+| mapping | jsonb | NO | — | AI-generated field → profile key mapping |
+| created_at | timestamptz | YES | now() | When mapping was created |
+| last_verified | timestamptz | YES | now() | Last verification date |
+| verified_working | boolean | YES | true | Whether mapping is confirmed working |
 
 ---
 
-## Storage Buckets
+## Table: remembered_answers
+**Purpose:** Stores student's answers to university-specific questions for reuse across portals.
+**RLS:** Enabled — students can only read/write their own answers (`auth.uid() = student_id`).
 
-### `student-documents` (Private)
-Stores CNIC scans, photos, result cards.
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | Primary key |
+| student_id | uuid | YES | — | Foreign key → profiles.id |
+| field_label | text | NO | — | The question/field label |
+| field_value | text | NO | — | The student's answer |
+| last_used_at | timestamptz | YES | now() | When this answer was last used |
+| use_count | integer | YES | 1 | How many times this answer has been used |
 
-| Setting | Value |
-|---------|-------|
-| Public | ❌ |
-| Max File Size | 10MB |
-| Allowed MIME | image/jpeg, image/png, image/webp, image/gif, application/pdf |
+---
 
-**RLS Policies:**
-- Users can upload to `{user_id}/*`
-- Users can view their own `{user_id}/*`
-- Users can update their own `{user_id}/*`
-- Users can delete their own `{user_id}/*`
+## Relationships
+- `profiles` (1) → (many) `applications` via `student_id` foreign key
+- `profiles` (1) → (many) `remembered_answers` via `student_id` foreign key
+- `field_maps`: standalone, shared across all users (no student link)
+
+## Storage Bucket: student-documents
+- **Access:** Private (RLS enforced)
+- **Path pattern:** `{user_id}/{document_type}`
+- **Document types:** photo, cnic, result_card, ibcc, matric_cert
+- **Max size:** 10MB per file
+- **Allowed MIME:** image/*, application/pdf
