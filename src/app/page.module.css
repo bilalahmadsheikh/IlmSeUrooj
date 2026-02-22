@@ -335,3 +335,118 @@
     transform: translateY(0);
   }
 }
+
+/* Dashboard Strip */
+.dashboardStrip {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-6) var(--space-2);
+  position: relative;
+  z-index: 2;
+}
+
+.dashGreeting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.dashGreeting h2 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.dashViewAll {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dashViewAll:hover {
+  text-decoration: underline;
+}
+
+.dashCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.dashCard {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-4);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-base);
+}
+
+.dashCard:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.dashCard strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.dashCardIcon {
+  font-size: 20px;
+  margin-bottom: var(--space-1);
+}
+
+.dashCardCta {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  margin-top: var(--space-2);
+  font-weight: 500;
+}
+
+.dashCardNote {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.dashCardAmber {
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+.dashCardAmber:hover {
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+.dashCardAmber strong {
+  color: #fbbf24;
+}
+
+/* Social Proof */
+.socialProof {
+  text-align: center;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 600px) {
+  .dashCards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashGreeting h2 {
+    font-size: var(--font-size-lg);
+  }
+}

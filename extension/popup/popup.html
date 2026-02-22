@@ -6,6 +6,285 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ilm Se Urooj</title>
   <link rel="stylesheet" href="popup.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 320px;
+      max-height: 500px;
+      overflow-y: auto;
+      background: #0c0e0b;
+      color: #e4e4e7;
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 13px;
+    }
+
+    .popup {
+      padding: 16px;
+    }
+
+    /* Header */
+    .popup-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1f2a1c;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo span {
+      font-size: 15px;
+      font-weight: 700;
+      color: #4ade80;
+    }
+
+    .urdu-text {
+      font-size: 11px;
+      color: #71717a;
+      margin-left: auto;
+    }
+
+    /* Current Portal Banner */
+    .portal-banner {
+      background: rgba(74, 222, 128, 0.06);
+      border: 1px solid rgba(74, 222, 128, 0.15);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .portal-name {
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+
+    .portal-name strong {
+      color: #4ade80;
+    }
+
+    .btn-autofill-popup {
+      background: #4ade80;
+      color: #0c0e0b;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-autofill-popup:hover {
+      background: #22c55e;
+    }
+
+    /* Profile Section */
+    .profile-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .profile-info-popup {
+      flex: 1;
+    }
+
+    .profile-info-popup strong {
+      font-size: 14px;
+      display: block;
+    }
+
+    .profile-info-popup span {
+      font-size: 11px;
+      color: #71717a;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #71717a;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    /* App Row */
+    .app-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #161916;
+      border: 1px solid #1f2a1c;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .app-info {
+      flex: 1;
+    }
+
+    .app-info strong {
+      font-size: 12px;
+      display: block;
+    }
+
+    .app-program {
+      font-size: 10px;
+      color: #71717a;
+    }
+
+    .status-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .btn-open {
+      background: none;
+      border: 1px solid #27272a;
+      color: #a1a1aa;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .btn-open:hover {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 20px 12px;
+      color: #71717a;
+    }
+
+    .empty-state h3 {
+      font-size: 14px;
+      color: #a1a1aa;
+      margin-bottom: 6px;
+    }
+
+    /* Footer Links */
+    .popup-links {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #1f2a1c;
+    }
+
+    .popup-links a,
+    .popup-links button {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #a1a1aa;
+      text-decoration: none;
+      background: #161916;
+      border: 1px solid #1f2a1c;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .popup-links a:hover,
+    .popup-links button:hover {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+
+    /* Auth */
+    .auth-card {
+      text-align: center;
+      padding: 24px 16px;
+    }
+
+    .auth-card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .auth-card p {
+      font-size: 12px;
+      color: #71717a;
+      margin-bottom: 16px;
+    }
+
+    .btn-signin {
+      width: 100%;
+      padding: 10px;
+      background: #4ade80;
+      color: #0c0e0b;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    .btn-signin:hover {
+      background: #22c55e;
+    }
+
+    .btn-create {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: #a1a1aa;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-create:hover {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #27272a;
+      border-top-color: #4ade80;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
@@ -16,23 +295,14 @@
           <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
           <path d="M6 12v5c6 3 10 3 16 0v-5" />
         </svg>
-        <div class="logo-text">
-          <span>Ilm Se Urooj</span>
-          <span class="urdu-text">علم سے عروج</span>
-        </div>
+        <span>Ilm Se Urooj</span>
       </div>
+      <span class="urdu-text">علم سے عروج</span>
     </header>
 
-    <div id="popup-content" class="popup-content">
-      <div class="loading">
-        <div class="spinner"></div>
-      </div>
+    <div id="popup-content">
+      <div class="spinner"></div>
     </div>
-
-    <footer class="popup-footer">
-      <button id="btn-signin" class="btn-primary hidden">Sign In</button>
-      <button id="btn-signout" class="btn-secondary hidden">Sign Out</button>
-    </footer>
   </div>
 
   <script src="popup.js"></script>

@@ -1,298 +1,224 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { universities } from '@/data/universities';
+
+// Pull verified status from university data
+function getVerifiedStatus(uni) {
+    // Default: portal mapped
+    return uni.verified ? { label: '✓ Autofill Verified', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }
+        : { label: 'Portal Mapped', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' };
+}
 
 export default function ExtensionPage() {
-    const [activeTab, setActiveTab] = useState('install');
+    const [installed, setInstalled] = useState(false);
+
+    useEffect(() => {
+        try {
+            const marker = document.querySelector('#unimatch-extension-active');
+            if (marker) setInstalled(true);
+        } catch (e) { }
+    }, []);
 
     return (
         <div className="ext-page">
-            <style jsx>{`
-        .ext-page {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #0c0e0b 0%, #1a1d1a 50%, #0c0e0b 100%);
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          color: #e4e4e7;
-          padding: 0 20px 60px;
-        }
-        .ext-nav {
-          max-width: 960px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px 0;
-        }
-        .ext-brand {
-          display: flex; align-items: center; gap: 8px;
-          font-size: 20px; font-weight: 700; color: #4ade80;
-          text-decoration: none;
-        }
-        .ext-nav-links { display: flex; gap: 16px; }
-        .ext-nav-links a {
-          color: #a1a1aa; font-size: 13px; text-decoration: none;
-          padding: 6px 12px; border-radius: 8px; transition: all 0.2s;
-        }
-        .ext-nav-links a:hover { color: #e4e4e7; background: rgba(255,255,255,0.06); }
+            <style jsx>{extStyles}</style>
 
-        .hero {
-          max-width: 960px; margin: 40px auto 60px; text-align: center;
-        }
-        .hero h1 {
-          font-size: 48px; font-weight: 800; margin: 0 0 16px;
-          background: linear-gradient(135deg, #4ade80, #22c55e, #15803d);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          line-height: 1.15;
-        }
-        .hero p { font-size: 18px; color: #a1a1aa; max-width: 600px; margin: 0 auto 32px; line-height: 1.6; }
-        .hero-cta {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 14px 32px; background: #4ade80; color: #0c0e0b;
-          border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
-          cursor: pointer; transition: all 0.2s; text-decoration: none;
-        }
-        .hero-cta:hover { background: #22c55e; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,222,128,0.3); }
-
-        .features {
-          max-width: 960px; margin: 0 auto 60px;
-          display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-        }
-        @media (max-width: 768px) { .features { grid-template-columns: 1fr; } }
-        .feature-card {
-          background: rgba(22,25,22,0.8); border: 1px solid #27272a;
-          border-radius: 16px; padding: 28px; transition: all 0.2s;
-        }
-        .feature-card:hover { border-color: #4ade80; transform: translateY(-2px); }
-        .feature-icon { font-size: 32px; margin-bottom: 12px; }
-        .feature-card h3 { font-size: 16px; font-weight: 600; margin: 0 0 8px; }
-        .feature-card p { font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.5; }
-
-        .install-section {
-          max-width: 720px; margin: 0 auto 40px;
-          background: rgba(22,25,22,0.8); border: 1px solid #27272a;
-          border-radius: 16px; overflow: hidden;
-        }
-        .tabs {
-          display: flex; border-bottom: 1px solid #27272a;
-        }
-        .tab {
-          flex: 1; padding: 14px; text-align: center; font-size: 13px;
-          font-weight: 600; color: #a1a1aa; cursor: pointer; border: none;
-          background: none; transition: all 0.2s; font-family: inherit;
-        }
-        .tab.active { color: #4ade80; background: rgba(74,222,128,0.06); border-bottom: 2px solid #4ade80; }
-        .tab:hover:not(.active) { color: #e4e4e7; }
-        .tab-content { padding: 28px; }
-        .step {
-          display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start;
-        }
-        .step-num {
-          width: 32px; height: 32px; border-radius: 50%;
-          background: rgba(74,222,128,0.15); color: #4ade80;
-          display: flex; align-items: center; justify-content: center;
-          font-weight: 700; font-size: 14px; flex-shrink: 0;
-        }
-        .step-text h4 { font-size: 14px; margin: 0 0 4px; }
-        .step-text p { font-size: 12px; color: #a1a1aa; margin: 0; line-height: 1.5; }
-        .code-block {
-          background: #0c0e0b; border: 1px solid #27272a; border-radius: 8px;
-          padding: 12px 16px; margin: 8px 0; font-family: 'Fira Code', monospace;
-          font-size: 12px; color: #4ade80; overflow-x: auto;
-        }
-        .profile-cta {
-          max-width: 720px; margin: 0 auto; text-align: center;
-          padding: 40px; background: linear-gradient(135deg, rgba(74,222,128,0.08), rgba(34,197,94,0.04));
-          border: 1px solid rgba(74,222,128,0.2); border-radius: 16px;
-        }
-        .profile-cta h3 { font-size: 20px; margin: 0 0 8px; }
-        .profile-cta p { font-size: 13px; color: #a1a1aa; margin: 0 0 20px; }
-        .btn-profile {
-          display: inline-flex; align-items: center; gap: 6px;
-          padding: 12px 28px; background: #4ade80; color: #0c0e0b;
-          border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
-          cursor: pointer; text-decoration: none; transition: all 0.2s;
-        }
-        .btn-profile:hover { background: #22c55e; transform: translateY(-1px); }
-      `}</style>
-
+            {/* Nav */}
             <nav className="ext-nav">
                 <Link href="/" className="ext-brand">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2">
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                         <path d="M6 12v5c6 3 10 3 16 0v-5" />
                     </svg>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span>Ilm Se Urooj</span>
-                        <span style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif", fontSize: 13, color: '#a1a1aa', lineHeight: 1, marginTop: -2 }}>علم سے عروج</span>
-                    </div>
+                    <span>Ilm Se Urooj</span>
                 </Link>
                 <div className="ext-nav-links">
-                    <Link href="/">Home</Link>
+                    <Link href="/">Explore</Link>
                     <Link href="/profile">Profile</Link>
                     <Link href="/applications">Dashboard</Link>
                 </div>
             </nav>
 
-            <div className="hero">
-                <h1>Autofill University<br />Applications with AI</h1>
-                <p>
-                    One profile. 28 universities. Fill any Pakistani university application form
-                    in seconds — powered by local AI that runs on your machine.
+            {/* Section 1 — Hero */}
+            <section className="ext-hero">
+                <h1>Fill any university form<br /><span className="green">in 3 seconds.</span></h1>
+                <p className="hero-sub">
+                    Ilm Se Urooj autofills your name, CNIC, marks, and contact info
+                    on <strong>17 verified</strong> Pakistani university portals.<br />
+                    You review. You submit. We just save you the typing.
                 </p>
-                <a href="#install" className="hero-cta">
-                    ⚡ Get the Extension
-                </a>
-            </div>
-
-            <div className="features">
-                <div className="feature-card">
-                    <div className="feature-icon">🧠</div>
-                    <h3>AI Field Mapping</h3>
-                    <p>AI analyzes each university portal and maps fields to your profile. Works with React, Vue, and traditional forms.</p>
-                </div>
-                <div className="feature-card">
-                    <div className="feature-icon">✍️</div>
-                    <h3>SOP Essay Drafting</h3>
-                    <p>AI drafts personalized essays and statements. You review and edit before inserting — your voice, AI-assisted.</p>
-                </div>
-                <div className="feature-card">
-                    <div className="feature-icon">🔐</div>
-                    <h3>Password Vault</h3>
-                    <p>Auto-generates secure passwords for university portals. One-click copy and fill. Never forget a portal login.</p>
-                </div>
-                <div className="feature-card">
-                    <div className="feature-icon">📋</div>
-                    <h3>Pre-submit Check</h3>
-                    <p>Validates CNIC format, marks, required fields before you submit. Catches errors before universities do.</p>
-                </div>
-                <div className="feature-card">
-                    <div className="feature-icon">💾</div>
-                    <h3>Answer Memory</h3>
-                    <p>Saves your manually entered answers and reuses them across universities. Fill once, apply everywhere.</p>
-                </div>
-                <div className="feature-card">
-                    <div className="feature-icon">📊</div>
-                    <h3>Application Dashboard</h3>
-                    <p>Track all applications in one place. Status badges, confirmation numbers, and direct portal links.</p>
-                </div>
-            </div>
-
-            <div className="install-section" id="install">
-                <div className="tabs">
-                    <button className={`tab ${activeTab === 'install' ? 'active' : ''}`} onClick={() => setActiveTab('install')}>
-                        Chrome Extension
-                    </button>
-                    <button className={`tab ${activeTab === 'backend' ? 'active' : ''}`} onClick={() => setActiveTab('backend')}>
-                        Backend Setup
-                    </button>
-                    <button className={`tab ${activeTab === 'ollama' ? 'active' : ''}`} onClick={() => setActiveTab('ollama')}>
-                        AI (Ollama)
-                    </button>
-                </div>
-
-                <div className="tab-content">
-                    {activeTab === 'install' && (
+                <div className="hero-actions">
+                    {installed ? (
+                        <div className="installed-badge">
+                            <span style={{ color: '#4ade80' }}>✓ Extension Installed</span>
+                            <Link href="/applications" className="btn-secondary-ext">Open Dashboard →</Link>
+                        </div>
+                    ) : (
                         <>
-                            <div className="step">
-                                <div className="step-num">1</div>
-                                <div className="step-text">
-                                    <h4>Open Chrome Extensions</h4>
-                                    <p>Navigate to <code>chrome://extensions</code> in your browser.</p>
-                                </div>
-                            </div>
-                            <div className="step">
-                                <div className="step-num">2</div>
-                                <div className="step-text">
-                                    <h4>Enable Developer Mode</h4>
-                                    <p>Toggle the "Developer mode" switch in the top-right corner.</p>
-                                </div>
-                            </div>
-                            <div className="step">
-                                <div className="step-num">3</div>
-                                <div className="step-text">
-                                    <h4>Load the Extension</h4>
-                                    <p>Click "Load unpacked" and select the <code>extension/</code> folder from this project.</p>
-                                </div>
-                            </div>
-                            <div className="step">
-                                <div className="step-num">4</div>
-                                <div className="step-text">
-                                    <h4>Visit a University Portal</h4>
-                                    <p>Go to any supported university's admissions page. The Ilm Se Urooj sidebar will appear automatically!</p>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {activeTab === 'backend' && (
-                        <>
-                            <div className="step">
-                                <div className="step-num">1</div>
-                                <div className="step-text">
-                                    <h4>Install Dependencies</h4>
-                                    <div className="code-block">npm install</div>
-                                </div>
-                            </div>
-                            <div className="step">
-                                <div className="step-num">2</div>
-                                <div className="step-text">
-                                    <h4>Configure Environment</h4>
-                                    <p>The <code>.env.local</code> file should have your Supabase credentials.</p>
-                                    <div className="code-block">
-                                        NEXT_PUBLIC_SUPABASE_URL=your-url<br />
-                                        NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="step">
-                                <div className="step-num">3</div>
-                                <div className="step-text">
-                                    <h4>Start the Dev Server</h4>
-                                    <div className="code-block">npm run dev</div>
-                                    <p>The backend will run at <code>http://localhost:3000</code>.</p>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {activeTab === 'ollama' && (
-                        <>
-                            <div className="step">
-                                <div className="step-num">1</div>
-                                <div className="step-text">
-                                    <h4>Install Ollama</h4>
-                                    <p>Download from <a href="https://ollama.com" target="_blank" style={{ color: '#4ade80' }}>ollama.com</a> and install.</p>
-                                </div>
-                            </div>
-                            <div className="step">
-                                <div className="step-num">2</div>
-                                <div className="step-text">
-                                    <h4>Pull the Llama 3 Model</h4>
-                                    <div className="code-block">ollama pull llama3</div>
-                                    <p>This downloads the 4.7 GB model. It runs entirely on your machine — no API keys needed!</p>
-                                </div>
-                            </div>
-                            <div className="step">
-                                <div className="step-num">3</div>
-                                <div className="step-text">
-                                    <h4>Start Ollama</h4>
-                                    <div className="code-block">ollama serve</div>
-                                    <p>Ollama runs at <code>http://localhost:11434</code>. The extension connects automatically.</p>
-                                </div>
-                            </div>
+                            <a href="https://chromewebstore.google.com/detail/ilm-se-urooj" target="_blank" rel="noreferrer" className="btn-primary-ext">
+                                Add to Chrome — Free
+                            </a>
+                            <a href="#how-it-works" className="btn-ghost-ext">See how it works ↓</a>
                         </>
                     )}
                 </div>
-            </div>
+            </section>
 
-            <div className="profile-cta">
-                <h3>Ready to start?</h3>
-                <p>Create your profile first, then install the extension to autofill applications.</p>
-                <Link href="/profile" className="btn-profile">
-                    👤 Create Your Profile →
-                </Link>
-            </div>
+            {/* Section 2 — How it works */}
+            <section className="ext-section" id="how-it-works">
+                <h2>How it works</h2>
+                <div className="steps-grid">
+                    <div className="step">
+                        <span className="step-num">①</span>
+                        <h3>Create your profile once</h3>
+                        <p>Enter your marks, CNIC, contact info — including O/A-Level or Matric/FSc details.</p>
+                    </div>
+                    <div className="step">
+                        <span className="step-num">②</span>
+                        <h3>Install the extension</h3>
+                        <p>One click from Chrome Web Store. Free forever.</p>
+                    </div>
+                    <div className="step">
+                        <span className="step-num">③</span>
+                        <h3>Open any portal + click Autofill</h3>
+                        <p>Extension fills all known fields instantly. You fill the rest. You click Submit.</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section 3 — Supported Universities */}
+            <section className="ext-section">
+                <h2>Supported Universities</h2>
+                <div className="uni-grid">
+                    {universities.slice(0, 24).map(uni => {
+                        const status = getVerifiedStatus(uni);
+                        return (
+                            <div key={uni.id} className="uni-card-ext">
+                                <strong>{uni.shortName || uni.name}</strong>
+                                <span className="uni-campus">{uni.city}</span>
+                                <span className="uni-status" style={{ color: status.color, background: status.bg }}>
+                                    {status.label}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
+
+            {/* Section 4 — What gets filled */}
+            <section className="ext-section">
+                <h2>What we fill vs. what you fill</h2>
+                <div className="fill-grid">
+                    <div className="fill-col fill-green">
+                        <h3 style={{ color: '#4ade80' }}>✓ Auto-Filled</h3>
+                        <ul>
+                            <li>Full name, Father's name</li>
+                            <li>CNIC number</li>
+                            <li>Date of birth, Gender</li>
+                            <li>Email, Phone number</li>
+                            <li>City, Province, Address</li>
+                            <li>FSc/A-Level marks (or IBCC equivalent)</li>
+                            <li>Matric/O-Level marks</li>
+                            <li>Board name, Passing year</li>
+                            <li>College/school name</li>
+                            <li>Account password (consistent across portals)</li>
+                        </ul>
+                    </div>
+                    <div className="fill-col fill-amber">
+                        <h3 style={{ color: '#fbbf24' }}>✎ You Fill</h3>
+                        <ul>
+                            <li>Guardian's name (if different)</li>
+                            <li>"How did you hear about us?"</li>
+                            <li>Personal statement / SOP</li>
+                            <li>Program selection</li>
+                            <li>Application fee payment</li>
+                            <li>File uploads (CNIC scan, photo)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section 5 — Install CTA */}
+            <section className="ext-section ext-cta">
+                {installed ? (
+                    <div className="installed-badge">
+                        <span style={{ color: '#4ade80', fontSize: 18 }}>✓ Ilm Se Urooj Extension is installed</span>
+                        <Link href="/applications" className="btn-primary-ext" style={{ marginTop: 12 }}>Open Dashboard →</Link>
+                    </div>
+                ) : (
+                    <>
+                        <a href="https://chromewebstore.google.com/detail/ilm-se-urooj" target="_blank" rel="noreferrer" className="btn-primary-ext btn-lg">
+                            Add to Chrome — Free
+                        </a>
+                        <p className="cta-note">$5 one-time Chrome Web Store fee paid by us. Free forever for students.</p>
+                    </>
+                )}
+            </section>
         </div>
     );
 }
+
+const extStyles = `
+  .ext-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0c0e0b 0%, #1a1d1a 50%, #0c0e0b 100%);
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #e4e4e7;
+  }
+  .ext-nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; max-width: 1100px; margin: 0 auto; }
+  .ext-brand { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; color: #4ade80; text-decoration: none; }
+  .ext-nav-links { display: flex; gap: 16px; }
+  .ext-nav-links a { color: #a1a1aa; font-size: 13px; text-decoration: none; padding: 6px 12px; border-radius: 8px; transition: all 0.2s; }
+  .ext-nav-links a:hover { color: #e4e4e7; background: rgba(255,255,255,0.06); }
+
+  .ext-hero { max-width: 700px; margin: 0 auto; text-align: center; padding: 80px 24px 48px; }
+  .ext-hero h1 { font-size: 42px; font-weight: 800; line-height: 1.15; margin: 0 0 20px; }
+  .green { color: #4ade80; }
+  .hero-sub { font-size: 16px; color: #a1a1aa; line-height: 1.7; max-width: 540px; margin: 0 auto 28px; }
+  .hero-sub strong { color: #4ade80; }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
+
+  .btn-primary-ext { display: inline-flex; padding: 14px 32px; background: #4ade80; color: #0c0e0b; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all 0.2s; cursor: pointer; }
+  .btn-primary-ext:hover { background: #22c55e; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(74,222,128,0.35); }
+  .btn-primary-ext.btn-lg { padding: 18px 48px; font-size: 18px; }
+  .btn-ghost-ext { color: #a1a1aa; font-size: 14px; text-decoration: none; padding: 8px 16px; }
+  .btn-ghost-ext:hover { color: #e4e4e7; }
+  .btn-secondary-ext { color: #4ade80; font-size: 13px; text-decoration: none; margin-left: 12px; }
+  .btn-secondary-ext:hover { text-decoration: underline; }
+  .installed-badge { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+  .ext-section { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+  .ext-section h2 { font-size: 24px; font-weight: 700; margin: 0 0 28px; text-align: center; }
+  .ext-cta { text-align: center; padding: 60px 24px 80px; }
+  .cta-note { font-size: 12px; color: #71717a; margin-top: 12px; }
+
+  .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .step { background: rgba(22,25,22,0.8); border: 1px solid #27272a; border-radius: 16px; padding: 28px; text-align: center; }
+  .step-num { font-size: 28px; display: block; margin-bottom: 12px; }
+  .step h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; color: #e4e4e7; }
+  .step p { font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.5; }
+
+  .uni-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .uni-card-ext { background: rgba(22,25,22,0.7); border: 1px solid #27272a; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .uni-card-ext strong { font-size: 13px; color: #e4e4e7; }
+  .uni-campus { font-size: 11px; color: #71717a; }
+  .uni-status { font-size: 10px; padding: 2px 8px; border-radius: 8px; align-self: flex-start; margin-top: 6px; font-weight: 600; }
+
+  .fill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .fill-col { background: rgba(22,25,22,0.8); border: 1px solid #27272a; border-radius: 16px; padding: 28px; }
+  .fill-col h3 { font-size: 16px; font-weight: 700; margin: 0 0 16px; }
+  .fill-col ul { list-style: none; padding: 0; margin: 0; }
+  .fill-col li { font-size: 13px; color: #a1a1aa; padding: 6px 0; border-bottom: 1px solid rgba(39,39,42,0.5); }
+  .fill-col li:last-child { border-bottom: none; }
+  .fill-green { border-color: rgba(74,222,128,0.15); }
+  .fill-amber { border-color: rgba(251,191,36,0.15); }
+
+  @media (max-width: 768px) {
+    .ext-hero h1 { font-size: 28px; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .uni-grid { grid-template-columns: 1fr 1fr; }
+    .fill-grid { grid-template-columns: 1fr; }
+  }
+`;

@@ -618,19 +618,51 @@ async function initSidebarState(university) {
 
 function renderState(container, state, data = {}) {
   switch (state) {
+    case 'unknown_portal':
+      container.innerHTML = `
+        <div class="state-card">
+          <div class="state-icon">⟡</div>
+          <h3>This portal isn't mapped yet.</h3>
+          <a class="btn-secondary" href="mailto:support@ilmseurooj.com?subject=Portal+Request:+${encodeURIComponent(window.location.hostname)}" target="_blank">Request Support</a>
+        </div>
+      `;
+      break;
+
     case 'not_logged_in':
       container.innerHTML = `
         <div class="state-card">
           <div class="state-icon">🔒</div>
-          <h3>Sign in to UniMatch</h3>
+          <h3>Sign in to autofill this form.</h3>
           <p>Connect your profile to autofill university applications.</p>
-          <button class="btn-primary" id="unimatch-signin">Sign In</button>
+          <button class="btn-primary" id="unimatch-signin">Sign In to UniMatch</button>
         </div>
       `;
       document.getElementById('unimatch-signin')?.addEventListener('click', () => {
         const extId = chrome.runtime.id;
         window.open(`http://localhost:3000/extension-auth?ext=${extId}`, '_blank', 'width=500,height=600');
       });
+      break;
+
+    case 'warning_ibcc':
+      container.innerHTML = `
+        <div class="state-card">
+          <div class="state-icon" style="color:#fbbf24">⚠️</div>
+          <h3>IBCC equivalence not entered in your profile.</h3>
+          <p>Required for this portal.</p>
+          <a class="btn-primary" href="http://localhost:3000/profile" target="_blank">Complete Profile →</a>
+        </div>
+      `;
+      break;
+
+    case 'warning_no_marks':
+      container.innerHTML = `
+        <div class="state-card">
+          <div class="state-icon" style="color:#fbbf24">⚠️</div>
+          <h3>No intermediate marks in your profile yet.</h3>
+          <p>${data.uniName || 'This university'} requires FSc Part-I minimum to apply.</p>
+          <a class="btn-primary" href="http://localhost:3000/profile" target="_blank">Update Profile →</a>
+        </div>
+      `;
       break;
 
     case 'loading':
@@ -646,6 +678,10 @@ function renderState(container, state, data = {}) {
       const profile = data.profile;
       const displayName = profile?.full_name || 'Student';
       const completeness = calculateCompleteness(profile);
+      const isProjected = ['part1_only', 'appearing'].includes(profile?.inter_status);
+      const isCambridge = profile?.education_system === 'cambridge';
+      const marksLabel = isCambridge ? 'IBCC equivalence %' : isProjected ? 'FSc marks (projected)' : 'FSc marks';
+      const marksWarning = isProjected ? '⚠ Using projected marks from Part-I' : isCambridge ? 'ℹ Using IBCC equivalence %' : '';
       container.innerHTML = `
         <div class="state-card">
           <div class="profile-info">
@@ -655,12 +691,20 @@ function renderState(container, state, data = {}) {
               <span class="profile-pct">${completeness}% complete</span>
             </div>
           </div>
+          <div class="fill-list">
+            <p style="font-size:11px;color:#a1a1aa;margin:8px 0 4px">Will fill:</p>
+            <div style="font-size:12px;color:#4ade80">✓ Name, Father, CNIC</div>
+            <div style="font-size:12px;color:${isProjected || isCambridge ? '#fbbf24' : '#4ade80'}">✓ ${marksLabel} ${isProjected || isCambridge ? '⚠' : ''}</div>
+            <div style="font-size:12px;color:#4ade80">✓ Email, Phone, City</div>
+            ${marksWarning ? `<div style="font-size:10px;color:#fbbf24;margin-top:4px;padding:4px 8px;background:rgba(251,191,36,0.08);border-radius:6px">${marksWarning}</div>` : ''}
+          </div>
           <div id="unimatch-suggestions"></div>
           <div class="field-stats" id="unimatch-field-stats">
             <p class="stats-note">Click Autofill to detect and fill form fields</p>
           </div>
           <button class="btn-primary btn-autofill" id="unimatch-autofill">⚡ Autofill Now</button>
           <button class="btn-secondary" id="unimatch-scan">🔍 Scan Fields Only</button>
+          <p style="font-size:10px;color:#71717a;text-align:center;margin-top:8px">You control submission.</p>
         </div>
       `;
       // Show smart suggestions
