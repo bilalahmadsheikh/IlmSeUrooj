@@ -944,7 +944,7 @@ export const upcomingDeadlines = [
     testDate: "2026-02-01",
     session: "Fall 2026 - Round 1",
     applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 3,
@@ -957,7 +957,7 @@ export const upcomingDeadlines = [
     testDate: "2026-02-15",
     session: "Fall 2026",
     applyUrl: "https://admissions.lums.edu.pk",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 4,
@@ -991,12 +991,12 @@ export const upcomingDeadlines = [
     shortName: "AKU",
     program: "MBBS, Nursing",
     field: "Medical",
-    deadline: "2026-02-28",
+    deadline: "2026-03-02",
     testName: "AKU Test",
     testDate: "2026-03-10",
     session: "Fall 2026",
     applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 12,
@@ -1007,9 +1007,9 @@ export const upcomingDeadlines = [
     deadline: "2026-03-05",
     testName: "PIEAS Written Test",
     testDate: "2026-04-12",
-    session: "Fall 2026",
+    session: "Phase 4",
     applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 122,
@@ -1020,9 +1020,9 @@ export const upcomingDeadlines = [
     deadline: "2026-03-22",
     testName: "ECAT",
     testDate: "2026-03-30",
-    session: "Fall 2026",
+    session: "Fall 2025",
     applyUrl: "https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 2,
@@ -1035,7 +1035,7 @@ export const upcomingDeadlines = [
     testDate: "2026-04-04",
     session: "Fall 2026",
     applyUrl: "https://ugadmissions.nust.edu.pk",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 13,
@@ -1046,9 +1046,9 @@ export const upcomingDeadlines = [
     deadline: "2026-04-02",
     testName: "Bahria CBT (BUET)",
     testDate: "2026-04-04",
-    session: "Fall 2026",
+    session: "Spring 2026 - Phase 2",
     applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 14,
@@ -1059,9 +1059,9 @@ export const upcomingDeadlines = [
     deadline: "2026-04-02",
     testName: "Bahria CBT (BUET)",
     testDate: "2026-04-04",
-    session: "Fall 2026",
+    session: "Spring 2026 - Phase 2",
     applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   },
   {
     id: 11,
@@ -1230,7 +1230,7 @@ export const upcomingDeadlines = [
     testDate: "2026-08-18",
     session: "Fall 2026",
     applyUrl: "https://www.neduet.edu.pk/sites/default/files/Admissions-2025/ADMISSION_SCHEDULE_2025.pdf",
-    lastVerified: "2026-02-19"
+    lastVerified: "2026-03-01"
   }
 ];
 
@@ -1321,4 +1321,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-02-20";
+export const lastScraperRun = "2026-03-01";
