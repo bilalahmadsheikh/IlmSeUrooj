@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import styles from './SimilarUniversities.module.css';
 import { getMatchPercentage, getFieldRank } from '@/utils/ranking';
 import { IconBookmark } from '@/components/Icons/Icons';
@@ -53,7 +54,9 @@ export default function SimilarUniversities({
               <div className={styles.cardHeader}>
                 <div className={styles.logo}>{uni.shortName.charAt(0)}</div>
                 <div className={styles.primary}>
-                  <h3 className={styles.name}>{uni.shortName}</h3>
+                  <Link href={`/university/${uni.id}`} className={styles.nameLink}>
+                    <h3 className={styles.name}>{uni.shortName}</h3>
+                  </Link>
                   <p className={styles.meta}>
                     {uni.city} &middot; {uni.type}
                     {fieldRank != null && ` &middot; #${fieldRank} in ${field}`}
@@ -67,6 +70,10 @@ export default function SimilarUniversities({
               {uni.similarReason && (
                 <p className={styles.reason}>{uni.similarReason}</p>
               )}
+              <div className={styles.cardActions}>
+                <Link href={`/university/${uni.id}`} className={styles.detailsLink}>
+                  View Details
+                </Link>
               <button
                 type="button"
                 className={`${styles.saveBtn} ${isSaved ? styles.saved : ''}`}
@@ -78,6 +85,7 @@ export default function SimilarUniversities({
                 <IconBookmark className={styles.saveIcon} aria-hidden />
                 {isSaved ? 'Saved' : 'Save'}
               </button>
+              </div>
             </article>
           );
         })}

@@ -68,3 +68,33 @@ export async function PATCH(
 
     return Response.json({ application: data });
 }
+
+/**
+ * DELETE /api/applications/[id]
+ * Deletes an application (e.g. removing from saved list).
+ * Only the owning student can delete (enforced by RLS).
+ */
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const supabase = createAuthClient(req);
+    if (!supabase) return unauthorizedResponse();
+
+    const user = await getUser(supabase);
+    if (!user) return unauthorizedResponse();
+
+    const { id } = await params;
+
+    const { error } = await supabase
+        .from('applications')
+        .delete()
+        .eq('id', id)
+        .eq('student_id', user.id);
+
+    if (error) {
+        return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return new Response(null, { status: 204 });
+}

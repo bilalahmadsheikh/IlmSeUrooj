@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import styles from './UniversityList.module.css';
 import { getMatchPercentage, getFieldRank, getMatchReasons } from '@/utils/ranking';
-import { IconCheck } from '@/components/Icons/Icons';
+import { IconCheck, IconExternalLink } from '@/components/Icons/Icons';
 
 // Progressive visibility limits
 const VISIBILITY_LIMITS = [5, 15, 50];
@@ -160,11 +161,10 @@ export default function UniversityList({ universities, field, filters, onSave, s
                                         </div>
                                     </div>
 
-                                    {/* View Full Details button */}
-                                    <button type="button" className={styles.fullDetailsBtn} disabled>
-                                        View Full Details
-                                        <span className={styles.comingSoon}>Coming Soon</span>
-                                    </button>
+                                    {/* View Full Details link */}
+                                    <Link href={`/university/${uni.id}`} className={styles.fullDetailsBtn}>
+                                        View Full Details →
+                                    </Link>
                                 </div>
                             )}
 
@@ -176,6 +176,19 @@ export default function UniversityList({ universities, field, filters, onSave, s
                                 >
                                     {isExpanded ? '▲ Show Less' : '▼ View Details'}
                                 </button>
+
+                                {uni.admissions?.applyUrl && (
+                                    <a
+                                        href={uni.admissions.applyUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.applyBtn}
+                                        aria-label={`Apply to ${uni.shortName}`}
+                                    >
+                                        <IconExternalLink aria-hidden />
+                                        Apply
+                                    </a>
+                                )}
 
                                 <button
                                     type="button"

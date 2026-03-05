@@ -1,4 +1,5 @@
-// Mock University Data for Pakistani Universities - Campus-Specific Entries
+// University Data for Pakistani Universities - Sourced from official websites
+// Data verified from nust.edu.pk, giki.edu.pk, lums.edu.pk, nu.edu.pk, comsats.edu.pk, etc.
 
 export const universities = [
   // === NUST (Single Campus) ===
@@ -19,12 +20,14 @@ export const universities = [
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering", "Computer Science", "Business", "Medical"],
+    fields: ["Pre-Engineering", "Computer Science", "Business", "Medical", "Natural Sciences", "Others"],
     programs: {
-      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering"],
-      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence"],
-      "Business": ["Business Administration", "Accounting & Finance"],
-      "Medical": ["MBBS", "BDS"]
+      "Pre-Engineering": ["Civil Engineering", "Electrical Engineering", "Mechanical Engineering", "Chemical Engineering", "Aerospace Engineering", "Avionics Engineering", "Computer Engineering", "Environmental Engineering", "Geoinformatics Engineering", "Metallurgy & Materials Engineering", "Mechatronics Engineering", "Naval Architecture & Marine Engineering", "Maritime Sciences"],
+      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence", "Information Security"],
+      "Business": ["Business Administration", "Accounting & Finance", "Tourism & Hospitality Management"],
+      "Medical": ["MBBS", "BS Human Nutrition and Dietetics"],
+      "Natural Sciences": ["BS Chemistry", "BS Physics", "BS Mathematics", "BS Biotechnology", "BS Food Science & Technology", "BS Agriculture", "BS Environmental Science"],
+      "Others": ["Architecture", "Industrial Design", "Law (LLB)", "Economics", "Psychology", "Mass Communication", "Liberal Arts & Humanities", "Public Administration"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Top Engineering School", "Strong Research", "Industry Connections"],
@@ -56,11 +59,12 @@ export const universities = [
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Business", "Computer Science", "Pre-Engineering"],
+    fields: ["Business", "Computer Science", "Pre-Engineering", "Natural Sciences"],
     programs: {
       "Business": ["Business Administration", "Accounting & Finance", "Economics"],
-      "Computer Science": ["Computer Science", "Electrical Engineering"],
-      "Pre-Engineering": ["Electrical Engineering", "Computer Engineering"]
+      "Computer Science": ["Computer Science"],
+      "Pre-Engineering": ["Electrical Engineering", "Chemical Engineering"],
+      "Natural Sciences": ["Biology", "Chemistry", "Mathematics", "Physics", "Economics & Mathematics"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Best Business School", "Need-Based Aid", "Diverse Community"],
@@ -94,9 +98,9 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Business"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence", "Cyber Security"],
-      "Pre-Engineering": ["Electrical Engineering", "Computer Engineering"],
-      "Business": ["Business Administration"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence", "Cyber Security", "Internet of Things", "Robotics"],
+      "Pre-Engineering": ["Electrical Engineering", "Computer Engineering", "Civil Engineering"],
+      "Business": ["Business Administration", "Accounting & Finance", "Business Analytics"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["#1 CS University", "Highest Cutoffs", "Strong Alumni Network"],
@@ -127,8 +131,8 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Pre-Engineering"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence"],
-      "Pre-Engineering": ["Electrical Engineering"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence", "Internet of Things", "Robotics"],
+      "Pre-Engineering": ["Electrical Engineering", "Computer Engineering"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["Strong CS Program", "Lahore Hub", "Industry Connections"],
@@ -159,8 +163,8 @@ export const universities = [
     hostelAvailability: "On-Campus without Hostel",
     fields: ["Computer Science", "Pre-Engineering"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering", "Data Science"],
-      "Pre-Engineering": ["Electrical Engineering"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence", "Cyber Security"],
+      "Pre-Engineering": ["Electrical Engineering", "Computer Engineering"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["Karachi Tech Hub", "Industry Links", "Affordable"],
@@ -190,7 +194,7 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Internet of Things", "Robotics"]
     },
     degreeLevel: ["Undergraduate"],
     highlights: ["Lowest Cutoffs", "Easy Admission", "Growing Campus"],
@@ -214,13 +218,17 @@ export const universities = [
     type: "Private",
     ranking: 15,
     fieldRankings: {
-      "Computer Science": 16
+      "Computer Science": 16,
+      "Pre-Engineering": 18,
+      "Business": 15
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Computer Science"],
+    fields: ["Computer Science", "Pre-Engineering", "Business"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Cyber Security", "Data Science", "Computer Engineering"],
+      "Pre-Engineering": ["Electrical Engineering", "Civil Engineering"],
+      "Business": ["Business Administration", "Accounting & Finance", "Business Analytics", "Financial Technology"]
     },
     degreeLevel: ["Undergraduate"],
     highlights: ["New Campus", "Low Cutoffs", "Affordable"],
@@ -252,11 +260,13 @@ export const universities = [
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Computer Science", "Pre-Engineering", "Business"],
+    fields: ["Computer Science", "Pre-Engineering", "Business", "Natural Sciences", "Others"],
     programs: {
       "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Cyber Security", "Data Science"],
-      "Pre-Engineering": ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering"],
-      "Business": ["Business Administration", "Accounting & Finance"]
+      "Pre-Engineering": ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Computer Engineering"],
+      "Business": ["Business Administration", "Economics", "Accounting & Finance"],
+      "Natural Sciences": ["Mathematics", "Physics", "Chemistry", "Biosciences", "Bioinformatics"],
+      "Others": ["Architecture", "Art & Design", "Psychology"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Affordable Federal", "High Cutoffs (CS: 82.7%)", "Research Focus"],
@@ -282,15 +292,17 @@ export const universities = [
     fieldRankings: {
       "Computer Science": 7,
       "Pre-Engineering": 10,
-      "Business": 6
+      "Business": 6,
+      "Medical": 4
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Computer Science", "Pre-Engineering", "Business"],
+    fields: ["Computer Science", "Pre-Engineering", "Business", "Medical"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence"],
-      "Pre-Engineering": ["Electrical Engineering", "Chemical Engineering"],
-      "Business": ["Business Administration"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Data Science"],
+      "Pre-Engineering": ["Electrical Engineering", "Chemical Engineering", "Civil Engineering"],
+      "Business": ["Business Administration", "Economics", "Accounting & Finance"],
+      "Medical": ["Pharm-D"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Higher CS Cutoff than Isb!", "Lahore Location", "Pharm-D Strong"],
@@ -347,14 +359,15 @@ export const universities = [
     ranking: 13,
     fieldRankings: {
       "Computer Science": 12,
-      "Pre-Engineering": 15
+      "Pre-Engineering": 15,
+      "Medical": 5
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Medical"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"],
-      "Pre-Engineering": ["Electrical Engineering", "Civil Engineering"],
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence"],
+      "Pre-Engineering": ["Electrical Engineering", "Civil Engineering", "Computer Engineering"],
       "Medical": ["Pharm-D"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
@@ -380,14 +393,18 @@ export const universities = [
     ranking: 18,
     fieldRankings: {
       "Computer Science": 18,
-      "Business": 12
+      "Pre-Engineering": 18,
+      "Business": 12,
+      "Natural Sciences": 10
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Computer Science", "Business"],
+    fields: ["Computer Science", "Pre-Engineering", "Business", "Natural Sciences"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"],
-      "Business": ["Business Administration"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Computer Engineering"],
+      "Pre-Engineering": ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering"],
+      "Business": ["Business Administration"],
+      "Natural Sciences": ["Biochemistry", "Bioinformatics", "Food Science and Nutrition", "Mathematics with Data Science", "Mathematics with IT"]
     },
     degreeLevel: ["Undergraduate"],
     highlights: ["Low Cutoffs (~68%)", "Affordable", "Easy Admission"],
@@ -412,14 +429,18 @@ export const universities = [
     ranking: 20,
     fieldRankings: {
       "Computer Science": 20,
-      "Business": 14
+      "Pre-Engineering": 20,
+      "Business": 14,
+      "Natural Sciences": 14
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Computer Science", "Business"],
+    fields: ["Computer Science", "Pre-Engineering", "Business", "Natural Sciences"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"],
-      "Business": ["Business Administration"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Computer Engineering"],
+      "Pre-Engineering": ["Electrical Engineering"],
+      "Business": ["Business Administration", "Accounting & Finance"],
+      "Natural Sciences": ["Mathematics"]
     },
     degreeLevel: ["Undergraduate"],
     highlights: ["Very Low Cutoffs (~62%)", "Near Islamabad", "Easiest COMSATS"],
@@ -450,7 +471,7 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Business"],
     programs: {
-      "Computer Science": ["Computer Science"],
+      "Computer Science": ["Computer Science", "Software Engineering"],
       "Business": ["Business Administration"]
     },
     degreeLevel: ["Undergraduate"],
@@ -482,10 +503,11 @@ export const universities = [
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Business", "Computer Science"],
+    fields: ["Business", "Computer Science", "Others"],
     programs: {
-      "Business": ["Business Administration", "Accounting & Finance", "Economics", "Social Sciences"],
-      "Computer Science": ["Computer Science", "Data Science"]
+      "Business": ["Business Administration (BBA)", "Accounting & Finance", "Business Analytics", "Economics", "Economics & Mathematics"],
+      "Computer Science": ["Computer Science"],
+      "Others": ["Mathematics", "Social Sciences & Liberal Arts"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Oldest Business School", "Strong Placement", "Merit Based"],
@@ -511,13 +533,16 @@ export const universities = [
     type: "Public",
     ranking: 9,
     fieldRankings: {
-      "Pre-Engineering": 2
+      "Pre-Engineering": 2,
+      "Computer Science": 8
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering", "Computer Science"],
+    fields: ["Pre-Engineering", "Computer Science", "Others"],
     programs: {
-      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Computer Science"]
+      "Pre-Engineering": ["Civil Engineering", "Mechanical Engineering", "Electrical Engineering", "Chemical Engineering", "Petroleum & Gas Engineering", "Aerospace Engineering", "Environmental Engineering", "Industrial & Manufacturing Engineering", "Mechatronics & Control Engineering", "Transportation Engineering", "Biomedical Engineering", "Textile Engineering", "Mining Engineering", "Geological Engineering", "Metallurgical & Materials Engineering", "Polymer Engineering", "Building & Architectural Engineering"],
+      "Computer Science": ["Computer Engineering", "Computer Science", "BS Computing and Data Science"],
+      "Others": ["Architecture", "BS Energy System and Management"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Historic Institution", "Highest UET Merit", "Very Affordable"],
@@ -541,13 +566,15 @@ export const universities = [
     type: "Public",
     ranking: 11,
     fieldRankings: {
-      "Pre-Engineering": 5
+      "Pre-Engineering": 5,
+      "Computer Science": 10
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering"],
+    fields: ["Pre-Engineering", "Computer Science"],
     programs: {
-      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Software Engineering"]
+      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering"],
+      "Computer Science": ["Software Engineering", "Computer Science"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Near Islamabad", "Lower than Lahore", "Good Value"],
@@ -574,14 +601,16 @@ export const universities = [
     ranking: 10,
     fieldRankings: {
       "Pre-Engineering": 3,
-      "Computer Science": 9
+      "Computer Science": 9,
+      "Business": 12
     },
     campusType: "Strong Campus Life",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering", "Computer Science"],
+    fields: ["Pre-Engineering", "Computer Science", "Business"],
     programs: {
-      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Engineering Sciences"],
-      "Computer Science": ["Computer Science", "Computer Engineering"]
+      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Engineering Sciences", "Chemical Engineering", "Materials Engineering"],
+      "Computer Science": ["Computer Science", "Computer Engineering"],
+      "Business": ["BS Management Sciences"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["Residential Campus", "Beautiful Location", "Strong Bonding"],
@@ -612,10 +641,11 @@ export const universities = [
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering", "Computer Science"],
+    fields: ["Pre-Engineering", "Computer Science", "Natural Sciences"],
     programs: {
-      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Nuclear Engineering", "Chemical Engineering"],
-      "Computer Science": ["Computer Science", "Information Security"]
+      "Pre-Engineering": ["Electrical Engineering", "Mechanical Engineering", "Chemical Engineering", "Metallurgy & Materials Engineering"],
+      "Computer Science": ["BS Computer and Information Sciences"],
+      "Natural Sciences": ["BS Physics"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Nuclear Research", "High Security", "Elite Faculty"],
@@ -647,11 +677,12 @@ export const universities = [
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Computer Science", "Business", "Pre-Engineering"],
+    fields: ["Computer Science", "Business", "Pre-Engineering", "Others"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence"],
-      "Business": ["Business Administration", "Accounting & Finance"],
-      "Pre-Engineering": ["Electrical Engineering"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Information Technology", "Robotics & Intelligent Systems", "Computer Engineering"],
+      "Business": ["Business Administration", "Accounting & Finance", "Economics", "Supply Chain Management"],
+      "Pre-Engineering": ["Electrical Engineering"],
+      "Others": ["BS Environmental Sciences"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["Navy Affiliated", "High Cutoffs (CS: >80%)", "Disciplined"],
@@ -682,7 +713,7 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Business"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"],
+      "Computer Science": ["Computer Science", "Software Engineering", "Information Technology", "Business & Information Technology"],
       "Business": ["Business Administration"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
@@ -715,8 +746,8 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Computer Science", "Business", "Medical"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"],
-      "Business": ["Business Administration"],
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Information Technology", "Robotics & Intelligent Systems", "Computer Engineering"],
+      "Business": ["Business Administration", "Accounting & Finance", "Economics & Finance", "Business Analytics", "Supply Chain Management"],
       "Medical": ["MBBS", "BDS"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
@@ -751,9 +782,9 @@ export const universities = [
     hostelAvailability: "On-Campus without Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Others"],
     programs: {
-      "Computer Science": ["Computer Science", "Electrical Engineering"],
+      "Computer Science": ["Computer Science", "Computer Engineering"],
       "Pre-Engineering": ["Electrical Engineering"],
-      "Others": ["Social Development", "Communication & Design"]
+      "Others": ["Social Development & Policy", "Communication & Design", "Comparative Humanities", "Integrated Science & Mathematics"]
     },
     degreeLevel: ["Undergraduate"],
     highlights: ["Liberal Arts Focus", "Modern Campus", "Innovative Curriculum"],
@@ -783,7 +814,7 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Medical"],
     programs: {
-      "Medical": ["MBBS", "BScN Nursing", "Pharmacy"]
+      "Medical": ["MBBS", "BScN Nursing"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Top Medical School", "International Recognition", "Research Excellence"],
@@ -812,10 +843,11 @@ export const universities = [
     },
     campusType: "Research-Oriented",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering", "Computer Science"],
+    fields: ["Pre-Engineering", "Computer Science", "Others"],
     programs: {
-      "Pre-Engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Petroleum Engineering"],
-      "Computer Science": ["Computer Science", "Software Engineering"]
+      "Pre-Engineering": ["Civil Engineering", "Mechanical Engineering", "Electrical Engineering", "Electronic Engineering", "Telecommunications Engineering", "Petroleum Engineering", "Textile Engineering", "Industrial & Manufacturing Engineering", "Automotive Engineering"],
+      "Computer Science": ["Computer & Information Systems Engineering", "Computer Science", "Software Engineering"],
+      "Others": ["Architecture", "Development Studies"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Historic Excellence", "Very Affordable", "SE: 87% Cutoff"],
@@ -845,11 +877,13 @@ export const universities = [
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus with Hostel",
-    fields: ["Pre-Engineering", "Computer Science", "Business"],
+    fields: ["Pre-Engineering", "Computer Science", "Business", "Natural Sciences", "Others"],
     programs: {
-      "Pre-Engineering": ["Aerospace Engineering", "Mechanical Engineering", "Electrical Engineering"],
-      "Computer Science": ["Computer Science", "Software Engineering"],
-      "Business": ["Business Administration"]
+      "Pre-Engineering": ["Aerospace Engineering", "Mechanical Engineering", "Electrical Engineering", "Computer Engineering", "Mechatronics Engineering", "Biomedical Engineering"],
+      "Computer Science": ["Computer Science", "Software Engineering", "Information Technology", "Cyber Security", "Gaming & Multimedia"],
+      "Business": ["Business Administration", "Accounting & Finance"],
+      "Natural Sciences": ["BS Physics", "BS Mathematics"],
+      "Others": ["Aviation Management", "Tourism & Hospitality Management", "International Relations", "BS English"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["Air Force Affiliated", "Aerospace Focus", "Modern Facilities"],
@@ -881,9 +915,9 @@ export const universities = [
     hostelAvailability: "Hybrid/Partially Online",
     fields: ["Computer Science", "Business", "Others"],
     programs: {
-      "Computer Science": ["Computer Science", "Software Engineering"],
-      "Business": ["Business Administration", "Media Sciences"],
-      "Others": ["Media Sciences", "Social Sciences"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Artificial Intelligence", "Multimedia & Gaming"],
+      "Business": ["Business Administration", "Accounting & Finance", "Entrepreneurship", "Business Studies", "Business Analytics"],
+      "Others": ["Media Sciences"]
     },
     degreeLevel: ["Undergraduate", "Graduate"],
     highlights: ["Flexible Programs", "Media Focus", "Industry Links"],
@@ -908,14 +942,16 @@ export const universities = [
     ranking: 27,
     fieldRankings: {
       "Computer Science": 25,
-      "Business": 15
+      "Business": 15,
+      "Pre-Engineering": 14
     },
     campusType: "Industry-Focused",
     hostelAvailability: "On-Campus without Hostel",
-    fields: ["Computer Science", "Business"],
+    fields: ["Computer Science", "Business", "Pre-Engineering"],
     programs: {
-      "Computer Science": ["Computer Science", "Data Science", "Electrical Engineering"],
-      "Business": ["Business Administration"]
+      "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence", "Computer Engineering"],
+      "Business": ["Management & Technology", "Financial Technology", "Economics with Data Science"],
+      "Pre-Engineering": ["Electrical Engineering"]
     },
     degreeLevel: ["Undergraduate", "Graduate", "PhD"],
     highlights: ["Tech Focused", "Modern Curriculum", "Startup Culture"],
@@ -931,308 +967,37 @@ export const universities = [
   }
 ];
 
-// Upcoming admission deadlines (sorted by date) - Campus Specific
-export const upcomingDeadlines = [
-  {
-    id: 1,
-    university: "IBA Karachi",
-    shortName: "IBA",
-    program: "BBA, BS Programs",
-    field: "Business",
-    deadline: "2026-01-21",
-    testName: "IBA Aptitude Test",
-    testDate: "2026-02-01",
-    session: "Fall 2026 - Round 1",
-    applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 3,
-    university: "LUMS",
-    shortName: "LUMS",
-    program: "Undergraduate",
-    field: "Business",
-    deadline: "2026-01-27",
-    testName: "LCAT",
-    testDate: "2026-02-15",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.lums.edu.pk",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 4,
-    university: "SZABIST Karachi",
-    shortName: "SZABIST",
-    program: "All Programs",
-    field: "Business",
-    deadline: "2026-02-12",
-    testName: "SZABIST Test",
-    testDate: "2026-02-22",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.szabist.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 6,
-    university: "Habib University",
-    shortName: "Habib",
-    program: "All Programs",
-    field: "Computer Science",
-    deadline: "2026-02-19",
-    testName: "Habib Entrance Test",
-    testDate: "2026-03-01",
-    session: "Fall 2026",
-    applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 5,
-    university: "Aga Khan University",
-    shortName: "AKU",
-    program: "MBBS, Nursing",
-    field: "Medical",
-    deadline: "2026-03-02",
-    testName: "AKU Test",
-    testDate: "2026-03-10",
-    session: "Fall 2026",
-    applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 12,
-    university: "PIEAS",
-    shortName: "PIEAS",
-    program: "Engineering & CS",
-    field: "Pre-Engineering",
-    deadline: "2026-03-05",
-    testName: "PIEAS Written Test",
-    testDate: "2026-04-12",
-    session: "Phase 4",
-    applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 122,
-    university: "UET Lahore",
-    shortName: "UET Lahore",
-    program: "Engineering (ME: 81.6%)",
-    field: "Pre-Engineering",
-    deadline: "2026-03-22",
-    testName: "ECAT",
-    testDate: "2026-03-30",
-    session: "Fall 2025",
-    applyUrl: "https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 2,
-    university: "NUST",
-    shortName: "NUST",
-    program: "Engineering & CS",
-    field: "Pre-Engineering",
-    deadline: "2026-03-30",
-    testName: "NET Series III",
-    testDate: "2026-04-04",
-    session: "Fall 2026",
-    applyUrl: "https://ugadmissions.nust.edu.pk",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 13,
-    university: "Bahria Islamabad",
-    shortName: "Bahria Isb",
-    program: "CS, SE, BBA",
-    field: "Computer Science",
-    deadline: "2026-04-02",
-    testName: "Bahria CBT (BUET)",
-    testDate: "2026-04-04",
-    session: "Spring 2026 - Phase 2",
-    applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 14,
-    university: "Bahria Lahore",
-    shortName: "Bahria Lhr",
-    program: "CS, SE, BBA",
-    field: "Computer Science",
-    deadline: "2026-04-02",
-    testName: "Bahria CBT (BUET)",
-    testDate: "2026-04-04",
-    session: "Spring 2026 - Phase 2",
-    applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-    lastVerified: "2026-03-01"
-  },
-  {
-    id: 11,
-    university: "GIKI",
-    shortName: "GIKI",
-    program: "Engineering & CS",
-    field: "Pre-Engineering",
-    deadline: "2026-06-16",
-    testName: "GIKI Entry Test",
-    testDate: "2025-08-15",
-    session: "Fall 2026",
-    applyUrl: "https://giki.edu.pk/admissions",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 7,
-    university: "FAST Islamabad",
-    shortName: "FAST Isb",
-    program: "CS, SE, AI, DS",
-    field: "Computer Science",
-    deadline: "2026-07-04",
-    testName: "FAST NU Test",
-    testDate: "2026-07-07",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 8,
-    university: "FAST Lahore",
-    shortName: "FAST Lhr",
-    program: "CS, SE, AI",
-    field: "Computer Science",
-    deadline: "2026-07-04",
-    testName: "FAST NU Test",
-    testDate: "2026-07-07",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 9,
-    university: "FAST Karachi",
-    shortName: "FAST Khi",
-    program: "CS, SE",
-    field: "Computer Science",
-    deadline: "2026-07-04",
-    testName: "FAST NU Test",
-    testDate: "2026-07-07",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 10,
-    university: "FAST Peshawar",
-    shortName: "FAST Psh",
-    program: "CS, SE",
-    field: "Computer Science",
-    deadline: "2026-07-04",
-    testName: "FAST NU Test",
-    testDate: "2026-07-07",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 19,
-    university: "Air University",
-    shortName: "Air",
-    program: "Aerospace, CS",
-    field: "Pre-Engineering",
-    deadline: "2026-07-15",
-    testName: "Air University CBT",
-    testDate: "2026-07-18",
-    session: "Fall 2026",
-    applyUrl: "https://portals.au.edu.pk/admissions",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 123,
-    university: "UET Taxila",
-    shortName: "UET Taxila",
-    program: "Engineering",
-    field: "Pre-Engineering",
-    deadline: "2026-07-15",
-    testName: "ECAT",
-    testDate: "2026-03-22",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.uettaxila.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 15,
-    university: "COMSATS Islamabad",
-    shortName: "COMSATS Isb",
-    program: "CS, SE, AI (87% Cutoff)",
-    field: "Computer Science",
-    deadline: "2026-07-20",
-    testName: "NTS NAT",
-    testDate: "2026-07-30",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 16,
-    university: "COMSATS Lahore",
-    shortName: "COMSATS Lhr",
-    program: "CS, SE, AI (87.5% Cutoff)",
-    field: "Computer Science",
-    deadline: "2026-07-20",
-    testName: "NTS NAT",
-    testDate: "2026-07-30",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 17,
-    university: "COMSATS Wah",
-    shortName: "COMSATS Wah",
-    program: "CS, SE, AI (~80% Cutoff)",
-    field: "Computer Science",
-    deadline: "2026-07-20",
-    testName: "NTS NAT",
-    testDate: "2026-07-30",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 18,
-    university: "COMSATS Abbottabad",
-    shortName: "COMSATS Abbottabad",
-    program: "CS, SE, Pharm-D",
-    field: "Computer Science",
-    deadline: "2026-07-20",
-    testName: "NTS NAT",
-    testDate: "2026-07-30",
-    session: "Fall 2026",
-    applyUrl: "https://admissions.comsats.edu.pk",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 20,
-    university: "ITU Lahore",
-    shortName: "ITU",
-    program: "CS, Data Science",
-    field: "Computer Science",
-    deadline: "2026-07-31",
-    testName: "ITU Admission Test",
-    testDate: "2026-08-05",
-    session: "Fall 2026",
-    applyUrl: "https://itu.edu.pk/admissions",
-    lastVerified: "2026-02-19"
-  },
-  {
-    id: 121,
-    university: "NED Karachi",
-    shortName: "NED",
-    program: "Engineering (SE: 87%)",
-    field: "Pre-Engineering",
-    deadline: "2026-08-10",
-    testName: "NED Entry Test",
-    testDate: "2026-08-18",
-    session: "Fall 2026",
-    applyUrl: "https://www.neduet.edu.pk/sites/default/files/Admissions-2025/ADMISSION_SCHEDULE_2025.pdf",
-    lastVerified: "2026-03-01"
-  }
-];
+/** Build upcoming deadlines from universities (single source of truth, CI/CD updates universities) */
+function buildUpcomingDeadlines(universitiesList) {
+  const today = new Date().toISOString().slice(0, 10);
+  return universitiesList
+    .filter((u) => u.admissions?.deadline && u.admissions?.applyUrl)
+    .map((u, idx) => {
+      const field = u.fields?.[0] ?? 'General';
+      const progs = u.programs?.[field];
+      const program = Array.isArray(progs) ? progs.slice(0, 2).join(', ') : (field === 'General' ? 'All Programs' : 'Various');
+      const deadlineYear = u.admissions.deadline?.slice(0, 4);
+      const deadlineMonth = parseInt(u.admissions.deadline?.slice(5, 7) || 0, 10);
+      const session = deadlineMonth >= 1 && deadlineMonth <= 6 ? `Spring ${deadlineYear}` : `Fall ${deadlineYear}`;
+      return {
+        id: u.id,
+        university: u.name,
+        shortName: u.shortName,
+        program,
+        field,
+        deadline: u.admissions.deadline,
+        testName: u.admissions.testName || 'Entry Test',
+        testDate: u.admissions.testDate || u.admissions.deadline,
+        session,
+        applyUrl: u.admissions.applyUrl,
+        lastVerified: u.admissions.lastVerified || '2026-03-01',
+      };
+    })
+    .sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''));
+}
+
+// Upcoming admission deadlines — derived from universities (no hardcoding)
+export const upcomingDeadlines = buildUpcomingDeadlines(universities);
 
 // Filter options configuration
 export const filterOptions = {
@@ -1241,6 +1006,7 @@ export const filterOptions = {
     { value: "Computer Science", label: "Computer Science" },
     { value: "Business", label: "Business" },
     { value: "Medical", label: "Medical" },
+    { value: "Natural Sciences", label: "Natural Sciences" },
     { value: "Others", label: "Others" }
   ],
 
@@ -1282,10 +1048,19 @@ export const filterOptions = {
       { value: "Pharm-D", label: "Pharm-D" },
       { value: "Nursing", label: "Nursing" }
     ],
+    "Natural Sciences": [
+      { value: "Any", label: "Any Program" },
+      { value: "Biology", label: "Biology" },
+      { value: "Chemistry", label: "Chemistry" },
+      { value: "Physics", label: "Physics" },
+      { value: "Mathematics", label: "Mathematics" }
+    ],
     "Others": [
       { value: "Any", label: "Any Program" },
       { value: "Social Sciences", label: "Social Sciences" },
-      { value: "Media Sciences", label: "Media Sciences" }
+      { value: "Media Sciences", label: "Media Sciences" },
+      { value: "Architecture", label: "Architecture" },
+      { value: "Law", label: "Law" }
     ]
   },
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import styles from './SavedList.module.css';
 import { IconBookmark, IconClose, IconCheck, IconNote, IconChevronUp, IconChevronDown, IconArrowRight } from '@/components/Icons/Icons';
 
@@ -37,6 +38,7 @@ export default function SavedList({
   onReorder,
   onCompare,
   onClose,
+  isLoggedIn = false,
 }) {
   const [sortBy, setSortBy] = useState('manual');
   const [searchQuery, setSearchQuery] = useState('');
@@ -150,7 +152,9 @@ export default function SavedList({
             <p className={styles.emptyHint}>
               Swipe right on cards or tap the heart on the list to save universities here.
             </p>
-            <p className={styles.emptySubhint}>Your list is saved on this device and persists across visits.</p>
+            <p className={styles.emptySubhint}>
+              {isLoggedIn ? 'Your list syncs to your account and is available on any device.' : 'Your list is saved on this device and persists across visits.'}
+            </p>
           </div>
         ) : (
           <>
@@ -325,6 +329,13 @@ export default function SavedList({
                             </button>
                           </div>
                         )}
+                        <Link
+                          href={`/university/${uni.id}`}
+                          className={styles.detailsBtn}
+                          aria-label={`View full details for ${uni.shortName}`}
+                        >
+                          Details
+                        </Link>
                         {uni.website && (
                           <a
                             href={uni.website}
@@ -338,7 +349,7 @@ export default function SavedList({
                         <button
                           type="button"
                           className={styles.removeBtn}
-                          onClick={() => onRemove(uni.id)}
+                          onClick={() => onRemove(uni.id, item.applicationId)}
                           aria-label={`Remove ${uni.shortName}`}
                         >
                           <IconClose aria-hidden />

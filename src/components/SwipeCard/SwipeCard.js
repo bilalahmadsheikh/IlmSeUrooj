@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Link from 'next/link';
 import styles from './SwipeCard.module.css';
 import { getMatchPercentage } from '@/utils/ranking';
-import { IconBookmark, IconClose } from '@/components/Icons/Icons';
+import { IconBookmark, IconClose, IconExternalLink } from '@/components/Icons/Icons';
 
 export default function SwipeCard({ university, onSwipe, isTop }) {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -156,11 +157,14 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                             <span>{university.campusType}</span>
                         </div>
 
-                        {/* View Full Details Button */}
-                        <button type="button" className={styles.fullDetailsBtn} disabled>
-                            View Full Details
-                            <span className={styles.comingSoon}>Coming Soon</span>
-                        </button>
+                        {/* View Full Details Link */}
+                        <Link
+                            href={`/university/${university.id}`}
+                            className={styles.fullDetailsBtn}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            View Full Details →
+                        </Link>
                     </div>
                 )}
 
@@ -174,8 +178,21 @@ export default function SwipeCard({ university, onSwipe, isTop }) {
                     {showDetails ? 'Show Less' : 'View Details'}
                 </button>
 
-                {/* Swipe Buttons */}
-                <div className={styles.actions} role="group" aria-label="Swipe actions">
+                {/* Apply + Swipe Buttons */}
+                <div className={styles.actions} role="group" aria-label="Swipe and apply actions">
+                    {university.admissions?.applyUrl && (
+                        <a
+                            href={university.admissions.applyUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.applyBtn}
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={`Apply to ${university.shortName}`}
+                        >
+                            <IconExternalLink aria-hidden />
+                            Apply
+                        </a>
+                    )}
                     <button
                         type="button"
                         className={`${styles.actionBtn} ${styles.skipBtn}`}

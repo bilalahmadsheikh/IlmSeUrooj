@@ -3,6 +3,15 @@
 import { useState, useMemo } from 'react';
 import styles from './ScholarshipsSection.module.css';
 import { scholarships, scholarshipCategories } from '@/data/scholarships';
+import { universities } from '@/data/universities';
+
+function getLinkedUniversityNames(sch) {
+  if (!sch.universityIds?.length) return null;
+  return sch.universityIds
+    .map((uid) => universities.find((u) => u.id === uid))
+    .filter(Boolean)
+    .map((u) => u.shortName);
+}
 
 export default function ScholarshipsSection() {
   const [category, setCategory] = useState('all');
@@ -20,7 +29,7 @@ export default function ScholarshipsSection() {
           Scholarships and financial aid
         </h2>
         <p className={styles.subtitle}>
-          For underprivileged students: need-based aid, government schemes, and university support so you can afford a degree.
+          Need-based aid, government schemes, and university support so you can afford a degree.
         </p>
       </div>
 
@@ -56,6 +65,7 @@ export default function ScholarshipsSection() {
       <div className={styles.grid} role="list">
         {filtered.map((sch) => {
           const isExpanded = expandedId === sch.id;
+          const uniNames = getLinkedUniversityNames(sch);
           return (
             <article
               key={sch.id}
@@ -67,11 +77,14 @@ export default function ScholarshipsSection() {
                   {sch.type.replace('-', ' ')}
                 </span>
                 {sch.forUnderprivileged && (
-                  <span className={styles.underprivilegedBadge}>For underprivileged students</span>
+                  <span className={styles.underprivilegedBadge}>Need-friendly</span>
                 )}
               </div>
               <h3 className={styles.name}>{sch.name}</h3>
-              <p className={styles.provider}>{sch.provider}</p>
+              <p className={styles.provider}>
+                {sch.provider}
+                {uniNames && uniNames.length > 0 && ` (${uniNames.join(', ')})`}
+              </p>
               {sch.coverage && <p className={styles.coverage}>{sch.coverage}</p>}
               <p className={styles.description}>{sch.description}</p>
               <button

@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
         }
     }
 
+    const status = body.status === 'saved' ? 'saved' : 'pending';
+
     const { data, error } = await supabase
         .from('applications')
         .insert({
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
             university_name: body.university_name,
             portal_domain: body.portal_domain,
             program_applied: body.program_applied || null,
-            status: 'pending',
+            status,
         })
         .select()
         .single();

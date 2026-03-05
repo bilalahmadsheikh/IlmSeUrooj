@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import styles from './RecommendationsSection.module.css';
 import { getMatchPercentage, getMatchReasons, getFieldRank } from '@/utils/ranking';
-import { IconArrowRight, IconCheck } from '@/components/Icons/Icons';
+import { IconArrowRight, IconCheck, IconExternalLink } from '@/components/Icons/Icons';
 
 const TOP_N = 5;
 
@@ -122,6 +123,25 @@ export default function RecommendationsSection({
               )}
 
               <div className={styles.actions}>
+                <Link
+                  href={`/university/${uni.id}`}
+                  className={styles.detailsLink}
+                  aria-label={`View full details for ${uni.shortName}`}
+                >
+                  View Details
+                </Link>
+                {uni.admissions?.applyUrl && (
+                  <a
+                    href={uni.admissions.applyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.applyBtn}
+                    aria-label={`Apply to ${uni.shortName}`}
+                  >
+                    <IconExternalLink aria-hidden />
+                    Apply
+                  </a>
+                )}
                 <button
                   type="button"
                   className={`${styles.saveBtn} ${isSaved ? styles.saveBtnSaved : ''}`}

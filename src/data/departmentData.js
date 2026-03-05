@@ -220,6 +220,18 @@ export const departmentDetails = {
 
     // GIKI - id=18 in universities.js
     18: {
+        "Business": {
+            ranking: 12,
+            facultyStrength: "Good",
+            researchOutput: "Medium",
+            industryConnections: "Good",
+            placementRate: "75%",
+            avgStartingSalary: "PKR 85,000",
+            internshipPartners: ["Supply Chain Firms", "FMCG", "Manufacturing"],
+            facilities: ["School of Management Sciences", "Business Labs"],
+            phdFaculty: "45%",
+            researchPapers: 60
+        },
         "Pre-Engineering": {
             ranking: 3,
             facultyStrength: "Excellent",
