@@ -1,30 +1,68 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-
-/**
- * Extension Auth Page
- * 
- * Flow:
- * 1. User clicks "Sign In" in the extension popup
- * 2. Popup opens this page with ?ext=EXTENSION_ID
- * 3. User logs in with Supabase Auth
- * 4. On success, this page sends the access_token to the extension
- *    via chrome.runtime.sendMessage (using externally_connectable)
- * 5. If that fails, shows a fallback "Copy Token" button
- */
+import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 export default function ExtensionAuthPage() {
-    const [status, setStatus] = useState('idle'); // idle | loading | success | error | token_sent
+    const [status, setStatus] = useState('checking'); // checking | idle | loading | success | error | token_sent
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [tokenSent, setTokenSent] = useState(false);
     const [copied, setCopied] = useState(false);
     const tokenRef = useRef(null);
+
+    // On mount: check if user is already logged in → auto-send token to extension
+    useEffect(() => {
+        async function checkExistingSession() {
+            try {
+                const { data } = await supabase.auth.getSession();
+                if (data?.session?.access_token) {
+                    tokenRef.current = data.session.access_token;
+                    const sent = await sendTokenToExtension(data.session.access_token);
+                    if (sent) {
+                        setStatus('token_sent');
+                        setTimeout(() => window.close(), 2000);
+                    } else {
+                        setStatus('success'); // fallback to manual copy
+                    }
+                } else {
+                    setStatus('idle');
+                }
+            } catch {
+                setStatus('idle');
+            }
+        }
+        checkExistingSession();
+    }, []);
+
+    async function sendTokenToExtension(token) {
+        const params = new URLSearchParams(window.location.search);
+        const extensionId = params.get('ext');
+        if (!extensionId || typeof chrome === 'undefined' || !chrome.runtime?.sendMessage) {
+            return false;
+        }
+        try {
+            await new Promise((resolve, reject) => {
+                chrome.runtime.sendMessage(extensionId, {
+                    type: 'AUTH_TOKEN',
+                    token,
+                    siteUrl: window.location.origin,
+                }, (response) => {
+                    if (chrome.runtime.lastError) { reject(new Error(chrome.runtime.lastError.message)); return; }
+                    resolve(response);
+                });
+            });
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
     async function handleSignIn(e) {
         e.preventDefault();
@@ -51,37 +89,13 @@ export default function ExtensionAuthPage() {
             const token = data.access_token;
             tokenRef.current = token;
 
-            // Try to send token to extension via externally_connectable
-            const params = new URLSearchParams(window.location.search);
-            const extensionId = params.get('ext');
-
-            if (extensionId && typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-                try {
-                    await new Promise((resolve, reject) => {
-                        chrome.runtime.sendMessage(extensionId, {
-                            type: 'AUTH_TOKEN',
-                            token: token,
-                        }, (response) => {
-                            if (chrome.runtime.lastError) {
-                                reject(new Error(chrome.runtime.lastError.message));
-                                return;
-                            }
-                            resolve(response);
-                        });
-                    });
-                    setTokenSent(true);
-                    setStatus('token_sent');
-                    // Auto-close after 2 seconds
-                    setTimeout(() => window.close(), 2000);
-                    return;
-                } catch (sendErr) {
-                    console.warn('[ExtAuth] Failed to send to extension:', sendErr.message);
-                    // Fall through to manual token display
-                }
+            const sent = await sendTokenToExtension(token);
+            if (sent) {
+                setStatus('token_sent');
+                setTimeout(() => window.close(), 2000);
+            } else {
+                setStatus('success');
             }
-
-            // Fallback: show success with manual token copy option
-            setStatus('success');
         } catch (err) {
             setStatus('error');
             setErrorMsg(err.message);
@@ -123,11 +137,17 @@ export default function ExtensionAuthPage() {
 
                 <p style={styles.subtitle}>Sign in to connect your profile to the extension.</p>
 
-                {status === 'token_sent' ? (
+                {status === 'checking' ? (
+                    <div style={styles.successBox}>
+                        <span style={{ fontSize: 40 }}>⏳</span>
+                        <h2 style={{ color: '#4ade80', marginTop: 8, marginBottom: 4 }}>Checking session…</h2>
+                        <p style={styles.subtitle}>Checking if you're already signed in…</p>
+                    </div>
+                ) : status === 'token_sent' ? (
                     <div style={styles.successBox}>
                         <span style={{ fontSize: 40 }}>✅</span>
                         <h2 style={{ color: '#4ade80', marginTop: 8, marginBottom: 4 }}>Connected!</h2>
-                        <p style={styles.subtitle}>Token sent to extension. This tab will close automatically.</p>
+                        <p style={styles.subtitle}>Your profile has been sent to the extension. This tab will close automatically.</p>
                     </div>
                 ) : status === 'success' ? (
                     <div style={styles.successBox}>

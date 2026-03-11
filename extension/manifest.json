@@ -2,13 +2,15 @@
     "manifest_version": 3,
     "name": "Ilm Se Urooj — Pakistan University Bridge",
     "description": "Autofill Pakistani university application forms from a single student profile.",
-    "version": "0.1.0",
+    "version": "2.0.0",
     "permissions": [
         "storage",
         "activeTab",
         "scripting"
     ],
     "host_permissions": [
+        "*://localhost/*",
+        "*://127.0.0.1/*",
         "*://*.nust.edu.pk/*",
         "*://*.nu.edu.pk/*",
         "*://*.lums.edu.pk/*",
@@ -72,9 +74,11 @@
     },
     "externally_connectable": {
         "matches": [
+            "https://ilmseurooj.com/*",
+            "https://www.ilmseurooj.com/*",
+            "https://*.vercel.app/*",
             "http://localhost/*",
-            "http://127.0.0.1/*",
-            "https://*.vercel.app/*"
+            "http://127.0.0.1/*"
         ]
     }
 }

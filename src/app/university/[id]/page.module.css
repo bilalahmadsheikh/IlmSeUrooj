@@ -443,6 +443,47 @@
   gap: var(--space-8);
 }
 
+/* Why choose - highlights */
+.highlightsIntro {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.highlightGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.highlightCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.highlightCard:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.highlightBullet {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--font-size-base);
+}
+
 .keyTakeaways {
   scroll-margin-top: 100px;
   padding: var(--space-6);
@@ -498,6 +539,160 @@
 .card:hover {
   border-color: rgba(16, 185, 129, 0.3);
   box-shadow: var(--glass-shadow), 0 0 40px rgba(16, 185, 129, 0.06);
+}
+
+/* Merit predictor section */
+.meritSection {
+  scroll-margin-top: 100px;
+}
+
+/* Scholarships for this university */
+.scholarshipsIntro {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.scholarshipCards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.scholarshipCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--transition-fast);
+}
+
+.scholarshipCard:hover {
+  border-color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.08);
+  transform: translateX(4px);
+}
+
+.scholarshipName {
+  flex: 1 1 100%;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.scholarshipProvider {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.scholarshipCoverage {
+  font-size: var(--font-size-xs);
+  padding: var(--space-1) var(--space-2);
+  background: rgba(16, 185, 129, 0.15);
+  border-radius: var(--radius-full);
+  color: var(--color-primary-light);
+}
+
+.scholarshipIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.scholarshipsMore {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-light);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.scholarshipsMore:hover {
+  color: var(--color-primary);
+}
+
+/* Your path - next steps */
+.pathCard {
+  padding: var(--space-6);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(13, 43, 38, 0.95) 50%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 0 60px rgba(16, 185, 129, 0.08);
+}
+
+.pathTitle {
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  margin: 0 0 var(--space-5);
+  color: var(--color-text-primary);
+}
+
+.pathSteps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.pathStep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.pathNum {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.pathCtas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pathCta {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.pathCta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.pathSaved {
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: 500;
 }
 
 .cardHeaderRow {

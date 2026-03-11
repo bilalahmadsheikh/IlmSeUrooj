@@ -531,7 +531,7 @@ export default function AdmissionPredictor() {
     const [matricMarks, setMatricMarks] = useState(85);
     const [expectedTestScore, setExpectedTestScore] = useState(70);
     const [selectedField, setSelectedField] = useState('Pre-Engineering');
-    const [selectedUniversity, setSelectedUniversity] = useState('GIKI'); // Default to GIKI
+    const [selectedUniversity, setSelectedUniversity] = useState('GIKI');
     const [educationStatus, setEducationStatus] = useState('fsc_complete'); // fsc_complete, fsc_incomplete, alevel_complete, alevel_incomplete
 
     // Get universities that offer the selected field and have admission criteria

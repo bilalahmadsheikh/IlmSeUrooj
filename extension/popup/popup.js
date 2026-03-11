@@ -5,6 +5,20 @@
 
 const contentEl = document.getElementById('popup-content');
 
+// ─── Site URL ───────────────────────────────────────────────────
+
+let _siteBase = null;
+async function getSiteBase() {
+  if (_siteBase) return _siteBase;
+  try {
+    const result = await chrome.runtime.sendMessage({ type: 'GET_SITE_BASE' });
+    _siteBase = result?.url || 'http://localhost:3000';
+  } catch {
+    _siteBase = 'http://localhost:3000';
+  }
+  return _siteBase;
+}
+
 // ─── Initialize ────────────────────────────────────────────────
 
 async function init() {
@@ -29,14 +43,16 @@ function showSignedOut() {
         </div>
     `;
 
-  document.getElementById('btn-signin').addEventListener('click', () => {
+  document.getElementById('btn-signin').addEventListener('click', async () => {
     const extId = chrome.runtime.id;
-    chrome.tabs.create({ url: `http://localhost:3000/extension-auth?ext=${extId}` });
+    const base = await getSiteBase();
+    chrome.tabs.create({ url: `${base}/extension-auth?ext=${extId}` });
     window.close();
   });
 
-  document.getElementById('btn-create').addEventListener('click', () => {
-    chrome.tabs.create({ url: 'http://localhost:3000/profile' });
+  document.getElementById('btn-create').addEventListener('click', async () => {
+    const base = await getSiteBase();
+    chrome.tabs.create({ url: `${base}/profile` });
     window.close();
   });
 }
@@ -141,15 +157,17 @@ async function showDashboard(profile) {
   }
 
   // Footer links
-  document.getElementById('link-dashboard').addEventListener('click', (e) => {
+  document.getElementById('link-dashboard').addEventListener('click', async (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'http://localhost:3000/applications' });
+    const base = await getSiteBase();
+    chrome.tabs.create({ url: `${base}/applications` });
     window.close();
   });
 
-  document.getElementById('link-profile').addEventListener('click', (e) => {
+  document.getElementById('link-profile').addEventListener('click', async (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'http://localhost:3000/profile' });
+    const base = await getSiteBase();
+    chrome.tabs.create({ url: `${base}/profile` });
     window.close();
   });
 

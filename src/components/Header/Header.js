@@ -3,17 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './Header.module.css';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { getBrowserClient } from '@/lib/supabase-browser';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import { ProfileRing } from './ProfileRing';
 import { IconBookmark, IconScholarship } from '@/components/Icons/Icons';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-export default function Header({ savedCount, onShowSaved, onShowScholarships }) {
+export default function Header({ savedCount = 0, onShowSaved, onShowScholarships }) {
+    const safeShowSaved = typeof onShowSaved === 'function' ? onShowSaved : () => {};
+    const safeShowScholarships = typeof onShowScholarships === 'function' ? onShowScholarships : () => {};
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -21,6 +18,7 @@ export default function Header({ savedCount, onShowSaved, onShowScholarships }) 
     const dropdownRef = useRef(null);
 
     useEffect(() => {
+        const supabase = getBrowserClient();
         supabase.auth.getSession().then(({ data }) => {
             if (data?.session?.user) {
                 setUser(data.session.user);
@@ -41,6 +39,7 @@ export default function Header({ savedCount, onShowSaved, onShowScholarships }) 
     }, []);
 
     async function loadProfile(userId) {
+        const supabase = getBrowserClient();
         const { data } = await supabase.from('profiles')
             .select('full_name, profile_completion, education_system, ibcc_equivalent_inter, inter_status')
             .eq('id', userId).single();
@@ -59,7 +58,7 @@ export default function Header({ savedCount, onShowSaved, onShowScholarships }) 
     }, []);
 
     async function handleSignOut() {
-        await supabase.auth.signOut();
+        await getBrowserClient().auth.signOut();
         setUser(null);
         setProfile(null);
         setShowDropdown(false);
@@ -103,13 +102,13 @@ export default function Header({ savedCount, onShowSaved, onShowScholarships }) 
 
                     <Link href="/" className={styles.navLink}><span className={styles.navLinkText}>Explore</span></Link>
 
-                    <button type="button" className={styles.scholarshipsBtn} onClick={onShowScholarships}
+                    <button type="button" className={styles.scholarshipsBtn} onClick={safeShowScholarships}
                         title="Scholarships and financial aid" aria-label="Open scholarships and financial aid">
                         <IconScholarship className={styles.scholarshipsIcon} aria-hidden />
                         <span className={styles.scholarshipsText}>Scholarships</span>
                     </button>
 
-                    <button className={styles.savedBtn} onClick={onShowSaved}
+                    <button className={styles.savedBtn} onClick={safeShowSaved}
                         title={savedCount > 0 ? `View your shortlist (${savedCount} saved)` : 'View saved universities'}
                         aria-label={savedCount > 0 ? `Open saved list, ${savedCount} universities` : 'Open saved list'}>
                         <IconBookmark className={styles.savedIcon} aria-hidden />

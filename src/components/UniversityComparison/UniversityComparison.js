@@ -231,7 +231,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
                                                 {getComparisonValue(uni, field)}
                                             </span>
                                             {uni && bestId === uni.id && (
-                                                <span className={styles.bestBadge}>Best</span>
+                                                <span className={styles.bestBadge} aria-label="Best value in this category">Best</span>
                                             )}
                                         </div>
                                     ))}

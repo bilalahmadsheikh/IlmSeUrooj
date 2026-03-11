@@ -14,8 +14,25 @@ const outfit = Outfit({
 
 export const metadata = {
   title: "Ilm Se Urooj - Find Your Perfect University in Pakistan",
-  description: "Discover universities across Pakistan with our smart matching system. Swipe right on your favorites! Like UCAS, but for Pakistan.",
-  keywords: "university, Pakistan, admission, NUST, LUMS, FAST, COMSATS, engineering, computer science",
+  description: "Discover universities across Pakistan with our smart matching system. Compare NUST, LUMS, FAST, COMSATS and 24 more. Swipe right on your favorites!",
+  keywords: "university Pakistan admission NUST LUMS FAST COMSATS GIKI engineering computer science medical business",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmseurooj.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_PK',
+    siteName: 'Ilm Se Urooj',
+    title: 'Ilm Se Urooj — Find Your Perfect University in Pakistan',
+    description: 'Smart university matching for Pakistani students. Compare NUST, LUMS, FAST, COMSATS and 24 more. Deadlines, merit calculators, scholarships — all in one place.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ilm Se Urooj — Find Your Perfect University in Pakistan',
+    description: 'Smart university matching for Pakistani students. Compare 28 universities, track deadlines, calculate merit.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }) {

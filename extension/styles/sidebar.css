@@ -502,3 +502,140 @@
     color: var(--um-text-dim) !important;
     border-left: none !important;
 }
+
+/* ─── Conflict Outline (field had existing different value) ─── */
+
+.unimatch-conflict {
+    outline: 2px solid #60a5fa !important;
+    outline-offset: 1px;
+}
+
+/* ─── Suggestion Chip animation ─── */
+
+@keyframes chip-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* ─── Details/Summary (profile preview) ─── */
+
+#unimatch-sidebar details summary::-webkit-details-marker { display: none; }
+#unimatch-sidebar details summary { user-select: none; }
+#unimatch-sidebar details[open] summary span:last-child { transform: rotate(180deg); display: inline-block; }
+
+/* ─── Autofill button pulse on keyboard shortcut ─── */
+
+.btn-autofill:focus {
+    animation: um-pulse 0.4s ease;
+}
+
+@keyframes um-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+    70%  { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+/* ─── Draft AI Button ─── */
+
+.unimatch-draft-btn:hover {
+    background: rgba(168, 85, 247, 0.25) !important;
+    border-color: rgba(168, 85, 247, 0.5) !important;
+}
+
+/* ─── Enhanced Glow Effects ──────────────────── */
+#unimatch-sidebar {
+  border-left: 1px solid rgba(74, 222, 128, 0.15) !important;
+  box-shadow: -4px 0 40px rgba(0, 0, 0, 0.4), -1px 0 0 rgba(74, 222, 128, 0.08) !important;
+}
+
+#unimatch-toggle {
+  box-shadow: -2px 0 20px rgba(74, 222, 128, 0.3), 0 0 0 1px rgba(74, 222, 128, 0.2) !important;
+}
+
+#unimatch-toggle:hover {
+  box-shadow: -2px 0 30px rgba(74, 222, 128, 0.6), 0 0 0 1px rgba(74, 222, 128, 0.5), 0 0 60px rgba(74, 222, 128, 0.2) !important;
+}
+
+.btn-autofill {
+  background: linear-gradient(135deg, #16a34a, #4ade80, #22c55e) !important;
+  background-size: 200% 200% !important;
+  animation: um-btn-shimmer 3s ease infinite !important;
+  box-shadow: 0 4px 20px rgba(74, 222, 128, 0.4) !important;
+}
+
+.btn-autofill:hover {
+  box-shadow: 0 6px 30px rgba(74, 222, 128, 0.7) !important;
+  animation-duration: 1s !important;
+}
+
+@keyframes um-btn-shimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Typing animation for header ────────────── */
+.unimatch-logo span {
+  overflow: hidden;
+  border-right: 2px solid #4ade80;
+  animation: um-typing 0.5s steps(9) 0.3s both, um-blink 0.8s step-end 0.8s 3;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+@keyframes um-typing {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes um-blink {
+  50% { border-color: transparent; }
+}
+
+/* ─── State card enhanced ─────────────────────── */
+.state-card {
+  animation: um-fade-up 0.3s ease forwards;
+}
+
+@keyframes um-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─── Avatar pulse ────────────────────────────── */
+.avatar {
+  animation: um-pulse 3s ease-in-out infinite !important;
+}
+
+/* ─── Profile completion ring glow ─────────────── */
+.profile-ring circle:last-child {
+  filter: drop-shadow(0 0 4px rgba(74,222,128,0.8));
+}
+
+/* ─── University badge glow ─────────────────────── */
+.uni-badge {
+  animation: um-badge-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes um-badge-glow {
+  from { box-shadow: 0 0 0 rgba(74,222,128,0); }
+  to   { box-shadow: 0 0 10px rgba(74,222,128,0.4); }
+}
+
+/* ─── Filled field flash animation ──────────────── */
+@keyframes um-field-fill {
+  0%   { background-color: rgba(74,222,128,0.15) !important; }
+  100% { background-color: transparent !important; }
+}
+
+/* ─── Demo button special ────────────────────── */
+#unimatch-load-demo {
+  background: linear-gradient(135deg, rgba(74,222,128,0.1), rgba(34,197,94,0.15)) !important;
+  border: 1px solid rgba(74,222,128,0.3) !important;
+  color: #4ade80 !important;
+}
+
+#unimatch-load-demo:hover {
+  background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.3)) !important;
+  box-shadow: 0 0 20px rgba(74,222,128,0.3) !important;
+}

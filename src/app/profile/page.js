@@ -129,6 +129,8 @@ export default function ProfilePage() {
             if (data?.session?.user) {
                 setUser(data.session.user);
                 loadProfile(data.session.user.id);
+                // Silently push token to extension if it's installed
+                tryConnectExtension(data.session.access_token);
             } else {
                 setLoading(false);
             }
@@ -137,6 +139,7 @@ export default function ProfilePage() {
             if (session?.user) {
                 setUser(session.user);
                 loadProfile(session.user.id);
+                if (event === 'SIGNED_IN') tryConnectExtension(session.access_token);
             } else {
                 setUser(null);
                 setProfile({});
@@ -145,6 +148,20 @@ export default function ProfilePage() {
         });
         return () => subscription?.unsubscribe();
     }, []);
+
+    // Send auth token to the Chrome extension if installed (fire-and-forget)
+    function tryConnectExtension(token) {
+        if (!token || typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const extId = params.get('ext');
+        if (extId && typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+            chrome.runtime.sendMessage(extId, {
+                type: 'AUTH_TOKEN',
+                token,
+                siteUrl: window.location.origin,
+            }, () => { /* ignore response — fire and forget */ });
+        }
+    }
 
     async function loadProfile(userId) {
         try {
@@ -359,6 +376,20 @@ export default function ProfilePage() {
         <div className="pf-page" onBlur={handleBlurSave}>
             <style jsx>{pageStyles}</style>
             <Nav user={user} onSignOut={handleSignOut} />
+
+            {/* Extension Connect Banner */}
+            <div className="ext-connect-banner">
+                <span className="ext-connect-icon">🧩</span>
+                <div className="ext-connect-text">
+                    <strong>Extension installed?</strong>
+                    <span> Click to connect your real profile — autofill will use your actual data.</span>
+                </div>
+                <button className="ext-connect-btn" onClick={() => {
+                    const extId = new URLSearchParams(window.location.search).get('ext') || '';
+                    const url = `/extension-auth${extId ? `?ext=${extId}` : ''}`;
+                    window.open(url, '_blank', 'width=480,height=560');
+                }}>Connect Extension →</button>
+            </div>
 
             {/* Header + Completion  */}
             <div className="pf-header">
@@ -752,6 +783,12 @@ const pageStyles = `
   .btn-signout { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; }
   .btn-signout:hover { background: rgba(239,68,68,0.2); }
 
+  .ext-connect-banner { display: flex; align-items: center; gap: 12px; background: rgba(74,222,128,0.06); border: 1px solid rgba(74,222,128,0.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; flex-wrap: wrap; }
+  .ext-connect-icon { font-size: 20px; flex-shrink: 0; }
+  .ext-connect-text { flex: 1; font-size: 13px; color: #a1a1aa; min-width: 200px; }
+  .ext-connect-text strong { color: #e4e4e7; }
+  .ext-connect-btn { padding: 8px 16px; background: #4ade80; color: #0c0e0b; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .ext-connect-btn:hover { background: #86efac; }
   .pf-header { display: flex; align-items: center; gap: 16px; padding: 24px 0 32px; flex-wrap: wrap; }
   .pf-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(74,222,128,0.15); color: #4ade80; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; flex-shrink: 0; }
   .pf-header h1 { font-size: 24px; margin: 0; }

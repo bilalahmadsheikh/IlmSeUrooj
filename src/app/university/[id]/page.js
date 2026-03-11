@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { universities, lastScraperRun } from '@/data/universities';
@@ -9,7 +9,7 @@ import { getAlumniLinks } from '@/data/alumniLinks';
 import { getAlumniPulse, COUNTRY_COORDS } from '@/data/alumniPulseData';
 import Header from '@/components/Header/Header';
 import AnimatedBackground from '@/components/Background/AnimatedBackground';
-import { IconArrowLeft, IconExternalLink, IconCalendar, IconBookmark, IconCheck, IconShield, IconLinkedIn, IconUsers } from '@/components/Icons/Icons';
+import { IconArrowLeft, IconExternalLink, IconCalendar, IconBookmark, IconCheck, IconShield, IconLinkedIn } from '@/components/Icons/Icons';
 import { loadSavedFromStorage, saveToStorage } from '@/utils/savedStorage';
 import styles from './page.module.css';
 
@@ -54,7 +54,10 @@ function getSimilarUniversities(current, limit = 4) {
 
 export default function UniversityDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id ? parseInt(params.id, 10) : null;
+
+  const goHome = useCallback(() => router.push('/'), [router]);
 
   const [uni, setUni] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -134,7 +137,7 @@ export default function UniversityDetailPage() {
     return (
       <main className={styles.main}>
         <AnimatedBackground />
-        <Header savedCount={0} onShowSaved={() => {}} onShowScholarships={() => {}} />
+        <Header savedCount={0} onShowSaved={goHome} onShowScholarships={goHome} />
         <div className={styles.notFound}>
           <h1>University Not Found</h1>
           <p>The university you&apos;re looking for doesn&apos;t exist or has been removed.</p>
@@ -150,7 +153,7 @@ export default function UniversityDetailPage() {
     return (
       <main className={styles.main}>
         <AnimatedBackground />
-        <Header savedCount={0} onShowSaved={() => {}} onShowScholarships={() => {}} />
+        <Header savedCount={0} onShowSaved={goHome} onShowScholarships={goHome} />
         <div className={styles.loading}>Loading...</div>
       </main>
     );
@@ -172,7 +175,7 @@ export default function UniversityDetailPage() {
   return (
     <main className={styles.main}>
       <AnimatedBackground />
-      <Header savedCount={0} onShowSaved={() => {}} onShowScholarships={() => {}} />
+      <Header savedCount={0} onShowSaved={goHome} onShowScholarships={goHome} />
 
       {/* Quick nav */}
       <nav className={styles.quickNav} aria-label="Page sections">
@@ -223,7 +226,7 @@ export default function UniversityDetailPage() {
               {uni.logo && !logoError ? (
                 <div className={styles.logoImgWrap}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={uni.logo} alt="" className={styles.logoImg} onError={() => setLogoError(true)} />
+                  <img src={uni.logo} alt={`${uni.shortName} logo`} className={styles.logoImg} onError={() => setLogoError(true)} />
                 </div>
               ) : (
                 <div className={styles.logoBox}>
@@ -679,22 +682,22 @@ export default function UniversityDetailPage() {
                         <div className={styles.outcomeGrid}>
                           <div className={styles.outcomeItem}>
                             <span className={styles.outcomeIcon}>🌍</span>
-                            <span className={styles.outcomeValue}>{snap.abroadPercent}%</span>
+                            <span className={styles.outcomeValue}>{snap.abroadPercent != null ? `${snap.abroadPercent}%` : "—"}</span>
                             <span className={styles.outcomeLabel}>working abroad</span>
                           </div>
                           <div className={styles.outcomeItem}>
                             <span className={styles.outcomeIcon}>🏢</span>
-                            <span className={styles.outcomeValue}>{snap.topEmployers?.slice(0, 3).join(", ") || "—"}</span>
+                            <span className={styles.outcomeValue}>{Array.isArray(snap.topEmployers) ? snap.topEmployers.slice(0, 3).join(", ") : "—"}</span>
                             <span className={styles.outcomeLabel}>top employers</span>
                           </div>
                           <div className={styles.outcomeItem}>
                             <span className={styles.outcomeIcon}>🚀</span>
-                            <span className={styles.outcomeValue}>{snap.startupsFounded}+</span>
+                            <span className={styles.outcomeValue}>{snap.startupsFounded != null ? `${snap.startupsFounded}+` : "—"}</span>
                             <span className={styles.outcomeLabel}>startups founded</span>
                           </div>
                           <div className={styles.outcomeItem}>
                             <span className={styles.outcomeIcon}>📈</span>
-                            <span className={styles.outcomeValue}>{snap.employedWithin6Months}%</span>
+                            <span className={styles.outcomeValue}>{snap.employedWithin6Months != null ? `${snap.employedWithin6Months}%` : "—"}</span>
                             <span className={styles.outcomeLabel}>employed within 6 mo</span>
                           </div>
                         </div>

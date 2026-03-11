@@ -1,35 +1,70 @@
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { getBrowserClient } from '@/lib/supabase-browser';
 
 /**
  * Shared profile hook for components that need access to the student profile.
  * Used by AdmissionPredictor, SavedList, SwipeCard, etc.
+ *
+ * Uses the shared browser singleton so auth state is never out of sync
+ * across Header, page.js, and this hook.
  */
 export function useProfile() {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (!user) { setLoading(false); return; }
-            supabase.from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single()
-                .then(({ data }) => { setProfile(data); setLoading(false); });
-        });
+        let cancelled = false;
+        const supabase = getBrowserClient();
+
+        async function load() {
+            try {
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError) throw authError;
+                if (!user) { if (!cancelled) setLoading(false); return; }
+
+                const { data, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError && profileError.code !== 'PGRST116') {
+                    // PGRST116 = row not found (profile not yet created) — that's OK
+                    throw profileError;
+                }
+
+                if (!cancelled) {
+                    setProfile(data ?? null);
+                    setLoading(false);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error('[useProfile] Failed to load profile:', err);
+                    setError(err);
+                    setLoading(false);
+                }
+            }
+        }
+
+        load();
+        return () => { cancelled = true; };
     }, []);
 
     const updateProfile = async (updates) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        await supabase.from('profiles').upsert({ id: user.id, ...updates }, { onConflict: 'id' });
-        setProfile(prev => ({ ...prev, ...updates }));
+        const supabase = getBrowserClient();
+        try {
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) return;
+            const { error: upsertError } = await supabase
+                .from('profiles')
+                .upsert({ id: user.id, ...updates }, { onConflict: 'id' });
+            if (upsertError) throw upsertError;
+            setProfile(prev => ({ ...prev, ...updates }));
+        } catch (err) {
+            console.error('[useProfile] Failed to update profile:', err);
+            throw err; // Re-throw so callers can show error feedback
+        }
     };
 
     /**
@@ -65,9 +100,11 @@ export function useProfile() {
 
         // Part-I / Appearing: use projected
         if (['part1_only', 'appearing'].includes(profile.inter_status)) {
+            const part1Marks = Number(profile.fsc_part1_marks) || 0;
+            const part1Total = Number(profile.fsc_part1_total) || 0; // guard: never divide by zero
             const projected = profile.fsc_projected_percentage ||
-                (profile.fsc_part1_marks && profile.fsc_part1_total
-                    ? ((profile.fsc_part1_marks / profile.fsc_part1_total) * 100)
+                (part1Marks > 0 && part1Total > 0
+                    ? ((part1Marks / part1Total) * 100)
                     : null);
             return {
                 percentage: projected ? parseFloat(projected).toFixed(2) : null,
@@ -92,5 +129,5 @@ export function useProfile() {
         };
     }
 
-    return { profile, loading, updateProfile, getEffectiveInterData };
+    return { profile, loading, error, updateProfile, getEffectiveInterData };
 }

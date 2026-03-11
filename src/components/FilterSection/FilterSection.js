@@ -5,7 +5,7 @@ import { filterOptions } from '@/data/universities';
 import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
 import { IconArrowRight } from '@/components/Icons/Icons';
 
-export default function FilterSection({ filters, setFilters, onStartSwiping, isSwipeMode }) {
+export default function FilterSection({ filters, setFilters, onStartSwiping, isSwipeMode, searchQuery, onSearchChange }) {
     const handleFieldChange = (value) => {
         setFilters(prev => ({
             ...prev,
@@ -35,6 +35,36 @@ export default function FilterSection({ filters, setFilters, onStartSwiping, isS
                             Discover universities across Pakistan with our smart matching system.
                             Swipe right on your favorites!
                         </p>
+                    </div>
+                )}
+
+                {/* Quick university name search */}
+                {typeof onSearchChange === 'function' && (
+                    <div className={styles.searchBarWrapper}>
+                        <label htmlFor="uni-search" className={styles.srOnly}>Search university by name</label>
+                        <div className={styles.searchBar}>
+                            <svg className={styles.searchIcon} viewBox="0 0 20 20" fill="none" aria-hidden>
+                                <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.5"/>
+                                <path d="M13 13l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            </svg>
+                            <input
+                                id="uni-search"
+                                type="search"
+                                className={styles.searchInput}
+                                placeholder="Search by university name (e.g. NUST, LUMS…)"
+                                value={searchQuery || ''}
+                                onChange={e => onSearchChange(e.target.value)}
+                                autoComplete="off"
+                            />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    className={styles.searchClear}
+                                    onClick={() => onSearchChange('')}
+                                    aria-label="Clear search"
+                                >✕</button>
+                            )}
+                        </div>
                     </div>
                 )}
 

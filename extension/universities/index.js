@@ -88,10 +88,28 @@ ALL_UNIVERSITIES.push({
 ALL_UNIVERSITIES.push({
     slug: 'comsats', name: 'COMSATS',
     fullName: 'COMSATS University Islamabad',
-    registrationUrl: 'https://admissions.comsats.edu.pk',
-    loginUrl: 'https://admissions.comsats.edu.pk',
+    registrationUrl: 'https://admissions.comsats.edu.pk/Home/Register',
+    loginUrl: 'https://admissions.comsats.edu.pk/Home/Login',
+    registerLinkSelectors: 'a[href*="Register"], a[href*="register"], a[href*="signup"], button:contains("Register"), a:contains("New User"), a:contains("Register")',
     portalDomains: ['admissions.comsats.edu.pk'],
     formType: 'requires_login_first',
+    // Login form
+    loginFieldMap: {
+        portal_email: '[name="Email"], [name="email"], #Email, input[type="email"]',
+        portal_password: 'input[type="password"]',
+    },
+    // Registration form (after clicking Register/New User)
+    registerFieldMap: {
+        full_name: '[name="Name"], [name="ApplicantName"], [name="FullName"], #Name, #ApplicantName',
+        email: '[name="Email"], [type="email"], #Email',
+        portal_password: 'input[type="password"]',
+        cnic: '[name="CNIC"], [name="cnic"], #CNIC, [name="NIC"]',
+        phone: '[name="Mobile"], [name="Phone"], [name="ContactNo"], #Mobile, #Phone',
+        father_name: '[name="FatherName"], [name="fatherName"], #FatherName',
+        date_of_birth: '[name="DOB"], [name="dob"], #DOB, [name="DateOfBirth"]',
+        gender: '[name="Gender"], [name="gender"], #Gender',
+    },
+    // Application form (after login)
     fieldMap: {
         full_name: '[name="Name"], [name="ApplicantName"], [name="name"], #Name, #ApplicantName',
         father_name: '[name="FatherName"], [name="fatherName"], #FatherName',
@@ -117,8 +135,8 @@ ALL_UNIVERSITIES.push({
         province: { punjab: 'Punjab', sindh: 'Sindh', kpk: 'Khyber Pakhtunkhwa', balochistan: 'Balochistan', islamabad: 'Islamabad' }
     },
     transforms: { cnic: 'cnic_dashes', phone: 'phone_pak', date_of_birth: 'date_dmy' },
-    verified: false, lastVerified: '2026-02-21',
-    notes: 'ASP.NET style PascalCase field names. Signup has Name, Email, Password.'
+    verified: false, lastVerified: '2026-03-11',
+    notes: 'ASP.NET style PascalCase field names. Login uses Email + Password. Register at /Home/Register.'
 });
 
 ALL_UNIVERSITIES.push({

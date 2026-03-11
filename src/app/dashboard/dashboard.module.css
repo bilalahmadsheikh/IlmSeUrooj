@@ -1,0 +1,296 @@
+/* Dashboard Layout */
+.page {
+    min-height: 100vh;
+    background: #0c0e0b;
+    color: #e4e4e7;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.loading, .authRequired {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0c0e0b;
+    color: #a1a1aa;
+    gap: 16px;
+}
+
+.authRequired h2 { color: #e4e4e7; font-size: 22px; margin: 0; }
+.authRequired a { color: #4ade80; text-decoration: none; }
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #27272a;
+    border-top-color: #4ade80;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Header */
+.header {
+    background: #111311;
+    border-bottom: 1px solid #1f2520;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.headerInner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.backLink {
+    color: #71717a;
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+.backLink:hover { color: #4ade80; }
+
+.title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #4ade80;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titleIcon { font-size: 20px; }
+
+.userEmail {
+    font-size: 12px;
+    color: #71717a;
+    background: #1a1c1a;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid #27272a;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    overflow-x: auto;
+    background: #111311;
+    border-bottom: 1px solid #1f2520;
+    padding: 0 24px;
+    scrollbar-width: none;
+    max-width: 100%;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    color: #71717a;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.tab:hover { color: #a1a1aa; }
+
+.tabActive {
+    color: #4ade80;
+    border-bottom-color: #4ade80;
+}
+
+.tabIcon { font-size: 16px; }
+
+/* Main */
+.main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Section card used by components */
+:global(.dash-section) {
+    background: #161916;
+    border: 1px solid #27272a;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+:global(.dash-section-title) {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e4e4e7;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+:global(.dash-btn) {
+    padding: 8px 16px;
+    background: #4ade80;
+    color: #0c0e0b;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.2s;
+}
+:global(.dash-btn:hover) { opacity: 0.85; }
+:global(.dash-btn:disabled) { opacity: 0.5; cursor: not-allowed; }
+
+:global(.dash-btn-ghost) {
+    padding: 7px 14px;
+    background: transparent;
+    color: #71717a;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+:global(.dash-btn-ghost:hover) { border-color: #4ade80; color: #4ade80; }
+
+:global(.dash-btn-danger) {
+    padding: 6px 12px;
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+:global(.dash-input) {
+    padding: 9px 12px;
+    background: #0c0e0b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    color: #e4e4e7;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+:global(.dash-input:focus) { border-color: #4ade80; }
+
+:global(.dash-select) {
+    padding: 9px 12px;
+    background: #0c0e0b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    color: #e4e4e7;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+:global(.dash-select:focus) { border-color: #4ade80; }
+
+:global(.dash-label) {
+    font-size: 11px;
+    font-weight: 500;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+:global(.dash-field) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+:global(.dash-grid-2) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+:global(.dash-grid-3) {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+:global(.dash-stat-card) {
+    background: #1a1c1a;
+    border: 1px solid #1f2520;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+:global(.dash-stat-value) {
+    font-size: 28px;
+    font-weight: 700;
+    color: #4ade80;
+    line-height: 1;
+}
+
+:global(.dash-stat-label) {
+    font-size: 12px;
+    color: #71717a;
+}
+
+:global(.dash-empty) {
+    text-align: center;
+    padding: 40px 20px;
+    color: #71717a;
+    font-size: 13px;
+}
+
+:global(.dash-tag) {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+:global(.dash-tag-green) { background: rgba(74,222,128,0.1); color: #4ade80; }
+:global(.dash-tag-yellow) { background: rgba(251,191,36,0.1); color: #fbbf24; }
+:global(.dash-tag-red) { background: rgba(239,68,68,0.1); color: #ef4444; }
+:global(.dash-tag-blue) { background: rgba(96,165,250,0.1); color: #60a5fa; }
+:global(.dash-tag-gray) { background: rgba(113,113,122,0.15); color: #a1a1aa; }
+
+@media (max-width: 768px) {
+    .headerInner { padding: 12px 16px; }
+    .main { padding: 16px; }
+    .tabs { padding: 0 16px; }
+    :global(.dash-grid-2), :global(.dash-grid-3) { grid-template-columns: 1fr; }
+}

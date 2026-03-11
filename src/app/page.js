@@ -76,6 +76,7 @@ export default function Home() {
   const [showScholarships, setShowScholarships] = useState(false);
   const [toast, setToast] = useState(null);
   const [compareInitialIds, setCompareInitialIds] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Saved items: [{ university, savedAt, tag, note }, ...] — order = display order
   const [savedItems, setSavedItems] = useState([]);
@@ -85,10 +86,13 @@ export default function Home() {
   const [rankedUniversities, setRankedUniversities] = useState([]);
   const [allRankedUniversities, setAllRankedUniversities] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  // Use a plain array but derive Set in useMemo for O(1) lookups
   const [skippedIds, setSkippedIds] = useState([]);
+  const skippedSet = useMemo(() => new Set(skippedIds), [skippedIds]);
 
   const savedUniversities = useMemo(() => savedItems.map(i => i.university), [savedItems]);
   const savedIds = useMemo(() => savedItems.map(i => i.university.id), [savedItems]);
+  const savedSet = useMemo(() => new Set(savedIds), [savedIds]);
 
   // Load saved: localStorage for guests, API for logged-in users
   useEffect(() => {
@@ -112,47 +116,57 @@ export default function Home() {
 
         if (cancelled) return;
 
-        // Sync localStorage items not in API to Supabase
+        // Sync localStorage items not in API to Supabase — one batch request instead of N
         const localRows = loadSavedFromStorage();
         const localItems = hydrateSavedItems(localRows);
         const apiIds = new Set(hydrated.map((i) => i.university.id));
 
-        for (const item of localItems) {
-          if (apiIds.has(item.university.id)) continue;
-          const slug = getUniversitySlug(item.university);
-          const domain = getPortalDomain(item.university);
-          if (!slug || !domain) continue;
+        const toSync = localItems
+          .filter((item) => !apiIds.has(item.university.id))
+          .map((item) => ({
+            university_slug: getUniversitySlug(item.university),
+            university_name: item.university.shortName ?? item.university.name,
+            portal_domain: getPortalDomain(item.university),
+            status: 'saved',
+            _item: item, // keep reference for hydration below
+          }))
+          .filter((x) => x.university_slug && x.portal_domain);
+
+        if (toSync.length > 0) {
           try {
-            const postRes = await fetch('/api/applications', {
+            const batchRes = await fetch('/api/applications/batch', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({
-                university_slug: slug,
-                university_name: item.university.shortName ?? item.university.name,
-                portal_domain: domain,
-                status: 'saved',
+                items: toSync.map(({ _item: _unused, ...rest }) => rest),
               }),
             });
-            if (postRes.ok && !cancelled) {
-              const { application } = await postRes.json();
-              hydrated = [...hydrated, {
-                university: item.university,
-                savedAt: item.savedAt,
-                tag: item.tag,
-                note: item.note,
-                applicationId: application.id,
-              }];
-              apiIds.add(item.university.id);
+            if (batchRes.ok && !cancelled) {
+              const { created: createdRecords = [] } = await batchRes.json();
+              // Map created records back to local items by slug
+              const createdBySlug = new Map(createdRecords.map((a) => [a.university_slug, a]));
+              for (const syncItem of toSync) {
+                const record = createdBySlug.get(syncItem.university_slug);
+                hydrated = [...hydrated, {
+                  university: syncItem._item.university,
+                  savedAt: syncItem._item.savedAt,
+                  tag: syncItem._item.tag,
+                  note: syncItem._item.note,
+                  applicationId: record?.id ?? null,
+                }];
+              }
             }
-          } catch (_) {}
+          } catch (syncErr) {
+            console.warn('[page] Batch sync failed, saved list may be out of sync:', syncErr);
+          }
         }
 
-        if (!cancelled && hydrated.length >= 0) {
+        if (!cancelled) {
           setSavedItems(hydrated);
         }
       } catch (e) {
-        console.warn('Failed to fetch saved from API', e);
+        console.warn('[page] Failed to fetch saved from API:', e);
       }
     })();
     return () => { cancelled = true; };
@@ -164,17 +178,14 @@ export default function Home() {
     saveToStorage(savedItems);
   }, [savedItems, savedLoaded]);
 
-  // Rank universities when filters change
+  // Rank universities when filters change — uses Sets for O(1) exclusion lookups
   useEffect(() => {
     const ranked = rankUniversities(universities, filters);
     setAllRankedUniversities(ranked);
-    const filtered = ranked.filter(uni =>
-      !savedIds.includes(uni.id) &&
-      !skippedIds.includes(uni.id)
-    );
+    const filtered = ranked.filter(uni => !savedSet.has(uni.id) && !skippedSet.has(uni.id));
     setRankedUniversities(filtered);
     setCurrentIndex(0);
-  }, [filters, savedIds, skippedIds]);
+  }, [filters, savedSet, skippedSet]);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
@@ -205,16 +216,22 @@ export default function Home() {
             setSavedItems(prev =>
               prev.map(i => i.university.id === university.id ? { ...i, applicationId: application.id } : i)
             );
+          } else if (res.status !== 409) {
+            // 409 = already exists (duplicate save), that's fine. Anything else is unexpected.
+            console.warn('[page] Failed to sync save to API, status:', res.status);
           }
-        } catch (_) {}
+        } catch (err) {
+          // Network error — item is still saved locally via localStorage, so don't show error to user
+          console.warn('[page] Save sync failed (network):', err);
+        }
       }
     }
   }, [isLoggedIn]);
 
   // Handle swipe action
-  const handleSwipe = (direction, university) => {
+  const handleSwipe = useCallback((direction, university) => {
     if (direction === 'right') {
-      if (!savedIds.includes(university.id)) {
+      if (!savedSet.has(university.id)) {
         addSavedWithSync(university);
         showToast(`${university.shortName} saved to your list!`, 'success');
       }
@@ -222,29 +239,38 @@ export default function Home() {
       setSkippedIds(prev => [...prev, university.id]);
     }
     setCurrentIndex(prev => prev + 1);
-  };
+  }, [savedSet, addSavedWithSync, showToast]);
 
   // Handle save from list
-  const handleSaveFromList = (university) => {
-    if (!savedIds.includes(university.id)) {
+  const handleSaveFromList = useCallback((university) => {
+    if (!savedSet.has(university.id)) {
       addSavedWithSync(university);
       showToast(`${university.shortName} added to saved list`, 'success');
     }
-  };
+  }, [savedSet, addSavedWithSync, showToast]);
 
   // Remove from saved
   const handleRemoveSaved = useCallback(async (id, applicationId) => {
     const item = savedItems.find(i => i.university.id === id);
     const name = item?.university?.shortName ?? 'University';
+    const appId = applicationId ?? item?.applicationId;
 
-    if (isLoggedIn && (applicationId ?? item?.applicationId)) {
-      try {
-        await fetch(`/api/applications/${applicationId ?? item.applicationId}`, { method: 'DELETE', credentials: 'include' });
-      } catch (_) {}
-    }
-
+    // Optimistically remove from UI immediately
     setSavedItems(prev => prev.filter(i => i.university.id !== id));
     showToast(`${name} removed from list`, 'removed');
+
+    if (isLoggedIn && appId) {
+      try {
+        const res = await fetch(`/api/applications/${appId}`, { method: 'DELETE', credentials: 'include' });
+        if (!res.ok && res.status !== 404) {
+          // 404 means it was already gone — that's fine
+          console.warn('[page] Failed to delete application from API, status:', res.status);
+        }
+      } catch (err) {
+        // Network error — item is removed from UI and localStorage, API will self-correct on next sync
+        console.warn('[page] Remove sync failed (network):', err);
+      }
+    }
   }, [savedItems, isLoggedIn]);
 
   // Update a saved item (tag, note)
@@ -279,8 +305,22 @@ export default function Home() {
     setSkippedIds([]);
   };
 
-  // Get visible cards (current + next for stacking effect)
-  const visibleCards = rankedUniversities.slice(currentIndex, currentIndex + 2);
+  // Search-filtered view of all ranked universities (used for UniversityList + RecommendationsSection)
+  const searchFilteredUniversities = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return allRankedUniversities;
+    return allRankedUniversities.filter(u =>
+      u.name.toLowerCase().includes(q) ||
+      u.shortName?.toLowerCase().includes(q) ||
+      u.city?.toLowerCase().includes(q)
+    );
+  }, [allRankedUniversities, searchQuery]);
+
+  // Get visible cards (current + next for stacking effect) — memoized to prevent re-render cascade
+  const visibleCards = useMemo(
+    () => rankedUniversities.slice(currentIndex, currentIndex + 2),
+    [rankedUniversities, currentIndex]
+  );
   const hasMoreCards = currentIndex < rankedUniversities.length;
 
   // Keyboard: Escape closes saved panel; arrow keys in swipe mode
@@ -336,11 +376,13 @@ export default function Home() {
         setFilters={setFilters}
         onStartSwiping={handleStartSwiping}
         isSwipeMode={isSwipeMode}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
 
-      {!isSwipeMode && allRankedUniversities.length > 0 && (
+      {!isSwipeMode && searchFilteredUniversities.length > 0 && (
         <RecommendationsSection
-          rankedUniversities={allRankedUniversities}
+          rankedUniversities={searchFilteredUniversities}
           filters={filters}
           onStartSwiping={handleStartSwiping}
           onSave={handleSaveFromList}
@@ -416,7 +458,10 @@ export default function Home() {
                 <div
                   className={styles.progressFill}
                   style={{
-                    width: `${((currentIndex + savedItems.length) / (rankedUniversities.length + savedItems.length + skippedIds.length)) * 100}%`
+                    width: (() => {
+                      const total = rankedUniversities.length + savedItems.length + skippedIds.length;
+                      return total ? `${((currentIndex + savedItems.length) / total) * 100}%` : '0%';
+                    })()
                   }}
                 />
               </div>
@@ -426,9 +471,9 @@ export default function Home() {
             </div>
           </section>
 
-          {/* University List Section */}
+          {/* University List Section — respects search query */}
           <UniversityList
-            universities={allRankedUniversities}
+            universities={searchFilteredUniversities}
             field={filters.field}
             filters={filters}
             onSave={handleSaveFromList}

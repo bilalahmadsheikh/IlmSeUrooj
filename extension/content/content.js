@@ -6,6 +6,10 @@
 // ─── University Domain Registry ────────────────────────────────
 
 const UNIVERSITY_DOMAINS = {
+  // ── TEST ENTRIES — safe to keep, sidebar only shows with a profile logged in ──
+  'localhost': { slug: 'test', name: '🧪 Test Portal' },
+  '127.0.0.1': { slug: 'test', name: '🧪 Test Portal' },
+  // ──────────────────────────────────────────────────────────────────────────────
   'admissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
   'ugadmissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
   'pgadmission.nust.edu.pk': { slug: 'nust', name: 'NUST' },
@@ -98,132 +102,570 @@ const TRANSFORMS = {
 // Matches form fields to profile keys by analyzing name, id, label, placeholder
 
 const FIELD_HEURISTICS = [
-  { match: ['email', 'e-mail', 'e_mail', 'emailaddress', 'email_address'], profileKey: 'email', priority: 10 },
-  { match: ['cnic', 'nic', 'national_id', 'nationalid', 'id_card', 'idcard', 'cnic_no', 'b_form', 'bform', 'nicop'], profileKey: 'cnic', priority: 9 },
-  { match: ['phone', 'mobile', 'cell', 'contact', 'tel', 'telephone', 'phone_number', 'mobileno', 'contact_no'], profileKey: 'phone', priority: 8 },
-  // First/Last/Middle name MUST be checked BEFORE full_name
-  { match: ['first_name', 'firstname', 'first name', 'fname'], profileKey: 'first_name', priority: 11 },
-  { match: ['last_name', 'lastname', 'last name', 'lname', 'surname'], profileKey: 'last_name', priority: 11 },
-  { match: ['middle_name', 'middlename', 'middle name', 'mname'], profileKey: 'middle_name', priority: 11 },
-  { match: ['full_name', 'fullname', 'applicant_name', 'student_name', 'candidatename'], profileKey: 'full_name', priority: 7 },
-  { match: ['father', 'fathername', 'father_name', 'fathersname', 'guardian'], profileKey: 'father_name', priority: 7 },
-  { match: ['dob', 'date_of_birth', 'dateofbirth', 'birthdate', 'birth_date'], profileKey: 'date_of_birth', priority: 6, inputType: 'date' },
-  { match: ['gender', 'sex'], profileKey: 'gender', priority: 5 },
-  { match: ['city', 'town'], profileKey: 'city', priority: 5 },
-  { match: ['province', 'state', 'domicile'], profileKey: 'province', priority: 5 },
-  { match: ['address', 'postal_address', 'mailing_address', 'residential_address', 'permanent_address'], profileKey: 'address', priority: 4 },
-  { match: ['postal_code', 'postalcode', 'zipcode', 'zip', 'zip_code'], profileKey: 'postal_code', priority: 3 },
-  { match: ['nationality'], profileKey: 'nationality', priority: 3 },
-  { match: ['religion'], profileKey: 'religion', priority: 3 },
-  { match: ['whatsapp'], profileKey: 'whatsapp', priority: 3 },
-  { match: ['board', 'board_name', 'boardname', 'examination_board'], profileKey: 'board_name', priority: 4 },
-  { match: ['school', 'college', 'school_name', 'institution', 'school_college'], profileKey: 'school_name', priority: 4 },
-  { match: ['passing_year', 'passingyear', 'year_of_passing', 'grad_year', 'graduation_year'], profileKey: 'passing_year', priority: 4 },
-  { match: ['fsc_marks', 'fscmarks', 'hssc_marks', 'inter_marks', 'intermediate_marks', 'fsc_obtained'], profileKey: 'fsc_marks', priority: 6 },
-  { match: ['fsc_total', 'fsctotal', 'hssc_total', 'inter_total'], profileKey: 'fsc_total', priority: 5 },
-  { match: ['matric_marks', 'matricmarks', 'ssc_marks', 'matric_obtained'], profileKey: 'matric_marks', priority: 6 },
-  { match: ['matric_total', 'matrictotal', 'ssc_total'], profileKey: 'matric_total', priority: 5 },
+  // ── Email ──────────────────────────────────────────────────────
+  { match: ['email', 'e-mail', 'e_mail', 'emailaddress', 'email_address', 'email_id', 'emailid',
+    'student_email', 'applicant_email', 'user_email', 'contact_email', 'email_contact',
+    'email address', 'your email', 'applicantemail', 'emailid', 'mail_id', 'mailid'],
+    profileKey: 'email', priority: 10 },
+
+  // ── CNIC / National ID ─────────────────────────────────────────
+  { match: ['cnic', 'nic', 'national_id', 'nationalid', 'id_card', 'idcard', 'cnic_no', 'cnic_number',
+    'b_form', 'bform', 'nicop', 'identity_card', 'id_number', 'id_no', 'national_identity',
+    'nadra', 'id_card_no', 'nic_number', 'form_b', 'form-b', 'nicno', 'id card', 'cnicno',
+    'national id', 'national identity card', 'cnic/nicop', 'identity_no', 'id_no'],
+    profileKey: 'cnic', priority: 9 },
+
+  // ── CNIC (no dashes) — maps to 'cnic' so Tier 3 transform strips dashes ──
+  { match: ['cnic_no_dash', 'cnicnodash', 'cnic_without_dash', 'cnic_nodash', 'nic_no_dash',
+    'cnic_digits', 'cnic13', 'nadra_no', 'cnicno_dash'],
+    profileKey: 'cnic', priority: 9 },
+
+  // ── Phone ──────────────────────────────────────────────────────
+  { match: ['phone', 'mobile', 'cell', 'tel', 'telephone', 'phone_number', 'mobileno', 'contact_no',
+    'mob_no', 'cell_no', 'cellno', 'mobile_no', 'contact_number', 'mobile_number', 'phone_no',
+    'cell_number', 'phone_num', 'mob_num', 'ph_no', 'phno', 'contact_cell',
+    'mobile number', 'phone number', 'cell number', 'mobile no', 'phone no',
+    'contact mobile', 'applicant_phone', 'student_phone', 'applicant_mobile',
+    'contact_mob', 'mob', 'contact_phone', 'personal_phone', 'personal_mobile'],
+    profileKey: 'phone', priority: 8 },
+
+  // ── WhatsApp ──────────────────────────────────────────────────
+  { match: ['whatsapp', 'whatsapp_no', 'whatsapp_number', 'whatsapp number', 'wp_no',
+    'whatsapp_mob', 'whatsapp_mobile', 'wp_number', 'wapp_no'],
+    profileKey: 'whatsapp', priority: 7 },
+
+  // ── First / Last / Middle — MUST be before full_name ──────────
+  { match: ['first_name', 'firstname', 'fname', 'f_name', 'given_name', 'givenname',
+    'f_nm', 'frst_nm', 'first_nm', 'applicant_fname', 'student_fname', 'sfname',
+    'first name', 'given name', 'name1', 'first-name', 'forename', 'fore_name',
+    'name_first', 'applicant_first', 'candidate_first_name'],
+    profileKey: 'first_name', priority: 11 },
+
+  { match: ['last_name', 'lastname', 'lname', 'l_name', 'surname', 'family_name', 'familyname',
+    'l_nm', 'lst_nm', 'last_nm', 'applicant_lname', 'slname', 'sur_name', 'surename',
+    'last name', 'family name', 'name2', 'last-name', 'name_last', 'candidate_last_name'],
+    profileKey: 'last_name', priority: 11 },
+
+  { match: ['middle_name', 'middlename', 'mname', 'm_name', 'middle_nm', 'mid_name',
+    'middle name', 'middle-name', 'middle_initial', 'mid_nm'],
+    profileKey: 'middle_name', priority: 11 },
+
+  // ── Full Name ──────────────────────────────────────────────────
+  { match: ['full_name', 'fullname', 'applicant_name', 'student_name', 'candidatename',
+    'candidate_name', 'name_of_applicant', 'name_of_student', 'complete_name', 'full_nm',
+    'full name', 'complete name', 'applicant name', 'student name', 'name of applicant',
+    'yourname', 'your_name', 'applicantname', 'name_complete', 'complete_nm'],
+    profileKey: 'full_name', priority: 7 },
+
+  // ── Father / Guardian ──────────────────────────────────────────
+  { match: ['father', 'father_name', 'fathername', 'fathers_name', 'fathersname', 'father_nm',
+    "father's name", 'fathers name', 'dad_name', 'father_first_name',
+    'guardian', 'guardian_name', 'parent_name', 'parentname',
+    'wali', 'wali_name', 'father_full_name', 'sarparest'],
+    profileKey: 'father_name', priority: 7 },
+
+  // ── Father CNIC ────────────────────────────────────────────────
+  { match: ['father_cnic', 'fathercnic', 'guardian_cnic', 'parent_cnic', 'father_nic',
+    'father_id', 'father_id_card', 'father cnic', "father's cnic", 'dad_cnic', 'fcnic'],
+    profileKey: 'father_cnic', priority: 6 },
+
+  // ── Mother's Name ──────────────────────────────────────────────
+  { match: ['mother_name', 'mothername', 'mothers_name', "mother's name", 'mom_name', 'mname',
+    'mother', 'mother_full_name'],
+    profileKey: 'mother_name', priority: 5 },
+
+  // ── Date of Birth ──────────────────────────────────────────────
+  { match: ['dob', 'date_of_birth', 'dateofbirth', 'birthdate', 'birth_date', 'birth_dt',
+    'bdate', 'date_birth', 'd_o_b', 'dob_date', 'born_date', 'date_born',
+    'date of birth', 'birthday', 'birth date', 'applicant_dob', 'student_dob',
+    'date_of_birth_applicant', 'dob_full',
+    // Three-part select names (day/month/year components all map here)
+    'birth_day', 'birth_month', 'birth_year', 'dob_day', 'dob_month', 'dob_year',
+    'day_of_birth', 'month_of_birth', 'year_of_birth',
+    'bd_day', 'bd_month', 'bd_year', 'dob_dd', 'dob_mm', 'dob_yyyy',
+    'birth_dd', 'birth_mm', 'birth_yyyy'],
+    profileKey: 'date_of_birth', priority: 6 },
+
+  // ── Gender ──────────────────────────────────────────────────────
+  { match: ['gender', 'sex', 'gender_id', 'applicant_gender', 'student_gender', 'male_female',
+    'gender_type', 'applicant_sex', 'gen'],
+    profileKey: 'gender', priority: 5 },
+
+  // ── Blood Group ────────────────────────────────────────────────
+  { match: ['blood_group', 'bloodgroup', 'blood_type', 'bloodtype', 'blood group', 'blood type',
+    'blood_grp', 'bg'],
+    profileKey: 'blood_group', priority: 4 },
+
+  // ── City ───────────────────────────────────────────────────────
+  { match: ['city', 'town', 'city_name', 'resident_city', 'current_city', 'home_city',
+    'city of residence', 'city_residence', 'applicant_city', 'domicile_city',
+    'city_of_residence', 'residence_city', 'student_city'],
+    profileKey: 'city', priority: 5 },
+
+  // ── Province / Domicile ────────────────────────────────────────
+  { match: ['province', 'state', 'domicile', 'domicile_province', 'province_name', 'region',
+    'home_province', 'applicant_province', 'province of domicile', 'prov',
+    'domicile_prov', 'province_of_domicile', 'residence_province'],
+    profileKey: 'province', priority: 5 },
+
+  // ── District ───────────────────────────────────────────────────
+  { match: ['district', 'district_name', 'domicile_district', 'home_district', 'tehsil',
+    'zila', 'district_of_domicile', 'dist'],
+    profileKey: 'district', priority: 4 },
+
+  // ── Address ────────────────────────────────────────────────────
+  { match: ['address', 'postal_address', 'mailing_address', 'residential_address',
+    'permanent_address', 'home_address', 'current_address', 'present_address',
+    'local_address', 'street_address', 'street', 'addr', 'full_address',
+    'correspondence_address', 'home address', 'mailing address', 'residence address',
+    'permanent address', 'perm_address', 'res_address', 'applicant_address'],
+    profileKey: 'address', priority: 4 },
+
+  // ── Postal Code ────────────────────────────────────────────────
+  { match: ['postal_code', 'postalcode', 'zipcode', 'zip', 'zip_code', 'post_code', 'postcode',
+    'area_code', 'pincode', 'pin_code', 'postal code', 'zip code'],
+    profileKey: 'postal_code', priority: 3 },
+
+  // ── Nationality / Religion ─────────────────────────────────────
+  { match: ['nationality', 'citizenship', 'country_of_citizenship', 'country', 'citizen',
+    'applicant_nationality', 'national_status'],
+    profileKey: 'nationality', priority: 3 },
+  { match: ['religion', 'faith', 'religion_name', 'mazhab', 'deen', 'religious_affiliation'],
+    profileKey: 'religion', priority: 3 },
+
+  // ── Board ──────────────────────────────────────────────────────
+  { match: ['board', 'board_name', 'boardname', 'examination_board', 'exam_board',
+    'board_of_inter', 'hssc_board', 'inter_board', 'fsc_board', 'matric_board',
+    'ssc_board', 'bise', 'board of intermediate', 'board of education',
+    'board_of_education', 'board_exam', 'inter_board_name'],
+    profileKey: 'board_name', priority: 4 },
+
+  // ── School / College ───────────────────────────────────────────
+  { match: ['school', 'college', 'school_name', 'institution', 'school_college', 'college_name',
+    'last_institution', 'previous_institution', 'last_school', 'institution_name',
+    'last_attended', 'school_attended', 'name of college', 'college attended',
+    'college_name', 'school_college_name', 'intermediate_college', 'fsc_college',
+    'hssc_college', 'last_college', 'attended_school'],
+    profileKey: 'school_name', priority: 4 },
+
+  // ── Passing Year ───────────────────────────────────────────────
+  { match: ['passing_year', 'passingyear', 'year_of_passing', 'grad_year', 'graduation_year',
+    'pass_year', 'year_passed', 'completion_year', 'exam_year', 'inter_year',
+    'fsc_year', 'hssc_year', 'year of passing', 'passing year', 'ssc_year',
+    'matric_year', 'year_of_completion', 'passing_yr'],
+    profileKey: 'passing_year', priority: 4 },
+
+  // ── Roll Number ────────────────────────────────────────────────
+  { match: ['roll_number', 'rollnumber', 'roll_no', 'rollno', 'roll', 'exam_roll',
+    'matric_roll', 'inter_roll', 'ssc_roll', 'hssc_roll', 'candidate_roll',
+    'board_roll', 'roll_num', 'roll number', 'board roll no', 'roll_no_inter',
+    'inter_roll_no', 'fsc_roll_no', 'hssc_roll_no', 'roll_no_ssc', 'ssc_roll_no'],
+    profileKey: 'roll_number', priority: 5 },
+
+  // ── FSc Marks (obtained) ───────────────────────────────────────
+  { match: ['fsc_marks', 'fscmarks', 'hssc_marks', 'inter_marks', 'intermediate_marks',
+    'fsc_obtained', 'inter_obtained', 'hssc_obtained', 'inter_obt_marks',
+    'f_sc_marks', 'fsc_obt', 'inter_obt', 'total_marks_inter',
+    'marks_obtained_inter', 'hssc_marks_obtained', 'intermarks', 'marks_inter',
+    'fsc obtained marks', 'inter obtained', 'hssc obtained', 'marks_intermediate',
+    'hsc_marks', 'hscmarks', 'inter_marks_obtained', 'fsc_total_obtained'],
+    profileKey: 'fsc_marks', priority: 6 },
+
+  // ── FSc Total ──────────────────────────────────────────────────
+  { match: ['fsc_total', 'fsctotal', 'hssc_total', 'inter_total', 'total_marks_fsc',
+    'total_fsc', 'fsc_max', 'inter_max', 'hssc_max', 'total_inter',
+    'inter total marks', 'fsc total', 'hsc_total', 'intermediate_total',
+    'hssc_total_marks', 'fsc_total_marks'],
+    profileKey: 'fsc_total', priority: 5 },
+
+  // ── FSc Percentage ─────────────────────────────────────────────
+  { match: ['fsc_percentage', 'fscpercentage', 'inter_percentage', 'hssc_percentage',
+    'fsc_pct', 'inter_pct', 'percentage_fsc', 'hssc_pct', 'intermediate_percentage',
+    'fsc_percent', 'inter_percent'],
+    profileKey: 'fsc_percentage', priority: 5 },
+
+  // ── FSc Part-I marks ───────────────────────────────────────────
+  { match: ['part1_marks', 'part_1_marks', 'fsc_part1', 'part1_obtained', 'partone_marks',
+    'part_i_marks', 'year1_marks', 'part 1 marks', 'part-1 marks', 'part1marks',
+    'part_one_marks', 'yr1_marks'],
+    profileKey: 'fsc_part1_marks', priority: 6 },
+
+  // ── Matric Marks ───────────────────────────────────────────────
+  { match: ['matric_marks', 'matricmarks', 'ssc_marks', 'matric_obtained', 'ssc_obtained',
+    'matric_obt', 'ssc_obt', 'marks_obtained_matric', 'marks_matric',
+    'matric_obtained_marks', 'ssc_marks_obtained', 'marks_ssc',
+    'matriculation_marks', 'matric obtained', 'ssc obtained marks',
+    'class_10_marks', 'grade_10_marks', 'secondary_marks', 'ssc_obt_marks'],
+    profileKey: 'matric_marks', priority: 6 },
+
+  // ── Matric Total ───────────────────────────────────────────────
+  { match: ['matric_total', 'matrictotal', 'ssc_total', 'total_marks_matric',
+    'total_matric', 'matric_max', 'ssc_max', 'total_ssc', 'matriculation_total',
+    'matric total', 'ssc total marks', 'secondary_total', 'class_10_total'],
+    profileKey: 'matric_total', priority: 5 },
+
+  // ── Matric Percentage ──────────────────────────────────────────
+  { match: ['matric_percentage', 'matricpercentage', 'ssc_percentage', 'matric_pct',
+    'matric_percent', 'ssc_pct', 'secondary_percentage'],
+    profileKey: 'matric_percentage', priority: 5 },
+
+  // ── NET / NTS Score ────────────────────────────────────────────
+  { match: ['net_score', 'net_marks', 'netscore', 'net', 'nts_score', 'nts_marks',
+    'entry_test', 'entry_test_score', 'entrance_score', 'entrance_marks', 'admission_test',
+    'test_score', 'test_marks', 'merit_score', 'aggregate_score', 'entry_test_marks',
+    'aggregate_marks', 'test_percentile', 'merit_aggregate', 'admission_test_score'],
+    profileKey: 'net_score', priority: 5 },
+
+  // ── ECAT Score ─────────────────────────────────────────────────
+  { match: ['ecat_score', 'ecat_marks', 'ecat', 'engineering_test', 'enet_score'],
+    profileKey: 'ecat_score', priority: 6 },
+
+  // ── MCAT/MDCAT Score ──────────────────────────────────────────
+  { match: ['mcat_score', 'mcat', 'mcat_marks', 'mdcat_score', 'mdcat', 'mdcat_marks',
+    'medical_test', 'uhs_score'],
+    profileKey: 'net_score', priority: 6 },
+
+  // ── SAT Score ─────────────────────────────────────────────────
+  { match: ['sat_score', 'sat', 'sat_marks', 'sat1', 'sat2'],
+    profileKey: 'sat_score', priority: 6 },
+
+  // ── GAT/GRE ───────────────────────────────────────────────────
+  { match: ['gat_score', 'gat', 'gre_score', 'gre', 'gmat_score', 'gmat', 'ielts', 'toefl'],
+    profileKey: 'net_score', priority: 4 },
+
+  // ── Statement of Purpose ───────────────────────────────────────
+  { match: ['statement_of_purpose', 'sop', 'personal_statement', 'essay', 'motivation_letter',
+    'statement', 'why_join', 'why_apply', 'about_yourself', 'motivation', 'cover_letter',
+    'statement of purpose', 'personal statement', 'application essay'],
+    profileKey: 'statement_of_purpose', priority: 3 },
 ];
 
 // Fields that should NEVER be autofilled by heuristics
 const EXCLUDED_FIELD_PATTERNS = [
   'captcha', 'verification', 'verify', 'otp', 'token', 'csrf',
-  'login', 'userid', 'user_id',
+  'login', 'userid', 'user_id', 'username', 'user_name', 'loginid', 'login_id',
   'recaptcha', 'security_code', 'securitycode', 'answer',
-  'pin_code', 'pincode',
+  'pin_code', 'pincode', 'pin',
+  'secret', 'question', 'hint',
   // ASP.NET style verification fields
   'txtverif', 'txtcaptcha', 'imgcode', 'securityimage', 'imgverif',
-  'verificationcode', 'verification_code',
+  'verificationcode', 'verification_code', 'txtpin',
+  // Explicit login/account-creation fields that aren't profile data
+  'confirm_password', 'confirmpassword', 'password_confirm', 're_password', 'retype',
 ];
 
+// Pakistani city → province lookup
+const CITY_TO_PROVINCE = {
+  'karachi': 'Sindh', 'hyderabad': 'Sindh', 'sukkur': 'Sindh', 'larkana': 'Sindh',
+  'nawabshah': 'Sindh', 'mirpur khas': 'Sindh', 'khairpur': 'Sindh', 'jacobabad': 'Sindh',
+  'lahore': 'Punjab', 'faisalabad': 'Punjab', 'rawalpindi': 'Punjab', 'gujranwala': 'Punjab',
+  'multan': 'Punjab', 'bahawalpur': 'Punjab', 'sargodha': 'Punjab', 'sialkot': 'Punjab',
+  'sheikhupura': 'Punjab', 'jhang': 'Punjab', 'rahim yar khan': 'Punjab', 'gujrat': 'Punjab',
+  'kasur': 'Punjab', 'dera ghazi khan': 'Punjab', 'sahiwal': 'Punjab', 'okara': 'Punjab',
+  'islamabad': 'Islamabad Capital Territory', 'federal': 'Islamabad Capital Territory',
+  'peshawar': 'Khyber Pakhtunkhwa', 'mardan': 'Khyber Pakhtunkhwa', 'abbottabad': 'Khyber Pakhtunkhwa',
+  'swat': 'Khyber Pakhtunkhwa', 'kohat': 'Khyber Pakhtunkhwa', 'mansehra': 'Khyber Pakhtunkhwa',
+  'dera ismail khan': 'Khyber Pakhtunkhwa', 'nowshera': 'Khyber Pakhtunkhwa',
+  'quetta': 'Balochistan', 'turbat': 'Balochistan', 'khuzdar': 'Balochistan', 'hub': 'Balochistan',
+  'muzaffarabad': 'Azad Kashmir', 'mirpur': 'Azad Kashmir', 'rawalakot': 'Azad Kashmir',
+  'gilgit': 'Gilgit-Baltistan', 'skardu': 'Gilgit-Baltistan',
+};
+
 /**
- * Try to match a form element to a profile key using heuristics.
- * Analyzes: name, id, placeholder, label text, aria-label.
+ * Normalize a string for heuristic comparison:
+ * lowercases, strips common ASP.NET prefixes (txt, lbl, ctl, txt_),
+ * and collapses separators.
+ */
+function normalizeSignal(s) {
+  return s
+    .toLowerCase()
+    .replace(/^(txt|lbl|ctl|ddl|rb|chk|txt_|lbl_|ctl_)/, '') // ASP.NET prefixes
+    .replace(/[\-_\s]+/g, '_')                                  // unify separators
+    .trim();
+}
+
+/**
+ * Build a combined signal string for an input element.
+ * Used for quick pattern checks (username, login, etc.).
+ */
+function buildFieldSignature(el) {
+  const parts = [
+    el.name, el.id,
+    el.getAttribute('placeholder'),
+    el.getAttribute('aria-label'),
+    el.getAttribute('data-label'),
+    el.getAttribute('autocomplete'),
+  ].filter(Boolean).map(s => s.toLowerCase().replace(/[\-\s]+/g, '_'));
+  // Add label text
+  if (el.labels?.length) parts.push(el.labels[0].textContent.toLowerCase().replace(/[\s\-]+/g, '_'));
+  else {
+    const lbl = el.id ? document.querySelector(`label[for="${el.id}"]`) : null;
+    if (lbl) parts.push(lbl.textContent.toLowerCase().replace(/[\s\-]+/g, '_'));
+  }
+  return parts.join(' ');
+}
+
+/**
+ * Try to match a form element to a profile key using multi-signal heuristics.
+ * Analyzes: name, id, placeholder, label text, aria-label, data-*, autocomplete.
  */
 function matchFieldHeuristically(el) {
-  // Get all text signals from the element
-  const name = (el.name || '').toLowerCase();
-  const id = (el.id || '').toLowerCase();
-  const placeholder = (el.placeholder || '').toLowerCase();
-  const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
-  const labelEl = el.labels?.[0];
-  const labelText = (labelEl?.textContent || '').toLowerCase().trim();
-  const autocomplete = (el.getAttribute('autocomplete') || '').toLowerCase();
-
-  const signals = [name, id, placeholder, ariaLabel, labelText, autocomplete].filter(Boolean);
-  if (signals.length === 0) return null;
-
-  // Exclude password fields early
   if (el.type === 'password') return null;
+  if (el.type === 'hidden') return null;
 
-  // Exclude captcha, login, verification, and other non-profile fields
-  const allSignals = signals.join(' ');
-  if (EXCLUDED_FIELD_PATTERNS.some(p => allSignals.includes(p))) return null;
+  // Collect raw signals
+  const rawName = el.name || '';
+  const rawId = el.id || '';
+  const rawPlaceholder = el.getAttribute('placeholder') || '';
+  const rawAriaLabel = el.getAttribute('aria-label') || '';
+  const rawDataLabel = el.getAttribute('data-label') || el.getAttribute('data-field') || '';
+  const rawAutocomplete = el.getAttribute('autocomplete') || '';
+  // Find associated label
+  let labelText = '';
+  if (el.labels?.length) {
+    labelText = el.labels[0].textContent || '';
+  } else {
+    // Search nearby label by for= attribute
+    if (rawId) {
+      const lbl = document.querySelector(`label[for="${rawId}"]`);
+      if (lbl) labelText = lbl.textContent || '';
+    }
+    // Or a wrapping label
+    if (!labelText) {
+      const wrapping = el.closest('label');
+      if (wrapping) labelText = wrapping.textContent || '';
+    }
+  }
 
-  // Proximity-based CAPTCHA detection:
-  // Only check DIRECT siblings of this input for CAPTCHA images — not the whole form.
+  // Build normalized signals (name/id get extra weight as primary identifiers)
+  const normName = normalizeSignal(rawName);
+  const normId = normalizeSignal(rawId);
+  const normPlaceholder = (rawPlaceholder).toLowerCase().trim();
+  const normAriaLabel = (rawAriaLabel).toLowerCase().trim();
+  const normLabel = (labelText).toLowerCase().trim().replace(/[*:]+$/, '').trim();
+  const normData = (rawDataLabel).toLowerCase().trim();
+  const normAC = (rawAutocomplete).toLowerCase().trim();
+
+  // All signals as array (primary ones first for priority ordering)
+  const primarySignals = [normName, normId].filter(Boolean);
+  const secondarySignals = [normLabel, normAriaLabel, normPlaceholder, normData, normAC].filter(Boolean);
+  const allSignals = [...primarySignals, ...secondarySignals];
+
+  if (allSignals.length === 0) return null;
+
+  // ── Exclusion check ─────────────────────────────────────────────
+  const combined = allSignals.join(' ');
+  if (EXCLUDED_FIELD_PATTERNS.some(p => combined.includes(p))) return null;
+
+  // Proximity-based CAPTCHA image detection
   const isCaptchaImg = (img) => {
     const s = ((img.src || '') + ' ' + (img.alt || '') + ' ' + (img.className || '')).toLowerCase();
     return /captcha|verify|security|securityimage|imgcode/.test(s);
   };
-  // Check previous and next siblings
-  let sibling = el.previousElementSibling;
-  if (sibling && sibling.tagName === 'IMG' && isCaptchaImg(sibling)) return null;
-  sibling = el.nextElementSibling;
-  if (sibling && sibling.tagName === 'IMG' && isCaptchaImg(sibling)) return null;
-  // Check parent's direct child images (only immediate parent, not grandparent)
-  const parentEl = el.parentElement;
-  if (parentEl) {
-    for (const child of parentEl.children) {
+  for (const sibling of [el.previousElementSibling, el.nextElementSibling]) {
+    if (sibling?.tagName === 'IMG' && isCaptchaImg(sibling)) return null;
+  }
+  if (el.parentElement) {
+    for (const child of el.parentElement.children) {
       if (child.tagName === 'IMG' && isCaptchaImg(child)) return null;
     }
   }
 
-  // Check input type shortcuts
+  // ── HTML type shortcuts ─────────────────────────────────────────
   if (el.type === 'email') return 'email';
   if (el.type === 'tel') return 'phone';
-  if (el.type === 'date' && signals.some(s => s.includes('birth') || s.includes('dob'))) return 'date_of_birth';
+  if (el.type === 'date') {
+    if (allSignals.some(s => s.includes('birth') || s.includes('dob') || s.includes('born'))) return 'date_of_birth';
+  }
 
-  // Special handling: if a label/name says "first name", "last name", "middle name"
-  // use the split version, not full_name
-  if (signals.some(s => /\bfirst\s*name\b/.test(s) || s === 'fname' || s === 'firstname' || s === 'first_name')) return 'first_name';
-  if (signals.some(s => /\blast\s*name\b/.test(s) || /\bsurname\b/.test(s) || s === 'lname' || s === 'lastname' || s === 'last_name')) return 'last_name';
-  if (signals.some(s => /\bmiddle\s*name\b/.test(s) || s === 'mname' || s === 'middlename' || s === 'middle_name')) return 'middle_name';
+  // ── Autocomplete standard values ────────────────────────────────
+  const acMap = {
+    'email': 'email', 'tel': 'phone', 'tel-national': 'phone',
+    'given-name': 'first_name', 'family-name': 'last_name', 'additional-name': 'middle_name',
+    'name': 'full_name', 'bday': 'date_of_birth',
+    'sex': 'gender', 'address-line1': 'address', 'address-level2': 'city',
+    'address-level1': 'province', 'country': 'nationality', 'postal-code': 'postal_code',
+  };
+  if (normAC && acMap[normAC]) return acMap[normAC];
 
-  // If the signal contains generic "name" (not first/middle/last/login), use full_name
-  if (signals.some(s => {
-    if (!/\bname\b/i.test(s)) return false;
-    // Exclude if it also contains first/last/middle/login/sur — those are handled above or excluded
-    if (/\b(first|last|middle|login|sur)\b/i.test(s)) return false;
+  // ── First / Last / Middle before generic name ───────────────────
+  if (allSignals.some(s => /\bfirst[_\s-]?name\b/.test(s) || /\bgiven[_\s-]?name\b/.test(s) ||
+      s === 'fname' || s === 'first_name' || s === 'firstname' || s === 'f_name' ||
+      s === 'f_nm' || s === 'frst_nm' || s === 'sfname')) return 'first_name';
+
+  if (allSignals.some(s => /\blast[_\s-]?name\b/.test(s) || /\bsurname\b/.test(s) ||
+      /\bfamily[_\s-]?name\b/.test(s) || s === 'lname' || s === 'last_name' ||
+      s === 'lastname' || s === 'l_name' || s === 'l_nm' || s === 'slname')) return 'last_name';
+
+  if (allSignals.some(s => /\bmiddle[_\s-]?name\b/.test(s) || s === 'mname' ||
+      s === 'middle_name' || s === 'middlename' || s === 'm_name')) return 'middle_name';
+
+  // ── Generic "name" → full_name (excluding first/last/middle/login/user/roll/father/mother) ──
+  if (allSignals.some(s => {
+    if (!/\bname\b/.test(s)) return false;
+    if (/\b(first|last|middle|login|user|sur|father|mother|roll|school|college|board|institution|guardian|parent)\b/.test(s)) return false;
+    // Also exclude if signal itself contains 'mother' or 'father' substring
+    if (s.includes('mother') || s.includes('father') || s.includes('guardian') || s.includes('parent')) return false;
     return true;
-  }) || signals.some(s => s === 'fullname' || s === 'full_name' || s === 'applicantname' || s === 'applicant_name' || s === 'username' || s === 'user_name')) return 'full_name';
+  })) return 'full_name';
 
-  // Try each heuristic pattern
-  let bestMatch = null;
-  let bestPriority = -1;
+  // ── Heuristic table scan ────────────────────────────────────────
+  let bestKey = null;
+  let bestScore = -1;
 
   for (const h of FIELD_HEURISTICS) {
     for (const keyword of h.match) {
-      for (const signal of signals) {
-        // Exact match on name/id
-        if (signal === keyword || signal === keyword.replace(/_/g, '')) {
-          if (h.priority > bestPriority) {
-            bestMatch = h.profileKey;
-            bestPriority = h.priority + 5; // Bonus for exact match
-          }
+      const normKw = normalizeSignal(keyword);
+
+      // Primary signals get 2× priority bonus
+      for (const [idx, sig] of allSignals.entries()) {
+        const isPrimary = idx < primarySignals.length;
+        const bonus = isPrimary ? 5 : 0;
+
+        let score = -1;
+
+        if (sig === normKw || sig === normKw.replace(/_/g, '')) {
+          // Exact match
+          score = h.priority + 10 + bonus;
+        } else if (sig.startsWith(normKw) || sig.endsWith(normKw)) {
+          // Prefix/suffix match
+          score = h.priority + 6 + bonus;
+        } else if (sig.includes(normKw) || normKw.includes(sig)) {
+          // Contains match (only if sig is long enough to be meaningful)
+          if (sig.length >= 3) score = h.priority + bonus;
         }
-        // Contains match
-        else if (signal.includes(keyword) || keyword.includes(signal)) {
-          if (h.priority > bestPriority) {
-            bestMatch = h.profileKey;
-            bestPriority = h.priority;
-          }
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestKey = h.profileKey;
         }
       }
     }
   }
 
-  return bestMatch;
+  return bestKey;
+}
+
+// ─── Site URL Helper ───────────────────────────────────────────
+
+let _cachedSiteUrl = null;
+async function getSiteUrl() {
+  if (_cachedSiteUrl) return _cachedSiteUrl;
+  try {
+    const result = await chrome.runtime.sendMessage({ type: 'GET_SITE_BASE' });
+    _cachedSiteUrl = result?.url || 'http://localhost:3000';
+  } catch {
+    _cachedSiteUrl = 'http://localhost:3000';
+  }
+  return _cachedSiteUrl;
+}
+
+// ─── Shadow DOM + Regular DOM Traversal ────────────────────────
+
+/**
+ * Collect all form fields from the document including any shadow DOM roots.
+ * Returns a flat array of input/select/textarea elements.
+ */
+function collectAllFields(root = document) {
+  const results = [];
+  const SELECTOR = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]), select, textarea';
+
+  try {
+    results.push(...root.querySelectorAll(SELECTOR));
+  } catch { /* ignore */ }
+
+  // Traverse shadow roots
+  const walker = document.createTreeWalker(
+    root === document ? document.body || document : root,
+    NodeFilter.SHOW_ELEMENT,
+    null,
+  );
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node.shadowRoot) {
+      results.push(...collectAllFields(node.shadowRoot));
+    }
+  }
+
+  return results;
+}
+
+// ─── Date Format Detection ─────────────────────────────────────
+
+/**
+ * Detect the date format a field expects and format the date accordingly.
+ * Returns formatted string or original ISO value.
+ */
+function formatDateForInput(isoDate, el) {
+  if (!isoDate) return '';
+  const d = new Date(isoDate + 'T00:00:00');
+  if (isNaN(d.getTime())) return isoDate;
+  const day   = d.getDate();
+  const month = d.getMonth() + 1;
+  const year  = d.getFullYear();
+  const dd    = String(day).padStart(2, '0');
+  const mm    = String(month).padStart(2, '0');
+  const yyyy  = String(year);
+  const mon   = MONTH_NAMES[month - 1].charAt(0).toUpperCase() + MONTH_NAMES[month - 1].slice(1, 3); // "Jan"
+  const monFull = MONTH_NAMES[month - 1].charAt(0).toUpperCase() + MONTH_NAMES[month - 1].slice(1); // "January"
+
+  const ph = (el?.getAttribute('placeholder') || '').toLowerCase();
+  const pat = (el?.getAttribute('pattern') || '').toLowerCase();
+  const combined = ph + ' ' + pat;
+
+  // DD-Mon-YYYY or DD/Mon/YYYY
+  if (/dd[\/\-\s]mon/i.test(combined)) return `${dd}-${mon}-${yyyy}`;
+  // Mon-DD-YYYY
+  if (/mon[\/\-\s]dd/i.test(combined)) return `${mon}-${dd}-${yyyy}`;
+  // YYYY/MM/DD
+  if (/yyyy[\/\-]mm[\/\-]dd/.test(combined)) return `${yyyy}-${mm}-${dd}`;
+  // MM/DD/YYYY (US)
+  if (/mm[\/\-]dd[\/\-]yyyy/.test(combined)) return `${mm}/${dd}/${yyyy}`;
+  // DD/MM/YYYY (default Pakistani)
+  if (/dd[\/\-]mm[\/\-]yyyy/.test(combined)) return `${dd}/${mm}/${yyyy}`;
+  // D/M/YYYY
+  if (/d[\/\-]m[\/\-]y/.test(combined)) return `${day}/${month}/${yyyy}`;
+
+  // Fallback: detect from placeholder format string
+  if (ph.includes('mm/dd')) return `${mm}/${dd}/${yyyy}`;
+  if (ph.includes('dd/mm') || ph.includes('dd-mm')) return `${dd}/${mm}/${yyyy}`;
+  if (ph.includes('yyyy-mm') || ph.includes('yyyy/mm')) return `${yyyy}-${mm}-${dd}`;
+  if (ph.includes('dd-mon') || ph.includes('dd mon')) return `${dd}-${mon}-${yyyy}`;
+  if (ph.includes('mon-dd') || ph.includes('mon dd')) return `${mon}-${dd}-${yyyy}`;
+
+  // Absolute fallback: DD/MM/YYYY
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+// ─── Program / Degree Detection ────────────────────────────────
+
+/**
+ * Try to detect the program/degree being applied for from the page.
+ * Returns a short string like "BS Computer Science" or null.
+ */
+function detectProgram() {
+  const DEGREE_PREFIXES = ['bs', 'ms', 'be', 'me', 'bba', 'mba', 'bsc', 'msc', 'phd', 'mbbs', 'bds', 'llb', 'llm'];
+  const candidates = [
+    // Common element patterns where programs appear
+    document.querySelector('h1, h2')?.textContent,
+    document.querySelector('.program-name, .programme-name, #program-name, #programme')?.textContent,
+    document.querySelector('select[name*="program"] option:checked, select[name*="programme"] option:checked, select[id*="program"] option:checked')?.textContent,
+    document.querySelector('[class*="program-title"], [class*="programme-title"]')?.textContent,
+    document.title,
+  ].filter(Boolean).map(t => t.trim());
+
+  for (const text of candidates) {
+    const lower = text.toLowerCase();
+    for (const deg of DEGREE_PREFIXES) {
+      const idx = lower.indexOf(deg);
+      if (idx !== -1) {
+        // Extract a reasonable-length program name starting from the degree prefix
+        const snippet = text.slice(idx, idx + 60).split('\n')[0].trim();
+        if (snippet.length > 4) return snippet;
+      }
+    }
+  }
+  return null;
 }
 
 // ─── Page Type Detection ───────────────────────────────────────
@@ -285,20 +727,8 @@ function detectPageType() {
 }
 
 /**
- * Find a registration/signup link on a login page.
+ * Find a registration/signup link on a login page (legacy stub — delegates to new implementation below).
  */
-function findRegisterLink() {
-  const links = document.querySelectorAll('a, button');
-  const registerWords = ['register', 'sign up', 'signup', 'create account', 'new user', 'create an account', 'don\'t have'];
-  for (const link of links) {
-    const text = link.textContent?.toLowerCase()?.trim() || '';
-    const href = (link.href || '').toLowerCase();
-    if (registerWords.some(w => text.includes(w) || href.includes(w.replace(/\s/g, '')))) {
-      return { text: link.textContent?.trim() || 'Register', href: link.href || '#' };
-    }
-  }
-  return null;
-}
 
 // ─── Consistent Password System ────────────────────────────────
 
@@ -328,6 +758,78 @@ function generateStrongPassword() {
   return `${w1}${w2}${sym}${num}`;
 }
 
+// ─── Username Generation ────────────────────────────────────────
+/**
+ * Generate a portal username from profile data.
+ * Strategy order (most common for Pakistani uni portals):
+ * 1. CNIC without dashes (e.g. 3520112345673) — most common
+ * 2. portal_email prefix (before @)
+ * 3. email prefix
+ * 4. FirstLetterLastname (e.g. mkhan) lower-cased
+ */
+function generatePortalUsername(profile) {
+  if (profile?.cnic) return profile.cnic.replace(/-/g, '');
+  const email = profile?.portal_email || profile?.email || '';
+  if (email) return email.split('@')[0];
+  const names = (profile?.full_name || '').trim().split(/\s+/);
+  const first = names[0] || '';
+  const last = names[names.length - 1] || '';
+  return (first.slice(0, 1) + last).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Find the register/create-account link on a login page.
+ * Returns { href, text } or null.
+ */
+function findRegisterLinkEl() {
+  const registerWords = [
+    'register', 'sign up', 'signup', 'create account', 'create an account',
+    'new user', 'new account', 'don\'t have', 'no account', 'not registered',
+    'first time', 'new applicant', 'new student', 'new registration',
+  ];
+  // Try <a> tags first, then buttons
+  for (const tag of ['a', 'button']) {
+    for (const el of document.querySelectorAll(tag)) {
+      const text = (el.textContent || '').toLowerCase().trim();
+      const href = (el.href || '').toLowerCase();
+      if (registerWords.some(w => text.includes(w) || href.includes(w.replace(/\s/g, '')))) {
+        return el;
+      }
+    }
+  }
+  return null;
+}
+
+function findRegisterLink() {
+  const el = findRegisterLinkEl();
+  if (!el) return null;
+  return { text: el.textContent?.trim() || 'Register', href: el.href || '#' };
+}
+
+async function handleGoToRegister() {
+  const el = findRegisterLinkEl();
+  if (el) {
+    if (el.tagName === 'A' && el.href) {
+      window.location.href = el.href;
+    } else {
+      el.click();
+    }
+  } else {
+    // Try common registration URL patterns based on current URL
+    const base = window.location.origin;
+    const path = window.location.pathname;
+    const candidates = [
+      base + path.replace(/login|signin|LogIn|Login/gi, 'Register'),
+      base + path.replace(/login|signin|LogIn|Login/gi, 'Signup'),
+      base + '/register', base + '/Register', base + '/signup', base + '/SignUp',
+      base + '/Home/Register', base + '/account/register', base + '/user/register',
+      base + '/new-user', base + '/create-account',
+    ].filter(u => u !== window.location.href);
+    // Open first plausible one in same tab
+    if (candidates[0]) window.location.href = candidates[0];
+  }
+}
+
 // ─── Smart Suggestions ─────────────────────────────────────────
 
 function buildSmartSuggestions(pageType, university) {
@@ -335,23 +837,12 @@ function buildSmartSuggestions(pageType, university) {
   const registerLink = findRegisterLink();
 
   if (pageType === 'login') {
-    suggestions.push({
-      icon: '🔑',
-      text: 'This looks like a <strong>login page</strong>.',
-      sub: registerLink
-        ? `Don't have an account? <a href="${registerLink.href}" style="color:#4ade80;text-decoration:underline">${registerLink.text}</a>`
-        : 'Look for a "Register" or "Create Account" link on this page.',
-    });
-    suggestions.push({
-      icon: '🔐',
-      text: 'UniMatch can fill your password.',
-      sub: 'Your saved portal password will be auto-filled if available.',
-    });
+    // Intentionally empty — the ready state renders a full login card instead
   } else if (pageType === 'register') {
     suggestions.push({
       icon: '📝',
-      text: 'This looks like a <strong>registration page</strong>.',
-      sub: 'UniMatch will fill your email, name, and generate a strong password.',
+      text: 'Registration page detected.',
+      sub: 'Click <strong>Autofill</strong> — UniMatch fills your name, email, CNIC, DOB, marks, and auto-generates a strong password.',
     });
   } else if (pageType === 'application') {
     suggestions.push({
@@ -434,21 +925,43 @@ async function fillInput(el, value) {
 }
 
 function fillSelect(el, value) {
-  const val = String(value).toLowerCase();
+  if (!value && value !== 0) return false;
+  const val = String(value).toLowerCase().trim();
   const options = Array.from(el.options);
 
-  // Try exact value match first
+  // 1. Exact value match (case-insensitive)
   let match = options.find(o => o.value.toLowerCase() === val);
-  // Then try text match
-  if (!match) match = options.find(o => o.text.toLowerCase() === val);
-  // Then try partial match
-  if (!match) match = options.find(o =>
-    o.text.toLowerCase().includes(val) || val.includes(o.text.toLowerCase())
-  );
+  // 2. Exact text match
+  if (!match) match = options.find(o => o.text.toLowerCase().trim() === val);
+  // 3. If numeric value, also try month name (handles month selects)
+  if (!match) {
+    const numVal = parseInt(val, 10);
+    if (!isNaN(numVal) && numVal >= 1 && numVal <= 12) {
+      const mn = MONTH_NAMES[numVal - 1];
+      const ms = MONTH_SHORT[numVal - 1];
+      match =
+        options.find(o => o.text.toLowerCase().trim() === mn) ||
+        options.find(o => o.text.toLowerCase().trim() === ms) ||
+        options.find(o => o.text.toLowerCase().trim().startsWith(mn.slice(0, 3))) ||
+        options.find(o => o.value.toLowerCase() === mn) ||
+        options.find(o => o.value === String(numVal).padStart(2, '0'));
+    }
+  }
+  // 4. Strip leading zeros and retry
+  if (!match && val.startsWith('0')) {
+    const stripped = val.replace(/^0+/, '');
+    match = options.find(o => o.value.toLowerCase() === stripped) ||
+            options.find(o => o.text.toLowerCase().trim() === stripped);
+  }
+  // 5. Partial text match (option text contains value or vice versa — only for longer strings)
+  if (!match && val.length >= 3) {
+    match = options.find(o => o.text.toLowerCase().includes(val) || val.includes(o.text.toLowerCase().trim()));
+  }
 
   if (match) {
     el.value = match.value;
     el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
   }
   return false;
@@ -476,6 +989,580 @@ function fillCheckbox(el, value) {
     el.dispatchEvent(new Event('change', { bubbles: true }));
   }
   return true;
+}
+
+// ─── Creative Feature Engine ────────────────────────────────
+
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx || _audioCtx.state === 'closed') {
+    try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
+  }
+  return _audioCtx;
+}
+
+function playFillTone(index = 0, total = 1) {
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const baseFreq = 440 + (index / Math.max(total, 1)) * 440;
+    osc.type = 'sine';
+    osc.frequency.value = baseFreq;
+    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.12);
+  } catch {}
+}
+
+function playSuccessFanfare() {
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.12;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.07, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    });
+  } catch {}
+}
+
+function sparkleField(el) {
+  if (!el || !isVisibleEl(el)) return;
+  el.style.transition = 'box-shadow 0.05s ease, outline 0.05s ease';
+  el.style.boxShadow = '0 0 0 2px rgba(74,222,128,0.9), 0 0 20px rgba(74,222,128,0.5), 0 0 40px rgba(74,222,128,0.2)';
+  el.style.outline = 'none';
+  // inject sparkle CSS if not present
+  if (!document.getElementById('um-sparkle-style')) {
+    const s = document.createElement('style');
+    s.id = 'um-sparkle-style';
+    s.textContent = `
+      @keyframes um-field-fill {
+        0%   { background-color: rgba(74,222,128,0.12); }
+        100% { background-color: transparent; }
+      }
+      .um-filled-flash { animation: um-field-fill 0.6s ease forwards; }
+    `;
+    document.head.appendChild(s);
+  }
+  el.classList.add('um-filled-flash');
+  setTimeout(() => {
+    el.style.boxShadow = '';
+    el.style.transition = '';
+    el.classList.remove('um-filled-flash');
+  }, 700);
+}
+
+function showScanLine(duration = 1200) {
+  const existing = document.getElementById('um-scanline');
+  if (existing) existing.remove();
+  if (!document.getElementById('um-scanline-style')) {
+    const s = document.createElement('style');
+    s.id = 'um-scanline-style';
+    s.textContent = `
+      @keyframes um-scan-move {
+        0%   { top: 0; opacity: 0; }
+        5%   { opacity: 1; }
+        95%  { opacity: 1; }
+        100% { top: 100vh; opacity: 0; }
+      }
+    `;
+    document.head.appendChild(s);
+  }
+  const line = document.createElement('div');
+  line.id = 'um-scanline';
+  line.style.cssText = `
+    position: fixed; left: 0; top: 0; width: 100%; height: 3px; z-index: 2147483646;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent 0%, #4ade80 30%, #86efac 50%, #4ade80 70%, transparent 100%);
+    box-shadow: 0 0 12px 4px rgba(74,222,128,0.7), 0 0 30px 8px rgba(74,222,128,0.3);
+    animation: um-scan-move ${duration}ms ease-in-out forwards;
+  `;
+  document.body.appendChild(line);
+  setTimeout(() => line.remove(), duration + 200);
+}
+
+function showAchievementToast(filled, manual, timeSaved) {
+  const existing = document.getElementById('um-toast');
+  if (existing) existing.remove();
+  if (!document.getElementById('um-toast-style')) {
+    const s = document.createElement('style');
+    s.id = 'um-toast-style';
+    s.textContent = `
+      @keyframes um-toast-in { from { transform: translateX(120%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+      @keyframes um-toast-out { from { transform: translateX(0); opacity:1; } to { transform: translateX(120%); opacity:0; } }
+    `;
+    document.head.appendChild(s);
+  }
+  const toast = document.createElement('div');
+  toast.id = 'um-toast';
+  toast.style.cssText = `
+    position: fixed; bottom: 80px; right: 20px; z-index: 2147483645;
+    background: #0c1a0d; border: 1px solid rgba(74,222,128,0.4);
+    border-radius: 14px; padding: 14px 18px; pointer-events: none;
+    font-family: 'Inter', -apple-system, sans-serif; color: #e4e4e7;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(74,222,128,0.1);
+    animation: um-toast-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    min-width: 220px;
+  `;
+  toast.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:22px">&#9889;</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4ade80">Form Blasted!</div>
+        <div style="font-size:10px;color:#71717a">Ilm Se Urooj</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+      <div style="background:rgba(74,222,128,0.08);border-radius:8px;padding:6px">
+        <div style="font-size:18px;font-weight:700;color:#4ade80">${filled}</div>
+        <div style="font-size:9px;color:#71717a">FILLED</div>
+      </div>
+      <div style="background:rgba(251,191,36,0.08);border-radius:8px;padding:6px">
+        <div style="font-size:18px;font-weight:700;color:#fbbf24">${manual}</div>
+        <div style="font-size:9px;color:#71717a">MANUAL</div>
+      </div>
+      <div style="background:rgba(96,165,250,0.08);border-radius:8px;padding:6px">
+        <div style="font-size:18px;font-weight:700;color:#60a5fa">${timeSaved}s</div>
+        <div style="font-size:9px;color:#71717a">SAVED</div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.style.animation = 'um-toast-out 0.3s ease forwards';
+      setTimeout(() => toast.remove(), 300);
+    }
+  }, 4000);
+}
+
+function animateCounter(el, target, duration = 800) {
+  const start = parseInt(el.textContent) || 0;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ─── Helpers ────────────────────────────────────────────────────
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function isVisibleEl(el) {
+  if (!el) return false;
+  try {
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) return false;
+    const s = window.getComputedStyle(el);
+    return s.display !== 'none' && s.visibility !== 'hidden' && s.opacity !== '0';
+  } catch { return false; }
+}
+
+// ─── Advanced Date Filling ──────────────────────────────────────
+// Handles: native date inputs · three-part selects · Flatpickr · jQuery UI ·
+// Pikaday · Bootstrap Datepicker · React DatePicker · custom calendar widgets.
+
+const MONTH_NAMES = [
+  'january','february','march','april','may','june',
+  'july','august','september','october','november','december',
+];
+const MONTH_SHORT = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+
+/**
+ * Master date-fill function. Tries every strategy in order.
+ */
+async function fillDateAdvanced(el, isoDate) {
+  if (!isoDate || !el) return false;
+  const d = new Date(isoDate + 'T00:00:00'); // force local midnight
+  if (isNaN(d.getTime())) return false;
+
+  const day   = d.getDate();
+  const month = d.getMonth() + 1; // 1-based
+  const year  = d.getFullYear();
+  const mm    = String(month).padStart(2, '0');
+  const dd    = String(day).padStart(2, '0');
+  const yyyy  = String(year);
+
+  // ── 1. Native <input type="date"> ─────────────────────────────
+  if (el.type === 'date') {
+    const ok = await fillInput(el, `${yyyy}-${mm}-${dd}`);
+    return ok;
+  }
+  if (el.type === 'datetime-local') {
+    return await fillInput(el, `${yyyy}-${mm}-${dd}T00:00`);
+  }
+  if (el.type === 'month') {
+    return await fillInput(el, `${yyyy}-${mm}`);
+  }
+
+  // ── 2. Library-level API (fastest, no DOM click needed) ────────
+
+  // Flatpickr
+  if (el._flatpickr) {
+    try { el._flatpickr.setDate(d, true); return true; } catch { /* continue */ }
+  }
+
+  // Pikaday (checks el._pikaday or the instance stored on the element)
+  const pikadayInst = el._pikaday || el.pikadayInstance;
+  if (pikadayInst) {
+    try { pikadayInst.setDate(d); return true; } catch { /* continue */ }
+  }
+
+  // jQuery UI Datepicker
+  if (typeof window.$ !== 'undefined') {
+    try {
+      const $el = window.$(el);
+      if ($el.data('datepicker') || $el.hasClass('hasDatepicker')) {
+        $el.datepicker('setDate', d);
+        return true;
+      }
+    } catch { /* continue */ }
+  }
+
+  // React-DatePicker / date-fns based pickers — try via data attribute
+  if (el.getAttribute('data-input') !== null || el.classList.contains('flatpickr-input')) {
+    try {
+      el._flatpickr?.setDate(d, true);
+      return true;
+    } catch { /* continue */ }
+  }
+
+  // ── 3. Three-part day/month/year select group ───────────────────
+  // Look in the closest form container for three selects resembling a date
+  const container = el.closest('fieldset, .form-group, .row, tr, .date-group, .dob-group') ||
+                    el.parentElement?.parentElement || el.parentElement;
+  if (container) {
+    const filled = await tryThreePartSelects(container, day, month, year);
+    if (filled) return true;
+  }
+
+  // ── 4. Text input — try formatted value ────────────────────────
+  const formatted = formatDateForInput(isoDate, el);
+  const textOk = await fillInput(el, formatted);
+  if (textOk) {
+    // Dismiss any calendar that may have opened
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    el.blur();
+    return true;
+  }
+
+  // ── 5. Click-based calendar widget interaction ─────────────────
+  return await tryInteractCalendar(el, d);
+}
+
+/**
+ * Detect and fill three-part day/month/year select elements in a container.
+ */
+async function tryThreePartSelects(container, day, month, year) {
+  const selects = Array.from(container.querySelectorAll('select'));
+  if (selects.length < 2) return false;
+
+  let daySel = null, monthSel = null, yearSel = null;
+
+  // First pass: name/id/class heuristics (handles dob_day, dob_month, dob_year patterns)
+  for (const s of selects) {
+    const sig = (s.name + ' ' + s.id + ' ' + (s.className || '')).toLowerCase();
+    if (/(^|_|-)day($|_|-)|^dd$|_dd$/.test(sig) && !daySel) { daySel = s; continue; }
+    if (/(^|_|-)month($|_|-)|^mm$|_mm$/.test(sig) && !monthSel) { monthSel = s; continue; }
+    if (/(^|_|-)year($|_|-)|^yy$|_yy$|yyyy/.test(sig) && !yearSel) { yearSel = s; continue; }
+  }
+
+  // Second pass: guess by option count if name heuristics failed
+  if (!daySel || !monthSel || !yearSel) {
+    for (const s of selects) {
+      if (daySel && monthSel && yearSel) break;
+      const n = s.options.length;
+      // Day: 28-32 options
+      if (!daySel && n >= 28 && n <= 32) { daySel = s; continue; }
+      // Month: 12-13 options
+      if (!monthSel && n >= 12 && n <= 13) { monthSel = s; continue; }
+      // Year: 10-150 options (that look like years)
+      if (!yearSel && n >= 10 && n <= 150) {
+        const firstRealOpt = Array.from(s.options).find(o => o.value && /^\d{4}$/.test(o.value.trim()));
+        if (firstRealOpt) { yearSel = s; }
+      }
+    }
+  }
+
+  let filled = false;
+
+  if (daySel) {
+    const dd = String(day).padStart(2, '0');
+    const ok = fillSelect(daySel, String(day)) || fillSelect(daySel, dd);
+    if (ok) filled = true;
+  }
+
+  if (monthSel) {
+    filled = fillMonthSelect(monthSel, month) || filled;
+  }
+
+  if (yearSel) {
+    const ok = fillSelect(yearSel, String(year));
+    if (ok) filled = true;
+  }
+
+  return filled;
+}
+
+/**
+ * Fill a month <select> with every possible variant of month representation.
+ */
+function fillMonthSelect(sel, month) {
+  const mn  = MONTH_NAMES[month - 1];        // 'january'
+  const ms  = MONTH_SHORT[month - 1];        // 'jan'
+  const mUp = mn.charAt(0).toUpperCase() + mn.slice(1); // 'January'
+  const mm  = String(month).padStart(2, '0'); // '05'
+  const opts = Array.from(sel.options);
+
+  // Try all variants in order of specificity
+  const match =
+    // Exact text match: "January", "january", "JANUARY"
+    opts.find(o => o.text.toLowerCase().trim() === mn) ||
+    // Short name: "Jan", "jan"
+    opts.find(o => o.text.toLowerCase().trim() === ms) ||
+    // Text starts with first 3 chars (covers "Jan.", "January")
+    opts.find(o => o.text.toLowerCase().trim().startsWith(mn.slice(0, 3))) ||
+    // Numeric value: "5"
+    opts.find(o => o.value === String(month)) ||
+    // Zero-padded value: "05"
+    opts.find(o => o.value === mm) ||
+    // Value is month name: "January", "may", etc.
+    opts.find(o => o.value.toLowerCase() === mn) ||
+    opts.find(o => o.value.toLowerCase() === ms) ||
+    // 0-indexed month (January = 0)
+    opts.find(o => o.value === String(month - 1)) ||
+    // Any option whose numeric value equals month (for padded or unpadded)
+    opts.find(o => parseInt(o.value, 10) === month) ||
+    // Option text contains month name anywhere
+    opts.find(o => o.text.toLowerCase().includes(mn));
+
+  if (match) {
+    sel.value = match.value;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    sel.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Click-based calendar interaction for custom date pickers.
+ * Handles jQuery UI, Bootstrap Datepicker, Flatpickr (fallback), Pikaday, and generic calendars.
+ */
+async function tryInteractCalendar(el, date) {
+  el.click();
+  el.focus();
+  await sleep(350);
+
+  const targetDay   = date.getDate();
+  const targetMonth = date.getMonth(); // 0-based
+  const targetYear  = date.getFullYear();
+
+  // Selectors for popular calendar containers (visible only)
+  const CALENDAR_ROOTS = [
+    '.ui-datepicker',
+    '.flatpickr-calendar',
+    '.pika-single',
+    '.datepicker-dropdown',
+    '.bootstrap-datepicker',
+    '.datetimepicker-dropdown',
+    '[class*="datepicker-popup"]',
+    '[class*="calendar-popup"]',
+    '[class*="calendar-dropdown"]',
+    '[class*="picker-container"]',
+    '[role="dialog"][aria-label*="calendar" i]',
+    '[role="dialog"][aria-label*="date" i]',
+    'div[id*="datepicker"]:not([style*="display:none"])',
+  ];
+
+  let calendar = null;
+  for (const sel of CALENDAR_ROOTS) {
+    try {
+      const found = document.querySelector(sel);
+      if (found && isVisibleEl(found)) { calendar = found; break; }
+    } catch { /* invalid selector — skip */ }
+  }
+
+  if (!calendar) { el.blur(); return false; }
+
+  // ── Try select-based month/year navigation ─────────────────────
+  const yearSel  = calendar.querySelector('select.ui-datepicker-year, [class*="year-select"], select[aria-label*="year" i]');
+  const monthSel = calendar.querySelector('select.ui-datepicker-month, [class*="month-select"], select[aria-label*="month" i]');
+
+  if (yearSel)  { fillSelect(yearSel,  String(targetYear));  await sleep(80); }
+  if (monthSel) { fillSelect(monthSel, String(targetMonth)); await sleep(80); }
+
+  // ── Navigate with prev/next if no select ──────────────────────
+  if (!yearSel || !monthSel) {
+    for (let attempt = 0; attempt < 28; attempt++) {
+      const header = calendar.querySelector(
+        '.ui-datepicker-title, [class*="calendar-header"], [class*="month-year"], ' +
+        '[class*="current-month"], [class*="navigation"] h2, [class*="navigation"] span'
+      );
+      const headerText = (header?.textContent || '').toLowerCase();
+      const curMonth = MONTH_NAMES.findIndex(m => headerText.includes(m));
+      const curYearM = headerText.match(/\d{4}/);
+      const curYear  = curYearM ? parseInt(curYearM[0]) : null;
+
+      if (curMonth === targetMonth && curYear === targetYear) break;
+
+      const needNext = !curYear || curYear < targetYear ||
+                       (curYear === targetYear && curMonth < targetMonth);
+      const nav = needNext
+        ? calendar.querySelector('.ui-datepicker-next, [class*="next-month"], [class*="nav-next"], [aria-label*="next" i], [title*="next" i]')
+        : calendar.querySelector('.ui-datepicker-prev, [class*="prev-month"], [class*="nav-prev"], [aria-label*="prev" i], [title*="prev" i]');
+      if (!nav) break;
+      nav.click();
+      await sleep(120);
+    }
+  }
+
+  // ── Click the target day cell ──────────────────────────────────
+  const dayCells = calendar.querySelectorAll(
+    'td a, td[data-day], [class*="day-cell"]:not([class*="disabled"]):not([class*="other-month"]),' +
+    '[class*="calendar-day"]:not([class*="disabled"]), [data-date], [role="gridcell"] [role="button"]'
+  );
+
+  for (const cell of dayCells) {
+    const txt  = (cell.textContent || '').trim();
+    const dDay = cell.getAttribute('data-day') || cell.getAttribute('data-date') ||
+                 cell.getAttribute('aria-label')?.match(/\d+/)?.[0];
+
+    if (txt === String(targetDay) ||
+        (dDay && (dDay === String(targetDay) || dDay.startsWith(String(targetYear) + '-' + String(targetMonth + 1).padStart(2,'0') + '-' + String(targetDay).padStart(2,'0'))))) {
+      cell.click();
+      await sleep(100);
+      return true;
+    }
+  }
+
+  el.blur();
+  return false;
+}
+
+// ─── Smart Floating Suggestion Chips ───────────────────────────
+// When user focuses an empty field that can be autofilled, show a chip
+// below the field showing the profile value. Click to fill instantly.
+
+let _chipEl = null;
+
+function removeChip() {
+  _chipEl?.remove();
+  _chipEl = null;
+}
+
+function showSuggestionChip(el, value, profileKey) {
+  removeChip();
+  if (!value) return;
+
+  const rect = el.getBoundingClientRect();
+  if (!rect.width) return;
+
+  const chip = document.createElement('div');
+  chip.id = 'unimatch-chip';
+  chip.setAttribute('style', `
+    position: fixed;
+    left: ${Math.min(rect.left, window.innerWidth - 260)}px;
+    top: ${rect.bottom + 4 + window.scrollY - window.scrollY}px;
+    z-index: 2147483640;
+    background: #161916;
+    border: 1px solid #4ade80;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font: 12px/1.4 'Inter', -apple-system, sans-serif;
+    color: #e4e4e7;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 280px;
+    animation: chip-in 0.15s ease;
+    pointer-events: auto;
+  `);
+  chip.innerHTML = `
+    <span style="color:#4ade80;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">${profileKey.replace(/_/g,' ')}</span>
+    <span style="color:#e4e4e7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">${String(value).slice(0, 40)}</span>
+    <span style="color:#4ade80;font-size:11px;font-weight:700;flex-shrink:0">↵ Fill</span>
+  `;
+
+  // Inject animation
+  if (!document.getElementById('unimatch-chip-style')) {
+    const s = document.createElement('style');
+    s.id = 'unimatch-chip-style';
+    s.textContent = '@keyframes chip-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}';
+    document.head.appendChild(s);
+  }
+
+  document.body.appendChild(chip);
+  _chipEl = chip;
+
+  chip.addEventListener('mousedown', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    removeChip();
+    if (profileKey === 'date_of_birth') {
+      await fillDateAdvanced(el, value);
+    } else {
+      await fillInput(el, String(value));
+    }
+    el.style.outline = '2px solid #4ade80';
+    el.style.outlineOffset = '2px';
+    el.classList.add('unimatch-filled');
+    el.classList.remove('unimatch-manual');
+  });
+}
+
+function setupFloatingSuggestions() {
+  document.addEventListener('focusin', (e) => {
+    const el = e.target;
+    if (!el || !['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) return;
+    if (el.type === 'password' || el.type === 'hidden') return;
+    if (el.value && el.value.trim()) return; // already has content
+
+    const ctx = window.__unimatch;
+    if (!ctx?.profile) return;
+
+    const profileKey = matchFieldHeuristically(el);
+    if (!profileKey) return;
+
+    let value;
+    if (['first_name', 'last_name', 'middle_name'].includes(profileKey)) {
+      const fn = ctx.profile.full_name;
+      value = fn ? TRANSFORMS[profileKey](fn) : '';
+    } else {
+      value = ctx.profile[profileKey];
+    }
+
+    if (value != null && value !== '') {
+      // Small delay so it doesn't fight with the focus event
+      setTimeout(() => showSuggestionChip(el, value, profileKey), 120);
+    }
+  }, true);
+
+  document.addEventListener('focusout', () => {
+    setTimeout(removeChip, 200); // allow click to register first
+  }, true);
 }
 
 // ─── Domain Detection ──────────────────────────────────────────
@@ -569,6 +1656,41 @@ function showRefreshNeeded(contentEl) {
 
 // ─── Sidebar State Management ──────────────────────────────────
 
+// ─── Auto-Connect from IlmSeUrooj site ────────────────────────
+// Supabase v2 stores the session in localStorage under this key.
+const SUPABASE_LS_KEY = 'sb-nqmvfierglxgjgqjmxmp-auth-token';
+
+function isOnIlmSeUroojSite() {
+  const h = window.location.hostname;
+  return h === 'localhost' || h === '127.0.0.1' ||
+    h === 'ilmseurooj.com' || h.endsWith('.ilmseurooj.com') ||
+    h.endsWith('.vercel.app');
+}
+
+async function tryAutoConnectFromSite() {
+  try {
+    const raw = localStorage.getItem(SUPABASE_LS_KEY);
+    if (!raw) return false;
+    const session = JSON.parse(raw);
+    const token = session?.access_token;
+    if (!token) return false;
+    console.log('[IlmSeUrooj] 🔑 Supabase session found — auto-connecting…');
+    const result = await chrome.runtime.sendMessage({
+      type: 'AUTH_TOKEN',
+      token,
+      siteUrl: window.location.origin,
+    });
+    if (result?.profile) {
+      console.log('[IlmSeUrooj] ✅ Auto-connected as:', result.profile.full_name);
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.warn('[IlmSeUrooj] Auto-connect error:', e.message);
+    return false;
+  }
+}
+
 async function initSidebarState(university) {
   const contentEl = document.getElementById('unimatch-content');
   if (!contentEl) return;
@@ -578,11 +1700,16 @@ async function initSidebarState(university) {
     document.getElementById('unimatch-toggle')?.classList.remove('sidebar-open');
   });
 
-  // Read profile DIRECTLY from chrome.storage.local — no service worker round-trip
-  // This is instant because it's a local read, not a network call
   if (!isExtensionValid()) {
     showRefreshNeeded(contentEl);
     return;
+  }
+
+  // On the IlmSeUrooj site itself, silently pull the real Supabase session
+  // from localStorage and send it to the background — zero manual steps.
+  if (isOnIlmSeUroojSite()) {
+    renderState(contentEl, 'loading');
+    await tryAutoConnectFromSite();
   }
 
   let stored;
@@ -614,6 +1741,132 @@ async function initSidebarState(university) {
   renderState(contentEl, 'ready', { profile, university });
 }
 
+// ─── Progress Bar Helper ───────────────────────────────────────
+
+function buildProgressBar(container) {
+  // renderState('loading') already includes the bar; just return the element
+  if (!container) return null;
+  return document.getElementById('unimatch-progress');
+}
+
+// ─── Inline Profile Editor ─────────────────────────────────────
+
+function showProfileEditor(container) {
+  container.innerHTML = `
+    <div class="state-card" style="padding:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong style="color:#c084fc;font-size:13px">✏️ Enter Your Profile</strong>
+        <button id="um-editor-back" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:18px">←</button>
+      </div>
+      <div style="display:grid;gap:6px;max-height:420px;overflow-y:auto;padding-right:4px">
+        ${[
+          ['full_name','Full Name','text','Muhammad Ali Khan'],
+          ['father_name',"Father's Name",'text','Ahmad Ali Khan'],
+          ['cnic','CNIC','text','35201-1234567-3'],
+          ['date_of_birth','Date of Birth','date',''],
+          ['gender','Gender','select:male,female',''],
+          ['email','Email','email',''],
+          ['phone','Phone','tel','03001234567'],
+          ['city','City','text','Lahore'],
+          ['province','Province','select:Punjab,Sindh,Khyber Pakhtunkhwa,Balochistan,Islamabad,Azad Kashmir,Gilgit-Baltistan',''],
+          ['address','Address','text',''],
+          ['postal_code','Postal Code','text',''],
+          ['matric_marks','Matric Marks','number',''],
+          ['matric_total','Matric Total','number','1050'],
+          ['fsc_marks','FSc Marks','number',''],
+          ['fsc_total','FSc Total','number','1100'],
+          ['board_name','Board Name','text','FBISE'],
+          ['passing_year','Passing Year','number','2024'],
+          ['roll_number','Board Roll No','text',''],
+          ['school_name','School/College','text',''],
+          ['net_score','NET/Entry Test Score','number',''],
+          ['blood_group','Blood Group','select:A+,A-,B+,B-,O+,O-,AB+,AB-',''],
+          ['religion','Religion','text','Islam'],
+          ['nationality','Nationality','text','Pakistani'],
+        ].map(([key, label, type, placeholder]) => {
+          const isSelect = type.startsWith('select:');
+          const opts = isSelect ? type.slice(7).split(',') : [];
+          return `<div style="display:grid;gap:2px">
+            <label style="font-size:10px;color:#a1a1aa">${label}</label>
+            ${isSelect
+              ? `<select id="ume_${key}" style="background:#0c1a0d;border:1px solid #1f2a1c;color:#e4e4e7;border-radius:6px;padding:5px 8px;font-size:11px;width:100%">
+                   <option value="">-- Select --</option>
+                   ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
+                 </select>`
+              : `<input id="ume_${key}" type="${type}" placeholder="${placeholder}"
+                   style="background:#0c1a0d;border:1px solid #1f2a1c;color:#e4e4e7;border-radius:6px;padding:5px 8px;font-size:11px;width:100%;box-sizing:border-box">`
+            }
+          </div>`;
+        }).join('')}
+      </div>
+      <button id="um-editor-save" style="margin-top:10px;width:100%;padding:10px;background:linear-gradient(135deg,#16a34a,#4ade80);border:none;color:#fff;font-weight:700;border-radius:8px;cursor:pointer;font-size:12px">
+        💾 Save & Autofill
+      </button>
+    </div>
+  `;
+
+  // Pre-fill with existing data if any
+  chrome.storage.local.get('unimatch_profile').then(res => {
+    const p = res.unimatch_profile || {};
+    for (const [key] of [['full_name'],['father_name'],['cnic'],['date_of_birth'],['gender'],['email'],['phone'],['city'],['province'],['address'],['postal_code'],['matric_marks'],['matric_total'],['fsc_marks'],['fsc_total'],['board_name'],['passing_year'],['roll_number'],['school_name'],['net_score'],['blood_group'],['religion'],['nationality']]) {
+      const el = document.getElementById(`ume_${key}`);
+      if (el && p[key] != null) el.value = p[key];
+    }
+  }).catch(() => {});
+
+  document.getElementById('um-editor-back')?.addEventListener('click', () => {
+    renderState(container, 'not_logged_in');
+  });
+
+  document.getElementById('um-editor-save')?.addEventListener('click', async () => {
+    const get = id => document.getElementById(id)?.value?.trim() || '';
+    const getN = id => { const v = get(id); return v ? Number(v) : undefined; };
+
+    const profile = {
+      full_name: get('ume_full_name'),
+      father_name: get('ume_father_name'),
+      cnic: get('ume_cnic'),
+      date_of_birth: get('ume_date_of_birth'),
+      gender: get('ume_gender'),
+      email: get('ume_email'),
+      phone: get('ume_phone'),
+      city: get('ume_city'),
+      province: get('ume_province'),
+      address: get('ume_address'),
+      postal_code: get('ume_postal_code'),
+      matric_marks: getN('ume_matric_marks'),
+      matric_total: getN('ume_matric_total') || 1050,
+      fsc_marks: getN('ume_fsc_marks'),
+      fsc_total: getN('ume_fsc_total') || 1100,
+      board_name: get('ume_board_name'),
+      passing_year: getN('ume_passing_year'),
+      roll_number: get('ume_roll_number'),
+      school_name: get('ume_school_name'),
+      net_score: getN('ume_net_score'),
+      blood_group: get('ume_blood_group'),
+      religion: get('ume_religion'),
+      nationality: get('ume_nationality'),
+      inter_status: 'complete',
+      education_system: 'pakistan',
+    };
+
+    // Derive first/last names from full_name
+    if (profile.full_name) {
+      const parts = profile.full_name.trim().split(/\s+/);
+      profile.first_name = parts[0] || '';
+      profile.last_name = parts.length > 1 ? parts[parts.length - 1] : '';
+      profile.middle_name = parts.length > 2 ? parts.slice(1, -1).join(' ') : '';
+    }
+
+    await chrome.storage.local.set({
+      unimatch_token: 'real_token',
+      token_expiry: Date.now() + 86400000 * 30,
+      unimatch_profile: profile,
+    });
+    window.location.reload();
+  });
+}
+
 // ─── State Renderer ────────────────────────────────────────────
 
 function renderState(container, state, data = {}) {
@@ -628,20 +1881,106 @@ function renderState(container, state, data = {}) {
       `;
       break;
 
-    case 'not_logged_in':
+    case 'not_logged_in': {
+      const onSite = isOnIlmSeUroojSite();
       container.innerHTML = `
         <div class="state-card">
           <div class="state-icon">🔒</div>
-          <h3>Sign in to autofill this form.</h3>
-          <p>Connect your profile to autofill university applications.</p>
-          <button class="btn-primary" id="unimatch-signin">Sign In to UniMatch</button>
+          <h3>${onSite ? 'Connecting your profile…' : 'Sign in to autofill this form.'}</h3>
+          <p>${onSite
+            ? 'You\'re on the IlmSeUrooj website. Click below to connect your logged-in account.'
+            : 'Connect your profile to autofill university applications.'}</p>
+          ${onSite
+            ? `<button class="btn-primary" id="unimatch-signin" style="background:#4ade80;color:#0c0e0b">
+                 🔄 Connect My Real Profile
+               </button>`
+            : `<button class="btn-primary" id="unimatch-signin">Sign In to UniMatch</button>`
+          }
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1f2a1c">
+            <p style="font-size:11px;color:#52525b;margin-bottom:8px">— or enter profile directly —</p>
+            <button class="btn-secondary" id="unimatch-load-demo" style="width:100%;font-size:11px;padding:8px;margin-bottom:6px">
+              ⚡ Load Demo Profile
+            </button>
+            <button class="btn-secondary" id="unimatch-open-editor" style="width:100%;font-size:11px;padding:8px;background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);color:#c084fc">
+              ✏️ Enter My Real Profile
+            </button>
+          </div>
         </div>
       `;
-      document.getElementById('unimatch-signin')?.addEventListener('click', () => {
+      document.getElementById('unimatch-signin')?.addEventListener('click', async () => {
+        if (isOnIlmSeUroojSite()) {
+          // Try direct auto-connect first (reads localStorage Supabase session)
+          renderState(container, 'loading');
+          const ok = await tryAutoConnectFromSite();
+          if (ok) {
+            const stored = await chrome.storage.local.get(['unimatch_token', 'unimatch_profile']);
+            if (stored.unimatch_profile) {
+              const uni = detectUniversity();
+              window.__unimatch = { university: uni, profile: stored.unimatch_profile, fieldMap: null, filledFields: 0, manualFields: 0, filledSelectors: [], manualSelectors: [] };
+              renderState(container, 'ready', { profile: stored.unimatch_profile, university: uni });
+              return;
+            }
+          }
+          renderState(container, 'not_logged_in');
+          return;
+        }
         const extId = chrome.runtime.id;
-        window.open(`http://localhost:3000/extension-auth?ext=${extId}`, '_blank', 'width=500,height=600');
+        const base = await getSiteUrl();
+        window.open(`${base}/extension-auth?ext=${extId}`, '_blank', 'width=500,height=600');
+      });
+      document.getElementById('unimatch-load-demo')?.addEventListener('click', async () => {
+        await chrome.storage.local.set({
+          unimatch_token: 'demo_token',
+          token_expiry: Date.now() + 86400000 * 30,
+          unimatch_profile: {
+            full_name: 'Muhammad Ali Khan',
+            first_name: 'Muhammad',
+            last_name: 'Khan',
+            middle_name: 'Ali',
+            father_name: 'Ahmad Ali Khan',
+            mother_name: 'Ayesha Begum',
+            cnic: '35201-1234567-3',
+            father_cnic: '35201-7654321-5',
+            date_of_birth: '2003-05-15',
+            gender: 'male',
+            blood_group: 'O+',
+            religion: 'Islam',
+            nationality: 'Pakistani',
+            email: 'muhammad.ali.khan@gmail.com',
+            phone: '03001234567',
+            whatsapp: '03001234567',
+            city: 'Lahore',
+            district: 'Lahore',
+            province: 'Punjab',
+            domicile_province: 'Punjab',
+            postal_code: '54000',
+            address: 'House 12, Street 4, Gulberg III, Lahore',
+            matric_marks: 980,
+            matric_total: 1050,
+            matric_percentage: '93.3',
+            fsc_marks: 1020,
+            fsc_total: 1100,
+            fsc_percentage: '92.7',
+            board_name: 'FBISE',
+            passing_year: 2024,
+            roll_number: 'F-123456',
+            school_name: 'F.G. Degree College H-9, Islamabad',
+            net_score: 185,
+            ecat_score: 780,
+            sat_score: 1320,
+            profile_completion: 95,
+            inter_status: 'complete',
+            education_system: 'pakistan',
+            statement_of_purpose: 'I am a passionate and dedicated student with a strong academic record. I believe that higher education is the key to personal and professional growth. I have always excelled in mathematics and sciences, and I am eager to pursue my degree at this prestigious institution. My goal is to contribute meaningfully to Pakistan\'s technological advancement by applying the knowledge and skills I acquire here.'
+          }
+        });
+        window.location.reload();
+      });
+      document.getElementById('unimatch-open-editor')?.addEventListener('click', () => {
+        showProfileEditor(container);
       });
       break;
+    } // end case 'not_logged_in'
 
     case 'warning_ibcc':
       container.innerHTML = `
@@ -649,9 +1988,13 @@ function renderState(container, state, data = {}) {
           <div class="state-icon" style="color:#fbbf24">⚠️</div>
           <h3>IBCC equivalence not entered in your profile.</h3>
           <p>Required for this portal.</p>
-          <a class="btn-primary" href="http://localhost:3000/profile" target="_blank">Complete Profile →</a>
+          <a class="btn-primary" id="unimatch-ibcc-link" href="#" target="_blank">Complete Profile →</a>
         </div>
       `;
+      getSiteUrl().then(base => {
+        const link = document.getElementById('unimatch-ibcc-link');
+        if (link) link.href = `${base}/profile`;
+      });
       break;
 
     case 'warning_no_marks':
@@ -660,16 +2003,23 @@ function renderState(container, state, data = {}) {
           <div class="state-icon" style="color:#fbbf24">⚠️</div>
           <h3>No intermediate marks in your profile yet.</h3>
           <p>${data.uniName || 'This university'} requires FSc Part-I minimum to apply.</p>
-          <a class="btn-primary" href="http://localhost:3000/profile" target="_blank">Update Profile →</a>
+          <a class="btn-primary" id="unimatch-marks-link" href="#" target="_blank">Update Profile →</a>
         </div>
       `;
+      getSiteUrl().then(base => {
+        const link = document.getElementById('unimatch-marks-link');
+        if (link) link.href = `${base}/profile`;
+      });
       break;
 
     case 'loading':
       container.innerHTML = `
         <div class="state-card">
-          <div class="spinner"></div>
-          <p>Loading your profile...</p>
+          <div style="font-size:13px;font-weight:600;color:#e4e4e7;margin-bottom:10px">⚡ Filling form...</div>
+          <div style="height:4px;background:#1f2a1c;border-radius:2px;overflow:hidden;margin-bottom:12px">
+            <div id="unimatch-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:2px;transition:width 0.2s ease"></div>
+          </div>
+          <p style="font-size:11px;color:#71717a">Detecting and filling all form fields...</p>
         </div>
       `;
       break;
@@ -680,72 +2030,262 @@ function renderState(container, state, data = {}) {
       const completeness = calculateCompleteness(profile);
       const isProjected = ['part1_only', 'appearing'].includes(profile?.inter_status);
       const isCambridge = profile?.education_system === 'cambridge';
-      const marksLabel = isCambridge ? 'IBCC equivalence %' : isProjected ? 'FSc marks (projected)' : 'FSc marks';
-      const marksWarning = isProjected ? '⚠ Using projected marks from Part-I' : isCambridge ? 'ℹ Using IBCC equivalence %' : '';
-      container.innerHTML = `
-        <div class="state-card">
-          <div class="profile-info">
-            <div class="avatar">${displayName.charAt(0).toUpperCase()}</div>
-            <div>
-              <strong>${displayName}</strong>
-              <span class="profile-pct">${completeness}% complete</span>
+      const pageType = detectPageType();
+      const program = detectProgram();
+
+      // ── Profile quick-view rows (what WILL actually be filled) ──
+      const PROFILE_ROWS = [
+        { key: 'full_name',    icon: '👤', label: 'Name' },
+        { key: 'father_name',  icon: '👨', label: 'Father' },
+        { key: 'cnic',         icon: '🪪', label: 'CNIC' },
+        { key: 'email',        icon: '✉️',  label: 'Email' },
+        { key: 'phone',        icon: '📱', label: 'Phone' },
+        { key: 'date_of_birth',icon: '🎂', label: 'DOB' },
+        { key: 'city',         icon: '📍', label: 'City' },
+        { key: 'fsc_marks',    icon: '📊', label: 'FSc marks' },
+        { key: 'matric_marks', icon: '📊', label: 'Matric marks' },
+      ];
+
+      const previewRows = PROFILE_ROWS.map(r => {
+        const val = profile?.[r.key];
+        const hasVal = val != null && val !== '';
+        const display = hasVal ? String(val).slice(0, 22) + (String(val).length > 22 ? '…' : '') : '—';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">
+          <span style="color:#a1a1aa">${r.icon} ${r.label}</span>
+          <span style="color:${hasVal ? '#e4e4e7' : '#52525b'};font-family:monospace;font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${display}</span>
+        </div>`;
+      }).join('');
+
+      // ── Gap warnings (profile fields missing that form likely needs) ──
+      const gaps = PROFILE_ROWS.filter(r => !profile?.[r.key]).map(r => r.label);
+      const gapHTML = gaps.length
+        ? `<div style="margin-top:8px;padding:6px 8px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:6px;font-size:10px;color:#fbbf24">
+            ⚠ Missing: ${gaps.join(' · ')}
+           </div>`
+        : '';
+
+      // ── Marks warning ────────────────────────────────────────────
+      const marksWarning = isProjected
+        ? '<div style="font-size:10px;color:#fbbf24;margin-top:6px;padding:4px 8px;background:rgba(251,191,36,0.08);border-radius:6px">⚠ Using projected marks from Part-I</div>'
+        : isCambridge
+        ? '<div style="font-size:10px;color:#60a5fa;margin-top:6px;padding:4px 8px;background:rgba(96,165,250,0.08);border-radius:6px">ℹ Using IBCC equivalence %</div>'
+        : '';
+
+      // ── Login/Register page context card ────────────────────────
+      const portalEmail   = profile?.portal_email || profile?.email || '';
+      const portalUser    = generatePortalUsername(profile);
+      const regLink       = findRegisterLink();
+
+      const loginRegisterCard = (pageType === 'login') ? `
+        <div style="background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:12px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#4ade80;margin-bottom:8px">🔑 Login Page — Credentials Ready</div>
+          <div style="font-size:10px;color:#a1a1aa;margin-bottom:6px">UniMatch will fill these when you click Autofill:</div>
+          <div style="font-size:11px;background:#0c0e0b;border-radius:6px;padding:8px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="color:#71717a">Username/Email:</span>
+              <span style="color:#e4e4e7;font-family:monospace;max-width:140px;overflow:hidden;text-overflow:ellipsis">${portalEmail || portalUser}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="color:#71717a">Password:</span>
+              <span style="color:#4ade80">●●●●●●●●●● (saved)</span>
             </div>
           </div>
-          <div class="fill-list">
-            <p style="font-size:11px;color:#a1a1aa;margin:8px 0 4px">Will fill:</p>
-            <div style="font-size:12px;color:#4ade80">✓ Name, Father, CNIC</div>
-            <div style="font-size:12px;color:${isProjected || isCambridge ? '#fbbf24' : '#4ade80'}">✓ ${marksLabel} ${isProjected || isCambridge ? '⚠' : ''}</div>
-            <div style="font-size:12px;color:#4ade80">✓ Email, Phone, City</div>
-            ${marksWarning ? `<div style="font-size:10px;color:#fbbf24;margin-top:4px;padding:4px 8px;background:rgba(251,191,36,0.08);border-radius:6px">${marksWarning}</div>` : ''}
+          ${regLink
+            ? `<button id="unimatch-goto-register" style="width:100%;padding:7px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);border-radius:7px;color:#4ade80;font-size:11px;cursor:pointer;font-family:inherit">📝 No account yet? Create Account →</button>`
+            : `<button id="unimatch-goto-register" style="width:100%;padding:7px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);border-radius:7px;color:#4ade80;font-size:11px;cursor:pointer;font-family:inherit">📝 Find Registration Page →</button>`
+          }
+        </div>
+      ` : (pageType === 'register') ? `
+        <div style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:12px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#c084fc;margin-bottom:6px">📝 Registration Page — Ready to Create Account</div>
+          <div style="font-size:10px;color:#a1a1aa;margin-bottom:6px">UniMatch will fill your complete profile including:</div>
+          <div style="font-size:10px;color:#e4e4e7;line-height:1.7">
+            ✓ Full name, CNIC, DOB, gender<br>
+            ✓ Email: <span style="color:#4ade80;font-family:monospace">${portalEmail}</span><br>
+            ✓ Username: <span style="color:#4ade80;font-family:monospace">${portalUser}</span><br>
+            ✓ Password + Confirm Password (same)<br>
+            ✓ Phone, address, marks, test scores
           </div>
-          <div id="unimatch-suggestions"></div>
-          <div class="field-stats" id="unimatch-field-stats">
-            <p class="stats-note">Click Autofill to detect and fill form fields</p>
+        </div>
+      ` : '';
+
+      container.innerHTML = `
+        <div class="state-card">
+          <div class="profile-info" style="margin-bottom:10px">
+            <div class="avatar" style="flex-shrink:0">${displayName.charAt(0).toUpperCase()}</div>
+            <div style="flex:1;min-width:0">
+              <strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${displayName}</strong>
+              <span class="profile-pct">${completeness}% profile complete</span>
+            </div>
+            <div style="flex-shrink:0">
+              <svg width="28" height="28" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15" fill="none" stroke="#1f2a1c" stroke-width="3"/>
+                <circle cx="18" cy="18" r="15" fill="none" stroke="#4ade80" stroke-width="3"
+                  stroke-dasharray="${(completeness / 100) * 94.2} 94.2"
+                  stroke-linecap="round" transform="rotate(-90 18 18)"/>
+                <text x="18" y="22" text-anchor="middle" font-size="9" fill="#4ade80" font-family="monospace">${completeness}%</text>
+              </svg>
+            </div>
           </div>
-          <button class="btn-primary btn-autofill" id="unimatch-autofill">⚡ Autofill Now</button>
-          <button class="btn-secondary" id="unimatch-scan">🔍 Scan Fields Only</button>
-          <p style="font-size:10px;color:#71717a;text-align:center;margin-top:8px">You control submission.</p>
+
+          ${loginRegisterCard}
+
+          ${program ? `<div style="font-size:10px;color:#a855f7;padding:4px 8px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:6px;margin-bottom:8px">📋 ${program}</div>` : ''}
+
+          <details style="margin-bottom:8px">
+            <summary style="font-size:11px;color:#71717a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+              <span>Profile preview</span>
+              <span style="color:#4ade80;font-size:9px">▼ expand</span>
+            </summary>
+            <div style="margin-top:6px;padding:4px 0">${previewRows}</div>
+          </details>
+
+          ${gapHTML}
+          ${marksWarning}
+
+          <div id="unimatch-suggestions" style="margin-top:8px"></div>
+
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn-secondary" id="unimatch-refresh-profile" style="flex:1;font-size:10px;padding:5px">🔄 Refresh Profile</button>
+            <button class="btn-secondary" id="unimatch-edit-profile" style="flex:1;font-size:10px;padding:5px">✏️ Edit Profile</button>
+          </div>
+
+          <button class="btn-primary btn-autofill" id="unimatch-autofill" style="margin-top:10px;position:relative;overflow:hidden">
+            <span style="position:relative;z-index:1">&#9889; Autofill Now</span>
+            <span style="position:relative;z-index:1;font-size:9px;opacity:0.5;margin-left:6px">Alt+Shift+A</span>
+          </button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+            <button class="btn-secondary" id="unimatch-scan" style="font-size:11px">&#128269; Scan</button>
+            <button class="btn-secondary" id="unimatch-review-btn" style="font-size:11px">&#128203; Review</button>
+          </div>
+          <div style="margin-top:8px;padding:6px 8px;background:rgba(74,222,128,0.04);border:1px solid rgba(74,222,128,0.1);border-radius:6px;font-size:9px;color:#52525b;text-align:center;line-height:1.4">
+            &#128274; Never auto-submits &middot; Only you submit
+          </div>
         </div>
       `;
-      // Show smart suggestions
-      const pageType = detectPageType();
+
+      // Smart suggestions
       const suggestions = buildSmartSuggestions(pageType, data.university);
       const suggestionsEl = document.getElementById('unimatch-suggestions');
       if (suggestionsEl && suggestions.length > 0) {
         suggestionsEl.innerHTML = suggestions.map(s => `
-          <div style="padding:8px 10px; margin-bottom:6px; background:rgba(74,222,128,0.06); border:1px solid rgba(74,222,128,0.15); border-radius:8px; font-size:11px; line-height:1.4;">
+          <div style="padding:7px 10px;margin-bottom:5px;background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.12);border-radius:7px;font-size:11px;line-height:1.4">
             <span>${s.icon}</span> ${s.text}
-            ${s.sub ? `<div style="margin-top:2px; font-size:10px; color:#a1a1aa">${s.sub}</div>` : ''}
+            ${s.sub ? `<div style="margin-top:2px;font-size:10px;color:#a1a1aa">${s.sub}</div>` : ''}
           </div>
         `).join('');
       }
+
       document.getElementById('unimatch-autofill')?.addEventListener('click', handleAutofill);
       document.getElementById('unimatch-scan')?.addEventListener('click', handleScanFields);
+      document.getElementById('unimatch-review-btn')?.addEventListener('click', handlePreSubmitCheck);
+      document.getElementById('unimatch-goto-register')?.addEventListener('click', handleGoToRegister);
+
+      document.getElementById('unimatch-refresh-profile')?.addEventListener('click', async () => {
+        renderState(container, 'loading');
+        // Try auto-connect from site first (picks up latest Supabase session)
+        if (isOnIlmSeUroojSite()) await tryAutoConnectFromSite();
+        // Then refresh from API
+        const result = await chrome.runtime.sendMessage({ type: 'REFRESH_PROFILE' });
+        if (result?.profile) {
+          const uni = detectUniversity();
+          window.__unimatch = { university: uni, profile: result.profile, fieldMap: null, filledFields: 0, manualFields: 0, filledSelectors: [], manualSelectors: [] };
+          renderState(container, 'ready', { profile: result.profile, university: uni });
+        } else {
+          // Re-read from storage
+          const stored = await chrome.storage.local.get('unimatch_profile');
+          renderState(container, stored.unimatch_profile ? 'ready' : 'not_logged_in', { profile: stored.unimatch_profile, university: detectUniversity() });
+        }
+      });
+
+      document.getElementById('unimatch-edit-profile')?.addEventListener('click', () => {
+        showProfileEditor(container);
+      });
       break;
     }
 
-    case 'filled':
+    case 'filled': {
+      const pct = data.filled + data.manual > 0
+        ? Math.round((data.filled / (data.filled + data.manual)) * 100) : 0;
+      const pageType = detectPageType();
+      const ctx2 = window.__unimatch;
+      const filledProfile = ctx2?.profile;
+      const portalEmail2   = filledProfile?.portal_email || filledProfile?.email || '';
+      const portalUser2    = generatePortalUsername(filledProfile);
+      const filledPassword = data.password || ctx2?.generatedPassword || '';
+
+      // Show credential summary on login/register pages so user knows what was filled
+      const credSummary = (pageType === 'login' || pageType === 'register') ? `
+        <div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:8px;padding:10px;margin-top:10px;font-size:10px">
+          <div style="font-weight:600;color:#4ade80;margin-bottom:6px">📋 ${pageType === 'register' ? 'Account Created With:' : 'Filled Credentials:'}</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="color:#71717a">${pageType === 'register' ? 'Username:' : 'Email/User:'}</span>
+            <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${pageType === 'register' ? portalUser2 : (portalEmail2 || portalUser2)}</span>
+          </div>
+          ${portalEmail2 && pageType === 'register' ? `<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:#71717a">Email:</span><span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${portalEmail2}</span></div>` : ''}
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#71717a">Password:</span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <span id="pw-display" style="color:#e4e4e7;font-family:monospace;font-size:9px">●●●●●●●●</span>
+              <button id="pw-reveal" style="background:none;border:none;color:#4ade80;font-size:9px;cursor:pointer;padding:0">Show</button>
+              <button id="pw-copy" style="background:none;border:none;color:#60a5fa;font-size:9px;cursor:pointer;padding:0">Copy</button>
+            </div>
+          </div>
+        </div>
+        ${pageType === 'register' ? `<div style="margin-top:8px;padding:6px 8px;background:rgba(251,191,36,0.06);border-radius:6px;font-size:9px;color:#fbbf24">⚠ Save these credentials! You need them to log back in later.</div>` : ''}
+      ` : '';
+
       container.innerHTML = `
         <div class="state-card">
+          <div style="font-size:22px;font-weight:700;color:#4ade80;text-align:center;margin-bottom:2px">${pct}%</div>
+          <div style="font-size:10px;color:#71717a;text-align:center;margin-bottom:10px">form complete</div>
+          <div style="height:3px;background:#1f2a1c;border-radius:2px;margin-bottom:12px">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:2px"></div>
+          </div>
           <div class="fill-results">
             <div class="stat-row filled">
               <span class="stat-dot green"></span>
-              <span>${data.filled} fields filled</span>
+              <span><strong>${data.filled}</strong> fields auto-filled</span>
             </div>
             <div class="stat-row manual">
               <span class="stat-dot amber"></span>
-              <span>${data.manual} need your input</span>
+              <span><strong>${data.manual}</strong> need your input</span>
             </div>
+            ${data.conflicts > 0 ? `<div class="stat-row" style="margin-top:2px">
+              <span style="width:8px;height:8px;border-radius:50%;background:#60a5fa;display:inline-block;margin-right:6px;flex-shrink:0"></span>
+              <span style="color:#60a5fa"><strong>${data.conflicts}</strong> conflicts skipped</span>
+            </div>` : ''}
           </div>
-          <button class="btn-secondary" id="unimatch-save-progress">💾 Save Progress</button>
-          <button class="btn-primary btn-review" id="unimatch-review">📋 Pre-submit Check</button>
-          <button class="btn-secondary" id="unimatch-refill">🔄 Re-fill</button>
+          ${credSummary}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px">
+            <button class="btn-secondary" id="unimatch-save-progress" style="font-size:11px">💾 Save</button>
+            <button class="btn-secondary" id="unimatch-refill" style="font-size:11px">🔄 Re-fill</button>
+          </div>
+          <button class="btn-primary btn-review" id="unimatch-review" style="margin-top:6px;width:100%">📋 Pre-submit Check</button>
+          <p style="font-size:9px;color:#52525b;text-align:center;margin-top:8px">Alt+Shift+A to re-fill · Alt+Shift+R for review</p>
         </div>
       `;
       document.getElementById('unimatch-review')?.addEventListener('click', handlePreSubmitCheck);
       document.getElementById('unimatch-refill')?.addEventListener('click', handleAutofill);
       document.getElementById('unimatch-save-progress')?.addEventListener('click', handleSaveProgress);
+      // Password show/copy in credential summary
+      document.getElementById('pw-reveal')?.addEventListener('click', async () => {
+        const pw = await getConsistentPassword();
+        const display = document.getElementById('pw-display');
+        const btn = document.getElementById('pw-reveal');
+        if (display && btn) {
+          if (btn.textContent === 'Show') { display.textContent = pw; btn.textContent = 'Hide'; }
+          else { display.textContent = '●●●●●●●●'; btn.textContent = 'Show'; }
+        }
+      });
+      document.getElementById('pw-copy')?.addEventListener('click', async () => {
+        const pw = await getConsistentPassword();
+        navigator.clipboard?.writeText(pw);
+        const btn = document.getElementById('pw-copy');
+        if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+      });
       break;
+    }
 
     case 'submitted':
       container.innerHTML = `
@@ -944,19 +2484,6 @@ function fillSelectWithMapping(el, value, optionMap) {
 // ─── Extension Context Guard ───────────────────────────────────
 
 /**
- * Check if the extension context is still valid.
- * When the extension is reloaded in chrome://extensions, old content scripts
- * lose their connection and chrome.runtime.id becomes undefined.
- */
-function isExtensionValid() {
-  try {
-    return !!(chrome.runtime && chrome.runtime.id);
-  } catch (e) {
-    return false;
-  }
-}
-
-/**
  * Show a friendly "refresh needed" message when the extension context is gone.
  */
 function showContextInvalidatedUI(container) {
@@ -988,26 +2515,47 @@ async function handleAutofill() {
   }
 
   renderState(contentEl, 'loading');
+  showScanLine(1500);
+  const _fillStart = Date.now();
 
   try {
     let filledCount = 0;
     let manualCount = 0;
     let skippedCount = 0;
+    let conflictCount = 0;
     const filledSelectors = [];
     const manualSelectors = [];
+    const conflictList = [];
     const alreadyHandled = new Set();
     const masterPassword = await getConsistentPassword();
+
+    // Animated progress bar
+    const progressBar = buildProgressBar(contentEl);
+    const totalFields = collectAllFields().length || 1;
+    let processedFields = 0;
+    const tickProgress = () => {
+      processedFields++;
+      if (progressBar) progressBar.style.width = `${Math.min(100, (processedFields / totalFields) * 100)}%`;
+    };
 
     // ─── TIER 1: Deterministic per-university config ───────────
     // Uses verified CSS selectors from extension/universities/index.js
     const hostname = window.location.hostname;
     const uniConfig = (typeof getConfigForDomain === 'function') ? getConfigForDomain(hostname) : null;
 
-    if (uniConfig && uniConfig.fieldMap) {
+    // Select the right field map based on current page type
+    let tier1FieldMap = uniConfig?.fieldMap;
+    if (uniConfig) {
+      const pt = detectPageType();
+      if (pt === 'login' && uniConfig.loginFieldMap) tier1FieldMap = uniConfig.loginFieldMap;
+      else if (pt === 'register' && uniConfig.registerFieldMap) tier1FieldMap = uniConfig.registerFieldMap;
+    }
+
+    if (uniConfig && tier1FieldMap) {
       console.log(`[IlmSeUrooj] ✅ Found config for ${uniConfig.name} (${uniConfig.slug})`);
       console.log(`[IlmSeUrooj] Form type: ${uniConfig.formType}, Verified: ${uniConfig.verified}`);
 
-      for (const [profileKey, selectorString] of Object.entries(uniConfig.fieldMap)) {
+      for (const [profileKey, selectorString] of Object.entries(tier1FieldMap)) {
         const els = tryMultiSelectorAll(selectorString);
 
         if (els.length === 0) {
@@ -1017,13 +2565,20 @@ async function handleAutofill() {
         }
 
         for (const el of els) {
-          // Resolve value — virtual keys (first_name, last_name, middle_name) derive from full_name
+          tickProgress();
+          // Resolve value — virtual keys derive from profile fields
           let rawValue;
           if (['first_name', 'last_name', 'middle_name'].includes(profileKey)) {
             const fullName = ctx.profile?.full_name;
             rawValue = fullName ? TRANSFORMS[profileKey](fullName) : '';
+          } else if (profileKey === 'portal_password') {
+            rawValue = masterPassword; // Always use the consistent master password
+          } else if (profileKey === 'portal_username') {
+            rawValue = generatePortalUsername(ctx.profile);
           } else {
             rawValue = ctx.profile?.[profileKey];
+            // For portal_email, fall back to email if not set
+            if (profileKey === 'portal_email' && !rawValue) rawValue = ctx.profile?.email;
           }
 
           alreadyHandled.add(el);
@@ -1056,7 +2611,6 @@ async function handleAutofill() {
           if (el.tagName === 'SELECT') {
             filled = fillSelectWithMapping(el, value, uniConfig.selectOptions?.[profileKey]);
           } else if (el.type === 'radio') {
-            // Handle radio buttons
             const radioName = el.name;
             if (radioName) {
               document.querySelectorAll(`[name="${radioName}"]`).forEach(r => {
@@ -1067,6 +2621,8 @@ async function handleAutofill() {
                 }
               });
             }
+          } else if (profileKey === 'date_of_birth') {
+            filled = await fillDateAdvanced(el, String(value));
           } else {
             filled = await fillInput(el, String(value));
           }
@@ -1177,39 +2733,118 @@ async function handleAutofill() {
       }
     }
 
+    // ─── TIER 2.5: Explicit three-part date group scan ─────────
+    // Guaranteed fill for .date-group containers regardless of name heuristics
+    if (ctx.profile.date_of_birth) {
+      const dateGrps = document.querySelectorAll(
+        '.date-group, .dob-group, [class*="date-group"], [class*="dob-group"],' +
+        '[class*="date-field"], [class*="dob-field"], [class*="birth-date"]'
+      );
+      for (const grp of dateGrps) {
+        const grpSelects = grp.querySelectorAll('select');
+        if (grpSelects.length >= 2) {
+          const dDate = new Date(ctx.profile.date_of_birth + 'T00:00:00');
+          if (!isNaN(dDate.getTime())) {
+            const grpFilled = await tryThreePartSelects(grp, dDate.getDate(), dDate.getMonth() + 1, dDate.getFullYear());
+            if (grpFilled) {
+              grpSelects.forEach(s => {
+                alreadyHandled.add(s);
+                s.style.outline = '2px solid #4ade80';
+                s.style.outlineOffset = '2px';
+                s.classList.add('unimatch-filled');
+                sparkleField(s);
+              });
+              filledCount += grpSelects.length;
+            }
+          }
+        }
+      }
+    }
+
     // ─── TIER 3: Heuristic fallback for remaining fields ───────
-    const allInputs = document.querySelectorAll(
-      'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]), select, textarea'
-    );
+    const allInputs = collectAllFields();
 
     for (const input of allInputs) {
       if (alreadyHandled.has(input)) continue;
-      if (input.value && input.value.trim() !== '') continue;
+      tickProgress();
 
-      // Password fields — consistent password
+      // ── Credential fields: password, confirm-password, username/login ──────────────
+      // These are excluded from generic heuristics but we handle them explicitly here.
+
+      // Password fields — fill ALL password inputs (including confirm_password) with masterPassword
       if (input.type === 'password') {
         await fillInput(input, masterPassword);
+        // Also fill any other password inputs in the same form (confirm password etc.)
+        const pwForm = input.closest('form') || document;
+        const pwConfirms = pwForm.querySelectorAll('input[type="password"]');
+        if (pwConfirms.length > 1) {
+          for (const cf of pwConfirms) {
+            if (cf !== input) { await fillInput(cf, masterPassword); alreadyHandled.add(cf); sparkleField(cf); }
+          }
+        }
         input.style.outline = '2px solid #4ade80';
+        input.style.outlineOffset = '2px';
         input.classList.add('unimatch-filled');
+        sparkleField(input);
         filledCount++;
         alreadyHandled.add(input);
         continue;
       }
 
+      // Username / Login ID / User ID fields — fill with CNIC (no dashes) or email
+      {
+        const sig = buildFieldSignature(input);
+        const isUsernameField = /\b(username|user_?name|login_?id|user_?id|loginid|userid|applicant_?id|student_?id|reg_?no|registration_?no|login_?name)\b/.test(sig);
+        if (isUsernameField) {
+          const usernameValue = generatePortalUsername(ctx.profile);
+          if (usernameValue) {
+            await fillInput(input, usernameValue);
+            input.style.outline = '2px solid #4ade80';
+            input.style.outlineOffset = '2px';
+            input.classList.add('unimatch-filled');
+            sparkleField(input);
+            filledCount++;
+          } else {
+            input.style.outline = '2px solid #fbbf24';
+            input.style.outlineOffset = '2px';
+            input.classList.add('unimatch-manual');
+            manualCount++;
+          }
+          alreadyHandled.add(input);
+          continue;
+        }
+
+        // Login email field (on login pages: input that looks like an email/login field)
+        const isLoginEmailField = /\b(login|sign_?in_?email|user_?email|account_?email)\b/.test(sig);
+        if (isLoginEmailField) {
+          const emailValue = ctx.profile?.portal_email || ctx.profile?.email || '';
+          if (emailValue) {
+            await fillInput(input, emailValue);
+            input.style.outline = '2px solid #4ade80';
+            input.style.outlineOffset = '2px';
+            input.classList.add('unimatch-filled');
+            sparkleField(input);
+            filledCount++;
+          }
+          alreadyHandled.add(input);
+          continue;
+        }
+      }
+
       // Heuristic match
       const profileKey = matchFieldHeuristically(input);
       if (!profileKey) {
-        // Mark unfilled required fields
         if (input.required && !input.value) {
           input.style.outline = '2px solid #fbbf24';
+          input.style.outlineOffset = '2px';
           input.classList.add('unimatch-manual');
           manualCount++;
         }
+        alreadyHandled.add(input);
         continue;
       }
 
-      // Resolve the value — virtual keys (first_name, last_name, middle_name)
-      // are derived from full_name using transforms
+      // Resolve value
       let value;
       if (['first_name', 'last_name', 'middle_name'].includes(profileKey)) {
         const fullName = ctx.profile.full_name;
@@ -1218,53 +2853,84 @@ async function handleAutofill() {
         value = ctx.profile[profileKey];
       }
 
+      // Smart transforms
       if (profileKey === 'cnic' && value) {
-        const accepts = (input.maxLength === 13 || input.name?.includes('no_dash'));
-        value = accepts ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
+        const cnicSig = ((input.name || '') + ' ' + (input.id || '') + ' ' + (input.className || '')).toLowerCase();
+        const noDash = (input.maxLength === 13 ||
+          cnicSig.includes('nodash') || cnicSig.includes('no_dash') ||
+          cnicSig.includes('nondash') || cnicSig.includes('without_dash') ||
+          cnicSig.includes('digits') || cnicSig.includes('cnic13'));
+        value = noDash ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
       }
-      if (profileKey === 'phone' && value) {
+      if ((profileKey === 'phone' || profileKey === 'whatsapp') && value) {
         value = TRANSFORMS.phone_pak(value);
       }
+      if (profileKey === 'province' && (!value || value === '') && ctx.profile?.city) {
+        value = CITY_TO_PROVINCE[String(ctx.profile.city).toLowerCase()] || '';
+      }
 
-      if (value != null && value !== '') {
-        if (input.tagName === 'SELECT') {
-          const filled = fillSelect(input, value);
-          if (filled) {
-            input.style.outline = '2px solid #4ade80';
-            input.classList.add('unimatch-filled');
-            filledCount++;
-          }
-        } else {
-          const filled = await fillInput(input, String(value));
-          if (filled) {
-            input.style.outline = '2px solid #4ade80';
-            input.classList.add('unimatch-filled');
-            filledCount++;
-          }
+      // Track conflicts (informational only — we still fill)
+      if (input.value && input.value.trim() !== '' && value != null && value !== '') {
+        const existNorm = String(input.value).toLowerCase().trim();
+        const newNorm   = String(value).toLowerCase().trim();
+        if (existNorm !== newNorm) conflictCount++;
+      }
+
+      if (value == null || value === '') {
+        if (input.required && !input.value) {
+          input.style.outline = '2px solid #fbbf24';
+          input.style.outlineOffset = '2px';
+          input.classList.add('unimatch-manual');
+          manualCount++;
         }
         alreadyHandled.add(input);
         continue;
       }
 
-      // Mark unfilled required fields
-      if (input.required && !input.value) {
+      // Fill
+      let filled = false;
+      if (input.tagName === 'SELECT') {
+        filled = fillSelect(input, String(value));
+      } else if (profileKey === 'date_of_birth') {
+        filled = await fillDateAdvanced(input, String(ctx.profile.date_of_birth));
+      } else {
+        filled = await fillInput(input, String(value));
+      }
+
+      if (filled) {
+        input.style.outline = '2px solid #4ade80';
+        input.style.outlineOffset = '2px';
+        input.classList.add('unimatch-filled');
+        input.classList.remove('unimatch-conflict', 'unimatch-manual');
+        sparkleField(input);
+        playFillTone(filledCount, allInputs.length);
+        filledCount++;
+      } else if (input.required && !input.value) {
         input.style.outline = '2px solid #fbbf24';
+        input.style.outlineOffset = '2px';
         input.classList.add('unimatch-manual');
         manualCount++;
       }
+      alreadyHandled.add(input);
     }
 
     // Update context
     ctx.filledFields = filledCount;
     ctx.manualFields = manualCount;
+    ctx.conflictFields = conflictCount;
     ctx.filledSelectors = filledSelectors;
     ctx.manualSelectors = manualSelectors;
     ctx.generatedPassword = masterPassword;
     ctx.uniConfig = uniConfig;
 
     // Show results
-    renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount });
-    console.log(`[IlmSeUrooj] ✅ Autofill complete: ${filledCount} filled, ${manualCount} need input`);
+    const _timeSaved = Math.round((Date.now() - _fillStart) / 1000 + filledCount * 3);
+    if (filledCount > 0) {
+      playSuccessFanfare();
+      showAchievementToast(filledCount, manualCount, _timeSaved);
+    }
+    renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
+    console.log(`[IlmSeUrooj] ✅ Autofill complete: ${filledCount} filled, ${manualCount} need input, ${conflictCount} conflicts`);
 
   } catch (err) {
     console.error('[IlmSeUrooj] Autofill error:', err);
@@ -1335,15 +3001,42 @@ async function handleScanFields() {
   const statsEl = document.getElementById('unimatch-field-stats');
   if (!statsEl) return;
 
-  const inputs = document.querySelectorAll('input:not([type=hidden]):not([type=submit]), select, textarea');
+  const inputs = collectAllFields();
   const forms = document.querySelectorAll('form');
-  const required = document.querySelectorAll('[required]');
+
+  const detectedFields = [];
+  const unknownFields = [];
+
+  for (const input of inputs) {
+    if (input.type === 'password') {
+      detectedFields.push({ label: 'Password', key: 'password', icon: '🔑' });
+      continue;
+    }
+    const key = matchFieldHeuristically(input);
+    const label = input.labels?.[0]?.textContent?.trim() ||
+      input.getAttribute('placeholder') || input.name || input.id || '(unlabeled)';
+    if (key) {
+      detectedFields.push({ label: label.slice(0, 30), key, icon: '✓' });
+    } else if (input.required) {
+      unknownFields.push(label.slice(0, 30));
+    }
+  }
+
+  const uniqueKeys = [...new Set(detectedFields.map(f => f.key))];
+  const rows = uniqueKeys.slice(0, 8).map(k => {
+    const f = detectedFields.find(x => x.key === k);
+    return `<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0">
+      <span style="color:#a1a1aa">${f.label}</span>
+      <span style="color:#4ade80">✓ can fill</span>
+    </div>`;
+  }).join('');
 
   statsEl.innerHTML = `
-    <p class="stats-note">
-      Found <strong>${inputs.length}</strong> fields in <strong>${forms.length}</strong> form(s)<br>
-      <strong>${required.length}</strong> required fields
-    </p>
+    <div style="font-size:11px;margin-bottom:4px;color:#71717a">
+      ${inputs.length} fields · ${forms.length} form(s) · ${uniqueKeys.length} auto-fillable
+    </div>
+    ${rows}
+    ${unknownFields.length ? `<div style="font-size:10px;color:#fbbf24;margin-top:4px">⚠ ${unknownFields.length} required field(s) need manual input</div>` : ''}
   `;
 }
 
@@ -1831,7 +3524,8 @@ function showSOPModal(textarea) {
     statusEl.style.color = '#a855f7';
 
     try {
-      const response = await fetch('http://localhost:3000/api/sop-draft', {
+      const sopBase = await getSiteUrl();
+      const response = await fetch(`${sopBase}/api/sop-draft`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1993,189 +3687,118 @@ async function setupPasswordVault() {
   });
 }
 
-// ─── Initialize ────────────────────────────────────────────────
+// ─── Message Listener (for popup + TRIGGER_AUTOFILL) ───────────
 
-// ─── Missing Event Handlers ────────────────────────────────────
-
-function handleScanFields() {
-  const contentEl = document.getElementById('unimatch-content');
-  const ctx = window.__unimatch;
-  if (!contentEl || !ctx) return;
-
-  // Scan all visible form fields and figure out what we can autofill
-  const allInputs = document.querySelectorAll(
-    'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]), select, textarea'
-  );
-
-  const hostname = window.location.hostname;
-  const uniConfig = (typeof getConfigForDomain === 'function') ? getConfigForDomain(hostname) : null;
-
-  let matchedFields = [];
-  let unmatchedFields = [];
-  let passwordFields = 0;
-
-  for (const input of allInputs) {
-    if (input.type === 'password') {
-      passwordFields++;
-      matchedFields.push({ label: 'Password', profileKey: '(auto-generated)', selector: '' });
-      continue;
+if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'TRIGGER_AUTOFILL') {
+      handleAutofill().then(() => sendResponse({ ok: true })).catch(e => sendResponse({ error: e.message }));
+      return true;
     }
-
-    // Check deterministic config first
-    let found = false;
-    if (uniConfig && uniConfig.fieldMap) {
-      for (const [profileKey, selectorString] of Object.entries(uniConfig.fieldMap)) {
-        let isMatch = false;
-        try {
-          // Native DOM match (handles comma-separated lists)
-          isMatch = input.matches(selectorString);
-        } catch (e) {
-          // Fallback if the selector contains pseudo-classes not allowed in matches()
-          const els = tryMultiSelectorAll(selectorString);
-          isMatch = els.includes(input);
-        }
-
-        if (isMatch) {
-          const hasValue = ctx.profile?.[profileKey] != null && ctx.profile?.[profileKey] !== '';
-          matchedFields.push({
-            label: profileKey.replace(/_/g, ' '),
-            profileKey,
-            hasValue,
-            selector: selectorString,
-          });
-          found = true;
-          break;
-        }
-      }
+    if (message.type === 'CHECK_UNIVERSITY') {
+      const uni = detectUniversity();
+      sendResponse({ university: uni || null });
+      return false;
     }
-
-    if (!found) {
-      // Try heuristic match
-      const profileKey = matchFieldHeuristically(input);
-      if (profileKey) {
-        const hasValue = ctx.profile?.[profileKey] != null && ctx.profile?.[profileKey] !== '';
-        matchedFields.push({
-          label: profileKey.replace(/_/g, ' '),
-          profileKey,
-          hasValue,
-          selector: input.id ? `#${input.id}` : `[name="${input.name}"]`,
-        });
-      } else {
-        const label = input.labels?.[0]?.textContent?.trim() || input.placeholder || input.name || input.id || 'Unknown field';
-        unmatchedFields.push({ label: label.substring(0, 40) });
-      }
+    if (message.type === 'GET_FILL_STATUS') {
+      const ctx = window.__unimatch;
+      sendResponse({
+        filled: ctx?.filledFields ?? 0,
+        manual: ctx?.manualFields ?? 0,
+        university: ctx?.university ?? null,
+      });
+      return false;
     }
-  }
-
-  // Render scan results in the sidebar
-  const canFill = matchedFields.filter(f => f.hasValue !== false).length;
-  const needsInput = matchedFields.filter(f => f.hasValue === false).length;
-
-  contentEl.innerHTML = `
-    <div class="state-card">
-      <h3 style="margin:0 0 10px; font-size:14px;">🔍 Scan Results</h3>
-      <div class="fill-results">
-        <div class="stat-row filled">
-          <span class="stat-dot green"></span>
-          <span>${canFill} fields we can fill</span>
-        </div>
-        <div class="stat-row manual">
-          <span class="stat-dot amber"></span>
-          <span>${needsInput} fields missing from profile</span>
-        </div>
-        ${unmatchedFields.length > 0 ? `
-          <div class="stat-row" style="margin-top:4px;">
-            <span style="color:#a1a1aa; font-size:11px;">📋 ${unmatchedFields.length} fields not recognized</span>
-          </div>
-        ` : ''}
-        ${passwordFields > 0 ? `
-          <div class="stat-row" style="margin-top:4px;">
-            <span style="color:#a1a1aa; font-size:11px;">🔑 ${passwordFields} password field(s) → auto-generated</span>
-          </div>
-        ` : ''}
-      </div>
-      <div style="max-height:180px; overflow-y:auto; margin:10px 0; font-size:11px;">
-        ${matchedFields.map(f => `
-          <div style="padding:4px 8px; margin:2px 0; background:${f.hasValue !== false ? 'rgba(74,222,128,0.08)' : 'rgba(251,191,36,0.08)'}; border-radius:6px; display:flex; justify-content:space-between;">
-            <span>${f.label}</span>
-            <span style="color:${f.hasValue !== false ? '#4ade80' : '#fbbf24'}">${f.hasValue !== false ? '✓' : '✗'}</span>
-          </div>
-        `).join('')}
-        ${unmatchedFields.length > 0 ? `
-          <div style="margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.05);">
-            <div style="color:#71717a; font-size:10px; margin-bottom:4px;">Unrecognized:</div>
-            ${unmatchedFields.map(f => `
-              <div style="padding:3px 8px; margin:2px 0; color:#71717a; font-size:10px;">
-                ${f.label}
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-      </div>
-      <button class="btn-primary btn-autofill" id="unimatch-autofill">⚡ Autofill Now</button>
-      <button class="btn-secondary" id="unimatch-back-ready" style="margin-top:6px;">← Back</button>
-    </div>
-  `;
-
-  document.getElementById('unimatch-autofill')?.addEventListener('click', handleAutofill);
-  document.getElementById('unimatch-back-ready')?.addEventListener('click', () => {
-    renderState(contentEl, 'ready', { profile: ctx.profile, university: ctx.university });
   });
 }
 
-function handlePreSubmitCheck() {
-  const contentEl = document.getElementById('unimatch-content');
-  const ctx = window.__unimatch;
-  if (!contentEl || !ctx) return;
+// ─── MutationObserver for SPA navigation / dynamic forms ───────
 
-  // Basic mock check for now
-  const greenList = ctx.filledSelectors.map(sel => ({ label: 'Verified', selector: sel }));
-  const amberList = ctx.manualSelectors.map(sel => ({ label: 'Missing', msg: 'Needs input', selector: sel }));
-
-  renderState(contentEl, 'review', { greenList, amberList, redList: [] });
+let _reinitTimer = null;
+function debounceReinit() {
+  clearTimeout(_reinitTimer);
+  _reinitTimer = setTimeout(() => {
+    const university = detectUniversity();
+    if (!university) return;
+    // Re-setup SOP helper and password vault for newly loaded form sections
+    setupSOPHelper();
+    setupPasswordVault();
+    // If sidebar is showing "ready" state, refresh the scan stats
+    const statsEl = document.getElementById('unimatch-field-stats');
+    if (statsEl) handleScanFields();
+  }, 800);
 }
 
-function handleSaveProgress() {
-  alert('Progress saved locally.');
-}
-
-function handleSaveConfirmation() {
-  const input = document.getElementById('unimatch-confirm-input');
-  if (input && input.value) {
-    alert('Confirmation number ' + input.value + ' saved.');
-  } else {
-    alert('Please enter a confirmation number.');
-  }
-}
-
-function showFillGapModal(label, selector) {
-  const val = prompt(`Enter value for ${label} (This will be saved for future forms):`);
-  if (val) {
-    const el = document.querySelector(selector);
-    if (el) {
-      fillInput(el, val).then(() => {
-        el.style.outline = '2px solid #4ade80';
-        el.classList.add('unimatch-filled');
-        el.classList.remove('unimatch-manual');
-        alert('Filled!');
-      });
+function setupMutationObserver() {
+  if (typeof MutationObserver === 'undefined') return;
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        // Check if new content has form fields
+        const hasFields = node.matches?.('input,select,textarea,form') ||
+          node.querySelector?.('input:not([type=hidden]),select,textarea');
+        if (hasFields) { debounceReinit(); return; }
+      }
     }
-  }
+  });
+  observer.observe(document.body || document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
 }
 
 // ─── Initialize ────────────────────────────────────────────────
 
 (function init() {
   const university = detectUniversity();
-  if (university) {
-    console.log(`[UniMatch] Detected: ${university.name} (${university.slug})`);
-    injectSidebar(university);
-    setupSubmissionDetection();
+  if (!university) return;
 
-    // Phase 5 features — delayed to let page load
-    setTimeout(() => {
-      setupSOPHelper();
-      setupPasswordVault();
-    }, 2000);
-  }
+  console.log(`[IlmSeUrooj] Detected: ${university.name} (${university.slug})`);
+  injectSidebar(university);
+  setupSubmissionDetection();
+  setupMutationObserver();
+  setupFloatingSuggestions();
+  setupKeyboardShortcuts();
+
+  // Phase 5 features — delayed to let page fully render
+  setTimeout(() => {
+    setupSOPHelper();
+    setupPasswordVault();
+  }, 2000);
 })();
+
+// ─── Keyboard Shortcuts ────────────────────────────────────────
+// Alt+Shift+A → Autofill | Alt+Shift+R → Pre-submit review
+// Alt+Shift+S → Open/close sidebar
+
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    if (!e.altKey || !e.shiftKey) return;
+
+    switch (e.key.toUpperCase()) {
+      case 'A': {
+        e.preventDefault();
+        // Open sidebar if collapsed
+        const sidebar = document.getElementById('unimatch-sidebar');
+        const toggle  = document.getElementById('unimatch-toggle');
+        if (sidebar?.classList.contains('collapsed')) {
+          sidebar.classList.remove('collapsed');
+          toggle?.classList.add('sidebar-open');
+        }
+        handleAutofill();
+        break;
+      }
+      case 'R': {
+        e.preventDefault();
+        handlePreSubmitCheck();
+        break;
+      }
+      case 'S': {
+        e.preventDefault();
+        document.getElementById('unimatch-toggle')?.click();
+        break;
+      }
+    }
+  });
+}
