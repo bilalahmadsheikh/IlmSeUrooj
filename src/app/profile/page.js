@@ -757,6 +757,7 @@ function Nav({ user, onSignOut }) {
             </Link>
             <div className="pf-nav-links">
                 <Link href="/">Home</Link>
+                <Link href="/timeline">Timeline</Link>
                 <Link href="/extension">Extension</Link>
                 {user && <Link href="/applications">Dashboard</Link>}
                 {user && <button onClick={onSignOut} className="btn-signout">Sign Out</button>}

@@ -286,6 +286,7 @@ function AppNav() {
             <div className="app-nav-links">
                 <Link href="/">Explore</Link>
                 <Link href="/profile">Profile</Link>
+                <Link href="/timeline">Timeline</Link>
                 <Link href="/extension">Extension</Link>
             </div>
         </nav>

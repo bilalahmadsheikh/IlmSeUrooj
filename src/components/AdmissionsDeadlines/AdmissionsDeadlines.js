@@ -291,6 +291,15 @@ export default function AdmissionsDeadlines({ currentField }) {
                     </span>
                 )}
             </div>
+
+            <div className={styles.timelineBanner}>
+                <span className={styles.timelineBannerText}>
+                    Want a visual timeline with conflict detection &amp; strategy?
+                </span>
+                <a href="/timeline" className={styles.timelineBannerLink}>
+                    Open Timeline Planner →
+                </a>
+            </div>
         </section>
     );
 }

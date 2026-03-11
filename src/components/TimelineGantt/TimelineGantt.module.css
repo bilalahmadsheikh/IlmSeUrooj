@@ -1,0 +1,269 @@
+.wrap { width: 100%; }
+
+/* ── Ruler ───────────────────────────────────────────── */
+.ruler {
+    display: flex;
+    height: 32px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rulerLabel {
+    width: 140px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 9px;
+}
+
+.rulerTrack {
+    flex: 1;
+    position: relative;
+}
+
+.rulerMonth {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    white-space: nowrap;
+    font-size: 10px;
+}
+
+.rulerCurrent {
+    color: var(--color-primary);
+    background: rgba(16, 185, 129, 0.04);
+}
+
+/* ── Rows ────────────────────────────────────────────── */
+.rows { position: relative; }
+
+.row {
+    display: flex;
+    align-items: stretch;
+    min-height: 44px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+    transition: background 0.1s;
+}
+
+.row:hover { background: rgba(16, 185, 129, 0.015); }
+.row:last-child { border-bottom: none; }
+
+.rowName {
+    width: 140px;
+    flex-shrink: 0;
+    padding: 0 var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.tier {
+    font-size: 8px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+
+.tsafe { background: rgba(34, 197, 94, 0.12); color: #22C55E; }
+.tmatch { background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
+.treach { background: rgba(239, 68, 68, 0.12); color: #EF4444; }
+.tunknown { background: rgba(107, 114, 128, 0.08); color: #6B7280; }
+
+/* Track */
+.track {
+    flex: 1;
+    position: relative;
+    min-height: 44px;
+}
+
+/* Event dot */
+.evWrap {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    cursor: pointer;
+    padding: 6px;
+}
+
+.evWrap:hover { z-index: 10; }
+
+.evDot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.evWrap:hover .evDot { transform: scale(1.5); }
+
+.evConflict {
+    outline: 2px solid rgba(239, 68, 68, 0.4);
+    outline-offset: 2px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { outline-color: rgba(239, 68, 68, 0.2); }
+    50% { outline-color: rgba(239, 68, 68, 0.6); }
+}
+
+/* Inline date labels under dots (visible on hover of row) */
+.inlineLabels {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.inlineLabel {
+    position: absolute;
+    bottom: 2px;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+}
+
+.row:hover .inlineLabel { opacity: 0.6; }
+
+/* ── Tooltip ─────────────────────────────────────────── */
+.tip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background: var(--color-bg-elevated);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    z-index: 20;
+    pointer-events: none;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: tipIn 0.1s ease;
+}
+
+.tip span:first-child {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.tipDate {
+    font-size: 10px;
+    color: var(--color-text-muted) !important;
+}
+
+@keyframes tipIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Today ───────────────────────────────────────────── */
+.todayLine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-primary);
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.todayLabel {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--color-primary);
+    background: var(--color-bg-secondary);
+    padding: 1px 4px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Legend ───────────────────────────────────────────── */
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--color-text-muted);
+}
+
+.legendDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.legendLine {
+    width: 2px;
+    height: 10px;
+    background: var(--color-primary);
+    opacity: 0.5;
+}
+
+/* ── Empty ───────────────────────────────────────────── */
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-16) var(--space-6);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    text-align: center;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 768px) {
+    .rulerLabel, .rowName { width: 90px; padding: 0 var(--space-2); }
+    .name { font-size: 10px; }
+    .tier { display: none; }
+    .row { min-height: 36px; }
+    .inlineLabel { display: none; }
+}

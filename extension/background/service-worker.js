@@ -349,6 +349,10 @@ async function handleMessage(message, sender) {
       return { url: base };
     }
 
+    case 'GET_TIMELINE_STRATEGY': {
+      return await apiRequest('/timeline/strategy');
+    }
+
     default:
       return { error: `Unknown message type: ${message.type}` };
   }

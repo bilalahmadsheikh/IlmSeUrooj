@@ -1,0 +1,67 @@
+.banner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    border-radius: var(--radius-lg);
+    animation: slideIn 0.25s ease;
+}
+
+.bannerIcon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.bannerContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bannerTitle {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: #EF4444;
+}
+
+.bannerList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.bannerItem {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    background: rgba(239, 68, 68, 0.06);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.dismissBtn {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.dismissBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-primary);
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}

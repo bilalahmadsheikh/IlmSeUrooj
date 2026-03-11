@@ -284,6 +284,77 @@
     .hidden {
       display: none;
     }
+
+    /* Timeline Preview */
+    .timeline-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: #161916;
+      border: 1px solid #1f2a1c;
+      border-radius: 8px;
+      margin-bottom: 4px;
+    }
+
+    .timeline-score {
+      font-size: 10px;
+      font-weight: 700;
+      font-family: monospace;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .timeline-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timeline-info strong {
+      font-size: 11px;
+      display: block;
+    }
+
+    .timeline-action {
+      font-size: 9px;
+      color: #71717a;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timeline-days {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .days-urgent {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .days-soon {
+      background: rgba(251, 191, 36, 0.15);
+      color: #fbbf24;
+    }
+
+    .days-far {
+      background: rgba(74, 222, 128, 0.1);
+      color: #4ade80;
+    }
+
+    .timeline-conflict {
+      font-size: 10px;
+      color: #ef4444;
+      padding: 4px 10px;
+      background: rgba(239, 68, 68, 0.06);
+      border-radius: 6px;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 

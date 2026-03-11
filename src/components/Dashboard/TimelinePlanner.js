@@ -90,6 +90,20 @@ export default function TimelinePlanner({ apiFetch }) {
 
     return (
         <div>
+            {/* Strategy planner banner */}
+            <a href="/timeline" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                padding: '12px 16px', marginBottom: 16, borderRadius: 12, textDecoration: 'none',
+                background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04))',
+                border: '1px solid rgba(16,185,129,0.15)',
+            }}>
+                <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#F5F5F0' }}>Visual Timeline &amp; Strategy Planner</div>
+                    <div style={{ fontSize: 12, color: '#6B8A83', marginTop: 2 }}>Gantt chart, conflict detection, priority ordering</div>
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#10B981', whiteSpace: 'nowrap' }}>Open →</span>
+            </a>
+
             {overdue.length > 0 && (
                 <div style={{
                     background: 'rgba(239,68,68,0.08)',

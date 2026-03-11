@@ -108,7 +108,10 @@ async function showDashboard(profile) {
         </div>
         <div class="section-title">MY APPLICATIONS</div>
         <div id="apps-list"><div class="spinner"></div></div>
+        <div class="section-title" style="margin-top:10px">UPCOMING DEADLINES</div>
+        <div id="timeline-preview"><div class="spinner"></div></div>
         <div class="popup-links">
+            <a href="#" id="link-timeline">Timeline</a>
             <a href="#" id="link-dashboard">Dashboard</a>
             <a href="#" id="link-profile">Edit Profile</a>
             <button id="btn-signout">Sign Out</button>
@@ -156,11 +159,21 @@ async function showDashboard(profile) {
     });
   }
 
+  // Load upcoming deadlines
+  loadTimelinePreview();
+
   // Footer links
   document.getElementById('link-dashboard').addEventListener('click', async (e) => {
     e.preventDefault();
     const base = await getSiteBase();
     chrome.tabs.create({ url: `${base}/applications` });
+    window.close();
+  });
+
+  document.getElementById('link-timeline').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const base = await getSiteBase();
+    chrome.tabs.create({ url: `${base}/timeline` });
     window.close();
   });
 
@@ -175,6 +188,61 @@ async function showDashboard(profile) {
     await chrome.runtime.sendMessage({ type: 'LOGOUT' });
     showSignedOut();
   });
+}
+
+// ─── Timeline Preview ───────────────────────────────────────────
+
+async function loadTimelinePreview() {
+  const el = document.getElementById('timeline-preview');
+  if (!el) return;
+
+  try {
+    const result = await chrome.runtime.sendMessage({ type: 'GET_TIMELINE_STRATEGY' });
+    const strategy = result.strategy || [];
+    const conflicts = result.conflicts || [];
+
+    if (strategy.length === 0) {
+      el.innerHTML = '<div class="empty-state"><p>No upcoming deadlines found.</p></div>';
+      return;
+    }
+
+    // Show top 4 most urgent items
+    const top = strategy.slice(0, 4);
+
+    let html = '';
+
+    // Show conflicts first
+    if (conflicts.length > 0) {
+      for (const c of conflicts.slice(0, 2)) {
+        const dateStr = new Date(c.date).toLocaleDateString('en-PK', { month: 'short', day: 'numeric' });
+        html += `<div class="timeline-conflict">⚠️ ${c.universities.join(' & ')} — tests on ${dateStr}</div>`;
+      }
+    }
+
+    for (const item of top) {
+      const tierColor = item.tier === 'safe' ? '#4ade80' : item.tier === 'match' ? '#fbbf24' : '#ef4444';
+      const daysLabel = item.daysRemaining == null ? 'Passed'
+        : item.daysRemaining === 0 ? 'Today!'
+        : item.daysRemaining <= 7 ? `${item.daysRemaining}d ⚡`
+        : `${item.daysRemaining}d`;
+      const daysClass = item.daysRemaining != null && item.daysRemaining <= 14 ? 'days-urgent'
+        : item.daysRemaining != null && item.daysRemaining <= 60 ? 'days-soon' : 'days-far';
+
+      html += `
+        <div class="timeline-row">
+          <div class="timeline-score" style="color:${tierColor}">${item.matchScore}%</div>
+          <div class="timeline-info">
+            <strong>${item.shortName}</strong>
+            <span class="timeline-action">${item.nextAction}</span>
+          </div>
+          <span class="timeline-days ${daysClass}">${daysLabel}</span>
+        </div>`;
+    }
+
+    el.innerHTML = html;
+  } catch (err) {
+    el.innerHTML = '<div class="empty-state"><p>Sign in for deadline tracking.</p></div>';
+  }
 }
 
 // ─── Helpers ───────────────────────────────────────────────────

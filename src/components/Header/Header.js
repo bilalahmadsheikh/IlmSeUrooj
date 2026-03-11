@@ -101,6 +101,7 @@ export default function Header({ savedCount = 0, onShowSaved, onShowScholarships
                     <ThemeToggle />
 
                     <Link href="/" className={styles.navLink}><span className={styles.navLinkText}>Explore</span></Link>
+                    <Link href="/timeline" className={styles.navLink}><span className={styles.navLinkText}>Timeline</span></Link>
 
                     <button type="button" className={styles.scholarshipsBtn} onClick={safeShowScholarships}
                         title="Scholarships and financial aid" aria-label="Open scholarships and financial aid">
@@ -153,6 +154,9 @@ export default function Header({ savedCount = 0, onShowSaved, onShowScholarships
                                     </Link>
                                     <Link href="/applications" className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
                                         📊 Applications
+                                    </Link>
+                                    <Link href="/timeline" className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
+                                        📅 Timeline
                                     </Link>
                                     <Link href="/extension" className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
                                         🧩 Extension

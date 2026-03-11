@@ -450,3 +450,74 @@
     font-size: var(--font-size-lg);
   }
 }
+
+/* ── Timeline CTA Banner ─────────────────────────────── */
+.timelineCta {
+  margin: var(--space-4) 0;
+  padding: 0 var(--space-4);
+}
+
+.timelineCtaInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.timelineCtaText {
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineCtaTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.timelineCtaDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.timelineCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 10px 20px;
+  background: var(--gradient-primary);
+  color: white;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.timelineCtaBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .timelineCtaInner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .timelineCtaBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

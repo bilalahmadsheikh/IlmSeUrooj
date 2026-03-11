@@ -37,6 +37,7 @@ export default function ExtensionPage() {
                 <div className="ext-nav-links">
                     <Link href="/">Explore</Link>
                     <Link href="/profile">Profile</Link>
+                    <Link href="/timeline">Timeline</Link>
                     <Link href="/applications">Dashboard</Link>
                 </div>
             </nav>

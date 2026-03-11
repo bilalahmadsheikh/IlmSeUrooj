@@ -130,7 +130,7 @@
 }
 
 /* Section card used by components */
-:global(.dash-section) {
+.page :global(.dash-section) {
     background: #161916;
     border: 1px solid #27272a;
     border-radius: 16px;
@@ -138,7 +138,7 @@
     margin-bottom: 20px;
 }
 
-:global(.dash-section-title) {
+.page :global(.dash-section-title) {
     font-size: 18px;
     font-weight: 700;
     color: #e4e4e7;
@@ -148,7 +148,7 @@
     gap: 8px;
 }
 
-:global(.dash-btn) {
+.page :global(.dash-btn) {
     padding: 8px 16px;
     background: #4ade80;
     color: #0c0e0b;
@@ -160,10 +160,10 @@
     font-family: inherit;
     transition: opacity 0.2s;
 }
-:global(.dash-btn:hover) { opacity: 0.85; }
-:global(.dash-btn:disabled) { opacity: 0.5; cursor: not-allowed; }
+.page :global(.dash-btn:hover) { opacity: 0.85; }
+.page :global(.dash-btn:disabled) { opacity: 0.5; cursor: not-allowed; }
 
-:global(.dash-btn-ghost) {
+.page :global(.dash-btn-ghost) {
     padding: 7px 14px;
     background: transparent;
     color: #71717a;
@@ -174,9 +174,9 @@
     font-family: inherit;
     transition: all 0.2s;
 }
-:global(.dash-btn-ghost:hover) { border-color: #4ade80; color: #4ade80; }
+.page :global(.dash-btn-ghost:hover) { border-color: #4ade80; color: #4ade80; }
 
-:global(.dash-btn-danger) {
+.page :global(.dash-btn-danger) {
     padding: 6px 12px;
     background: transparent;
     color: #ef4444;
@@ -187,7 +187,7 @@
     font-family: inherit;
 }
 
-:global(.dash-input) {
+.page :global(.dash-input) {
     padding: 9px 12px;
     background: #0c0e0b;
     border: 1px solid #27272a;
@@ -200,9 +200,9 @@
     box-sizing: border-box;
     transition: border-color 0.2s;
 }
-:global(.dash-input:focus) { border-color: #4ade80; }
+.page :global(.dash-input:focus) { border-color: #4ade80; }
 
-:global(.dash-select) {
+.page :global(.dash-select) {
     padding: 9px 12px;
     background: #0c0e0b;
     border: 1px solid #27272a;
@@ -214,9 +214,9 @@
     cursor: pointer;
     transition: border-color 0.2s;
 }
-:global(.dash-select:focus) { border-color: #4ade80; }
+.page :global(.dash-select:focus) { border-color: #4ade80; }
 
-:global(.dash-label) {
+.page :global(.dash-label) {
     font-size: 11px;
     font-weight: 500;
     color: #71717a;
@@ -226,25 +226,25 @@
     display: block;
 }
 
-:global(.dash-field) {
+.page :global(.dash-field) {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-:global(.dash-grid-2) {
+.page :global(.dash-grid-2) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
-:global(.dash-grid-3) {
+.page :global(.dash-grid-3) {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 12px;
 }
 
-:global(.dash-stat-card) {
+.page :global(.dash-stat-card) {
     background: #1a1c1a;
     border: 1px solid #1f2520;
     border-radius: 12px;
@@ -254,26 +254,26 @@
     gap: 4px;
 }
 
-:global(.dash-stat-value) {
+.page :global(.dash-stat-value) {
     font-size: 28px;
     font-weight: 700;
     color: #4ade80;
     line-height: 1;
 }
 
-:global(.dash-stat-label) {
+.page :global(.dash-stat-label) {
     font-size: 12px;
     color: #71717a;
 }
 
-:global(.dash-empty) {
+.page :global(.dash-empty) {
     text-align: center;
     padding: 40px 20px;
     color: #71717a;
     font-size: 13px;
 }
 
-:global(.dash-tag) {
+.page :global(.dash-tag) {
     display: inline-flex;
     align-items: center;
     padding: 2px 8px;
@@ -282,15 +282,15 @@
     font-weight: 500;
 }
 
-:global(.dash-tag-green) { background: rgba(74,222,128,0.1); color: #4ade80; }
-:global(.dash-tag-yellow) { background: rgba(251,191,36,0.1); color: #fbbf24; }
-:global(.dash-tag-red) { background: rgba(239,68,68,0.1); color: #ef4444; }
-:global(.dash-tag-blue) { background: rgba(96,165,250,0.1); color: #60a5fa; }
-:global(.dash-tag-gray) { background: rgba(113,113,122,0.15); color: #a1a1aa; }
+.page :global(.dash-tag-green) { background: rgba(74,222,128,0.1); color: #4ade80; }
+.page :global(.dash-tag-yellow) { background: rgba(251,191,36,0.1); color: #fbbf24; }
+.page :global(.dash-tag-red) { background: rgba(239,68,68,0.1); color: #ef4444; }
+.page :global(.dash-tag-blue) { background: rgba(96,165,250,0.1); color: #60a5fa; }
+.page :global(.dash-tag-gray) { background: rgba(113,113,122,0.15); color: #a1a1aa; }
 
 @media (max-width: 768px) {
     .headerInner { padding: 12px 16px; }
     .main { padding: 16px; }
     .tabs { padding: 0 16px; }
-    :global(.dash-grid-2), :global(.dash-grid-3) { grid-template-columns: 1fr; }
+    .page :global(.dash-grid-2), .page :global(.dash-grid-3) { grid-template-columns: 1fr; }
 }

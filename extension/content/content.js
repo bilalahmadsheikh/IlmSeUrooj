@@ -2158,6 +2158,7 @@ function renderState(container, state, data = {}) {
             <button class="btn-secondary" id="unimatch-scan" style="font-size:11px">&#128269; Scan</button>
             <button class="btn-secondary" id="unimatch-review-btn" style="font-size:11px">&#128203; Review</button>
           </div>
+          <button class="btn-secondary" id="unimatch-timeline-btn" style="font-size:11px;width:100%;margin-top:6px">&#128197; View Timeline</button>
           <div style="margin-top:8px;padding:6px 8px;background:rgba(74,222,128,0.04);border:1px solid rgba(74,222,128,0.1);border-radius:6px;font-size:9px;color:#52525b;text-align:center;line-height:1.4">
             &#128274; Never auto-submits &middot; Only you submit
           </div>
@@ -2180,6 +2181,13 @@ function renderState(container, state, data = {}) {
       document.getElementById('unimatch-scan')?.addEventListener('click', handleScanFields);
       document.getElementById('unimatch-review-btn')?.addEventListener('click', handlePreSubmitCheck);
       document.getElementById('unimatch-goto-register')?.addEventListener('click', handleGoToRegister);
+
+      document.getElementById('unimatch-timeline-btn')?.addEventListener('click', async () => {
+        try {
+          const base = await chrome.runtime.sendMessage({ type: 'GET_SITE_BASE' });
+          window.open((base?.url || 'http://localhost:3000') + '/timeline', '_blank');
+        } catch { window.open('http://localhost:3000/timeline', '_blank'); }
+      });
 
       document.getElementById('unimatch-refresh-profile')?.addEventListener('click', async () => {
         renderState(container, 'loading');

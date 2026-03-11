@@ -11,7 +11,7 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const HIDDEN_PATHS = ['/profile', '/applications', '/extension'];
+const HIDDEN_PATHS = ['/profile', '/applications', '/extension', '/timeline'];
 
 export default function FloatingPanel() {
     const pathname = usePathname();
@@ -20,12 +20,10 @@ export default function FloatingPanel() {
     const [open, setOpen] = useState(false);
     const [unseenCount, setUnseenCount] = useState(0);
     const [extensionInstalled, setExtensionInstalled] = useState(false);
+    const isHidden = HIDDEN_PATHS.includes(pathname);
 
-    // Don't show on certain pages
-    if (HIDDEN_PATHS.includes(pathname)) return null;
-
-    // Auth check
     useEffect(() => {
+        if (isHidden) return;
         supabase.auth.getSession().then(({ data }) => {
             if (data?.session?.user) {
                 setUser(data.session.user);
@@ -33,15 +31,15 @@ export default function FloatingPanel() {
                 checkUnseen(data.session.user.id);
             }
         });
-    }, []);
+    }, [isHidden]);
 
-    // Extension detection
     useEffect(() => {
+        if (isHidden) return;
         try {
             const hasExtension = document.querySelector('#unimatch-extension-active');
             if (hasExtension) setExtensionInstalled(true);
         } catch (e) { }
-    }, []);
+    }, [isHidden]);
 
     async function loadProfile(userId) {
         const { data } = await supabase.from('profiles')
@@ -60,8 +58,7 @@ export default function FloatingPanel() {
         setUnseenCount(count || 0);
     }
 
-    // Don't render if not logged in
-    if (!user) return null;
+    if (isHidden || !user) return null;
 
     const completion = profile?.profile_completion || 0;
 
@@ -92,6 +89,10 @@ export default function FloatingPanel() {
                     <span className={styles.panelIcon}>👤</span>
                     <span className={styles.panelLabel}>Profile</span>
                     <span className={`${styles.panelBadge} ${styles.badgePercent}`}>{completion}%</span>
+                </Link>
+                <Link href="/timeline" className={styles.panelRow} onClick={() => setOpen(false)}>
+                    <span className={styles.panelIcon}>📅</span>
+                    <span className={styles.panelLabel}>Timeline</span>
                 </Link>
                 <Link href="/extension" className={styles.panelRow} onClick={() => setOpen(false)}>
                     <span className={styles.panelIcon}>🧩</span>
