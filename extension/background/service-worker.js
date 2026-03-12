@@ -16,8 +16,8 @@ const DOMAIN_REGISTRY = {
   'admissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
   'ugadmissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
   'pgadmission.nust.edu.pk': { slug: 'nust', name: 'NUST' },
-  'nu.edu.pk': { slug: 'fast', name: 'FAST-NUCES' },
-  'admissions.nu.edu.pk': { slug: 'fast', name: 'FAST-NUCES' },
+  'nu.edu.pk': { slug: 'fast', name: 'FAST-NU' },
+  'admissions.nu.edu.pk': { slug: 'fast', name: 'FAST-NU' },
   'lums.edu.pk': { slug: 'lums', name: 'LUMS' },
   'admissions.lums.edu.pk': { slug: 'lums', name: 'LUMS' },
   'comsats.edu.pk': { slug: 'comsats', name: 'COMSATS' },
@@ -30,14 +30,14 @@ const DOMAIN_REGISTRY = {
   'www.neduet.edu.pk': { slug: 'ned', name: 'NED' },
   'bahria.edu.pk': { slug: 'bahria', name: 'Bahria University' },
   'cms.bahria.edu.pk': { slug: 'bahria', name: 'Bahria University' },
-  'uet.edu.pk': { slug: 'uet', name: 'UET Lahore' },
-  'admission.uet.edu.pk': { slug: 'uet', name: 'UET Lahore' },
+  'uet.edu.pk': { slug: 'uet-lahore', name: 'UET Lahore' },
+  'admission.uet.edu.pk': { slug: 'uet-lahore', name: 'UET Lahore' },
   'uettaxila.edu.pk': { slug: 'uet-taxila', name: 'UET Taxila' },
   'admissions.uettaxila.edu.pk': { slug: 'uet-taxila', name: 'UET Taxila' },
   'pieas.edu.pk': { slug: 'pieas', name: 'PIEAS' },
   'red.pieas.edu.pk': { slug: 'pieas', name: 'PIEAS' },
-  'szabist.edu.pk': { slug: 'szabist', name: 'SZABIST' },
-  'admissions.szabist.edu.pk': { slug: 'szabist', name: 'SZABIST' },
+  'szabist.edu.pk': { slug: 'szabist-khi', name: 'SZABIST Karachi' },
+  'admissions.szabist.edu.pk': { slug: 'szabist-khi', name: 'SZABIST Karachi' },
   'szabist-isb.edu.pk': { slug: 'szabist-isb', name: 'SZABIST Islamabad' },
   'admissions.szabist-isb.edu.pk': { slug: 'szabist-isb', name: 'SZABIST Islamabad' },
   'itu.edu.pk': { slug: 'itu', name: 'ITU' },
@@ -72,6 +72,20 @@ const DOMAIN_REGISTRY = {
   'kemu.edu.pk': { slug: 'kemu', name: 'KEMU' },
   'kust.edu.pk': { slug: 'kust', name: 'Kohat University' },
   'awkum.edu.pk': { slug: 'awkum', name: 'Abdul Wali Khan University' },
+  'admission.neduet.edu.pk': { slug: 'ned', name: 'NED' },
+  'admissions.iba.edu.pk': { slug: 'iba', name: 'IBA' },
+  'admission.giki.edu.pk': { slug: 'giki', name: 'GIKI' },
+  'www.bahria.edu.pk': { slug: 'bahria', name: 'Bahria University' },
+  'admission.uettaxila.edu.pk': { slug: 'uet-taxila', name: 'UET Taxila' },
+  'www.aku.edu': { slug: 'aku', name: 'Aga Khan University' },
+  'admissions.ucp.edu.pk': { slug: 'ucp', name: 'UCP' },
+  'admissions.riphah.edu.pk': { slug: 'riphah', name: 'Riphah International' },
+  'admission.qau.edu.pk': { slug: 'qau', name: 'Quaid-i-Azam University' },
+  'admission.iiu.edu.pk': { slug: 'iiu', name: 'IIUI' },
+  'admission.uol.edu.pk': { slug: 'uol', name: 'University of Lahore' },
+  'admission.pucit.edu.pk': { slug: 'pucit', name: 'PUCIT' },
+  'localhost': { slug: 'test', name: 'Test Portal' },
+  '127.0.0.1': { slug: 'test', name: 'Test Portal' },
 };
 
 function lookupDomain(hostname) {
@@ -128,6 +142,13 @@ async function storeToken(token) {
 async function getToken() {
   const result = await chrome.storage.local.get(['unimatch_token', 'token_expiry']);
   if (!result.unimatch_token) return null;
+
+  const FAKE_TOKENS = ['demo_token', 'real_token', 'test_token', 'fake_token'];
+  if (FAKE_TOKENS.includes(result.unimatch_token)) {
+    console.log('[IlmSeUrooj] Rejecting fake/demo token, clearing auth data');
+    await chrome.storage.local.remove(['unimatch_token', 'token_expiry', 'unimatch_profile']);
+    return null;
+  }
 
   // Check expiry — allow 5 min buffer before actual expiry
   const BUFFER_MS = 5 * 60 * 1000;

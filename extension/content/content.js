@@ -4,62 +4,22 @@
  */
 
 // ─── University Domain Registry ────────────────────────────────
+// Built dynamically from ALL_UNIVERSITIES (universities/index.js loaded first)
 
-const UNIVERSITY_DOMAINS = {
-  // ── TEST ENTRIES — safe to keep, sidebar only shows with a profile logged in ──
-  'localhost': { slug: 'test', name: '🧪 Test Portal' },
-  '127.0.0.1': { slug: 'test', name: '🧪 Test Portal' },
-  // ──────────────────────────────────────────────────────────────────────────────
-  'admissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
-  'ugadmissions.nust.edu.pk': { slug: 'nust', name: 'NUST' },
-  'pgadmission.nust.edu.pk': { slug: 'nust', name: 'NUST' },
-  'nu.edu.pk': { slug: 'fast', name: 'FAST-NUCES' },
-  'admissions.nu.edu.pk': { slug: 'fast', name: 'FAST-NUCES' },
-  'lums.edu.pk': { slug: 'lums', name: 'LUMS' },
-  'admissions.lums.edu.pk': { slug: 'lums', name: 'LUMS' },
-  'comsats.edu.pk': { slug: 'comsats', name: 'COMSATS' },
-  'admissions.comsats.edu.pk': { slug: 'comsats', name: 'COMSATS' },
-  'iba.edu.pk': { slug: 'iba', name: 'IBA' },
-  'onlineadmission.iba.edu.pk': { slug: 'iba', name: 'IBA' },
-  'giki.edu.pk': { slug: 'giki', name: 'GIKI' },
-  'neduet.edu.pk': { slug: 'ned', name: 'NED' },
-  'www.neduet.edu.pk': { slug: 'ned', name: 'NED' },
-  'bahria.edu.pk': { slug: 'bahria', name: 'Bahria' },
-  'cms.bahria.edu.pk': { slug: 'bahria', name: 'Bahria' },
-  'uet.edu.pk': { slug: 'uet', name: 'UET Lahore' },
-  'admission.uet.edu.pk': { slug: 'uet', name: 'UET Lahore' },
-  'uettaxila.edu.pk': { slug: 'uet-taxila', name: 'UET Taxila' },
-  'admissions.uettaxila.edu.pk': { slug: 'uet-taxila', name: 'UET Taxila' },
-  'pieas.edu.pk': { slug: 'pieas', name: 'PIEAS' },
-  'red.pieas.edu.pk': { slug: 'pieas', name: 'PIEAS' },
-  'szabist.edu.pk': { slug: 'szabist', name: 'SZABIST' },
-  'admissions.szabist.edu.pk': { slug: 'szabist', name: 'SZABIST' },
-  'szabist-isb.edu.pk': { slug: 'szabist-isb', name: 'SZABIST Islamabad' },
-  'admissions.szabist-isb.edu.pk': { slug: 'szabist-isb', name: 'SZABIST Islamabad' },
-  'itu.edu.pk': { slug: 'itu', name: 'ITU' },
-  'aku.edu': { slug: 'aku', name: 'Aga Khan University' },
-  'akuross.aku.edu': { slug: 'aku', name: 'Aga Khan University' },
-  'au.edu.pk': { slug: 'airuni', name: 'Air University' },
-  'portals.au.edu.pk': { slug: 'airuni', name: 'Air University' },
-  'webdata.au.edu.pk': { slug: 'airuni', name: 'Air University' },
-  'habib.edu.pk': { slug: 'habib', name: 'Habib University' },
-  'eapplication.habib.edu.pk': { slug: 'habib', name: 'Habib University' },
-  'pucit.edu.pk': { slug: 'pucit', name: 'PUCIT' },
-  'uol.edu.pk': { slug: 'uol', name: 'University of Lahore' },
-  'ucp.edu.pk': { slug: 'ucp', name: 'UCP' },
-  'riphah.edu.pk': { slug: 'riphah', name: 'Riphah' },
-  'qau.edu.pk': { slug: 'qau', name: 'QAU' },
-  'iiu.edu.pk': { slug: 'iiu', name: 'IIUI' },
-  'lse.edu.pk': { slug: 'lse', name: 'LSE' },
-  'uos.edu.pk': { slug: 'uos', name: 'University of Sargodha' },
-  'bzu.edu.pk': { slug: 'bzu', name: 'BZU' },
-  'uop.edu.pk': { slug: 'uop', name: 'University of Peshawar' },
-  'uob.edu.pk': { slug: 'uob', name: 'University of Balochistan' },
-  'muet.edu.pk': { slug: 'muet', name: 'MUET' },
-  'ssuet.edu.pk': { slug: 'ssuet', name: 'SSUET' },
-  'lumhs.edu.pk': { slug: 'lumhs', name: 'LUMHS' },
-  'duhs.edu.pk': { slug: 'duhs', name: 'DUHS' },
-};
+const UNIVERSITY_DOMAINS = (() => {
+  const map = {
+    'localhost': { slug: 'test', name: '🧪 Test Portal' },
+    '127.0.0.1': { slug: 'test', name: '🧪 Test Portal' },
+  };
+  if (typeof ALL_UNIVERSITIES !== 'undefined') {
+    for (const uni of ALL_UNIVERSITIES) {
+      for (const domain of (uni.portalDomains || [])) {
+        map[domain] = { slug: uni.slug, name: uni.name };
+      }
+    }
+  }
+  return map;
+})();
 
 // ─── Transform Functions ───────────────────────────────────────
 
@@ -69,9 +29,19 @@ const TRANSFORMS = {
   marks_to_percent: (v, total) => ((v / total) * 100).toFixed(2),
   date_dmy: (v) => {
     const d = new Date(v);
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+    if (isNaN(d.getTime())) return v;
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   },
-  date_ymd: (v) => v,
+  date_ymd: (v) => {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return v;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  },
+  date_mdy: (v) => {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return v;
+    return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+  },
   phone_pak: (v) => {
     const str = String(v ?? '');
     return str && str.startsWith('0') ? str : '0' + str;
@@ -97,6 +67,108 @@ const TRANSFORMS = {
     return parts.length > 2 ? parts.slice(1, -1).join(' ') : '';
   },
 };
+
+// ─── Profile Value Resolver ─────────────────────────────────────
+// Maps profileKey strings to actual profile data, supporting nested / computed keys
+
+function profileValueFor(key, profile) {
+  if (!profile || !key) return undefined;
+
+  // Direct match
+  if (profile[key] !== undefined && profile[key] !== null && profile[key] !== '') return profile[key];
+
+  // Computed / derived keys
+  switch (key) {
+    case 'first_name':
+      return TRANSFORMS.first_name(profile.full_name);
+    case 'last_name':
+      return TRANSFORMS.last_name(profile.full_name);
+    case 'middle_name':
+      return TRANSFORMS.middle_name(profile.full_name);
+    case 'date_of_birth':
+    case 'dob':
+      return profile.date_of_birth || profile.dob;
+    case 'dob_day': {
+      const d = new Date(profile.date_of_birth || profile.dob);
+      return isNaN(d.getTime()) ? undefined : String(d.getDate());
+    }
+    case 'dob_month': {
+      const d = new Date(profile.date_of_birth || profile.dob);
+      return isNaN(d.getTime()) ? undefined : String(d.getMonth() + 1);
+    }
+    case 'dob_year': {
+      const d = new Date(profile.date_of_birth || profile.dob);
+      return isNaN(d.getTime()) ? undefined : String(d.getFullYear());
+    }
+    case 'matric_percent':
+      return profile.matric_marks && profile.matric_total
+        ? ((profile.matric_marks / profile.matric_total) * 100).toFixed(2)
+        : profile.matric_percent;
+    case 'inter_percent':
+      return profile.inter_marks && profile.inter_total
+        ? ((profile.inter_marks / profile.inter_total) * 100).toFixed(2)
+        : profile.inter_percent;
+    case 'matric_marks':
+      return profile.matric_marks || profile.matric_obtained;
+    case 'matric_total':
+      return profile.matric_total || '1100';
+    case 'fsc_marks':
+    case 'inter_marks':
+    case 'hssc_marks':
+      if (typeof getInterMarks === 'function') return getInterMarks(profile);
+      return profile.fsc_marks || profile.inter_marks || profile.inter_obtained;
+    case 'fsc_total':
+    case 'inter_total':
+    case 'hssc_total':
+      if (typeof getInterTotal === 'function') return getInterTotal(profile);
+      return profile.fsc_total || profile.inter_total || '1100';
+    case 'fsc_percentage':
+    case 'inter_percentage':
+    case 'hssc_percentage':
+      if (typeof getInterPercentage === 'function') return getInterPercentage(profile);
+      return profile.fsc_percentage || profile.inter_percent;
+    case 'matric_percentage':
+      if (typeof getMatricPercentage === 'function') return getMatricPercentage(profile);
+      return profile.matric_percentage || profile.matric_percent;
+    case 'matric_grade':
+      return marksToGrade(profile.matric_marks, profile.matric_total);
+    case 'inter_grade':
+      return marksToGrade(profile.inter_marks, profile.inter_total);
+    case 'matric_board':
+      return profile.matric_board || profile.board;
+    case 'inter_board':
+      return profile.inter_board || profile.board;
+    case 'matric_year':
+      return profile.matric_year || profile.matric_passing_year;
+    case 'inter_year':
+      return profile.inter_year || profile.inter_passing_year || profile.fsc_year;
+    case 'age': {
+      const d = new Date(profile.date_of_birth || profile.dob);
+      if (isNaN(d.getTime())) return undefined;
+      const now = new Date();
+      let age = now.getFullYear() - d.getFullYear();
+      if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
+      return String(age);
+    }
+    case 'cnic_no_dashes':
+      return profile.cnic ? profile.cnic.replace(/-/g, '') : undefined;
+    case 'phone_with_zero':
+      return profile.phone ? TRANSFORMS.phone_pak(profile.phone) : undefined;
+    default:
+      return undefined;
+  }
+}
+
+function marksToGrade(marks, total) {
+  if (!marks || !total) return '';
+  const pct = (marks / total) * 100;
+  if (pct >= 90) return 'A+';
+  if (pct >= 80) return 'A';
+  if (pct >= 70) return 'B';
+  if (pct >= 60) return 'C';
+  if (pct >= 50) return 'D';
+  return 'F';
+}
 
 // ─── Heuristic Field Detection ─────────────────────────────────
 // Matches form fields to profile keys by analyzing name, id, label, placeholder
@@ -907,6 +979,21 @@ async function fillInput(el, value) {
     return true;
   }
 
+  // For date inputs, handle ISO format conversion
+  if (inputType === 'date') {
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) {
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (nativeSetter) nativeSetter.call(el, iso);
+      else el.value = iso;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.dispatchEvent(new Event('blur', { bubbles: true }));
+      await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+      return true;
+    }
+  }
+
   // For other inputs, use native setter for React/Vue compatibility
   if (nativeSetter) {
     nativeSetter.call(el, String(value));
@@ -914,9 +1001,13 @@ async function fillInput(el, value) {
     el.value = String(value);
   }
 
-  // Dispatch events to notify frameworks
+  // Dispatch React-compatible synthetic events
   el.dispatchEvent(new Event('input', { bubbles: true }));
   el.dispatchEvent(new Event('change', { bubbles: true }));
+  try {
+    const ev = new InputEvent('input', { bubbles: true, data: String(value), inputType: 'insertText' });
+    el.dispatchEvent(ev);
+  } catch (_) { /* InputEvent not supported in older browsers */ }
   el.dispatchEvent(new Event('blur', { bubbles: true }));
 
   // Small random delay to avoid bot detection
@@ -927,13 +1018,13 @@ async function fillInput(el, value) {
 function fillSelect(el, value) {
   if (!value && value !== 0) return false;
   const val = String(value).toLowerCase().trim();
-  const options = Array.from(el.options);
+  const options = Array.from(el.options).filter(o => o.value !== '' || o.text.trim() !== '');
 
   // 1. Exact value match (case-insensitive)
   let match = options.find(o => o.value.toLowerCase() === val);
   // 2. Exact text match
   if (!match) match = options.find(o => o.text.toLowerCase().trim() === val);
-  // 3. If numeric value, also try month name (handles month selects)
+  // 3. If numeric value, try month name, padded number, etc.
   if (!match) {
     const numVal = parseInt(val, 10);
     if (!isNaN(numVal) && numVal >= 1 && numVal <= 12) {
@@ -944,7 +1035,13 @@ function fillSelect(el, value) {
         options.find(o => o.text.toLowerCase().trim() === ms) ||
         options.find(o => o.text.toLowerCase().trim().startsWith(mn.slice(0, 3))) ||
         options.find(o => o.value.toLowerCase() === mn) ||
+        options.find(o => o.value === String(numVal)) ||
         options.find(o => o.value === String(numVal).padStart(2, '0'));
+    }
+    // Year selects — match numeric value directly
+    if (!isNaN(numVal) && numVal >= 1950 && numVal <= 2100) {
+      match = options.find(o => o.value === String(numVal)) ||
+              options.find(o => o.text.trim() === String(numVal));
     }
   }
   // 4. Strip leading zeros and retry
@@ -953,9 +1050,48 @@ function fillSelect(el, value) {
     match = options.find(o => o.value.toLowerCase() === stripped) ||
             options.find(o => o.text.toLowerCase().trim() === stripped);
   }
-  // 5. Partial text match (option text contains value or vice versa — only for longer strings)
+  // 5. Normalize Pakistani city/board names (e.g. "Federal Board" -> "FBISE")
+  if (!match) {
+    const aliases = {
+      'federal': ['fbise', 'federal board', 'federal board islamabad'],
+      'lahore': ['bise lahore', 'lahore board'],
+      'rawalpindi': ['bise rawalpindi', 'rawalpindi board'],
+      'karachi': ['bise karachi', 'karachi board', 'board of secondary education karachi'],
+      'aga khan': ['akueb', 'aga khan university examination board'],
+      'cambridge': ['cie', 'cambridge international', 'o level', 'a level'],
+      'male': ['m', 'boy'],
+      'female': ['f', 'girl', 'woman'],
+      'sindh': ['sindh board', 'bsek'],
+      'punjab': ['punjab board'],
+    };
+    for (const [key, alts] of Object.entries(aliases)) {
+      if (val === key || alts.some(a => val.includes(a))) {
+        match = options.find(o => {
+          const ot = o.text.toLowerCase().trim();
+          const ov = o.value.toLowerCase();
+          return ot === key || ot.includes(key) || alts.some(a => ot.includes(a) || ov.includes(a));
+        });
+        if (match) break;
+      }
+    }
+  }
+  // 6. Partial text match (option text contains value or vice versa — only for longer strings)
   if (!match && val.length >= 3) {
-    match = options.find(o => o.text.toLowerCase().includes(val) || val.includes(o.text.toLowerCase().trim()));
+    match = options.find(o => o.text.toLowerCase().includes(val)) ||
+            options.find(o => val.includes(o.text.toLowerCase().trim()) && o.text.trim().length >= 3);
+  }
+  // 7. Levenshtein distance fallback for close matches (typos in option values)
+  if (!match && val.length >= 4) {
+    let bestDist = Infinity;
+    for (const o of options) {
+      const ot = o.text.toLowerCase().trim();
+      if (ot.length < 2) continue;
+      const dist = levenshtein(val, ot);
+      if (dist <= 2 && dist < bestDist) {
+        bestDist = dist;
+        match = o;
+      }
+    }
   }
 
   if (match) {
@@ -965,6 +1101,19 @@ function fillSelect(el, value) {
     return true;
   }
   return false;
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + (a[i-1] !== b[j-1] ? 1 : 0));
+  return dp[m][n];
 }
 
 function fillRadio(el, value) {
@@ -1612,21 +1761,21 @@ function buildSidebarHTML(university) {
   return `
     <div class="unimatch-header">
       <div class="unimatch-logo">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--um-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
           <path d="M6 12v5c6 3 10 3 16 0v-5"/>
         </svg>
-        <span>UniMatch</span>
+        <span>Ilm Se Urooj</span>
       </div>
       <button id="unimatch-close" title="Close">✕</button>
     </div>
     <div class="unimatch-university">
-      <span class="uni-badge">${university.name}</span>
+      <span class="uni-badge">🏫 ${university.name}</span>
     </div>
     <div id="unimatch-content" class="unimatch-content">
       <div class="unimatch-loading">
         <div class="spinner"></div>
-        <p>Checking status...</p>
+        <p>Connecting...</p>
       </div>
     </div>
   `;
@@ -1648,8 +1797,8 @@ function showRefreshNeeded(contentEl) {
     <div class="state-card">
       <div class="state-icon">🔄</div>
       <h3>Please Refresh This Page</h3>
-      <p style="font-size:12px; color:#a1a1aa;">The extension was updated. Press <strong>Ctrl+F5</strong> to reload.</p>
-      <button class="btn-primary" onclick="location.reload()" style="margin-top:8px;">🔄 Refresh Now</button>
+      <p>The extension was updated. Press <strong>Ctrl+F5</strong> to reload.</p>
+      <button class="btn-primary" onclick="location.reload()">🔄 Refresh Now</button>
     </div>
   `;
 }
@@ -1720,7 +1869,11 @@ async function initSidebarState(university) {
     return;
   }
 
-  if (!stored.unimatch_token || !stored.unimatch_profile) {
+  const FAKE_TOKENS = ['demo_token', 'real_token', 'test_token', 'fake_token'];
+  if (!stored.unimatch_token || !stored.unimatch_profile || FAKE_TOKENS.includes(stored.unimatch_token)) {
+    if (FAKE_TOKENS.includes(stored.unimatch_token)) {
+      await chrome.storage.local.remove(['unimatch_token', 'token_expiry', 'unimatch_profile']);
+    }
     renderState(contentEl, 'not_logged_in');
     return;
   }
@@ -1749,123 +1902,7 @@ function buildProgressBar(container) {
   return document.getElementById('unimatch-progress');
 }
 
-// ─── Inline Profile Editor ─────────────────────────────────────
-
-function showProfileEditor(container) {
-  container.innerHTML = `
-    <div class="state-card" style="padding:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <strong style="color:#c084fc;font-size:13px">✏️ Enter Your Profile</strong>
-        <button id="um-editor-back" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:18px">←</button>
-      </div>
-      <div style="display:grid;gap:6px;max-height:420px;overflow-y:auto;padding-right:4px">
-        ${[
-          ['full_name','Full Name','text','Muhammad Ali Khan'],
-          ['father_name',"Father's Name",'text','Ahmad Ali Khan'],
-          ['cnic','CNIC','text','35201-1234567-3'],
-          ['date_of_birth','Date of Birth','date',''],
-          ['gender','Gender','select:male,female',''],
-          ['email','Email','email',''],
-          ['phone','Phone','tel','03001234567'],
-          ['city','City','text','Lahore'],
-          ['province','Province','select:Punjab,Sindh,Khyber Pakhtunkhwa,Balochistan,Islamabad,Azad Kashmir,Gilgit-Baltistan',''],
-          ['address','Address','text',''],
-          ['postal_code','Postal Code','text',''],
-          ['matric_marks','Matric Marks','number',''],
-          ['matric_total','Matric Total','number','1050'],
-          ['fsc_marks','FSc Marks','number',''],
-          ['fsc_total','FSc Total','number','1100'],
-          ['board_name','Board Name','text','FBISE'],
-          ['passing_year','Passing Year','number','2024'],
-          ['roll_number','Board Roll No','text',''],
-          ['school_name','School/College','text',''],
-          ['net_score','NET/Entry Test Score','number',''],
-          ['blood_group','Blood Group','select:A+,A-,B+,B-,O+,O-,AB+,AB-',''],
-          ['religion','Religion','text','Islam'],
-          ['nationality','Nationality','text','Pakistani'],
-        ].map(([key, label, type, placeholder]) => {
-          const isSelect = type.startsWith('select:');
-          const opts = isSelect ? type.slice(7).split(',') : [];
-          return `<div style="display:grid;gap:2px">
-            <label style="font-size:10px;color:#a1a1aa">${label}</label>
-            ${isSelect
-              ? `<select id="ume_${key}" style="background:#0c1a0d;border:1px solid #1f2a1c;color:#e4e4e7;border-radius:6px;padding:5px 8px;font-size:11px;width:100%">
-                   <option value="">-- Select --</option>
-                   ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
-                 </select>`
-              : `<input id="ume_${key}" type="${type}" placeholder="${placeholder}"
-                   style="background:#0c1a0d;border:1px solid #1f2a1c;color:#e4e4e7;border-radius:6px;padding:5px 8px;font-size:11px;width:100%;box-sizing:border-box">`
-            }
-          </div>`;
-        }).join('')}
-      </div>
-      <button id="um-editor-save" style="margin-top:10px;width:100%;padding:10px;background:linear-gradient(135deg,#16a34a,#4ade80);border:none;color:#fff;font-weight:700;border-radius:8px;cursor:pointer;font-size:12px">
-        💾 Save & Autofill
-      </button>
-    </div>
-  `;
-
-  // Pre-fill with existing data if any
-  chrome.storage.local.get('unimatch_profile').then(res => {
-    const p = res.unimatch_profile || {};
-    for (const [key] of [['full_name'],['father_name'],['cnic'],['date_of_birth'],['gender'],['email'],['phone'],['city'],['province'],['address'],['postal_code'],['matric_marks'],['matric_total'],['fsc_marks'],['fsc_total'],['board_name'],['passing_year'],['roll_number'],['school_name'],['net_score'],['blood_group'],['religion'],['nationality']]) {
-      const el = document.getElementById(`ume_${key}`);
-      if (el && p[key] != null) el.value = p[key];
-    }
-  }).catch(() => {});
-
-  document.getElementById('um-editor-back')?.addEventListener('click', () => {
-    renderState(container, 'not_logged_in');
-  });
-
-  document.getElementById('um-editor-save')?.addEventListener('click', async () => {
-    const get = id => document.getElementById(id)?.value?.trim() || '';
-    const getN = id => { const v = get(id); return v ? Number(v) : undefined; };
-
-    const profile = {
-      full_name: get('ume_full_name'),
-      father_name: get('ume_father_name'),
-      cnic: get('ume_cnic'),
-      date_of_birth: get('ume_date_of_birth'),
-      gender: get('ume_gender'),
-      email: get('ume_email'),
-      phone: get('ume_phone'),
-      city: get('ume_city'),
-      province: get('ume_province'),
-      address: get('ume_address'),
-      postal_code: get('ume_postal_code'),
-      matric_marks: getN('ume_matric_marks'),
-      matric_total: getN('ume_matric_total') || 1050,
-      fsc_marks: getN('ume_fsc_marks'),
-      fsc_total: getN('ume_fsc_total') || 1100,
-      board_name: get('ume_board_name'),
-      passing_year: getN('ume_passing_year'),
-      roll_number: get('ume_roll_number'),
-      school_name: get('ume_school_name'),
-      net_score: getN('ume_net_score'),
-      blood_group: get('ume_blood_group'),
-      religion: get('ume_religion'),
-      nationality: get('ume_nationality'),
-      inter_status: 'complete',
-      education_system: 'pakistan',
-    };
-
-    // Derive first/last names from full_name
-    if (profile.full_name) {
-      const parts = profile.full_name.trim().split(/\s+/);
-      profile.first_name = parts[0] || '';
-      profile.last_name = parts.length > 1 ? parts[parts.length - 1] : '';
-      profile.middle_name = parts.length > 2 ? parts.slice(1, -1).join(' ') : '';
-    }
-
-    await chrome.storage.local.set({
-      unimatch_token: 'real_token',
-      token_expiry: Date.now() + 86400000 * 30,
-      unimatch_profile: profile,
-    });
-    window.location.reload();
-  });
-}
+// ─── Inline Profile Editor (removed — use website profile page) ─
 
 // ─── State Renderer ────────────────────────────────────────────
 
@@ -1884,32 +1921,22 @@ function renderState(container, state, data = {}) {
     case 'not_logged_in': {
       const onSite = isOnIlmSeUroojSite();
       container.innerHTML = `
-        <div class="state-card">
-          <div class="state-icon">🔒</div>
-          <h3>${onSite ? 'Connecting your profile…' : 'Sign in to autofill this form.'}</h3>
+        <div class="state-card um-auth-card">
+          <div class="um-auth-icon">${onSite ? '🔗' : '🎓'}</div>
+          <h3>${onSite ? 'Connect Your Profile' : 'Sign In to Autofill'}</h3>
           <p>${onSite
-            ? 'You\'re on the IlmSeUrooj website. Click below to connect your logged-in account.'
-            : 'Connect your profile to autofill university applications.'}</p>
-          ${onSite
-            ? `<button class="btn-primary" id="unimatch-signin" style="background:#4ade80;color:#0c0e0b">
-                 🔄 Connect My Real Profile
-               </button>`
-            : `<button class="btn-primary" id="unimatch-signin">Sign In to UniMatch</button>`
-          }
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1f2a1c">
-            <p style="font-size:11px;color:#52525b;margin-bottom:8px">— or enter profile directly —</p>
-            <button class="btn-secondary" id="unimatch-load-demo" style="width:100%;font-size:11px;padding:8px;margin-bottom:6px">
-              ⚡ Load Demo Profile
-            </button>
-            <button class="btn-secondary" id="unimatch-open-editor" style="width:100%;font-size:11px;padding:8px;background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);color:#c084fc">
-              ✏️ Enter My Real Profile
-            </button>
-          </div>
+            ? 'You\'re on IlmSeUrooj — tap below to sync your account with the extension.'
+            : 'Sign in with your IlmSeUrooj profile to autofill university applications instantly.'}</p>
+          <button class="um-btn-full um-btn-signin" id="unimatch-signin">
+            ${onSite ? '🔄 Connect My Account' : '⚡ Sign In'}
+          </button>
+          <button class="um-btn-full um-btn-website" id="unimatch-goto-site">
+            ${onSite ? '👤 Go to Profile' : '📝 Create Free Account'}
+          </button>
         </div>
       `;
       document.getElementById('unimatch-signin')?.addEventListener('click', async () => {
         if (isOnIlmSeUroojSite()) {
-          // Try direct auto-connect first (reads localStorage Supabase session)
           renderState(container, 'loading');
           const ok = await tryAutoConnectFromSite();
           if (ok) {
@@ -1928,56 +1955,9 @@ function renderState(container, state, data = {}) {
         const base = await getSiteUrl();
         window.open(`${base}/extension-auth?ext=${extId}`, '_blank', 'width=500,height=600');
       });
-      document.getElementById('unimatch-load-demo')?.addEventListener('click', async () => {
-        await chrome.storage.local.set({
-          unimatch_token: 'demo_token',
-          token_expiry: Date.now() + 86400000 * 30,
-          unimatch_profile: {
-            full_name: 'Muhammad Ali Khan',
-            first_name: 'Muhammad',
-            last_name: 'Khan',
-            middle_name: 'Ali',
-            father_name: 'Ahmad Ali Khan',
-            mother_name: 'Ayesha Begum',
-            cnic: '35201-1234567-3',
-            father_cnic: '35201-7654321-5',
-            date_of_birth: '2003-05-15',
-            gender: 'male',
-            blood_group: 'O+',
-            religion: 'Islam',
-            nationality: 'Pakistani',
-            email: 'muhammad.ali.khan@gmail.com',
-            phone: '03001234567',
-            whatsapp: '03001234567',
-            city: 'Lahore',
-            district: 'Lahore',
-            province: 'Punjab',
-            domicile_province: 'Punjab',
-            postal_code: '54000',
-            address: 'House 12, Street 4, Gulberg III, Lahore',
-            matric_marks: 980,
-            matric_total: 1050,
-            matric_percentage: '93.3',
-            fsc_marks: 1020,
-            fsc_total: 1100,
-            fsc_percentage: '92.7',
-            board_name: 'FBISE',
-            passing_year: 2024,
-            roll_number: 'F-123456',
-            school_name: 'F.G. Degree College H-9, Islamabad',
-            net_score: 185,
-            ecat_score: 780,
-            sat_score: 1320,
-            profile_completion: 95,
-            inter_status: 'complete',
-            education_system: 'pakistan',
-            statement_of_purpose: 'I am a passionate and dedicated student with a strong academic record. I believe that higher education is the key to personal and professional growth. I have always excelled in mathematics and sciences, and I am eager to pursue my degree at this prestigious institution. My goal is to contribute meaningfully to Pakistan\'s technological advancement by applying the knowledge and skills I acquire here.'
-          }
-        });
-        window.location.reload();
-      });
-      document.getElementById('unimatch-open-editor')?.addEventListener('click', () => {
-        showProfileEditor(container);
+      document.getElementById('unimatch-goto-site')?.addEventListener('click', async () => {
+        const base = await getSiteUrl();
+        window.open(`${base}/${onSite ? 'profile' : 'profile'}`, '_blank');
       });
       break;
     } // end case 'not_logged_in'
@@ -2015,11 +1995,11 @@ function renderState(container, state, data = {}) {
     case 'loading':
       container.innerHTML = `
         <div class="state-card">
-          <div style="font-size:13px;font-weight:600;color:#e4e4e7;margin-bottom:10px">⚡ Filling form...</div>
-          <div style="height:4px;background:#1f2a1c;border-radius:2px;overflow:hidden;margin-bottom:12px">
-            <div id="unimatch-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:2px;transition:width 0.2s ease"></div>
+          <div class="um-loading-title">⚡ Filling form...</div>
+          <div class="autofill-progress-wrap">
+            <div id="unimatch-progress" class="autofill-progress-bar"></div>
           </div>
-          <p style="font-size:11px;color:#71717a">Detecting and filling all form fields...</p>
+          <p class="um-loading-sub">Detecting and filling all form fields...</p>
         </div>
       `;
       break;
@@ -2033,7 +2013,6 @@ function renderState(container, state, data = {}) {
       const pageType = detectPageType();
       const program = detectProgram();
 
-      // ── Profile quick-view rows (what WILL actually be filled) ──
       const PROFILE_ROWS = [
         { key: 'full_name',    icon: '👤', label: 'Name' },
         { key: 'father_name',  icon: '👨', label: 'Father' },
@@ -2050,118 +2029,95 @@ function renderState(container, state, data = {}) {
         const val = profile?.[r.key];
         const hasVal = val != null && val !== '';
         const display = hasVal ? String(val).slice(0, 22) + (String(val).length > 22 ? '…' : '') : '—';
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">
-          <span style="color:#a1a1aa">${r.icon} ${r.label}</span>
-          <span style="color:${hasVal ? '#e4e4e7' : '#52525b'};font-family:monospace;font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${display}</span>
+        return `<div class="um-preview-row">
+          <span class="um-preview-label">${r.icon} ${r.label}</span>
+          <span class="um-preview-value${hasVal ? '' : ' missing'}">${display}</span>
         </div>`;
       }).join('');
 
-      // ── Gap warnings (profile fields missing that form likely needs) ──
       const gaps = PROFILE_ROWS.filter(r => !profile?.[r.key]).map(r => r.label);
       const gapHTML = gaps.length
-        ? `<div style="margin-top:8px;padding:6px 8px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:6px;font-size:10px;color:#fbbf24">
-            ⚠ Missing: ${gaps.join(' · ')}
-           </div>`
+        ? `<div class="um-gap-warning">⚠ Missing: ${gaps.join(' · ')}</div>`
         : '';
 
-      // ── Marks warning ────────────────────────────────────────────
       const marksWarning = isProjected
-        ? '<div style="font-size:10px;color:#fbbf24;margin-top:6px;padding:4px 8px;background:rgba(251,191,36,0.08);border-radius:6px">⚠ Using projected marks from Part-I</div>'
+        ? '<div class="um-marks-note projected">⚠ Using projected marks from Part-I</div>'
         : isCambridge
-        ? '<div style="font-size:10px;color:#60a5fa;margin-top:6px;padding:4px 8px;background:rgba(96,165,250,0.08);border-radius:6px">ℹ Using IBCC equivalence %</div>'
+        ? '<div class="um-marks-note cambridge">ℹ Using IBCC equivalence %</div>'
         : '';
 
-      // ── Login/Register page context card ────────────────────────
-      const portalEmail   = profile?.portal_email || profile?.email || '';
-      const portalUser    = generatePortalUsername(profile);
-      const regLink       = findRegisterLink();
+      const portalEmail = profile?.portal_email || profile?.email || '';
+      const portalUser = generatePortalUsername(profile);
+      const regLink = findRegisterLink();
 
-      const loginRegisterCard = (pageType === 'login') ? `
-        <div style="background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:12px;margin-bottom:10px">
-          <div style="font-size:11px;font-weight:700;color:#4ade80;margin-bottom:8px">🔑 Login Page — Credentials Ready</div>
-          <div style="font-size:10px;color:#a1a1aa;margin-bottom:6px">UniMatch will fill these when you click Autofill:</div>
-          <div style="font-size:11px;background:#0c0e0b;border-radius:6px;padding:8px;margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="color:#71717a">Username/Email:</span>
-              <span style="color:#e4e4e7;font-family:monospace;max-width:140px;overflow:hidden;text-overflow:ellipsis">${portalEmail || portalUser}</span>
+      let loginRegisterCard = '';
+      if (pageType === 'login') {
+        loginRegisterCard = `
+          <div class="um-context-card login">
+            <div class="um-context-title">🔑 Login Page — Credentials Ready</div>
+            <div class="um-cred-box">
+              <div class="um-cred-row"><span class="label">Username/Email:</span><span class="value">${portalEmail || portalUser}</span></div>
+              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">●●●●●●●● (saved)</span></div>
             </div>
-            <div style="display:flex;justify-content:space-between">
-              <span style="color:#71717a">Password:</span>
-              <span style="color:#4ade80">●●●●●●●●●● (saved)</span>
+            <button class="um-context-btn" id="unimatch-goto-register">${regLink ? '📝 No account? Create Account →' : '📝 Find Registration Page →'}</button>
+          </div>`;
+      } else if (pageType === 'register') {
+        loginRegisterCard = `
+          <div class="um-context-card register">
+            <div class="um-context-title">📝 Registration Page — Ready</div>
+            <div class="um-cred-box">
+              <div class="um-cred-row"><span class="label">Email:</span><span class="value">${portalEmail}</span></div>
+              <div class="um-cred-row"><span class="label">Username:</span><span class="value">${portalUser}</span></div>
+              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">Auto-generated ✓</span></div>
             </div>
-          </div>
-          ${regLink
-            ? `<button id="unimatch-goto-register" style="width:100%;padding:7px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);border-radius:7px;color:#4ade80;font-size:11px;cursor:pointer;font-family:inherit">📝 No account yet? Create Account →</button>`
-            : `<button id="unimatch-goto-register" style="width:100%;padding:7px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);border-radius:7px;color:#4ade80;font-size:11px;cursor:pointer;font-family:inherit">📝 Find Registration Page →</button>`
-          }
-        </div>
-      ` : (pageType === 'register') ? `
-        <div style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:12px;margin-bottom:10px">
-          <div style="font-size:11px;font-weight:700;color:#c084fc;margin-bottom:6px">📝 Registration Page — Ready to Create Account</div>
-          <div style="font-size:10px;color:#a1a1aa;margin-bottom:6px">UniMatch will fill your complete profile including:</div>
-          <div style="font-size:10px;color:#e4e4e7;line-height:1.7">
-            ✓ Full name, CNIC, DOB, gender<br>
-            ✓ Email: <span style="color:#4ade80;font-family:monospace">${portalEmail}</span><br>
-            ✓ Username: <span style="color:#4ade80;font-family:monospace">${portalUser}</span><br>
-            ✓ Password + Confirm Password (same)<br>
-            ✓ Phone, address, marks, test scores
-          </div>
-        </div>
-      ` : '';
+          </div>`;
+      }
+
+      const ringColor = completeness >= 80 ? 'var(--um-accent)' : completeness >= 50 ? 'var(--um-amber)' : 'var(--um-red)';
+      const ringFill = (completeness / 100) * 94.2;
 
       container.innerHTML = `
         <div class="state-card">
-          <div class="profile-info" style="margin-bottom:10px">
-            <div class="avatar" style="flex-shrink:0">${displayName.charAt(0).toUpperCase()}</div>
-            <div style="flex:1;min-width:0">
-              <strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${displayName}</strong>
-              <span class="profile-pct">${completeness}% profile complete</span>
+          <div class="um-profile-row">
+            <div class="avatar">${displayName.charAt(0).toUpperCase()}</div>
+            <div class="um-profile-name">
+              <strong>${displayName}</strong>
+              <span class="profile-pct">${completeness}% complete</span>
             </div>
-            <div style="flex-shrink:0">
-              <svg width="28" height="28" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="15" fill="none" stroke="#1f2a1c" stroke-width="3"/>
-                <circle cx="18" cy="18" r="15" fill="none" stroke="#4ade80" stroke-width="3"
-                  stroke-dasharray="${(completeness / 100) * 94.2} 94.2"
-                  stroke-linecap="round" transform="rotate(-90 18 18)"/>
-                <text x="18" y="22" text-anchor="middle" font-size="9" fill="#4ade80" font-family="monospace">${completeness}%</text>
-              </svg>
-            </div>
+            <svg width="28" height="28" viewBox="0 0 36 36" class="profile-ring">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="var(--um-border)" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke="${ringColor}" stroke-width="3"
+                stroke-dasharray="${ringFill} 94.2" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+              <text x="18" y="22" text-anchor="middle" font-size="9" fill="${ringColor}" font-family="monospace">${completeness}%</text>
+            </svg>
           </div>
 
           ${loginRegisterCard}
+          ${program ? `<div class="um-program-badge">📋 ${program}</div>` : ''}
 
-          ${program ? `<div style="font-size:10px;color:#a855f7;padding:4px 8px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:6px;margin-bottom:8px">📋 ${program}</div>` : ''}
-
-          <details style="margin-bottom:8px">
-            <summary style="font-size:11px;color:#71717a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:4px 0">
-              <span>Profile preview</span>
-              <span style="color:#4ade80;font-size:9px">▼ expand</span>
-            </summary>
-            <div style="margin-top:6px;padding:4px 0">${previewRows}</div>
+          <details class="um-details">
+            <summary><span>Profile preview</span><span class="um-expand-arrow">▼</span></summary>
+            <div class="um-preview-grid">${previewRows}</div>
           </details>
 
           ${gapHTML}
           ${marksWarning}
 
-          <div id="unimatch-suggestions" style="margin-top:8px"></div>
+          <div id="unimatch-suggestions"></div>
 
-          <div style="display:flex;gap:6px;margin-top:8px">
-            <button class="btn-secondary" id="unimatch-refresh-profile" style="flex:1;font-size:10px;padding:5px">🔄 Refresh Profile</button>
-            <button class="btn-secondary" id="unimatch-edit-profile" style="flex:1;font-size:10px;padding:5px">✏️ Edit Profile</button>
-          </div>
-
-          <button class="btn-primary btn-autofill" id="unimatch-autofill" style="margin-top:10px;position:relative;overflow:hidden">
-            <span style="position:relative;z-index:1">&#9889; Autofill Now</span>
-            <span style="position:relative;z-index:1;font-size:9px;opacity:0.5;margin-left:6px">Alt+Shift+A</span>
+          <button class="btn-primary btn-autofill" id="unimatch-autofill">
+            ⚡ Autofill Now <span style="font-size:9px;opacity:0.5;margin-left:6px">Alt+Shift+A</span>
           </button>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
-            <button class="btn-secondary" id="unimatch-scan" style="font-size:11px">&#128269; Scan</button>
-            <button class="btn-secondary" id="unimatch-review-btn" style="font-size:11px">&#128203; Review</button>
+          <div class="um-btn-grid">
+            <button class="btn-secondary" id="unimatch-refresh-profile">🔄 Refresh</button>
+            <button class="btn-secondary" id="unimatch-scan">🔍 Scan Fields</button>
           </div>
-          <button class="btn-secondary" id="unimatch-timeline-btn" style="font-size:11px;width:100%;margin-top:6px">&#128197; View Timeline</button>
-          <div style="margin-top:8px;padding:6px 8px;background:rgba(74,222,128,0.04);border:1px solid rgba(74,222,128,0.1);border-radius:6px;font-size:9px;color:#52525b;text-align:center;line-height:1.4">
-            &#128274; Never auto-submits &middot; Only you submit
+          <div class="um-btn-grid">
+            <button class="btn-secondary" id="unimatch-review-btn">📋 Review</button>
+            <button class="btn-secondary" id="unimatch-timeline-btn">📅 Timeline</button>
           </div>
+          <button class="btn-secondary um-btn-full-row" id="unimatch-edit-profile">👤 Edit Profile on Website</button>
+          <div class="um-safety-note">🔒 Never auto-submits · Only you submit</div>
         </div>
       `;
 
@@ -2170,9 +2126,9 @@ function renderState(container, state, data = {}) {
       const suggestionsEl = document.getElementById('unimatch-suggestions');
       if (suggestionsEl && suggestions.length > 0) {
         suggestionsEl.innerHTML = suggestions.map(s => `
-          <div style="padding:7px 10px;margin-bottom:5px;background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.12);border-radius:7px;font-size:11px;line-height:1.4">
+          <div class="um-suggestion">
             <span>${s.icon}</span> ${s.text}
-            ${s.sub ? `<div style="margin-top:2px;font-size:10px;color:#a1a1aa">${s.sub}</div>` : ''}
+            ${s.sub ? `<div class="um-suggestion-sub">${s.sub}</div>` : ''}
           </div>
         `).join('');
       }
@@ -2206,8 +2162,11 @@ function renderState(container, state, data = {}) {
         }
       });
 
-      document.getElementById('unimatch-edit-profile')?.addEventListener('click', () => {
-        showProfileEditor(container);
+      document.getElementById('unimatch-edit-profile')?.addEventListener('click', async () => {
+        try {
+          const base = await chrome.runtime.sendMessage({ type: 'GET_SITE_BASE' });
+          window.open((base?.url || 'http://localhost:3000') + '/profile', '_blank');
+        } catch { window.open('http://localhost:3000/profile', '_blank'); }
       });
       break;
     }
@@ -2259,18 +2218,18 @@ function renderState(container, state, data = {}) {
               <span class="stat-dot amber"></span>
               <span><strong>${data.manual}</strong> need your input</span>
             </div>
-            ${data.conflicts > 0 ? `<div class="stat-row" style="margin-top:2px">
-              <span style="width:8px;height:8px;border-radius:50%;background:#60a5fa;display:inline-block;margin-right:6px;flex-shrink:0"></span>
-              <span style="color:#60a5fa"><strong>${data.conflicts}</strong> conflicts skipped</span>
+            ${data.conflicts > 0 ? `<div class="stat-row" style="background:rgba(96,165,250,0.1);color:#60a5fa">
+              <span class="stat-dot" style="background:#60a5fa"></span>
+              <span><strong>${data.conflicts}</strong> conflicts skipped</span>
             </div>` : ''}
           </div>
           ${credSummary}
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px">
-            <button class="btn-secondary" id="unimatch-save-progress" style="font-size:11px">💾 Save</button>
-            <button class="btn-secondary" id="unimatch-refill" style="font-size:11px">🔄 Re-fill</button>
+          <div class="um-btn-grid">
+            <button class="btn-secondary" id="unimatch-save-progress">💾 Save</button>
+            <button class="btn-secondary" id="unimatch-refill">🔄 Re-fill</button>
           </div>
-          <button class="btn-primary btn-review" id="unimatch-review" style="margin-top:6px;width:100%">📋 Pre-submit Check</button>
-          <p style="font-size:9px;color:#52525b;text-align:center;margin-top:8px">Alt+Shift+A to re-fill · Alt+Shift+R for review</p>
+          <button class="btn-primary um-btn-full-row" id="unimatch-review">📋 Pre-submit Check</button>
+          <div class="um-safety-note">Alt+Shift+A to re-fill · Alt+Shift+R for review</div>
         </div>
       `;
       document.getElementById('unimatch-review')?.addEventListener('click', handlePreSubmitCheck);
@@ -2472,21 +2431,8 @@ function tryMultiSelectorAll(selectorString) {
  * Fill a select element using option text/value matching with optional mapping.
  */
 function fillSelectWithMapping(el, value, optionMap) {
-  const options = Array.from(el.options);
   const mappedValue = optionMap?.[String(value).toLowerCase()] || value;
-
-  const match = options.find(o =>
-    o.value.toLowerCase() === String(mappedValue).toLowerCase() ||
-    o.text.toLowerCase() === String(mappedValue).toLowerCase() ||
-    o.text.toLowerCase().includes(String(mappedValue).toLowerCase())
-  );
-
-  if (match) {
-    el.value = match.value;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    return true;
-  }
-  return false;
+  return fillSelect(el, mappedValue);
 }
 
 // ─── Extension Context Guard ───────────────────────────────────
@@ -2574,19 +2520,16 @@ async function handleAutofill() {
 
         for (const el of els) {
           tickProgress();
-          // Resolve value — virtual keys derive from profile fields
+          // Resolve value — use profileValueFor helper for computed/derived keys
           let rawValue;
-          if (['first_name', 'last_name', 'middle_name'].includes(profileKey)) {
-            const fullName = ctx.profile?.full_name;
-            rawValue = fullName ? TRANSFORMS[profileKey](fullName) : '';
-          } else if (profileKey === 'portal_password') {
-            rawValue = masterPassword; // Always use the consistent master password
+          if (profileKey === 'portal_password') {
+            rawValue = masterPassword;
           } else if (profileKey === 'portal_username') {
             rawValue = generatePortalUsername(ctx.profile);
+          } else if (profileKey === 'portal_email') {
+            rawValue = ctx.profile?.portal_email || ctx.profile?.email;
           } else {
-            rawValue = ctx.profile?.[profileKey];
-            // For portal_email, fall back to email if not set
-            if (profileKey === 'portal_email' && !rawValue) rawValue = ctx.profile?.email;
+            rawValue = profileValueFor(profileKey, ctx.profile) ?? ctx.profile?.[profileKey];
           }
 
           alreadyHandled.add(el);
@@ -2702,7 +2645,7 @@ async function handleAutofill() {
         if (!el || alreadyHandled.has(el)) continue;
         alreadyHandled.add(el);
 
-        let value = ctx.profile[field.profileKey];
+        let value = profileValueFor(field.profileKey, ctx.profile) ?? ctx.profile[field.profileKey];
 
         if (field.transform && TRANSFORMS[field.transform]) {
           if (field.transform === 'marks_to_percent') {
@@ -2852,14 +2795,8 @@ async function handleAutofill() {
         continue;
       }
 
-      // Resolve value
-      let value;
-      if (['first_name', 'last_name', 'middle_name'].includes(profileKey)) {
-        const fullName = ctx.profile.full_name;
-        value = fullName ? TRANSFORMS[profileKey](fullName) : '';
-      } else {
-        value = ctx.profile[profileKey];
-      }
+      // Resolve value using profileValueFor helper
+      let value = profileValueFor(profileKey, ctx.profile) ?? ctx.profile[profileKey];
 
       // Smart transforms
       if (profileKey === 'cnic' && value) {
