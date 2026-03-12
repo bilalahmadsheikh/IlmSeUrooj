@@ -9,12 +9,14 @@ const DESKTOP_LIMITS = [6, 15];
 const MOBILE_LIMITS = [3, 10];
 const MOBILE_BREAKPOINT = 768;
 
-export default function AdmissionsDeadlines({ currentField }) {
+export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
     const [filter, setFilter] = useState('all');
     const [showElapsed, setShowElapsed] = useState(false);
+    const [showSavedOnly, setShowSavedOnly] = useState(false);
     const [now, setNow] = useState(new Date());
     const [visibleCount, setVisibleCount] = useState(DESKTOP_LIMITS[0]);
     const [isMobile, setIsMobile] = useState(false);
+    const savedIdSet = new Set(savedIds);
 
     // Check if mobile on mount and resize
     useEffect(() => {
@@ -47,17 +49,16 @@ export default function AdmissionsDeadlines({ currentField }) {
         return diffDays;
     };
 
-    // Filter deadlines by field and upcoming/elapsed
+    // Filter deadlines by field, saved-only, and upcoming/elapsed
     const filteredDeadlines = upcomingDeadlines.filter(d => {
-        // Field filter
         if (filter !== 'all' && d.field !== filter) return false;
+        if (showSavedOnly && savedIdSet.size > 0 && !savedIdSet.has(d.id)) return false;
 
-        // Upcoming/Elapsed filter
         const daysLeft = getDaysRemaining(d.deadline);
         if (showElapsed) {
-            return daysLeft < 0; // Show only elapsed
+            return daysLeft < 0;
         } else {
-            return daysLeft >= 0; // Show only upcoming
+            return daysLeft >= 0;
         }
     }).sort((a, b) => {
         // Sort by closest deadline first (upcoming) or most recent first (elapsed)
@@ -154,6 +155,17 @@ export default function AdmissionsDeadlines({ currentField }) {
                     </button>
                 </div>
 
+                {/* Saved filter */}
+                {savedIds.length > 0 && (
+                    <button
+                        className={`${styles.filterBtn} ${showSavedOnly ? styles.savedActive : ''}`}
+                        onClick={() => setShowSavedOnly(!showSavedOnly)}
+                    >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill={showSavedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        {' '}Saved ({savedIds.length})
+                    </button>
+                )}
+
                 {/* Field Filters */}
                 <button
                     className={`${styles.filterBtn} ${filter === 'all' ? styles.active : ''}`}
@@ -196,14 +208,19 @@ export default function AdmissionsDeadlines({ currentField }) {
                     return (
                         <div
                             key={deadline.id}
-                            className={`${styles.card} ${getUrgencyClass(daysLeft)} ${isPast ? styles.past : ''}`}
+                            className={`${styles.card} ${getUrgencyClass(daysLeft)} ${isPast ? styles.past : ''} ${savedIdSet.has(deadline.id) ? styles.cardSaved : ''}`}
                         >
                             <div className={styles.cardHeader}>
                                 <div className={styles.uniLogo}>
                                     <span>{deadline.shortName.charAt(0)}</span>
                                 </div>
                                 <div className={styles.uniInfo}>
-                                    <h3 className={styles.uniName}>{deadline.shortName}</h3>
+                                    <h3 className={styles.uniName}>
+                                        {deadline.shortName}
+                                        {savedIdSet.has(deadline.id) && (
+                                            <svg className={styles.savedIcon} width="14" height="14" viewBox="0 0 24 24" fill="#10B981" stroke="#10B981" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                        )}
+                                    </h3>
                                     <p className={styles.program}>{deadline.program}</p>
                                 </div>
                                 <div className={styles.countdown}>

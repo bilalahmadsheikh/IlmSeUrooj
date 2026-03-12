@@ -660,3 +660,19 @@
         text-align: center;
     }
 }
+
+.cardSaved {
+    border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.savedIcon {
+    display: inline-block;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.savedActive {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #10B981 !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}

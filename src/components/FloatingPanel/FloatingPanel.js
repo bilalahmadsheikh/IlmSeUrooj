@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import styles from './FloatingPanel.module.css';
+import { loadSavedFromStorage } from '@/utils/savedStorage';
+import { upcomingDeadlines } from '@/data/universities';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -20,6 +22,8 @@ export default function FloatingPanel() {
     const [open, setOpen] = useState(false);
     const [unseenCount, setUnseenCount] = useState(0);
     const [extensionInstalled, setExtensionInstalled] = useState(false);
+    const [savedCount, setSavedCount] = useState(0);
+    const [nextDeadlineDays, setNextDeadlineDays] = useState(null);
     const isHidden = HIDDEN_PATHS.includes(pathname);
 
     useEffect(() => {
@@ -39,6 +43,25 @@ export default function FloatingPanel() {
             const hasExtension = document.querySelector('#unimatch-extension-active');
             if (hasExtension) setExtensionInstalled(true);
         } catch (e) { }
+    }, [isHidden]);
+
+    useEffect(() => {
+        if (isHidden) return;
+        const saved = loadSavedFromStorage();
+        setSavedCount(saved.length);
+
+        const savedIdSet = new Set(saved.map(s => s.id));
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let minDays = null;
+        for (const d of upcomingDeadlines) {
+            if (savedIdSet.size > 0 && !savedIdSet.has(d.id)) continue;
+            const diff = Math.ceil((new Date(d.deadline) - today) / 86400000);
+            if (diff >= 0 && (minDays === null || diff < minDays)) {
+                minDays = diff;
+            }
+        }
+        setNextDeadlineDays(minDays);
     }, [isHidden]);
 
     async function loadProfile(userId) {
@@ -90,9 +113,21 @@ export default function FloatingPanel() {
                     <span className={styles.panelLabel}>Profile</span>
                     <span className={`${styles.panelBadge} ${styles.badgePercent}`}>{completion}%</span>
                 </Link>
+                <Link href="/" className={styles.panelRow} onClick={() => setOpen(false)}>
+                    <span className={styles.panelIcon}>🔖</span>
+                    <span className={styles.panelLabel}>Saved</span>
+                    {savedCount > 0 && (
+                        <span className={`${styles.panelBadge} ${styles.badgeSaved}`}>{savedCount}</span>
+                    )}
+                </Link>
                 <Link href="/timeline" className={styles.panelRow} onClick={() => setOpen(false)}>
                     <span className={styles.panelIcon}>📅</span>
                     <span className={styles.panelLabel}>Timeline</span>
+                    {nextDeadlineDays !== null && nextDeadlineDays <= 14 && (
+                        <span className={`${styles.panelBadge} ${nextDeadlineDays <= 3 ? styles.badgeUrgent : styles.badgeSoon}`}>
+                            {nextDeadlineDays === 0 ? 'Today!' : `${nextDeadlineDays}d`}
+                        </span>
+                    )}
                 </Link>
                 <Link href="/extension" className={styles.panelRow} onClick={() => setOpen(false)}>
                     <span className={styles.panelIcon}>🧩</span>

@@ -8,13 +8,16 @@ import StrategyPanel from '@/components/StrategyPanel/StrategyPanel';
 import ConflictAlert from '@/components/ConflictAlert/ConflictAlert';
 import ThemeToggle from '@/components/ThemeToggle/ThemeToggle';
 import { getBrowserClient } from '@/lib/supabase-browser';
-import { filterOptions } from '@/data/universities';
+import { universities as allUniversities, filterOptions } from '@/data/universities';
 import {
     buildDeadlinesFromUniversities,
     mergeSupabaseDeadlines,
     detectRealConflicts,
+    toSlug,
 } from '@/data/deadlines';
 import { computeMatchScore } from '@/data/meritFormulas';
+import { loadSavedFromStorage } from '@/utils/savedStorage';
+import { findUniversityByApplication } from '@/utils/universityHelpers';
 
 export default function TimelinePage() {
     const [timeline, setTimeline] = useState([]);
@@ -29,16 +32,41 @@ export default function TimelinePage() {
     const ganttRef = useRef(null);
 
     useEffect(() => {
-        try {
-            const saved = JSON.parse(localStorage.getItem('unimatch_saved') || '[]');
-            const slugs = saved.map(u =>
-                (u.shortName || u.name || '')
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')
-                    .replace(/[()]/g, '')
-            );
-            setSavedSlugs(slugs);
-        } catch { /* empty */ }
+        let cancelled = false;
+        (async () => {
+            try {
+                const localRows = loadSavedFromStorage();
+                const localIds = new Set(localRows.map(r => r.id));
+                const localUnis = localRows
+                    .map(r => allUniversities.find(u => u.id === r.id || u.id === parseInt(r.id, 10)))
+                    .filter(Boolean);
+
+                const supabase = getBrowserClient();
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.access_token && !cancelled) {
+                    try {
+                        const res = await fetch('/api/applications', { credentials: 'include' });
+                        if (res.ok) {
+                            const { applications } = await res.json();
+                            const savedFromApi = (applications || []).filter(a => a.status === 'saved');
+                            for (const app of savedFromApi) {
+                                const uni = findUniversityByApplication(app, allUniversities);
+                                if (uni && !localIds.has(uni.id)) {
+                                    localUnis.push(uni);
+                                    localIds.add(uni.id);
+                                }
+                            }
+                        }
+                    } catch { /* API unavailable, use localStorage only */ }
+                }
+
+                if (!cancelled) {
+                    const slugs = localUnis.map(u => toSlug(u.shortName));
+                    setSavedSlugs(slugs);
+                }
+            } catch { /* empty */ }
+        })();
+        return () => { cancelled = true; };
     }, []);
 
     const fetchStrategy = useCallback(async () => {

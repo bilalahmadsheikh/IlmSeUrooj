@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from './AdmissionPredictor.module.css';
 import { universities } from '@/data/universities';
 import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
+import { useProfile } from '@/hooks/useProfile';
 
 // Real admission criteria with 2023-2024 merit data from official/researched sources
 // Campus-specific entries for universities with multiple campuses
@@ -526,13 +527,72 @@ function calculateChance(fsc, matric, field, testScore, uniName) {
     }
 }
 
-export default function AdmissionPredictor() {
+export default function AdmissionPredictor({ savedIds = [] }) {
+    const { profile, getEffectiveInterData } = useProfile();
     const [fscMarks, setFscMarks] = useState(75);
     const [matricMarks, setMatricMarks] = useState(85);
     const [expectedTestScore, setExpectedTestScore] = useState(70);
     const [selectedField, setSelectedField] = useState('Pre-Engineering');
     const [selectedUniversity, setSelectedUniversity] = useState('GIKI');
-    const [educationStatus, setEducationStatus] = useState('fsc_complete'); // fsc_complete, fsc_incomplete, alevel_complete, alevel_incomplete
+    const [educationStatus, setEducationStatus] = useState('fsc_complete');
+    const [profilePreFilled, setProfilePreFilled] = useState(false);
+
+    useEffect(() => {
+        if (!profile) return;
+        let didPrefill = false;
+
+        const interData = getEffectiveInterData();
+        if (interData?.percentage && !interData.cannotCalculate) {
+            setFscMarks(Math.round(parseFloat(interData.percentage)));
+            didPrefill = true;
+        }
+
+        if (profile.matric_percentage) {
+            setMatricMarks(Math.round(parseFloat(profile.matric_percentage)));
+            didPrefill = true;
+        } else if (profile.ibcc_equivalent_matric) {
+            setMatricMarks(Math.round(parseFloat(profile.ibcc_equivalent_matric)));
+            didPrefill = true;
+        }
+
+        if (profile.net_score || profile.ecat_score) {
+            setExpectedTestScore(Math.round(parseFloat(profile.net_score || profile.ecat_score)));
+            didPrefill = true;
+        }
+
+        if (profile.preferred_field) {
+            const fieldMap = {
+                'Pre-Engineering': 'Pre-Engineering',
+                'Computer Science': 'Computer Science',
+                'Business': 'Business',
+                'Medical': 'Medical',
+                'Pre-Medical': 'Medical',
+            };
+            const mapped = fieldMap[profile.preferred_field];
+            if (mapped) {
+                setSelectedField(mapped);
+                didPrefill = true;
+            }
+        }
+
+        if (profile.education_system === 'cambridge') {
+            setEducationStatus(profile.inter_status === 'not_started' || profile.inter_status === 'part1_only'
+                ? 'alevel_incomplete' : 'alevel_complete');
+        } else if (profile.inter_status) {
+            const statusMap = {
+                'completed': 'fsc_complete',
+                'result_awaited': 'fsc_complete',
+                'appearing': 'fsc_incomplete',
+                'part1_only': 'fsc_incomplete',
+                'not_started': 'fsc_incomplete',
+            };
+            if (statusMap[profile.inter_status]) {
+                setEducationStatus(statusMap[profile.inter_status]);
+            }
+        }
+
+        if (didPrefill) setProfilePreFilled(true);
+    }, [profile]);
 
     // Get universities that offer the selected field and have admission criteria
     const availableUniversities = useMemo(() => {
@@ -587,6 +647,12 @@ export default function AdmissionPredictor() {
                 <p className={styles.subtitle}>
                     Enter your marks to see your chances at top Pakistani universities
                 </p>
+                {profilePreFilled && (
+                    <span className={styles.profileBadge}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Pre-filled from your profile
+                    </span>
+                )}
             </div>
 
             {/* Input Form */}
@@ -885,14 +951,19 @@ export default function AdmissionPredictor() {
                 </h3>
 
                 <div className={styles.predictionsList}>
-                    {predictions.map((uni) => (
-                        <div key={uni.id} className={styles.predictionCard}>
+                    {predictions.map((uni) => {
+                        const isSavedUni = savedIds.includes(uni.id);
+                        return (
+                        <div key={uni.id} className={`${styles.predictionCard} ${isSavedUni ? styles.predictionCardSaved : ''}`}>
                             <div className={styles.predictionHeader}>
                                 <div className={styles.uniLogo}>
                                     {uni.shortName.charAt(0)}
                                 </div>
                                 <div className={styles.uniInfo}>
-                                    <h4>{uni.shortName}</h4>
+                                    <h4>
+                                        {uni.shortName}
+                                        {isSavedUni && <span className={styles.savedTag}>Saved</span>}
+                                    </h4>
                                     <p>{uni.city} • {uni.type}</p>
                                 </div>
                                 <div className={`${styles.chanceBadge} ${styles[uni.prediction.color]}`}>
@@ -928,7 +999,8 @@ export default function AdmissionPredictor() {
                                 />
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 

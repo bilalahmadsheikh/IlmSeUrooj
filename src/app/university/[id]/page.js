@@ -9,8 +9,11 @@ import { getAlumniLinks } from '@/data/alumniLinks';
 import { getAlumniPulse, COUNTRY_COORDS } from '@/data/alumniPulseData';
 import Header from '@/components/Header/Header';
 import AnimatedBackground from '@/components/Background/AnimatedBackground';
+import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
 import { IconArrowLeft, IconExternalLink, IconCalendar, IconBookmark, IconCheck, IconShield, IconLinkedIn } from '@/components/Icons/Icons';
 import { loadSavedFromStorage, saveToStorage } from '@/utils/savedStorage';
+import { useProfile } from '@/hooks/useProfile';
+import { getUniversitySlug, getPortalDomain } from '@/utils/universityHelpers';
 import styles from './page.module.css';
 
 function formatDate(iso) {
@@ -56,18 +59,22 @@ export default function UniversityDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id ? parseInt(params.id, 10) : null;
+  const { profile } = useProfile();
+  const isLoggedIn = !!profile;
 
   const goHome = useCallback(() => router.push('/'), [router]);
 
   const [uni, setUni] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [savedCount, setSavedCount] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [toast, setToast] = useState(null);
   const [copied, setCopied] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
   const [alumniFieldFilter, setAlumniFieldFilter] = useState(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -78,6 +85,7 @@ export default function UniversityDetailPage() {
     if (found) {
       setUni(found);
       const stored = loadSavedFromStorage();
+      setSavedCount(stored.length);
       setSaved(stored.some((i) => i.id === found.id));
       const progs = found.programs || {};
       const fieldsWithPrograms = (found.fields || []).filter((f) => progs[f]?.length > 0);
@@ -93,7 +101,7 @@ export default function UniversityDetailPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const handleSave = useCallback(() => {
+  const performSave = useCallback(async () => {
     if (!uni || saved) return;
     const stored = loadSavedFromStorage();
     const hydrated = stored
@@ -104,9 +112,44 @@ export default function UniversityDetailPage() {
       .filter(Boolean);
     saveToStorage([...hydrated, { university: uni, savedAt: Date.now(), tag: null, note: '' }]);
     setSaved(true);
+    setSavedCount(prev => prev + 1);
     setToast(`${uni.shortName} saved!`);
     setTimeout(() => setToast(null), 2500);
-  }, [uni, saved]);
+
+    if (isLoggedIn) {
+      const slug = getUniversitySlug(uni);
+      const domain = getPortalDomain(uni);
+      if (slug && domain) {
+        try {
+          await fetch('/api/applications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              university_slug: slug,
+              university_name: uni.shortName ?? uni.name,
+              portal_domain: domain,
+              status: 'saved',
+            }),
+          });
+        } catch { /* network error, localStorage is fallback */ }
+      }
+    }
+  }, [uni, saved, isLoggedIn]);
+
+  const handleSave = useCallback(() => {
+    if (!uni || saved) return;
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    performSave();
+  }, [uni, saved, isLoggedIn, performSave]);
+
+  const handleSaveAsGuest = useCallback(() => {
+    setShowLoginPrompt(false);
+    performSave();
+  }, [performSave]);
 
   const handleCopyLink = useCallback(async () => {
     const url = uni?.admissions?.applyUrl;
@@ -137,7 +180,7 @@ export default function UniversityDetailPage() {
     return (
       <main className={styles.main}>
         <AnimatedBackground />
-        <Header savedCount={0} onShowSaved={goHome} onShowScholarships={goHome} />
+        <Header savedCount={savedCount} onShowSaved={goHome} onShowScholarships={goHome} />
         <div className={styles.notFound}>
           <h1>University Not Found</h1>
           <p>The university you&apos;re looking for doesn&apos;t exist or has been removed.</p>
@@ -153,7 +196,7 @@ export default function UniversityDetailPage() {
     return (
       <main className={styles.main}>
         <AnimatedBackground />
-        <Header savedCount={0} onShowSaved={goHome} onShowScholarships={goHome} />
+        <Header savedCount={savedCount} onShowSaved={goHome} onShowScholarships={goHome} />
         <div className={styles.loading}>Loading...</div>
       </main>
     );
@@ -175,7 +218,7 @@ export default function UniversityDetailPage() {
   return (
     <main className={styles.main}>
       <AnimatedBackground />
-      <Header savedCount={0} onShowSaved={goHome} onShowScholarships={goHome} />
+      <Header savedCount={savedCount} onShowSaved={goHome} onShowScholarships={goHome} />
 
       {/* Quick nav */}
       <nav className={styles.quickNav} aria-label="Page sections">
@@ -857,6 +900,14 @@ export default function UniversityDetailPage() {
         <div className={styles.toast} role="status">
           {toast}
         </div>
+      )}
+
+      {showLoginPrompt && (
+        <LoginPromptModal
+          universityName={uni?.shortName}
+          onContinueAsGuest={handleSaveAsGuest}
+          onDismiss={() => setShowLoginPrompt(false)}
+        />
       )}
     </main>
   );

@@ -126,9 +126,30 @@ const entryTests = [
     }
 ];
 
-export default function EntryTests() {
+export default function EntryTests({ savedUniversities = [] }) {
     const [showAll, setShowAll] = useState(false);
-    const visibleTests = showAll ? entryTests : entryTests.slice(0, 6);
+
+    const savedNames = savedUniversities.map(u => u.shortName || u.name || '');
+
+    const isRelevant = (test) => {
+        if (savedNames.length === 0) return false;
+        return test.acceptedBy.some(accepted => {
+            const lower = accepted.toLowerCase();
+            return savedNames.some(name => {
+                const nameLower = name.toLowerCase();
+                return lower.includes(nameLower) || nameLower.includes(lower) ||
+                    lower.replace(/\s+/g, '').includes(nameLower.replace(/\s+/g, ''));
+            });
+        });
+    };
+
+    const sorted = [...entryTests].sort((a, b) => {
+        const aRelevant = isRelevant(a) ? 1 : 0;
+        const bRelevant = isRelevant(b) ? 1 : 0;
+        return bRelevant - aRelevant;
+    });
+
+    const visibleTests = showAll ? sorted : sorted.slice(0, 6);
 
     return (
         <section className={styles.section}>
@@ -143,12 +164,17 @@ export default function EntryTests() {
             </div>
 
             <div className={styles.testsGrid}>
-                {visibleTests.map(test => (
-                    <div key={test.id} className={styles.testCard}>
+                {visibleTests.map(test => {
+                    const relevant = isRelevant(test);
+                    return (
+                    <div key={test.id} className={`${styles.testCard} ${relevant ? styles.testCardRelevant : ''}`}>
                         <div className={styles.cardTop}>
                             <div className={styles.testIcon}>{test.icon}</div>
                             <div className={styles.testInfo}>
-                                <div className={styles.testName}>{test.name}</div>
+                                <div className={styles.testName}>
+                                    {test.name}
+                                    {relevant && <span className={styles.relevantBadge}>For your saved unis</span>}
+                                </div>
                                 <div className={styles.testConductor}>by {test.conductor}</div>
                             </div>
                         </div>
@@ -162,7 +188,7 @@ export default function EntryTests() {
 
                         <div className={styles.acceptedBy}>
                             {test.acceptedBy.map((uni, i) => (
-                                <span key={i} className={styles.uniTag}>{uni}</span>
+                                <span key={i} className={`${styles.uniTag} ${savedNames.some(n => uni.toLowerCase().includes(n.toLowerCase())) ? styles.uniTagSaved : ''}`}>{uni}</span>
                             ))}
                         </div>
 
@@ -175,7 +201,8 @@ export default function EntryTests() {
                             Apply / Register ↗
                         </a>
                     </div>
-                ))}
+                    );
+                })}
             </div>
 
             {!showAll && entryTests.length > 6 && (

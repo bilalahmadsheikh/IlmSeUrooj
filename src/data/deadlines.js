@@ -45,7 +45,7 @@ const UNIVERSITY_SYSTEMS = {
   'UET': ['uet-lahore', 'uet-taxila'],
 };
 
-function toSlug(shortName) {
+export function toSlug(shortName) {
   return shortName.toLowerCase().replace(/[()&]/g, '').replace(/\s+/g, '-');
 }
 

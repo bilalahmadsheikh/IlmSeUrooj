@@ -19,6 +19,7 @@ import ScrollToTop from '@/components/ScrollToTop/ScrollToTop';
 import SimilarUniversities from '@/components/SimilarUniversities/SimilarUniversities';
 import ScholarshipsPanel from '@/components/ScholarshipsPanel/ScholarshipsPanel';
 import FloatingPanel from '@/components/FloatingPanel/FloatingPanel';
+import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
 import { useProfile } from '@/hooks/useProfile';
 import { IconBookmark, IconArrowRight, IconCelebrate, IconArrowLeft } from '@/components/Icons/Icons';
 import { universities } from '@/data/universities';
@@ -77,6 +78,8 @@ export default function Home() {
   const [toast, setToast] = useState(null);
   const [compareInitialIds, setCompareInitialIds] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [pendingSaveUniversity, setPendingSaveUniversity] = useState(null);
 
   // Saved items: [{ university, savedAt, tag, note }, ...] — order = display order
   const [savedItems, setSavedItems] = useState([]);
@@ -232,6 +235,11 @@ export default function Home() {
   const handleSwipe = useCallback((direction, university) => {
     if (direction === 'right') {
       if (!savedSet.has(university.id)) {
+        if (!isLoggedIn) {
+          setPendingSaveUniversity(university);
+          setShowLoginPrompt(true);
+          return;
+        }
         addSavedWithSync(university);
         showToast(`${university.shortName} saved to your list!`, 'success');
       }
@@ -239,15 +247,28 @@ export default function Home() {
       setSkippedIds(prev => [...prev, university.id]);
     }
     setCurrentIndex(prev => prev + 1);
-  }, [savedSet, addSavedWithSync, showToast]);
+  }, [savedSet, isLoggedIn, addSavedWithSync, showToast]);
 
-  // Handle save from list
+  // Handle save from list — shows login prompt for guests
   const handleSaveFromList = useCallback((university) => {
-    if (!savedSet.has(university.id)) {
-      addSavedWithSync(university);
-      showToast(`${university.shortName} added to saved list`, 'success');
+    if (savedSet.has(university.id)) return;
+    if (!isLoggedIn) {
+      setPendingSaveUniversity(university);
+      setShowLoginPrompt(true);
+      return;
     }
-  }, [savedSet, addSavedWithSync, showToast]);
+    addSavedWithSync(university);
+    showToast(`${university.shortName} added to saved list`, 'success');
+  }, [savedSet, isLoggedIn, addSavedWithSync, showToast]);
+
+  const handleSaveAsGuest = useCallback(() => {
+    if (pendingSaveUniversity && !savedSet.has(pendingSaveUniversity.id)) {
+      addSavedWithSync(pendingSaveUniversity);
+      showToast(`${pendingSaveUniversity.shortName} added to saved list`, 'success');
+    }
+    setPendingSaveUniversity(null);
+    setShowLoginPrompt(false);
+  }, [pendingSaveUniversity, savedSet, addSavedWithSync, showToast]);
 
   // Remove from saved
   const handleRemoveSaved = useCallback(async (id, applicationId) => {
@@ -492,7 +513,7 @@ export default function Home() {
           )}
 
           {/* Admissions Deadlines Section */}
-          <AdmissionsDeadlines currentField={filters.field} />
+          <AdmissionsDeadlines currentField={filters.field} savedIds={savedIds} />
 
           {/* Timeline Strategy CTA */}
           <section className={styles.timelineCta}>
@@ -514,10 +535,10 @@ export default function Home() {
           <UniversityComparison initialSelectedIds={compareInitialIds} onConsumeInitialIds={() => setCompareInitialIds(null)} />
 
           {/* Admission Chance Predictor */}
-          <AdmissionPredictor />
+          <AdmissionPredictor savedIds={savedIds} />
 
           {/* Entry Tests & Cutoffs */}
-          <EntryTests />
+          <EntryTests savedUniversities={savedUniversities} />
         </div>
       )}
 
@@ -542,6 +563,14 @@ export default function Home() {
           message={toast.message}
           type={toast.type}
           onDismiss={() => setToast(null)}
+        />
+      )}
+
+      {showLoginPrompt && (
+        <LoginPromptModal
+          universityName={pendingSaveUniversity?.shortName}
+          onContinueAsGuest={handleSaveAsGuest}
+          onDismiss={() => { setPendingSaveUniversity(null); setShowLoginPrompt(false); }}
         />
       )}
 
