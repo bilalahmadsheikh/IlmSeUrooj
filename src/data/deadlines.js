@@ -90,7 +90,7 @@ function buildEventsFromUniversity(uni) {
         events.push({
           type: "registration_close",
           date: s.deadline,
-          label: `Apply By (${adm.testName || 'NET'} ${s.series})`,
+          label: `Apply By (${s.series})`,
           programs,
         });
       }
@@ -98,7 +98,7 @@ function buildEventsFromUniversity(uni) {
         events.push({
           type: "test_date",
           date: s.testDate,
-          label: `${adm.testName || 'NET'} ${s.series}`,
+          label: s.series,
           programs,
         });
       }

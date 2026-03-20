@@ -725,9 +725,13 @@ export const universities = [
       deadline: "2026-07-23",
       testName: "BUET (Bahria Entry Test)",
       testDate: "2026-06-20",
+      testSeries: [
+        { series: "BUET I",   deadline: null, testDate: "2026-06-20" },
+        { series: "BUET II",   deadline: null, testDate: "2026-07-25" }
+      ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-    lastVerified: "2026-03-21"
-  }
+      lastVerified: "2026-03-21"
+    }
   },
   {
     id: 21,
@@ -755,12 +759,15 @@ export const universities = [
     website: "https://bahria.edu.pk/lahore",
     avgFee: "PKR 85,000 - 145,000 per semester",
     admissions: {
-      deadline: "2026-07-23",
+      deadline: "2026-09-03",
       testName: "BUET (Bahria Entry Test)",
       testDate: "2026-06-20",
+      testSeries: [
+        { series: "BUET",   deadline: null, testDate: "2026-06-20" }
+      ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-    lastVerified: "2026-03-21"
-  }
+      lastVerified: "2026-03-21"
+    }
   },
   {
     id: 22,
@@ -790,10 +797,14 @@ export const universities = [
     website: "https://bahria.edu.pk/karachi",
     avgFee: "PKR 85,000 - 145,000 per semester",
     admissions: {
-      deadline: "2026-06-15",
+      deadline: "2026-06-02",
       testName: "BUET (Bahria Entry Test)",
-      testDate: "2026-07-10",
-      applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx"
+      testDate: "2026-06-04",
+      testSeries: [
+        { series: "BUET",   deadline: null, testDate: "2026-06-04" }
+      ],
+      applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
+      lastVerified: "2026-03-21"
     }
   },
 

@@ -863,13 +863,103 @@ def extract_pieas(page):
         'url': url,
     }
 
-def extract_bahria(page):
+_bahria_cache = None  # None = not yet fetched; False = fetch failed; dict = data
+
+# Each Bahria table starts with a header row containing the campus name.
+_BAHRIA_CAMPUS_MAP = [
+    (r'BUIC|BUHSCI', 'ISB'),
+    (r'BUKC',        'KHI'),
+    (r'BULC',        'LHR'),
+]
+
+def _scrape_bahria_all(page):
+    """Scrape the Bahria admissions page once and return per-campus data dict."""
     url = "https://www.bahria.edu.pk/page/PageTemplate4?pageContentId=5546&WebsiteID=1"
-    html = fetch_with_playwright(page, url, 'body', timeout=10000)
-    if not html: return None
+    html = fetch_with_playwright(page, url, 'body', timeout=15000)
+    if not html:
+        return False
+
     soup = BeautifulSoup(html, 'html.parser')
-    text = soup.get_text(separator=' ', strip=True)
-    return _parse_generic_text(text, url)
+    result = {}
+    today = datetime.today().strftime('%Y-%m-%d')
+
+    for table in soup.find_all('table'):
+        rows = table.find_all('tr')
+        if not rows:
+            continue
+
+        # First row of each table holds the campus name (usually a single merged cell)
+        header_text = rows[0].get_text(separator=' ', strip=True)
+        campus_key = None
+        for pattern, key in _BAHRIA_CAMPUS_MAP:
+            if re.search(pattern, header_text, re.IGNORECASE):
+                campus_key = key
+                break
+        if not campus_key or campus_key in result:
+            continue
+
+        deadline = None
+        test_series = []
+
+        for row in rows[1:]:   # skip the campus-name header row
+            cells = row.find_all(['td', 'th'])
+            if len(cells) < 2:
+                continue
+            event     = cells[0].get_text(separator=' ', strip=True)
+            date_text = cells[1].get_text(separator=' ', strip=True)  # date is col[1], not col[-1]
+
+            if re.search(r'admissions?\s+close|last\s+date.*admission|closing\s+date', event, re.IGNORECASE):
+                dates = _extract_dates_from_text(date_text)
+                if dates:
+                    deadline = dates[0]
+            elif re.search(r'BUET|bahria\s+entry\s+test', event, re.IGNORECASE):
+                series_m = re.search(r'Test[-\s]*([IVXivx]+|\d+)', event, re.IGNORECASE)
+                label = f"BUET {series_m.group(1).upper()}" if series_m else "BUET"
+                dates = _extract_dates_from_text(date_text)
+                if dates:
+                    test_series.append({'series': label, 'deadline': None, 'testDate': dates[0]})
+
+        if not deadline and not test_series:
+            continue
+
+        upcoming = [s for s in test_series if s['testDate'] and s['testDate'] >= today]
+        top_test = (upcoming[0]['testDate'] if upcoming
+                    else (test_series[-1]['testDate'] if test_series else None))
+
+        result[campus_key] = {
+            'deadline':   deadline,
+            'testDate':   top_test,
+            'testSeries': test_series if test_series else None,
+            'testName':   'BUET (Bahria Entry Test)',
+            'method':     f'playwright/bahria-{campus_key.lower()}-table',
+            'url':        url,
+        }
+
+    return result if result else False
+
+def extract_bahria_isb(page):
+    global _bahria_cache
+    if _bahria_cache is None:
+        _bahria_cache = _scrape_bahria_all(page)
+    if not _bahria_cache:
+        return None
+    return _bahria_cache.get('ISB')
+
+def extract_bahria_lhr(page):
+    global _bahria_cache
+    if _bahria_cache is None:
+        _bahria_cache = _scrape_bahria_all(page)
+    if not _bahria_cache:
+        return None
+    return _bahria_cache.get('LHR')
+
+def extract_bahria_khi(page):
+    global _bahria_cache
+    if _bahria_cache is None:
+        _bahria_cache = _scrape_bahria_all(page)
+    if not _bahria_cache:
+        return None
+    return _bahria_cache.get('KHI')
 
 def extract_comsats(page, campus="Islamabad"):
     url = "https://admissions.comsats.edu.pk/Home/Keydates"
@@ -1116,8 +1206,9 @@ def main():
         'Habib': {'extractor': extract_habib, 'sharedKey': None},
         'AKU': {'extractor': extract_aku, 'sharedKey': None},
         'PIEAS': {'extractor': extract_pieas, 'sharedKey': None},
-        'Bahria Isb': {'extractor': extract_bahria, 'sharedKey': 'Bahria'},
-        'Bahria Lhr': {'extractor': extract_bahria, 'sharedKey': 'Bahria'},
+        'Bahria Isb': {'extractor': extract_bahria_isb, 'sharedKey': None},
+        'Bahria Lhr': {'extractor': extract_bahria_lhr, 'sharedKey': None},
+        'Bahria Khi': {'extractor': extract_bahria_khi, 'sharedKey': None},
         'COMSATS Isb': {'extractor': lambda p: extract_comsats(p, "Islamabad"), 'sharedKey': 'COMSATS_Islamabad'},
         'COMSATS Lhr': {'extractor': lambda p: extract_comsats(p, "Lahore"), 'sharedKey': 'COMSATS_Lahore'},
         'COMSATS Wah': {'extractor': lambda p: extract_comsats(p, "Wah"), 'sharedKey': 'COMSATS_Wah'},
