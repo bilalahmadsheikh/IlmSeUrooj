@@ -314,15 +314,16 @@ def extract_nust(page):
                 continue
 
             # Check first cell for a series identifier: "Series - 1", "Series-2", "Series 3", "Series I" etc.
+            # Matches any number or Roman numeral — not capped at IV so Series V+ auto-detected.
             series_match = re.search(
-                r'series\s*[-–]?\s*([1-4]|i{1,3}v?|iv)',
+                r'series\s*[-–]?\s*(\d+|[IVXivx]+)',
                 cells[0], re.IGNORECASE
             )
             if not series_match:
                 continue
 
             key = series_match.group(1).strip().lower()
-            series_label = f"Series {_SERIES_NUM_MAP.get(key, key.upper())}"
+            series_label = f"Series {_SERIES_NUM_MAP.get(key, series_match.group(1).upper())}"
 
             # Column 1 = registration date range → take the LAST date as deadline
             reg_dates = _extract_dates_from_text(cells[1]) if len(cells) > 1 else []
@@ -824,8 +825,9 @@ def extract_pieas(page):
 
     # Use full text — ordinal-specific patterns distinguish UG from MS/MPhil tests.
     # "First Written Test for Undergraduate" is UG-specific (MS section says "Written Test for MS").
-    ORDINALS = ['first', 'second', 'third', 'fourth']
-    ROMAN    = ['I', 'II', 'III', 'IV']
+    # Not capped: scan the page to discover all ordinals actually present.
+    ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth']
+    ROMAN    = ['I', 'II', 'III', 'IV', 'V', 'VI']
     all_series = []
 
     for idx, ordinal in enumerate(ORDINALS):
@@ -998,10 +1000,19 @@ def extract_szabist(page):
     # Find every "Admission Schedule ..." string node in the document
     for node in soup.find_all(string=re.compile(r'Admission\s+Schedule', re.IGNORECASE)):
         parent = node.parent
-        heading_text = parent.get_text(' ', strip=True)
-        # Skip if this node is inside a table cell (not a real heading)
+        # Skip if inside a table cell — not a section heading
         if parent.find_parent('table'):
             continue
+        # Walk up to nearest block-level element so we get the FULL heading text
+        # (e.g. if "Admission Schedule" is in <strong> inside <h2>, we want <h2> text)
+        ancestor = parent
+        for _ in range(6):
+            if ancestor.name in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'li'):
+                break
+            if ancestor.parent is None:
+                break
+            ancestor = ancestor.parent
+        heading_text = ancestor.get_text(' ', strip=True)
         table = parent.find_next('table')
         if table is None or id(table) in seen_tables:
             continue

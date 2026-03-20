@@ -39,7 +39,7 @@ export const universities = [
       testName: "NET",
       testDate: "2026-04-04",
       testSeries: [
-        { series: "Series II",   deadline: "2026-02-01", testDate: "2026-01-31" },
+        { series: "Series II",   deadline: "2026-02-25", testDate: "2026-01-31" },
         { series: "Series III",   deadline: "2026-03-30", testDate: "2026-04-04" },
         { series: "Series I",   deadline: null, testDate: "2025-10-05" },
         { series: "Series IV",   deadline: null, testDate: null }
@@ -830,12 +830,11 @@ export const universities = [
       testName: "Habib Entrance Exam",
       testDate: "2026-04-03",
       testSeries: [
-        { series: "Oct", deadline: "2025-10-21", testDate: "2025-10-28" },
-        { series: "Nov", deadline: "2025-11-20", testDate: "2025-11-27" },
-        { series: "Dec", deadline: "2025-12-22", testDate: "2025-12-29" },
-        { series: "Jan", deadline: "2026-01-22", testDate: "2026-01-27" },
-        { series: "Feb", deadline: "2026-02-20", testDate: "2026-02-23" },
-        { series: "Mar", deadline: "2026-03-31", testDate: "2026-04-03" }
+        { series: "Nov",   deadline: "2025-10-21", testDate: "2025-10-28" },
+        { series: "Dec",   deadline: "2025-11-20", testDate: "2025-11-27" },
+        { series: "Jan",   deadline: "2025-12-22", testDate: "2025-12-29" },
+        { series: "Feb",   deadline: "2026-01-22", testDate: "2026-01-29" },
+        { series: "Mar",   deadline: "2026-02-20", testDate: "2026-02-27" }
       ],
       applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
       lastVerified: "2026-03-21"
@@ -979,8 +978,8 @@ export const universities = [
       testName: "SZABIST Admission Test",
       testDate: "2026-02-14",
       testSeries: [
-        { series: "Spring 2026 BS",  deadline: "2026-01-05", testDate: "2026-01-07" },
-        { series: "Spring 2026 LLB", deadline: "2026-01-27", testDate: "2026-02-02" },
+        { series: "Spring 2026",   deadline: "2026-01-05", testDate: "2026-01-07" },
+        { series: "Spring 2026 LLB",   deadline: "2026-01-27", testDate: "2026-02-02" },
         { series: "Fall 2026 R1",    deadline: "2026-02-12", testDate: "2026-02-14" }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
