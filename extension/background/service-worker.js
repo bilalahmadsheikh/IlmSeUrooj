@@ -210,7 +210,13 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
 async function fetchProfile() {
   const result = await apiRequest('/profile');
   if (result.profile) {
-    await chrome.storage.local.set({ unimatch_profile: result.profile });
+    const update = { unimatch_profile: result.profile };
+    // Sync portal_password as the master password so autofill uses the same password
+    // the user sees on their profile page
+    if (result.profile.portal_password) {
+      update.unimatch_master_password = result.profile.portal_password;
+    }
+    await chrome.storage.local.set(update);
     console.log('[IlmSeUrooj] Profile cached');
   }
   return result;

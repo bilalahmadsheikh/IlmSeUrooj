@@ -168,12 +168,21 @@ export default function ProfilePage() {
             const { data, error } = await supabase
                 .from('profiles').select('*').eq('id', userId).single();
             if (data) {
-                // Generate portal password on first load if missing
+                // Generate portal password on first load if missing, and persist it
                 if (!data.portal_password) {
                     data.portal_password = generatePortalPassword(data.full_name, data.cnic);
+                    // Save to DB so the extension can read it
+                    supabase.from('profiles')
+                        .update({ portal_password: data.portal_password })
+                        .eq('id', userId)
+                        .then(() => {});
                 }
                 if (!data.portal_email) {
                     data.portal_email = data.email || '';
+                    supabase.from('profiles')
+                        .update({ portal_email: data.portal_email })
+                        .eq('id', userId)
+                        .then(() => {});
                 }
                 setProfile(data);
             }
@@ -385,7 +394,10 @@ export default function ProfilePage() {
                     <span> Click to connect your real profile — autofill will use your actual data.</span>
                 </div>
                 <button className="ext-connect-btn" onClick={() => {
-                    const extId = new URLSearchParams(window.location.search).get('ext') || '';
+                    // Try URL param first, then the ID injected by the content script
+                    const extId = new URLSearchParams(window.location.search).get('ext')
+                        || window.__unimatch_ext_id
+                        || '';
                     const url = `/extension-auth${extId ? `?ext=${extId}` : ''}`;
                     window.open(url, '_blank', 'width=480,height=560');
                 }}>Connect Extension →</button>

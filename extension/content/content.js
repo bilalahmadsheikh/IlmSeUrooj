@@ -154,6 +154,14 @@ function profileValueFor(key, profile) {
       return profile.cnic ? profile.cnic.replace(/-/g, '') : undefined;
     case 'phone_with_zero':
       return profile.phone ? TRANSFORMS.phone_pak(profile.phone) : undefined;
+    case 'portal_username':
+      // Generate the login username: CNIC (no dashes) → email prefix → name slug
+      if (profile.cnic) return profile.cnic.replace(/-/g, '');
+      if (profile.portal_email || profile.email) return (profile.portal_email || profile.email).split('@')[0];
+      return (profile.full_name || '').toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+    case 'portal_password':
+      // Resolved separately via getConsistentPassword() — return stored value if present
+      return profile.portal_password || undefined;
     default:
       return undefined;
   }
@@ -175,21 +183,33 @@ function marksToGrade(marks, total) {
 
 const FIELD_HEURISTICS = [
   // ── Email ──────────────────────────────────────────────────────
+  // Covers: standard, ASP.NET (txtEmail, txtEmailAddress), common Pakistani portals
   { match: ['email', 'e-mail', 'e_mail', 'emailaddress', 'email_address', 'email_id', 'emailid',
     'student_email', 'applicant_email', 'user_email', 'contact_email', 'email_contact',
-    'email address', 'your email', 'applicantemail', 'emailid', 'mail_id', 'mailid'],
+    'email address', 'your email', 'applicantemail', 'mail_id', 'mailid',
+    // Pakistani portal variants
+    'email_addr', 'email_input', 'applicant_mail', 'student_mail', 'reg_email',
+    'registration_email', 'primary_email', 'alternate_email', 'alt_email',
+    'personal_email', 'official_email', 'institutional_email',
+    // ASP.NET style (after prefix stripping: txtEmail → email, but keep for label match)
+    'email address *', 'email *', 'your email address'],
     profileKey: 'email', priority: 10 },
 
   // ── CNIC / National ID ─────────────────────────────────────────
   { match: ['cnic', 'nic', 'national_id', 'nationalid', 'id_card', 'idcard', 'cnic_no', 'cnic_number',
     'b_form', 'bform', 'nicop', 'identity_card', 'id_number', 'id_no', 'national_identity',
     'nadra', 'id_card_no', 'nic_number', 'form_b', 'form-b', 'nicno', 'id card', 'cnicno',
-    'national id', 'national identity card', 'cnic/nicop', 'identity_no', 'id_no'],
+    'national id', 'national identity card', 'cnic/nicop', 'identity_no',
+    // Pakistani portal variants
+    'cnic_num', 'nadra_id', 'national_id_card', 'applicant_cnic', 'student_cnic',
+    'applicant_nic', 'father_id_proof', 'cnic_or_nicop', 'nic_no', 'id_proof',
+    'identity_number', 'national_identity_number', 'cnic_nicop', 'applicantcnic',
+    'cnic / b-form', 'cnic / b form', 'b-form', 'bform_no', 'form_b_no'],
     profileKey: 'cnic', priority: 9 },
 
-  // ── CNIC (no dashes) — maps to 'cnic' so Tier 3 transform strips dashes ──
+  // ── CNIC (no dashes) ──────────────────────────────────────────
   { match: ['cnic_no_dash', 'cnicnodash', 'cnic_without_dash', 'cnic_nodash', 'nic_no_dash',
-    'cnic_digits', 'cnic13', 'nadra_no', 'cnicno_dash'],
+    'cnic_digits', 'cnic13', 'nadra_no', 'cnicno_dash', 'cnic_plain', 'cnic_raw'],
     profileKey: 'cnic', priority: 9 },
 
   // ── Phone ──────────────────────────────────────────────────────
@@ -198,52 +218,77 @@ const FIELD_HEURISTICS = [
     'cell_number', 'phone_num', 'mob_num', 'ph_no', 'phno', 'contact_cell',
     'mobile number', 'phone number', 'cell number', 'mobile no', 'phone no',
     'contact mobile', 'applicant_phone', 'student_phone', 'applicant_mobile',
-    'contact_mob', 'mob', 'contact_phone', 'personal_phone', 'personal_mobile'],
+    'contact_mob', 'mob', 'contact_phone', 'personal_phone', 'personal_mobile',
+    // Pakistani portal variants
+    'phone_no', 'mob_number', 'cell_phone', 'applicant_cell', 'student_cell',
+    'home_phone', 'res_phone', 'contact_no_cell', 'mobile_ph', 'phone_mob',
+    'applicant_contact', 'student_contact', 'emergency_contact', 'guardian_phone',
+    'father_phone', 'father_mobile', 'father_cell', 'parent_phone', 'parent_mobile',
+    'alternate_phone', 'alt_phone', 'other_phone', 'secondary_phone',
+    'phone (with country code)', 'mobile (pakistan)', 'cell (pk)'],
     profileKey: 'phone', priority: 8 },
 
   // ── WhatsApp ──────────────────────────────────────────────────
   { match: ['whatsapp', 'whatsapp_no', 'whatsapp_number', 'whatsapp number', 'wp_no',
-    'whatsapp_mob', 'whatsapp_mobile', 'wp_number', 'wapp_no'],
+    'whatsapp_mob', 'whatsapp_mobile', 'wp_number', 'wapp_no', 'whatsapp_cell'],
     profileKey: 'whatsapp', priority: 7 },
 
   // ── First / Last / Middle — MUST be before full_name ──────────
   { match: ['first_name', 'firstname', 'fname', 'f_name', 'given_name', 'givenname',
     'f_nm', 'frst_nm', 'first_nm', 'applicant_fname', 'student_fname', 'sfname',
     'first name', 'given name', 'name1', 'first-name', 'forename', 'fore_name',
-    'name_first', 'applicant_first', 'candidate_first_name'],
+    'name_first', 'applicant_first', 'candidate_first_name',
+    // Pakistani portal variants
+    'first_name_eng', 'fname_en', 'first_name_en', 'applicant_first_name',
+    'student_first_name', 'name_en_first', 'fname_english'],
     profileKey: 'first_name', priority: 11 },
 
   { match: ['last_name', 'lastname', 'lname', 'l_name', 'surname', 'family_name', 'familyname',
     'l_nm', 'lst_nm', 'last_nm', 'applicant_lname', 'slname', 'sur_name', 'surename',
-    'last name', 'family name', 'name2', 'last-name', 'name_last', 'candidate_last_name'],
+    'last name', 'family name', 'name2', 'last-name', 'name_last', 'candidate_last_name',
+    'lname_en', 'last_name_en', 'surname_en', 'applicant_last_name', 'student_last_name'],
     profileKey: 'last_name', priority: 11 },
 
   { match: ['middle_name', 'middlename', 'mname', 'm_name', 'middle_nm', 'mid_name',
-    'middle name', 'middle-name', 'middle_initial', 'mid_nm'],
+    'middle name', 'middle-name', 'middle_initial', 'mid_nm', 'middle_name_en'],
     profileKey: 'middle_name', priority: 11 },
 
   // ── Full Name ──────────────────────────────────────────────────
   { match: ['full_name', 'fullname', 'applicant_name', 'student_name', 'candidatename',
     'candidate_name', 'name_of_applicant', 'name_of_student', 'complete_name', 'full_nm',
     'full name', 'complete name', 'applicant name', 'student name', 'name of applicant',
-    'yourname', 'your_name', 'applicantname', 'name_complete', 'complete_nm'],
+    'yourname', 'your_name', 'applicantname', 'name_complete', 'complete_nm',
+    // Pakistani portal variants
+    'full_name_eng', 'name_en', 'name_english', 'fullname_en', 'applicant_full_name',
+    'student_full_name', 'name_as_on_cnic', 'name_on_cnic', 'name_cnic',
+    'applicant_name_en', 'name_in_english', 'full_name_english',
+    'name_urdu', 'full_name_urdu', 'name_in_urdu',
+    'name_as_matric', 'name_as_per_matric'],
     profileKey: 'full_name', priority: 7 },
 
   // ── Father / Guardian ──────────────────────────────────────────
   { match: ['father', 'father_name', 'fathername', 'fathers_name', 'fathersname', 'father_nm',
     "father's name", 'fathers name', 'dad_name', 'father_first_name',
     'guardian', 'guardian_name', 'parent_name', 'parentname',
-    'wali', 'wali_name', 'father_full_name', 'sarparest'],
+    'wali', 'wali_name', 'father_full_name', 'sarparest',
+    // Pakistani portal variants
+    'father_name_en', 'father_name_urdu', 'fname_father', 'father_nm_en',
+    'father_or_guardian', 'father_guardian_name', 'guardian_father_name',
+    'applicant_father_name', 'student_father_name', 'father_s_name',
+    "father / guardian's name", 'fathers_full_name', 'guardians_name',
+    'parent_guardian_name', 'father_name_as_cnic', 'father_name_on_cnic'],
     profileKey: 'father_name', priority: 7 },
 
   // ── Father CNIC ────────────────────────────────────────────────
   { match: ['father_cnic', 'fathercnic', 'guardian_cnic', 'parent_cnic', 'father_nic',
-    'father_id', 'father_id_card', 'father cnic', "father's cnic", 'dad_cnic', 'fcnic'],
+    'father_id', 'father_id_card', 'father cnic', "father's cnic", 'dad_cnic', 'fcnic',
+    'father_cnic_no', 'guardian_nic', 'wali_cnic', 'father_nadra', 'parent_nic'],
     profileKey: 'father_cnic', priority: 6 },
 
   // ── Mother's Name ──────────────────────────────────────────────
-  { match: ['mother_name', 'mothername', 'mothers_name', "mother's name", 'mom_name', 'mname',
-    'mother', 'mother_full_name'],
+  { match: ['mother_name', 'mothername', 'mothers_name', "mother's name", 'mom_name',
+    'mother', 'mother_full_name', 'mname', 'mother_nm', 'mother_name_en',
+    'applicant_mother_name', 'student_mother_name'],
     profileKey: 'mother_name', priority: 5 },
 
   // ── Date of Birth ──────────────────────────────────────────────
@@ -255,34 +300,49 @@ const FIELD_HEURISTICS = [
     'birth_day', 'birth_month', 'birth_year', 'dob_day', 'dob_month', 'dob_year',
     'day_of_birth', 'month_of_birth', 'year_of_birth',
     'bd_day', 'bd_month', 'bd_year', 'dob_dd', 'dob_mm', 'dob_yyyy',
-    'birth_dd', 'birth_mm', 'birth_yyyy'],
+    'birth_dd', 'birth_mm', 'birth_yyyy',
+    // Pakistani portal variants
+    'date_birth', 'applicant_birth_date', 'student_birth_date', 'dob_applicant',
+    'date_of_birth_dd_mm_yyyy', 'dob_format', 'birth_date_full',
+    'date_of_birth (dd/mm/yyyy)', 'dob (dd/mm/yyyy)'],
     profileKey: 'date_of_birth', priority: 6 },
 
   // ── Gender ──────────────────────────────────────────────────────
   { match: ['gender', 'sex', 'gender_id', 'applicant_gender', 'student_gender', 'male_female',
-    'gender_type', 'applicant_sex', 'gen'],
+    'gender_type', 'applicant_sex', 'gen',
+    'gender_select', 'sex_type', 'gender_code', 'applicant_sex_type'],
     profileKey: 'gender', priority: 5 },
 
   // ── Blood Group ────────────────────────────────────────────────
   { match: ['blood_group', 'bloodgroup', 'blood_type', 'bloodtype', 'blood group', 'blood type',
-    'blood_grp', 'bg'],
+    'blood_grp', 'bg', 'blood_group_type', 'applicant_blood_group', 'student_blood_group'],
     profileKey: 'blood_group', priority: 4 },
 
   // ── City ───────────────────────────────────────────────────────
   { match: ['city', 'town', 'city_name', 'resident_city', 'current_city', 'home_city',
     'city of residence', 'city_residence', 'applicant_city', 'domicile_city',
-    'city_of_residence', 'residence_city', 'student_city'],
+    'city_of_residence', 'residence_city', 'student_city',
+    // Pakistani portal variants
+    'city_id', 'city_code', 'permanent_city', 'perm_city', 'local_city',
+    'domicile_city_name', 'birth_city', 'city_birth', 'mailing_city',
+    'correspondence_city', 'applicant_city_name'],
     profileKey: 'city', priority: 5 },
 
   // ── Province / Domicile ────────────────────────────────────────
   { match: ['province', 'state', 'domicile', 'domicile_province', 'province_name', 'region',
     'home_province', 'applicant_province', 'province of domicile', 'prov',
-    'domicile_prov', 'province_of_domicile', 'residence_province'],
+    'domicile_prov', 'province_of_domicile', 'residence_province',
+    // Pakistani portal variants
+    'province_id', 'province_code', 'domicile_id', 'domicile_code',
+    'prov_name', 'domicile_name', 'permanent_province', 'perm_province',
+    'applicant_domicile', 'student_domicile', 'domicile_certificate',
+    'domicile_prov_name', 'province of origin', 'province_of_origin'],
     profileKey: 'province', priority: 5 },
 
   // ── District ───────────────────────────────────────────────────
   { match: ['district', 'district_name', 'domicile_district', 'home_district', 'tehsil',
-    'zila', 'district_of_domicile', 'dist'],
+    'zila', 'district_of_domicile', 'dist',
+    'district_id', 'domicile_district_name', 'perm_district', 'district_code'],
     profileKey: 'district', priority: 4 },
 
   // ── Address ────────────────────────────────────────────────────
@@ -290,48 +350,76 @@ const FIELD_HEURISTICS = [
     'permanent_address', 'home_address', 'current_address', 'present_address',
     'local_address', 'street_address', 'street', 'addr', 'full_address',
     'correspondence_address', 'home address', 'mailing address', 'residence address',
-    'permanent address', 'perm_address', 'res_address', 'applicant_address'],
+    'permanent address', 'perm_address', 'res_address', 'applicant_address',
+    // Pakistani portal variants
+    'address1', 'address_line1', 'address_line_1', 'address_line2',
+    'permanent_addr', 'perm_addr', 'home_addr', 'local_addr', 'curr_address',
+    'applicant_addr', 'student_address', 'correspondence_addr', 'corr_address',
+    'contact_address', 'resident_address', 'house_address', 'house_no_street'],
     profileKey: 'address', priority: 4 },
 
   // ── Postal Code ────────────────────────────────────────────────
   { match: ['postal_code', 'postalcode', 'zipcode', 'zip', 'zip_code', 'post_code', 'postcode',
-    'area_code', 'pincode', 'pin_code', 'postal code', 'zip code'],
+    'area_code', 'pincode', 'pin_code', 'postal code', 'zip code',
+    'postal_zip', 'zip_postal', 'post_zip', 'area_postal_code'],
     profileKey: 'postal_code', priority: 3 },
 
   // ── Nationality / Religion ─────────────────────────────────────
   { match: ['nationality', 'citizenship', 'country_of_citizenship', 'country', 'citizen',
-    'applicant_nationality', 'national_status'],
+    'applicant_nationality', 'national_status', 'nationality_id', 'citizenship_status',
+    'country_of_origin', 'national_origin'],
     profileKey: 'nationality', priority: 3 },
-  { match: ['religion', 'faith', 'religion_name', 'mazhab', 'deen', 'religious_affiliation'],
+  { match: ['religion', 'faith', 'religion_name', 'mazhab', 'deen', 'religious_affiliation',
+    'religion_id', 'religion_code', 'applicant_religion', 'student_religion'],
     profileKey: 'religion', priority: 3 },
 
   // ── Board ──────────────────────────────────────────────────────
   { match: ['board', 'board_name', 'boardname', 'examination_board', 'exam_board',
     'board_of_inter', 'hssc_board', 'inter_board', 'fsc_board', 'matric_board',
     'ssc_board', 'bise', 'board of intermediate', 'board of education',
-    'board_of_education', 'board_exam', 'inter_board_name'],
+    'board_of_education', 'board_exam', 'inter_board_name',
+    // Pakistani portal variants
+    'board_id', 'board_code', 'bise_board', 'board_inter', 'board_matric',
+    'inter_exam_board', 'ssc_exam_board', 'hssc_exam_board',
+    'board_of_intermediate_education', 'board_of_secondary_education',
+    'matric_board_name', 'inter_board_name', 'bise_name', 'bise_id'],
     profileKey: 'board_name', priority: 4 },
 
   // ── School / College ───────────────────────────────────────────
   { match: ['school', 'college', 'school_name', 'institution', 'school_college', 'college_name',
     'last_institution', 'previous_institution', 'last_school', 'institution_name',
     'last_attended', 'school_attended', 'name of college', 'college attended',
-    'college_name', 'school_college_name', 'intermediate_college', 'fsc_college',
-    'hssc_college', 'last_college', 'attended_school'],
+    'school_college_name', 'intermediate_college', 'fsc_college',
+    'hssc_college', 'last_college', 'attended_school',
+    // Pakistani portal variants
+    'college_id', 'school_id', 'institution_id', 'fsc_institution',
+    'inter_college', 'inter_institution', 'matric_school', 'matric_institution',
+    'college_attended', 'school_last', 'college_last', 'previous_school',
+    'previous_college', 'last_attended_school', 'last_attended_college',
+    'hssc_institution', 'ssc_school', 'ssc_institution',
+    'school_college_attended', 'inst_name', 'instname'],
     profileKey: 'school_name', priority: 4 },
 
   // ── Passing Year ───────────────────────────────────────────────
   { match: ['passing_year', 'passingyear', 'year_of_passing', 'grad_year', 'graduation_year',
     'pass_year', 'year_passed', 'completion_year', 'exam_year', 'inter_year',
     'fsc_year', 'hssc_year', 'year of passing', 'passing year', 'ssc_year',
-    'matric_year', 'year_of_completion', 'passing_yr'],
+    'matric_year', 'year_of_completion', 'passing_yr',
+    // Pakistani portal variants
+    'year_of_pass', 'exam_passing_year', 'fsc_passing_year', 'inter_passing_year',
+    'matric_passing_year', 'ssc_passing_year', 'hssc_passing_year',
+    'year_exam', 'pass_yr', 'year_completion', 'graduation_yr', 'exam_yr'],
     profileKey: 'passing_year', priority: 4 },
 
   // ── Roll Number ────────────────────────────────────────────────
   { match: ['roll_number', 'rollnumber', 'roll_no', 'rollno', 'roll', 'exam_roll',
     'matric_roll', 'inter_roll', 'ssc_roll', 'hssc_roll', 'candidate_roll',
     'board_roll', 'roll_num', 'roll number', 'board roll no', 'roll_no_inter',
-    'inter_roll_no', 'fsc_roll_no', 'hssc_roll_no', 'roll_no_ssc', 'ssc_roll_no'],
+    'inter_roll_no', 'fsc_roll_no', 'hssc_roll_no', 'roll_no_ssc', 'ssc_roll_no',
+    // Pakistani portal variants
+    'roll_no_matric', 'roll_no_fsc', 'examination_roll_no', 'board_roll_no',
+    'matric_roll_no', 'inter_roll_number', 'fsc_roll_number', 'ssc_roll_number',
+    'hssc_roll_number', 'rollno_inter', 'rollno_matric', 'exam_rollno'],
     profileKey: 'roll_number', priority: 5 },
 
   // ── FSc Marks (obtained) ───────────────────────────────────────
@@ -340,26 +428,36 @@ const FIELD_HEURISTICS = [
     'f_sc_marks', 'fsc_obt', 'inter_obt', 'total_marks_inter',
     'marks_obtained_inter', 'hssc_marks_obtained', 'intermarks', 'marks_inter',
     'fsc obtained marks', 'inter obtained', 'hssc obtained', 'marks_intermediate',
-    'hsc_marks', 'hscmarks', 'inter_marks_obtained', 'fsc_total_obtained'],
+    'hsc_marks', 'hscmarks', 'inter_marks_obtained', 'fsc_total_obtained',
+    // Pakistani portal variants
+    'inter_obtained_marks', 'hssc_obtained_marks', 'fsc_obtained_marks',
+    'inter_marks_obt', 'hssc_marks_obt', 'fsc_marks_obt',
+    'class_12_marks', 'grade_12_marks', 'pre_engineering_marks',
+    'pre_medical_marks', 'fa_marks', 'fsc_part_1_2_marks',
+    'inter_part1_part2_marks', 'combined_inter_marks'],
     profileKey: 'fsc_marks', priority: 6 },
 
   // ── FSc Total ──────────────────────────────────────────────────
   { match: ['fsc_total', 'fsctotal', 'hssc_total', 'inter_total', 'total_marks_fsc',
     'total_fsc', 'fsc_max', 'inter_max', 'hssc_max', 'total_inter',
     'inter total marks', 'fsc total', 'hsc_total', 'intermediate_total',
-    'hssc_total_marks', 'fsc_total_marks'],
+    'hssc_total_marks', 'fsc_total_marks',
+    'inter_total_marks', 'fsc_max_marks', 'inter_max_marks', 'hssc_max_marks',
+    'class_12_total', 'grade_12_total', 'fsc_full_marks'],
     profileKey: 'fsc_total', priority: 5 },
 
   // ── FSc Percentage ─────────────────────────────────────────────
   { match: ['fsc_percentage', 'fscpercentage', 'inter_percentage', 'hssc_percentage',
     'fsc_pct', 'inter_pct', 'percentage_fsc', 'hssc_pct', 'intermediate_percentage',
-    'fsc_percent', 'inter_percent'],
+    'fsc_percent', 'inter_percent',
+    'inter_pct_age', 'hssc_pct_age', 'fsc_pct_age', 'intermediate_pct',
+    'class_12_percentage', 'grade_12_percentage', 'inter_score_pct'],
     profileKey: 'fsc_percentage', priority: 5 },
 
   // ── FSc Part-I marks ───────────────────────────────────────────
   { match: ['part1_marks', 'part_1_marks', 'fsc_part1', 'part1_obtained', 'partone_marks',
     'part_i_marks', 'year1_marks', 'part 1 marks', 'part-1 marks', 'part1marks',
-    'part_one_marks', 'yr1_marks'],
+    'part_one_marks', 'yr1_marks', 'inter_part1', 'hssc_part1', 'fsc_part_1'],
     profileKey: 'fsc_part1_marks', priority: 6 },
 
   // ── Matric Marks ───────────────────────────────────────────────
@@ -367,48 +465,65 @@ const FIELD_HEURISTICS = [
     'matric_obt', 'ssc_obt', 'marks_obtained_matric', 'marks_matric',
     'matric_obtained_marks', 'ssc_marks_obtained', 'marks_ssc',
     'matriculation_marks', 'matric obtained', 'ssc obtained marks',
-    'class_10_marks', 'grade_10_marks', 'secondary_marks', 'ssc_obt_marks'],
+    'class_10_marks', 'grade_10_marks', 'secondary_marks', 'ssc_obt_marks',
+    // Pakistani portal variants
+    'matric_obt_marks', 'ssc_obtained_marks', 'matric_marks_obtained',
+    'ssc_marks_obt', 'matriculation_obtained', 'class_9_10_marks',
+    'secondary_school_marks', 'matric_score'],
     profileKey: 'matric_marks', priority: 6 },
 
   // ── Matric Total ───────────────────────────────────────────────
   { match: ['matric_total', 'matrictotal', 'ssc_total', 'total_marks_matric',
     'total_matric', 'matric_max', 'ssc_max', 'total_ssc', 'matriculation_total',
-    'matric total', 'ssc total marks', 'secondary_total', 'class_10_total'],
+    'matric total', 'ssc total marks', 'secondary_total', 'class_10_total',
+    'matric_total_marks', 'ssc_total_marks', 'matric_max_marks', 'ssc_max_marks',
+    'matric_full_marks', 'class_10_total_marks'],
     profileKey: 'matric_total', priority: 5 },
 
   // ── Matric Percentage ──────────────────────────────────────────
   { match: ['matric_percentage', 'matricpercentage', 'ssc_percentage', 'matric_pct',
-    'matric_percent', 'ssc_pct', 'secondary_percentage'],
+    'matric_percent', 'ssc_pct', 'secondary_percentage',
+    'class_10_percentage', 'grade_10_percentage', 'matric_score_pct',
+    'ssc_pct_age', 'matric_pct_age'],
     profileKey: 'matric_percentage', priority: 5 },
 
   // ── NET / NTS Score ────────────────────────────────────────────
   { match: ['net_score', 'net_marks', 'netscore', 'net', 'nts_score', 'nts_marks',
     'entry_test', 'entry_test_score', 'entrance_score', 'entrance_marks', 'admission_test',
     'test_score', 'test_marks', 'merit_score', 'aggregate_score', 'entry_test_marks',
-    'aggregate_marks', 'test_percentile', 'merit_aggregate', 'admission_test_score'],
+    'aggregate_marks', 'test_percentile', 'merit_aggregate', 'admission_test_score',
+    // Pakistani portal variants
+    'nts_marks_obtained', 'net_marks_obtained', 'nts_test_score', 'entry_test_result',
+    'admission_test_marks', 'university_test_score', 'uni_test_score',
+    'hat_score', 'hat_marks', 'lcat_score', 'ncat_score', 'step_score',
+    'paf_test_score', 'navy_test_score', 'army_test_score'],
     profileKey: 'net_score', priority: 5 },
 
   // ── ECAT Score ─────────────────────────────────────────────────
-  { match: ['ecat_score', 'ecat_marks', 'ecat', 'engineering_test', 'enet_score'],
+  { match: ['ecat_score', 'ecat_marks', 'ecat', 'engineering_test', 'enet_score',
+    'ecat_result', 'ecat_marks_obtained', 'engineering_admission_test'],
     profileKey: 'ecat_score', priority: 6 },
 
   // ── MCAT/MDCAT Score ──────────────────────────────────────────
   { match: ['mcat_score', 'mcat', 'mcat_marks', 'mdcat_score', 'mdcat', 'mdcat_marks',
-    'medical_test', 'uhs_score'],
+    'medical_test', 'uhs_score', 'mdcat_result', 'mcat_result', 'uhs_test_score'],
     profileKey: 'net_score', priority: 6 },
 
   // ── SAT Score ─────────────────────────────────────────────────
-  { match: ['sat_score', 'sat', 'sat_marks', 'sat1', 'sat2'],
+  { match: ['sat_score', 'sat', 'sat_marks', 'sat1', 'sat2', 'sat_result', 'sat_total'],
     profileKey: 'sat_score', priority: 6 },
 
   // ── GAT/GRE ───────────────────────────────────────────────────
-  { match: ['gat_score', 'gat', 'gre_score', 'gre', 'gmat_score', 'gmat', 'ielts', 'toefl'],
+  { match: ['gat_score', 'gat', 'gre_score', 'gre', 'gmat_score', 'gmat', 'ielts', 'toefl',
+    'ielts_score', 'toefl_score', 'gat_general', 'gat_subject'],
     profileKey: 'net_score', priority: 4 },
 
   // ── Statement of Purpose ───────────────────────────────────────
   { match: ['statement_of_purpose', 'sop', 'personal_statement', 'essay', 'motivation_letter',
     'statement', 'why_join', 'why_apply', 'about_yourself', 'motivation', 'cover_letter',
-    'statement of purpose', 'personal statement', 'application essay'],
+    'statement of purpose', 'personal statement', 'application essay',
+    'sop_text', 'personal_essay', 'motivation_statement', 'letter_of_intent',
+    'why_this_university', 'why_apply_here'],
     profileKey: 'statement_of_purpose', priority: 3 },
 ];
 
@@ -810,10 +925,21 @@ function detectPageType() {
  * Meets all common constraints: 14+ chars, uppercase, lowercase, number, special.
  */
 async function getConsistentPassword() {
-  const stored = await chrome.storage.local.get('unimatch_master_password');
+  // Priority 1: use portal_password from the user's profile (set in Profile page)
+  const stored = await chrome.storage.local.get(['unimatch_master_password', 'unimatch_profile']);
+  const profilePwd = stored.unimatch_profile?.portal_password;
+  if (profilePwd && profilePwd.length >= 8) {
+    // Keep master password in sync with profile password
+    if (profilePwd !== stored.unimatch_master_password) {
+      await chrome.storage.local.set({ unimatch_master_password: profilePwd });
+    }
+    return profilePwd;
+  }
+
+  // Priority 2: use previously stored master password
   if (stored.unimatch_master_password) return stored.unimatch_master_password;
 
-  // Generate a new strong password that meets all constraints
+  // Priority 3: generate a new strong password
   const password = generateStrongPassword();
   await chrome.storage.local.set({ unimatch_master_password: password });
   return password;
@@ -2742,10 +2868,23 @@ async function handleAutofill() {
         continue;
       }
 
-      // Username / Login ID / User ID fields — fill with CNIC (no dashes) or email
+      // Username / Login ID / User ID fields — fill with CNIC (no dashes) or email prefix
       {
         const sig = buildFieldSignature(input);
-        const isUsernameField = /\b(username|user_?name|login_?id|user_?id|loginid|userid|applicant_?id|student_?id|reg_?no|registration_?no|login_?name)\b/.test(sig);
+        // Also apply ASP.NET prefix stripping to name/id so txtUserName, txtLoginId, etc. match
+        const normName = normalizeSignal(input.name || '');
+        const normId   = normalizeSignal(input.id || '');
+        const normSig  = normName + ' ' + normId + ' ' + sig;
+
+        const USERNAME_PATTERNS = [
+          'username', 'user_name', 'login_id', 'user_id', 'loginid', 'userid',
+          'applicant_id', 'student_id', 'reg_no', 'registration_no', 'login_name',
+          'applicantid', 'studentid', 'regno', 'registrationno', 'loginname',
+          'cnic_login', 'login_cnic', 'login_user', 'user_login',
+          'account_id', 'accountid', 'account_no',
+        ];
+        const isUsernameField = USERNAME_PATTERNS.some(p => normSig.includes(p));
+
         if (isUsernameField) {
           const usernameValue = generatePortalUsername(ctx.profile);
           if (usernameValue) {
@@ -2765,8 +2904,14 @@ async function handleAutofill() {
           continue;
         }
 
-        // Login email field (on login pages: input that looks like an email/login field)
-        const isLoginEmailField = /\b(login|sign_?in_?email|user_?email|account_?email)\b/.test(sig);
+        // Login email field — on login pages, a text/email field that looks like a login field
+        const LOGIN_EMAIL_PATTERNS = [
+          'login_email', 'loginemail', 'sign_in_email', 'user_email', 'account_email',
+          'signin_email', 'login_mail', 'loginmail',
+        ];
+        // Also treat a generic "login" text/email field (without password context) as login email
+        const isLoginEmailField = LOGIN_EMAIL_PATTERNS.some(p => normSig.includes(p))
+          || (normSig.includes('login') && (input.type === 'email' || normSig.includes('email')));
         if (isLoginEmailField) {
           const emailValue = ctx.profile?.portal_email || ctx.profile?.email || '';
           if (emailValue) {
@@ -3630,6 +3775,13 @@ async function setupPasswordVault() {
       data: { portal_password_hint: password },
     });
   });
+}
+
+// ─── Inject Extension ID for site pages ────────────────────────
+// Allows the profile page's "Connect Extension" button to pass the correct
+// extension ID to /extension-auth without needing a URL param.
+if (typeof chrome !== 'undefined' && chrome.runtime?.id) {
+  window.__unimatch_ext_id = chrome.runtime.id;
 }
 
 // ─── Message Listener (for popup + TRIGGER_AUTOFILL) ───────────
