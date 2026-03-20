@@ -1020,28 +1020,171 @@ def extract_bahria_khi(page):
         return None
     return _bahria_cache.get('KHI')
 
-def extract_comsats(page, campus="Islamabad"):
-    url = "https://admissions.comsats.edu.pk/Home/Keydates"
-    html = fetch_with_playwright(page, url, 'table', timeout=10000)
-    if not html: return None
-    soup = BeautifulSoup(html, 'html.parser')
-    
-    text = ""
-    for table in soup.find_all('table'):
-        headers = [th.get_text(separator=' ', strip=True) for th in table.find_all(['th', 'td']) if th.name == 'th' or th.find('strong')]
-        if not headers and table.find('tr'):
-            headers = [td.get_text(separator=' ', strip=True) for td in table.find('tr').find_all(['th', 'td'])]
+_comsats_cache = None  # None = not fetched; False = failed; dict = data
 
-        for row in table.find_all('tr'):
-            if campus.lower() in row.get_text(separator=' ', strip=True).lower():
-                cells = row.find_all(['th', 'td'])
-                for i, cell in enumerate(cells):
-                    header_prefix = headers[i] if i < len(headers) else ""
-                    text += f" {header_prefix} {cell.get_text(separator=' ', strip=True)}"
-    
-    if not text:
-        text = soup.get_text(separator=' ', strip=True)
-    return _parse_generic_text(text, url, 'NTS')
+# Map lowercase campus name from page → internal key
+_COMSATS_CAMPUS_MAP = {
+    'islamabad':  'ISB',
+    'lahore':     'LHR',
+    'wah':        'WAH',
+    'abbottabad': 'ABBOTTABAD',
+    'sahiwal':    'SAHIWAL',
+    'attock':     'ATTOCK',
+    'vehari':     'VEHARI',
+}
+
+def _parse_comsats_date(text):
+    """Parse COMSATS datetime string 'MM/DD/YYYY HH:MM:SS AM/PM' → 'YYYY-MM-DD'."""
+    text = text.strip()
+    m = re.match(r'(\d{1,2})/(\d{1,2})/(\d{4})', text)
+    if m:
+        return parse_date(f"{m.group(1)}/{m.group(2)}/{m.group(3)}")
+    return parse_date(text)
+
+def _scrape_comsats_all(page):
+    """Fetch COMSATS admissions key-dates page once; return per-campus data dict."""
+    url = "https://admissions.comsats.edu.pk/Home/Keydates"
+    html = fetch_with_playwright(page, url, 'table', timeout=20000)
+    if not html:
+        return False
+
+    soup = BeautifulSoup(html, 'html.parser')
+    tables = soup.find_all('table')
+    if len(tables) < 2:
+        return False
+
+    raw = {}   # campus_key -> {'deadline': str|None, 'test_dates': set}
+
+    # ── Table 0: Test Centre Schedule ──────────────────────────────────────
+    # Columns: Campus | Admission Open Date | Admission Close Date
+    for row in tables[0].find_all('tr')[1:]:
+        cells = row.find_all(['td', 'th'])
+        if len(cells) < 3:
+            continue
+        key = _COMSATS_CAMPUS_MAP.get(cells[0].get_text(strip=True).lower())
+        if not key:
+            continue
+        close_date = _parse_comsats_date(cells[2].get_text(strip=True))
+        if close_date:
+            raw.setdefault(key, {'deadline': None, 'test_dates': set()})
+            raw[key]['deadline'] = close_date   # last row for this campus wins (there's only one)
+
+    # ── Table 1: NTS Test Centre Schedule ──────────────────────────────────
+    # Columns: Campus | Test Type | Test Date | Start Time | Test Centre
+    for row in tables[1].find_all('tr')[1:]:
+        cells = row.find_all(['td', 'th'])
+        if len(cells) < 3:
+            continue
+        key = _COMSATS_CAMPUS_MAP.get(cells[0].get_text(strip=True).lower())
+        if not key:
+            continue
+        test_date = _parse_comsats_date(cells[2].get_text(strip=True))
+        if test_date:
+            raw.setdefault(key, {'deadline': None, 'test_dates': set()})
+            raw[key]['test_dates'].add(test_date)
+
+    if not raw:
+        return False
+
+    today = datetime.today().strftime('%Y-%m-%d')
+    result = {}
+
+    for key, data in raw.items():
+        deadline   = data['deadline']
+        test_dates = sorted(data['test_dates'])
+
+        # Detect session label from deadline:
+        #   Jan-Jun → Spring {year}   (e.g. Jan 2026 → Spring 2026)
+        #   Jul-Sep → Fall {year}     (e.g. Aug 2026 → Fall 2026)
+        #   Oct-Dec → Spring {year+1} (e.g. Dec 2025 → Spring 2026)
+        session = None
+        if deadline:
+            dm = re.match(r'(\d{4})-(\d{2})', deadline)
+            if dm:
+                yr, mo = int(dm.group(1)), int(dm.group(2))
+                if mo <= 6:
+                    session = f"Spring {yr}"
+                elif mo <= 9:
+                    session = f"Fall {yr}"
+                else:
+                    session = f"Spring {yr + 1}"
+
+        # Build testSeries — one entry per unique NTS test date
+        test_series = []
+        for i, td in enumerate(test_dates, 1):
+            label = f"{session} T{i}" if session and len(test_dates) > 1 else (session or f"NTS T{i}")
+            test_series.append({'series': label, 'deadline': None, 'testDate': td})
+
+        upcoming_tests = [s for s in test_series if s['testDate'] >= today]
+        top_test = (upcoming_tests[0]['testDate'] if upcoming_tests
+                    else (test_series[-1]['testDate'] if test_series else None))
+
+        result[key] = {
+            'deadline':   deadline,
+            'testDate':   top_test,
+            'testSeries': test_series if len(test_series) > 1 else None,
+            'testName':   'NTS NAT',
+            'method':     f'playwright/comsats-{key.lower()}-table',
+            'url':        url,
+        }
+
+    return result
+
+def extract_comsats_isb(page):
+    global _comsats_cache
+    if _comsats_cache is None:
+        _comsats_cache = _scrape_comsats_all(page)
+    if not _comsats_cache:
+        return None
+    return _comsats_cache.get('ISB')
+
+def extract_comsats_lhr(page):
+    global _comsats_cache
+    if _comsats_cache is None:
+        _comsats_cache = _scrape_comsats_all(page)
+    if not _comsats_cache:
+        return None
+    return _comsats_cache.get('LHR')
+
+def extract_comsats_wah(page):
+    global _comsats_cache
+    if _comsats_cache is None:
+        _comsats_cache = _scrape_comsats_all(page)
+    if not _comsats_cache:
+        return None
+    return _comsats_cache.get('WAH')
+
+def extract_comsats_abbottabad(page):
+    global _comsats_cache
+    if _comsats_cache is None:
+        _comsats_cache = _scrape_comsats_all(page)
+    if not _comsats_cache:
+        return None
+    return _comsats_cache.get('ABBOTTABAD')
+
+def extract_comsats_sahiwal(page):
+    global _comsats_cache
+    if _comsats_cache is None:
+        _comsats_cache = _scrape_comsats_all(page)
+    if not _comsats_cache:
+        return None
+    return _comsats_cache.get('SAHIWAL')
+
+def extract_comsats_attock(page):
+    global _comsats_cache
+    if _comsats_cache is None:
+        _comsats_cache = _scrape_comsats_all(page)
+    if not _comsats_cache:
+        return None
+    return _comsats_cache.get('ATTOCK')
+
+def extract_comsats_vehari(page):
+    global _comsats_cache
+    if _comsats_cache is None:
+        _comsats_cache = _scrape_comsats_all(page)
+    if not _comsats_cache:
+        return None
+    return _comsats_cache.get('VEHARI')
 
 def extract_itu(page):
     url = "https://itu.edu.pk/admissions/"
@@ -1269,10 +1412,13 @@ def main():
         'Bahria Isb': {'extractor': extract_bahria_isb, 'sharedKey': None},
         'Bahria Lhr': {'extractor': extract_bahria_lhr, 'sharedKey': None},
         'Bahria Khi': {'extractor': extract_bahria_khi, 'sharedKey': None},
-        'COMSATS Isb': {'extractor': lambda p: extract_comsats(p, "Islamabad"), 'sharedKey': 'COMSATS_Islamabad'},
-        'COMSATS Lhr': {'extractor': lambda p: extract_comsats(p, "Lahore"), 'sharedKey': 'COMSATS_Lahore'},
-        'COMSATS Wah': {'extractor': lambda p: extract_comsats(p, "Wah"), 'sharedKey': 'COMSATS_Wah'},
-        'COMSATS Abbottabad': {'extractor': lambda p: extract_comsats(p, "Abbottabad"), 'sharedKey': 'COMSATS_Abbottabad'},
+        'COMSATS Isb':        {'extractor': extract_comsats_isb,        'sharedKey': None},
+        'COMSATS Lhr':        {'extractor': extract_comsats_lhr,        'sharedKey': None},
+        'COMSATS Wah':        {'extractor': extract_comsats_wah,        'sharedKey': None},
+        'COMSATS Abbottabad': {'extractor': extract_comsats_abbottabad, 'sharedKey': None},
+        'COMSATS Sahiwal':    {'extractor': extract_comsats_sahiwal,    'sharedKey': None},
+        'COMSATS Attock':     {'extractor': extract_comsats_attock,     'sharedKey': None},
+        'COMSATS Vehari':     {'extractor': extract_comsats_vehari,     'sharedKey': None},
         'ITU': {'extractor': extract_itu, 'sharedKey': None},
         'NED': {'extractor': lambda p: extract_ned_pdf(), 'sharedKey': None},
         'Air': {'extractor': extract_air, 'sharedKey': None},

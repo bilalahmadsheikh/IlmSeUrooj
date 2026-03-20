@@ -124,8 +124,9 @@ export const universities = [
       deadline: "2026-07-04",
       testName: "FAST NU Test",
       testDate: "2026-07-07",
-      applyUrl: "https://admissions.nu.edu.pk"
-    }
+      applyUrl: "https://admissions.nu.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 4,
@@ -156,8 +157,9 @@ export const universities = [
       deadline: "2026-07-04",
       testName: "FAST NU Test",
       testDate: "2026-07-07",
-      applyUrl: "https://admissions.nu.edu.pk"
-    }
+      applyUrl: "https://admissions.nu.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 5,
@@ -252,8 +254,9 @@ export const universities = [
       deadline: "2026-07-04",
       testName: "FAST NU Test",
       testDate: "2026-07-07",
-      applyUrl: "https://admissions.nu.edu.pk"
-    }
+      applyUrl: "https://admissions.nu.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
 
   // === COMSATS Campuses ===
@@ -290,6 +293,10 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
+      testSeries: [
+        { series: "Spring 2026 T1",   deadline: null, testDate: "2025-12-14" },
+        { series: "Spring 2026 T2",   deadline: null, testDate: "2025-12-28" }
+      ],
       applyUrl: "https://admissions.comsats.edu.pk",
     lastVerified: "2026-03-21"
   }
@@ -327,6 +334,12 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
+      testSeries: [
+        { series: "Spring 2026 T1",   deadline: null, testDate: "2025-12-14" },
+        { series: "Spring 2026 T2",   deadline: null, testDate: "2026-01-04" },
+        { series: "Spring 2026 T3",   deadline: null, testDate: "2026-01-21" },
+        { series: "Spring 2026 T4",   deadline: null, testDate: "2026-02-01" }
+      ],
       applyUrl: "https://admissions.comsats.edu.pk",
     lastVerified: "2026-03-21"
   }
@@ -395,6 +408,12 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
+      testSeries: [
+        { series: "Spring 2026 T1",   deadline: null, testDate: "2025-12-28" },
+        { series: "Spring 2026 T2",   deadline: null, testDate: "2026-02-06" },
+        { series: "Spring 2026 T3",   deadline: null, testDate: "2026-02-26" },
+        { series: "Spring 2026 T4",   deadline: null, testDate: "2026-03-10" }
+      ],
       applyUrl: "https://admissions.comsats.edu.pk",
     lastVerified: "2026-03-21"
   }
@@ -432,8 +451,15 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
-    }
+      testSeries: [
+        { series: "Spring 2026 T1",   deadline: null, testDate: "2025-12-21" },
+        { series: "Spring 2026 T2",   deadline: null, testDate: "2026-01-18" },
+        { series: "Spring 2026 T3",   deadline: null, testDate: "2026-01-25" },
+        { series: "Spring 2026 T4",   deadline: null, testDate: "2026-02-09" }
+      ],
+      applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 13,
@@ -468,8 +494,14 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
-    }
+      testSeries: [
+        { series: "Spring 2026 T1",   deadline: null, testDate: "2025-12-21" },
+        { series: "Spring 2026 T2",   deadline: null, testDate: "2026-01-18" },
+        { series: "Spring 2026 T3",   deadline: null, testDate: "2026-01-26" }
+      ],
+      applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 14,
@@ -500,8 +532,13 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
-    }
+      testSeries: [
+        { series: "Spring 2026 T1",   deadline: null, testDate: "2025-12-21" },
+        { series: "Spring 2026 T2",   deadline: null, testDate: "2026-01-18" }
+      ],
+      applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
 
   // === IBA (Single Campus) ===
