@@ -1261,6 +1261,7 @@ def main():
         'FAST Lhr': {'extractor': extract_fast, 'sharedKey': 'FAST'},
         'FAST Khi': {'extractor': extract_fast, 'sharedKey': 'FAST'},
         'FAST Psh': {'extractor': extract_fast, 'sharedKey': 'FAST'},
+        'FAST CFD': {'extractor': extract_fast, 'sharedKey': 'FAST'},
         'LUMS': {'extractor': extract_lums, 'sharedKey': None},
         'Habib': {'extractor': extract_habib, 'sharedKey': None},
         'AKU': {'extractor': extract_aku, 'sharedKey': None},
