@@ -471,26 +471,85 @@ def extract_giki(page):
     return _parse_generic_text(text, url)
 
 def extract_fast(page):
+    """Extract FAST/NU admission deadline and test dates from the schedule table.
+
+    Page: https://nu.edu.pk/Admissions/Schedule
+    Table structure (3 columns):
+      col[0] = Event name, col[1] = UG dates, col[2] = Grad dates
+
+    Date cells have no year and include day-of-week: "May 19 (Mon) - Jul 4 (Fri)".
+    We extract the year from the table header row ("Admission Schedule 2025/2026")
+    and strip (Mon)/(Fri) etc. before parsing.
+
+      deadline = LAST date in "Admission Application Submission" row (end of apply window)
+      testDate = FIRST date in "Admission Tests" row (start of test window)
+    """
     url = "https://nu.edu.pk/Admissions/Schedule"
     html = fetch_with_playwright(page, url, 'table', timeout=15000)
-    if not html: return None
+    if not html:
+        return None
     soup = BeautifulSoup(html, 'html.parser')
-    
-    text = ""
-    for table in soup.find_all('table'):
-        headers = [th.get_text(separator=' ', strip=True) for th in table.find_all(['th', 'td']) if th.name == 'th' or th.find('strong')]
-        if not headers and table.find('tr'):
-            headers = [td.get_text(separator=' ', strip=True) for td in table.find('tr').find_all(['th', 'td'])]
 
-        for row in table.find_all('tr'):
-            cells = row.find_all(['th', 'td'])
-            for i, cell in enumerate(cells):
-                header_prefix = headers[i] if i < len(headers) else ""
-                text += f" {header_prefix} {cell.get_text(separator=' ', strip=True)}"
-                
-    if not text:
-        text = soup.get_text(separator=' ', strip=True)
-    return _parse_generic_text(text, url, 'FAST|NU')
+    def _strip_dow(text):
+        """Remove day-of-week tags like (Mon), (Fri) from date strings."""
+        return re.sub(r'\s*\([A-Za-z]+\)', '', text).strip()
+
+    def _parse_range(raw, year):
+        """Split a date range 'A - B' by hyphen/dash, append year, return parsed list."""
+        parsed = []
+        for part in re.split(r'\s*[-–]\s*', raw):
+            part = part.strip()
+            if not part or part == '-':
+                continue
+            d = parse_date(f"{part} {year}")
+            if d:
+                parsed.append(d)
+        return parsed
+
+    for table in soup.find_all('table'):
+        rows = table.find_all('tr')
+        if not rows:
+            continue
+
+        # Only process the schedule table — header row must mention "Admission Schedule"
+        header_text = rows[0].get_text(separator=' ', strip=True)
+        if not re.search(r'admission\s+schedule', header_text, re.IGNORECASE):
+            continue
+
+        # Extract year from header; fall back to current year + 1 if not found
+        year_m = re.search(r'(20\d{2})', header_text)
+        year = year_m.group(1) if year_m else str(datetime.today().year + 1)
+
+        deadline = None
+        test_date = None
+
+        for row in rows[1:]:
+            cells = row.find_all(['td', 'th'])
+            if len(cells) < 2:
+                continue
+            event    = cells[0].get_text(separator=' ', strip=True)
+            date_raw = _strip_dow(cells[1].get_text(separator=' ', strip=True))
+
+            if re.search(r'admission\s+application\s+submission', event, re.IGNORECASE):
+                dates = _parse_range(date_raw, year)
+                if dates and not deadline:
+                    deadline = dates[-1]   # end of apply window (e.g. Jul 4)
+
+            elif re.search(r'^admission\s+tests?', event, re.IGNORECASE):
+                dates = _parse_range(date_raw, year)
+                if dates and not test_date:
+                    test_date = dates[0]   # start of test window (e.g. Jul 7)
+
+        if deadline or test_date:
+            return {
+                'deadline': deadline,
+                'testDate': test_date,
+                'testName': 'FAST Admission Test',
+                'method':   'playwright/fast-schedule-table',
+                'url':      url,
+            }
+
+    return None
 
 def extract_lums(page):
     """Extract UG application deadline, LCAT test date, and SAT/ACT deadlines from LUMS critical dates page.
