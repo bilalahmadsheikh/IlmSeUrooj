@@ -35,10 +35,17 @@ export const universities = [
     website: "https://nust.edu.pk",
     avgFee: "PKR 170,000 - 202,050 per semester (varies by school)",
     admissions: {
-      deadline: "2026-01-25",
-      testName: "NET Series II",
-      testDate: "2026-01-31",
-      applyUrl: "https://ugadmissions.nust.edu.pk"
+      deadline: "2026-03-30",
+      testName: "NET",
+      testDate: "2026-04-04",
+      testSeries: [
+        { series: "Series II",   deadline: "2026-02-01", testDate: "2026-01-31" },
+        { series: "Series III",   deadline: "2026-03-30", testDate: "2026-04-04" },
+        { series: "Series I",   deadline: null, testDate: "2025-10-05" },
+        { series: "Series IV",   deadline: null, testDate: null }
+      ],
+      applyUrl: "https://ugadmissions.nust.edu.pk",
+      lastVerified: "2026-03-21"
     }
   },
 
@@ -75,7 +82,13 @@ export const universities = [
       deadline: "2026-01-27",
       testName: "LCAT",
       testDate: "2026-02-15",
-      applyUrl: "https://admissions.lums.edu.pk"
+      testSeries: [
+        { series: "LCAT",   deadline: null, testDate: "2026-02-15" },
+        { series: "SAT",   deadline: null, testDate: "2026-03-14" },
+        { series: "ACT",   deadline: null, testDate: "2026-04-11" }
+      ],
+      applyUrl: "https://admissions.lums.edu.pk",
+      lastVerified: "2026-03-21"
     }
   },
 
@@ -277,8 +290,9 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
-    }
+      applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 9,
@@ -313,8 +327,9 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
-    }
+      applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 10,
@@ -345,8 +360,9 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
-    }
+      applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 11,
@@ -379,8 +395,9 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
-      applyUrl: "https://admissions.comsats.edu.pk"
-    }
+      applyUrl: "https://admissions.comsats.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 12,
@@ -515,11 +532,18 @@ export const universities = [
     website: "https://iba.edu.pk",
     avgFee: "PKR 200,000 - 240,000 per semester (Rs. 29,400/CH)",
     admissions: {
-      deadline: "2026-01-21",
+      deadline: "2026-03-25",
       testName: "IBA Aptitude Test",
-      testDate: "2026-02-01",
-      applyUrl: "https://onlineadmission.iba.edu.pk"
-    }
+      testDate: "2026-04-05",
+      testSeries: [
+        { series: "BBA",   deadline: "2026-01-21", testDate: "2026-02-01" },
+        { series: "BS",   deadline: "2026-02-18", testDate: "2026-03-01" },
+        { series: "BSECO",   deadline: "2026-03-25", testDate: "2026-04-05" },
+        { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
+      ],
+      applyUrl: "https://onlineadmission.iba.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
 
   // === UET Campuses ===
@@ -553,8 +577,9 @@ export const universities = [
       deadline: "2026-03-22",
       testName: "ECAT",
       testDate: "2026-03-30",
-      applyUrl: "https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx"
-    }
+      applyUrl: "https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 17,
@@ -618,11 +643,12 @@ export const universities = [
     website: "https://giki.edu.pk",
     avgFee: "PKR 427,500 per semester (tuition + accommodation)",
     admissions: {
-      deadline: "2026-06-16",
+      deadline: "2026-05-15",
       testName: "GIKI Entry Test",
-      testDate: "2026-07-09",
-      applyUrl: "https://giki.edu.pk/admissions"
-    }
+      testDate: "2026-07-06",
+      applyUrl: "https://giki.edu.pk/admissions",
+    lastVerified: "2026-03-21"
+  }
   },
 
   // === PIEAS (Single Campus) ===
@@ -653,11 +679,17 @@ export const universities = [
     website: "https://pieas.edu.pk",
     avgFee: "PKR 63,000 - 100,000 per semester (heavily subsidized)",
     admissions: {
-      deadline: "2026-03-05",
+      deadline: "2026-03-26",
       testName: "PIEAS Written Test",
       testDate: "2026-04-12",
-      applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx"
-    }
+      testSeries: [
+        { series: "Test I",   deadline: "2026-03-26", testDate: "2026-04-12" },
+        { series: "Test II",   deadline: "2026-05-11", testDate: "2026-06-14" },
+        { series: "Test III",   deadline: "2026-06-26", testDate: "2026-07-12" }
+      ],
+      applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
+    lastVerified: "2026-03-21"
+  }
   },
 
   // === Bahria Campuses ===
@@ -690,11 +722,12 @@ export const universities = [
     website: "https://bahria.edu.pk/islamabad",
     avgFee: "PKR 85,000 - 145,000 per semester",
     admissions: {
-      deadline: "2026-06-15",
+      deadline: "2026-07-23",
       testName: "BUET (Bahria Entry Test)",
-      testDate: "2026-07-10",
-      applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx"
-    }
+      testDate: "2026-06-20",
+      applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 21,
@@ -722,11 +755,12 @@ export const universities = [
     website: "https://bahria.edu.pk/lahore",
     avgFee: "PKR 85,000 - 145,000 per semester",
     admissions: {
-      deadline: "2026-06-22",
+      deadline: "2026-07-23",
       testName: "BUET (Bahria Entry Test)",
-      testDate: "2026-07-10",
-      applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx"
-    }
+      testDate: "2026-06-20",
+      applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 22,
@@ -792,10 +826,19 @@ export const universities = [
     website: "https://habib.edu.pk",
     avgFee: "PKR 335,000 - 395,000 per semester (Engineering)",
     admissions: {
-      deadline: "2026-02-19",
+      deadline: "2026-03-31",
       testName: "Habib Entrance Exam",
-      testDate: "2026-02-23",
-      applyUrl: "https://eapplication.habib.edu.pk/login.aspx"
+      testDate: "2026-04-03",
+      testSeries: [
+        { series: "Oct", deadline: "2025-10-21", testDate: "2025-10-28" },
+        { series: "Nov", deadline: "2025-11-20", testDate: "2025-11-27" },
+        { series: "Dec", deadline: "2025-12-22", testDate: "2025-12-29" },
+        { series: "Jan", deadline: "2026-01-22", testDate: "2026-01-27" },
+        { series: "Feb", deadline: "2026-02-20", testDate: "2026-02-23" },
+        { series: "Mar", deadline: "2026-03-31", testDate: "2026-04-03" }
+      ],
+      applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
+      lastVerified: "2026-03-21"
     }
   },
   {
@@ -822,11 +865,17 @@ export const universities = [
     website: "https://aku.edu",
     avgFee: "PKR 927,000 per semester (MBBS, ~PKR 1,854,000/year)",
     admissions: {
-      deadline: "2026-03-15",
+      deadline: "2026-05-13",
       testName: "AKU Entry Test",
-      testDate: "2026-06-15",
-      applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL"
-    }
+      testDate: "2026-07-04",
+      testSeries: [
+        { series: "BSc Arts and Sciences",   deadline: "2025-10-05", testDate: "2026-03-28" },
+        { series: "BEd",   deadline: "2026-02-10", testDate: "2026-03-28" },
+        { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2026-07-04" }
+      ],
+      applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 25,
@@ -858,8 +907,9 @@ export const universities = [
       deadline: "2026-07-15",
       testName: "NED Entry Test",
       testDate: "2026-07-20",
-      applyUrl: "https://www.neduet.edu.pk/admission"
-    }
+      applyUrl: "https://www.neduet.edu.pk/admission",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 26,
@@ -928,7 +978,13 @@ export const universities = [
       deadline: "2026-02-12",
       testName: "SZABIST Admission Test",
       testDate: "2026-02-14",
-      applyUrl: "https://admissions.szabist.edu.pk"
+      testSeries: [
+        { series: "Spring 2026 BS",  deadline: "2026-01-05", testDate: "2026-01-07" },
+        { series: "Spring 2026 LLB", deadline: "2026-01-27", testDate: "2026-02-02" },
+        { series: "Fall 2026 R1",    deadline: "2026-02-12", testDate: "2026-02-14" }
+      ],
+      applyUrl: "https://admissions.szabist.edu.pk",
+      lastVerified: "2026-03-21"
     }
   },
   {
@@ -969,31 +1025,62 @@ export const universities = [
 
 /** Build upcoming deadlines from universities (single source of truth, CI/CD updates universities) */
 function buildUpcomingDeadlines(universitiesList) {
-  const today = new Date().toISOString().slice(0, 10);
-  return universitiesList
-    .filter((u) => u.admissions?.deadline && u.admissions?.applyUrl)
-    .map((u, idx) => {
-      const field = u.fields?.[0] ?? 'General';
-      const progs = u.programs?.[field];
-      const program = Array.isArray(progs) ? progs.slice(0, 2).join(', ') : (field === 'General' ? 'All Programs' : 'Various');
-      const deadlineYear = u.admissions.deadline?.slice(0, 4);
-      const deadlineMonth = parseInt(u.admissions.deadline?.slice(5, 7) || 0, 10);
+  const result = [];
+
+  for (const u of universitiesList) {
+    const adm = u.admissions;
+    if (!adm?.applyUrl) continue;
+
+    const field = u.fields?.[0] ?? 'General';
+    const progs = u.programs?.[field];
+    const program = Array.isArray(progs) ? progs.slice(0, 2).join(', ') : (field === 'General' ? 'All Programs' : 'Various');
+    const lastVerified = adm.lastVerified || '2026-03-01';
+
+    if (adm.testSeries?.length) {
+      // Expand multi-series into separate deadline cards.
+      // series.series is either a round label ("Series III", "Test II") or a
+      // program name ("BBA", "MBBS / BScN") — use it as the program descriptor.
+      adm.testSeries.forEach((s, idx) => {
+        if (!s.deadline) return;
+        const deadlineYear = s.deadline.slice(0, 4);
+        const deadlineMonth = parseInt(s.deadline.slice(5, 7), 10);
+        const session = deadlineMonth >= 1 && deadlineMonth <= 6 ? `Spring ${deadlineYear}` : `Fall ${deadlineYear}`;
+        result.push({
+          id: `${u.id}-s${idx + 1}`,
+          university: u.name,
+          shortName: u.shortName,
+          program: s.series,                          // program label = series name
+          field,
+          deadline: s.deadline,
+          testName: adm.testName || 'Entry Test',    // just the test name, no duplication
+          testDate: s.testDate || s.deadline,
+          session,
+          applyUrl: adm.applyUrl,
+          lastVerified,
+        });
+      });
+    } else {
+      if (!adm.deadline) continue;
+      const deadlineYear = adm.deadline.slice(0, 4);
+      const deadlineMonth = parseInt(adm.deadline.slice(5, 7), 10);
       const session = deadlineMonth >= 1 && deadlineMonth <= 6 ? `Spring ${deadlineYear}` : `Fall ${deadlineYear}`;
-      return {
+      result.push({
         id: u.id,
         university: u.name,
         shortName: u.shortName,
         program,
         field,
-        deadline: u.admissions.deadline,
-        testName: u.admissions.testName || 'Entry Test',
-        testDate: u.admissions.testDate || u.admissions.deadline,
+        deadline: adm.deadline,
+        testName: adm.testName || 'Entry Test',
+        testDate: adm.testDate || adm.deadline,
         session,
-        applyUrl: u.admissions.applyUrl,
-        lastVerified: u.admissions.lastVerified || '2026-03-01',
-      };
-    })
-    .sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''));
+        applyUrl: adm.applyUrl,
+        lastVerified,
+      });
+    }
+  }
+
+  return result.sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''));
 }
 
 // Upcoming admission deadlines — derived from universities (no hardcoding)
@@ -1096,4 +1183,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-03-01";
+export const lastScraperRun = "2026-03-21";

@@ -66,6 +66,7 @@ export function getSystemName(slug) {
 /**
  * Build timeline events from a single university's CI/CD-scraped data.
  * ONLY real data — no estimations.
+ * Supports testSeries[] for multi-round tests (e.g. NUST NET Series I–IV).
  */
 function buildEventsFromUniversity(uni) {
   const events = [];
@@ -73,22 +74,53 @@ function buildEventsFromUniversity(uni) {
   if (!adm) return events;
   const programs = fieldsToPrograms(uni);
 
-  if (adm.deadline) {
-    events.push({
-      type: "registration_close",
-      date: adm.deadline,
-      label: "Apply By",
-      programs,
-    });
-  }
-
-  if (adm.testDate) {
-    events.push({
-      type: "test_date",
-      date: adm.testDate,
-      label: adm.testName || "Entry Test",
-      programs,
-    });
+  if (adm.testSeries?.length) {
+    // If the main deadline isn't already in a series, add it as the shared Apply By
+    if (adm.deadline && !adm.testSeries.some(s => s.deadline === adm.deadline)) {
+      events.push({
+        type: "registration_close",
+        date: adm.deadline,
+        label: "Apply By",
+        programs,
+      });
+    }
+    // Multi-round test (e.g. NET): one event pair per series
+    for (const s of adm.testSeries) {
+      if (s.deadline) {
+        events.push({
+          type: "registration_close",
+          date: s.deadline,
+          label: `Apply By (${adm.testName || 'NET'} ${s.series})`,
+          programs,
+        });
+      }
+      if (s.testDate) {
+        events.push({
+          type: "test_date",
+          date: s.testDate,
+          label: `${adm.testName || 'NET'} ${s.series}`,
+          programs,
+        });
+      }
+    }
+  } else {
+    // Single-round test (most universities)
+    if (adm.deadline) {
+      events.push({
+        type: "registration_close",
+        date: adm.deadline,
+        label: "Apply By",
+        programs,
+      });
+    }
+    if (adm.testDate) {
+      events.push({
+        type: "test_date",
+        date: adm.testDate,
+        label: adm.testName || "Entry Test",
+        programs,
+      });
+    }
   }
 
   return events;
