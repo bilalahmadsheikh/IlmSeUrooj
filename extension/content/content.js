@@ -159,6 +159,9 @@ function profileValueFor(key, profile) {
       if (profile.cnic) return profile.cnic.replace(/-/g, '');
       if (profile.portal_email || profile.email) return (profile.portal_email || profile.email).split('@')[0];
       return (profile.full_name || '').toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+    case 'full_name_as_login':
+      // Used where the "Login" field expects the applicant's full name (e.g. COMSATS signup)
+      return profile.full_name || undefined;
     case 'portal_password':
       // Resolved separately via getConsistentPassword() — return stored value if present
       return profile.portal_password || undefined;
@@ -2173,7 +2176,7 @@ function renderState(container, state, data = {}) {
         : '';
 
       const portalEmail = profile?.portal_email || profile?.email || '';
-      const portalUser = generatePortalUsername(profile);
+      const displayName2 = profile?.full_name || portalEmail || '';
       const regLink = findRegisterLink();
 
       let loginRegisterCard = '';
@@ -2182,7 +2185,7 @@ function renderState(container, state, data = {}) {
           <div class="um-context-card login">
             <div class="um-context-title">🔑 Login Page — Credentials Ready</div>
             <div class="um-cred-box">
-              <div class="um-cred-row"><span class="label">Username/Email:</span><span class="value">${portalEmail || portalUser}</span></div>
+              <div class="um-cred-row"><span class="label">Username/Email:</span><span class="value">${portalEmail}</span></div>
               <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">●●●●●●●● (saved)</span></div>
             </div>
             <button class="um-context-btn" id="unimatch-goto-register">${regLink ? '📝 No account? Create Account →' : '📝 Find Registration Page →'}</button>
@@ -2192,9 +2195,9 @@ function renderState(container, state, data = {}) {
           <div class="um-context-card register">
             <div class="um-context-title">📝 Registration Page — Ready</div>
             <div class="um-cred-box">
+              <div class="um-cred-row"><span class="label">Name:</span><span class="value">${displayName2}</span></div>
               <div class="um-cred-row"><span class="label">Email:</span><span class="value">${portalEmail}</span></div>
-              <div class="um-cred-row"><span class="label">Username:</span><span class="value">${portalUser}</span></div>
-              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">Auto-generated ✓</span></div>
+              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">Portal password ✓</span></div>
             </div>
           </div>`;
       }
@@ -2238,6 +2241,7 @@ function renderState(container, state, data = {}) {
             <button class="btn-secondary" id="unimatch-refresh-profile">🔄 Refresh</button>
             <button class="btn-secondary" id="unimatch-scan">🔍 Scan Fields</button>
           </div>
+          <div id="unimatch-field-stats" style="margin:4px 0"></div>
           <div class="um-btn-grid">
             <button class="btn-secondary" id="unimatch-review-btn">📋 Review</button>
             <button class="btn-secondary" id="unimatch-timeline-btn">📅 Timeline</button>
@@ -2304,18 +2308,22 @@ function renderState(container, state, data = {}) {
       const ctx2 = window.__unimatch;
       const filledProfile = ctx2?.profile;
       const portalEmail2   = filledProfile?.portal_email || filledProfile?.email || '';
-      const portalUser2    = generatePortalUsername(filledProfile);
+      const displayFullName2 = filledProfile?.full_name || portalEmail2 || '';
       const filledPassword = data.password || ctx2?.generatedPassword || '';
 
       // Show credential summary on login/register pages so user knows what was filled
       const credSummary = (pageType === 'login' || pageType === 'register') ? `
         <div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:8px;padding:10px;margin-top:10px;font-size:10px">
           <div style="font-weight:600;color:#4ade80;margin-bottom:6px">📋 ${pageType === 'register' ? 'Account Created With:' : 'Filled Credentials:'}</div>
+          ${pageType === 'register' ? `
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-            <span style="color:#71717a">${pageType === 'register' ? 'Username:' : 'Email/User:'}</span>
-            <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${pageType === 'register' ? portalUser2 : (portalEmail2 || portalUser2)}</span>
+            <span style="color:#71717a">Name:</span>
+            <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${displayFullName2}</span>
+          </div>` : ''}
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="color:#71717a">Email:</span>
+            <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${portalEmail2}</span>
           </div>
-          ${portalEmail2 && pageType === 'register' ? `<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:#71717a">Email:</span><span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${portalEmail2}</span></div>` : ''}
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="color:#71717a">Password:</span>
             <div style="display:flex;gap:4px;align-items:center">

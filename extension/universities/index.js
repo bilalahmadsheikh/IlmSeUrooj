@@ -93,17 +93,16 @@ ALL_UNIVERSITIES.push({
     registerLinkSelectors: 'a[href*="Register"], a[href*="register"], a[href*="signup"], button:contains("Register"), a:contains("New User"), a:contains("Register")',
     portalDomains: ['admissions.comsats.edu.pk'],
     formType: 'requires_login_first',
-    // Login form — COMSATS login uses "User Name" (text field) + password
+    // Login form — COMSATS logs in with email + password
     loginFieldMap: {
-        // "User Name" label: the field accepts registered email or CNIC
-        portal_username: '[name="UserName"], [name="Username"], [name="userName"], [name="Login"], [name="login"], [name="loginId"], [name="LoginId"], #UserName, #Username, #Login, input[placeholder*="ser"], input[placeholder*="sername"], input[placeholder*="login"], input[placeholder*="Login"]',
+        portal_email: '[name="UserName"], [name="Username"], [name="userName"], [name="Email"], [name="email"], [name="Login"], [name="login"], #UserName, #Username, #Email, #Login, input[type="email"], input[placeholder*="ser"], input[placeholder*="login"], input[placeholder*="Login"], input[placeholder*="mail"]',
         portal_password: 'input[type="password"]',
     },
     // Registration form (after clicking Register/New User)
     registerFieldMap: {
         full_name: '[name="Name"], [name="ApplicantName"], [name="FullName"], #Name, #ApplicantName',
-        // "Login" field — the username/login ID chosen during registration
-        portal_username: '[name="Login"], [name="login"], [name="UserName"], [name="Username"], [name="LoginName"], [name="loginName"], #Login, #UserName, #Username, #LoginName, input[placeholder*="login"], input[placeholder*="Login"], input[placeholder*="ser name"]',
+        // "Login" field — filled with applicant's full name as the display/login name
+        full_name_as_login: '[name="Login"], [name="login"], [name="LoginName"], [name="loginName"], #Login, #LoginName, input[placeholder*="login name"], input[placeholder*="Login name"], input[placeholder*="login for"], input[placeholder*="signin"]',
         email: '[name="Email"], [type="email"], #Email',
         portal_password: 'input[type="password"]',
         cnic: '[name="CNIC"], [name="cnic"], #CNIC, [name="NIC"]',

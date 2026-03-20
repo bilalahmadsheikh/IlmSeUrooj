@@ -164,7 +164,7 @@ async function getToken() {
 async function clearToken() {
   await chrome.storage.local.remove([
     'unimatch_token', 'token_expiry', 'unimatch_profile',
-    'unimatch_master_password',
+    'profile_cached_at', 'unimatch_master_password',
   ]);
   console.log('[IlmSeUrooj] Auth data cleared');
 }
@@ -207,17 +207,36 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
   }
 }
 
-async function fetchProfile() {
+// Profile cache TTL: 30 minutes. Avoids hitting Supabase on every autofill/popup open.
+const PROFILE_CACHE_TTL_MS = 30 * 60 * 1000;
+
+async function fetchProfile(forceRefresh = false) {
+  // Serve from cache if fresh enough
+  if (!forceRefresh) {
+    const cached = await chrome.storage.local.get(['unimatch_profile', 'profile_cached_at']);
+    if (cached.unimatch_profile && cached.profile_cached_at) {
+      const age = Date.now() - cached.profile_cached_at;
+      if (age < PROFILE_CACHE_TTL_MS) {
+        console.log(`[IlmSeUrooj] Profile served from cache (${Math.round(age / 1000)}s old)`);
+        return { profile: cached.unimatch_profile };
+      }
+    }
+  }
+
+  // Cache miss or stale — fetch from API
   const result = await apiRequest('/profile');
   if (result.profile) {
-    const update = { unimatch_profile: result.profile };
+    const update = {
+      unimatch_profile: result.profile,
+      profile_cached_at: Date.now(),
+    };
     // Sync portal_password as the master password so autofill uses the same password
     // the user sees on their profile page
     if (result.profile.portal_password) {
       update.unimatch_master_password = result.profile.portal_password;
     }
     await chrome.storage.local.set(update);
-    console.log('[IlmSeUrooj] Profile cached');
+    console.log('[IlmSeUrooj] Profile fetched and cached');
   }
   return result;
 }
@@ -260,13 +279,10 @@ async function handleMessage(message, sender) {
     }
 
     case 'GET_PROFILE':
-      return await fetchProfile();
+      return await fetchProfile(); // uses cache if fresh
 
-    case 'REFRESH_PROFILE': {
-      // Force re-fetch even if cached
-      const result = await fetchProfile();
-      return result;
-    }
+    case 'REFRESH_PROFILE':
+      return await fetchProfile(true); // bypass cache
 
     case 'LOGOUT':
       await clearToken();
