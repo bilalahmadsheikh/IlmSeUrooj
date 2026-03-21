@@ -1187,12 +1187,107 @@ def extract_comsats_vehari(page):
     return _comsats_cache.get('VEHARI')
 
 def extract_itu(page):
+    """Extract ITU UG admission deadline and test date from the schedule table.
+
+    Page: https://itu.edu.pk/admissions/
+    Table: Sr.# | Items | Dates  (3 columns, no year in dates)
+
+    Year is inferred from "Admissions ... 202X" text on page; falls back to
+    current year (or next year if all derived dates are past).
+
+    UG only — Graduate/MS/PhD rows are skipped.
+
+    deadline = "Online Admissions Deadline" row (the common UG+Grad deadline)
+    testDate = FIRST UG test date (section 4 sub-rows — BSEDS/BSM&T or BSCS/etc.)
+    """
     url = "https://itu.edu.pk/admissions/"
-    html = fetch_with_playwright(page, url, 'body', timeout=10000)
-    if not html: return None
+    html = fetch_with_playwright(page, url, 'body', timeout=15000)
+    if not html:
+        return None
     soup = BeautifulSoup(html, 'html.parser')
-    text = soup.get_text(separator=' ', strip=True)
-    return _parse_generic_text(text, url)
+
+    # ── Detect year from page text ───────────────────────────────────────
+    page_text = soup.get_text(separator=' ', strip=True)
+    # Look for "Admissions ... 2026" or any "202X" near admission context
+    year_candidates = re.findall(
+        r'(?:admission|merit|session|batch|fall|spring)\s+(?:\S+\s+)?(?:\S+\s+)?(20\d{2})',
+        page_text, re.IGNORECASE
+    )
+    # Also grab any bare 202X in the page
+    year_candidates += re.findall(r'\b(20[2-9]\d)\b', page_text)
+    today = datetime.today()
+    # Prefer the largest year >= current year
+    valid_years = [int(y) for y in year_candidates if int(y) >= today.year]
+    year = str(max(valid_years)) if valid_years else str(today.year)
+
+    def _parse_itu_date(raw):
+        """Strip day-of-week, parse 'Tuesday, 24th June' with detected year."""
+        # Remove leading day-of-week: "Friday, " or "Saturday "
+        raw = re.sub(r'^[A-Za-z]+(?:,\s*|\s+)', '', raw.strip())
+        # Strip ordinals: "24th" → "24"
+        raw = re.sub(r'\b(\d+)\s*(?:st|nd|rd|th)\b', r'\1', raw)
+        if not raw:
+            return None
+        # Try with detected year first; if that parses to a past date, try year+1
+        for y in [year, str(int(year) + 1)]:
+            d = parse_date(f"{raw} {y}")
+            if d:
+                return d
+        return None
+
+    # ── Parse schedule table ─────────────────────────────────────────────
+    table = soup.find('table')
+    if not table:
+        return None
+
+    deadline    = None
+    ug_test     = None
+    in_ug_section = False
+
+    for row in table.find_all('tr'):
+        cells = row.find_all(['td', 'th'])
+        if len(cells) < 2:
+            continue
+        sr        = cells[0].get_text(strip=True)
+        event     = cells[1].get_text(separator=' ', strip=True)
+        date_raw  = cells[2].get_text(separator=' ', strip=True) if len(cells) > 2 else ''
+
+        # Detect section header: numbered row with empty date
+        if sr.isdigit() and not date_raw:
+            in_ug_section = bool(re.search(r'undergraduate', event, re.IGNORECASE))
+            continue
+
+        # Leave UG section when a new numbered section begins
+        if sr.isdigit() and date_raw:
+            in_ug_section = False   # numbered rows with dates are top-level events
+
+        # Skip graduate-only rows
+        if re.search(r'\b(MS|PhD|EMBA|Graduate|GRE|GAT)\b', event, re.IGNORECASE) \
+                and not re.search(r'undergraduate', event, re.IGNORECASE):
+            continue
+
+        # Online Admissions Deadline (applies to both UG and Grad — use for UG deadline)
+        if re.search(r'online\s+admissions?\s+deadline|application\s+deadline', event, re.IGNORECASE):
+            d = _parse_itu_date(date_raw)
+            if d and not deadline:
+                deadline = d
+
+        # UG test dates (rows inside "ITU Undergraduate Admissions Test" section)
+        elif in_ug_section and date_raw and not re.search(r'upload|SAT|USAT|NAT|ECAT', event, re.IGNORECASE):
+            d = _parse_itu_date(date_raw)
+            if d and not ug_test:
+                ug_test = d   # first UG test date (June 28 for BSEDS, or June 29 for BSCS)
+
+    if not deadline and not ug_test:
+        return None
+
+    return {
+        'deadline': deadline,
+        'testDate': ug_test,
+        'testName': 'ITU Undergraduate Admissions Test',
+        'method':   'playwright/itu-schedule-table',
+        'url':      url,
+    }
 
 def extract_ned(page):
     """Extract NED UG admission deadline and test date.
@@ -1537,7 +1632,7 @@ def main():
     entries = []
     # Each university entry: { id: N, name: "...", shortName: "...", ... admissions: { ... } }
     # We match the full university object up to the closing brace+comma pattern
-    entry_regex = r'\{\s*id:\s*(\d+),\s*name:\s*"([^"]+)",\s*shortName:\s*"([^"]+)"[\s\S]*?(?=\n  \},|\n\])'
+    entry_regex = r'\{\s*id:\s*(\d+),\s*name:\s*"([^"]+)",\s*shortName:\s*"([^"]+)"[\s\S]*?(?=\n  \},|\n\]|$)'
     for match in re.finditer(entry_regex, uni_array_match.group(1)):
         entries.append({
             'id': int(match.group(1)),

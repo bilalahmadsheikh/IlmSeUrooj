@@ -190,8 +190,9 @@ export const universities = [
       deadline: "2026-07-04",
       testName: "FAST NU Test",
       testDate: "2026-07-07",
-      applyUrl: "https://admissions.nu.edu.pk"
-    }
+      applyUrl: "https://admissions.nu.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 6,
@@ -220,8 +221,9 @@ export const universities = [
       deadline: "2026-07-04",
       testName: "FAST NU Test",
       testDate: "2026-07-07",
-      applyUrl: "https://admissions.nu.edu.pk"
-    }
+      applyUrl: "https://admissions.nu.edu.pk",
+    lastVerified: "2026-03-21"
+  }
   },
   {
     id: 7,
@@ -373,6 +375,10 @@ export const universities = [
       deadline: "2026-07-20",
       testName: "NTS NAT",
       testDate: "2026-07-30",
+      testSeries: [
+        { series: "Spring 2026 T1",   deadline: null, testDate: "2025-12-21" },
+        { series: "Spring 2026 T2",   deadline: null, testDate: "2026-01-18" }
+      ],
       applyUrl: "https://admissions.comsats.edu.pk",
     lastVerified: "2026-03-21"
   }
@@ -1028,7 +1034,7 @@ export const universities = [
       testSeries: [
         { series: "Spring 2026",   deadline: "2026-01-05", testDate: "2026-01-07" },
         { series: "Spring 2026 LLB",   deadline: "2026-01-27", testDate: "2026-02-02" },
-        { series: "Fall 2026 R1",    deadline: "2026-02-12", testDate: "2026-02-14" }
+        { series: "Fall 2026 R1 LLB",   deadline: "2026-02-12", testDate: "2026-02-14" }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
       lastVerified: "2026-03-21"
@@ -1062,11 +1068,12 @@ export const universities = [
     website: "https://itu.edu.pk",
     avgFee: "PKR 80,000 - 175,000 per semester (Rs. 6,000/CH)",
     admissions: {
-      deadline: "2026-06-18",
+      deadline: "2026-06-24",
       testName: "ITU Admission Test",
-      testDate: "2026-07-01",
-      applyUrl: "https://itu.edu.pk/admissions"
-    }
+      testDate: "2026-06-28",
+      applyUrl: "https://itu.edu.pk/admissions",
+    lastVerified: "2026-03-21"
+  }
   }
 ];
 
