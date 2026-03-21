@@ -1071,6 +1071,10 @@ export const universities = [
       deadline: "2026-06-24",
       testName: "ITU Admission Test",
       testDate: "2026-06-28",
+      testSeries: [
+        { series: "BSEDS/BSM&T",   deadline: null, testDate: "2026-06-28" },
+        { series: "BSCS/BSAI/BSSE/BSCE/BSEE",   deadline: null, testDate: "2026-06-29" }
+      ],
       applyUrl: "https://itu.edu.pk/admissions",
     lastVerified: "2026-03-21"
   }

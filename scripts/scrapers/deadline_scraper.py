@@ -409,6 +409,7 @@ def extract_uet_taxila(page):
     deadline = None
 
     # Walk every table looking for the schedule — row structure: Sr# | Event | Date | Time
+    page_has_schedule = False
     for table in soup.find_all('table'):
         for row in table.find_all('tr'):
             cells = row.find_all(['td', 'th'])
@@ -417,38 +418,33 @@ def extract_uet_taxila(page):
             event_text = cells[1].get_text(separator=' ', strip=True)
             date_text  = cells[2].get_text(separator=' ', strip=True)
 
-            # Only match the application submission deadline row, not merit list / dues rows
+            # Only match the application submission deadline row
             if re.search(
                 r'last\s+date\s+of\s+online\s+submission'
                 r'|online\s+submission\s+of\s+admission\s+forms',
                 event_text, re.IGNORECASE
             ):
+                page_has_schedule = True
+                # date_text may be "--" (not yet set) — only store if parseable
                 dates = _extract_dates_from_text(date_text)
                 if dates:
                     deadline = dates[0]
-                    break
-        if deadline:
+                else:
+                    logger.info(f"   ℹ️  UET Taxila deadline row found but date not yet published ('{date_text}')")
+                break
+        if page_has_schedule:
             break
 
-    # Fallback: generic parse with a tight keyword so we still avoid merit-list rows
-    if not deadline:
-        text = soup.get_text(separator=' ', strip=True)
-        result = _parse_generic_text(
-            text, url,
-            test_keyword=r'ECAT|entry\s+test|aptitude\s+test'
-        )
-        if result:
-            # Override deadline with only the submission-deadline match to avoid
-            # picking up "Last Date of Depositing Dues"
-            for m in re.finditer(
-                r'online\s+submission\s+of\s+admission|last\s+date\s+of\s+online',
-                text, re.IGNORECASE
-            ):
-                dates = _extract_dates_from_text(text[m.start():m.start() + 200])
-                if dates:
-                    result['deadline'] = dates[0]
-                    break
-            return result
+    # If page loaded and schedule table found but deadline not set yet,
+    # return a valid result so CI shows ✅ page-accessible rather than ❌ failed.
+    # The existing stored deadline is preserved by the skip/update logic.
+    if page_has_schedule and not deadline:
+        return {
+            'deadline': None,
+            'testDate': None,
+            'method': 'playwright/uet-taxila-table',
+            'url': url,
+        }
 
     if not deadline:
         return None
@@ -1187,18 +1183,20 @@ def extract_comsats_vehari(page):
     return _comsats_cache.get('VEHARI')
 
 def extract_itu(page):
-    """Extract ITU UG admission deadline and test date from the schedule table.
+    """Extract ITU UG admission deadline and test dates from the schedule table.
 
     Page: https://itu.edu.pk/admissions/
     Table: Sr.# | Items | Dates  (3 columns, no year in dates)
 
     Year is inferred from "Admissions ... 202X" text on page; falls back to
-    current year (or next year if all derived dates are past).
+    current year >= today.
 
     UG only — Graduate/MS/PhD rows are skipped.
 
-    deadline = "Online Admissions Deadline" row (the common UG+Grad deadline)
-    testDate = FIRST UG test date (section 4 sub-rows — BSEDS/BSM&T or BSCS/etc.)
+    deadline  = "Online Admissions Deadline" row
+    testDate  = FIRST UG test date (BSEDS/BSM&T group: Jun 28)
+    testSeries = all distinct UG test dates, labelled by degree group:
+                 e.g. "BSEDS/BSM&T" (Jun 28), "BSCS/BSAI/etc" (Jun 29)
     """
     url = "https://itu.edu.pk/admissions/"
     html = fetch_with_playwright(page, url, 'body', timeout=15000)
@@ -1208,27 +1206,21 @@ def extract_itu(page):
 
     # ── Detect year from page text ───────────────────────────────────────
     page_text = soup.get_text(separator=' ', strip=True)
-    # Look for "Admissions ... 2026" or any "202X" near admission context
     year_candidates = re.findall(
         r'(?:admission|merit|session|batch|fall|spring)\s+(?:\S+\s+)?(?:\S+\s+)?(20\d{2})',
         page_text, re.IGNORECASE
     )
-    # Also grab any bare 202X in the page
     year_candidates += re.findall(r'\b(20[2-9]\d)\b', page_text)
     today = datetime.today()
-    # Prefer the largest year >= current year
     valid_years = [int(y) for y in year_candidates if int(y) >= today.year]
     year = str(max(valid_years)) if valid_years else str(today.year)
 
     def _parse_itu_date(raw):
-        """Strip day-of-week, parse 'Tuesday, 24th June' with detected year."""
-        # Remove leading day-of-week: "Friday, " or "Saturday "
+        """Strip day-of-week prefix and ordinals, then parse with detected year."""
         raw = re.sub(r'^[A-Za-z]+(?:,\s*|\s+)', '', raw.strip())
-        # Strip ordinals: "24th" → "24"
         raw = re.sub(r'\b(\d+)\s*(?:st|nd|rd|th)\b', r'\1', raw)
         if not raw:
             return None
-        # Try with detected year first; if that parses to a past date, try year+1
         for y in [year, str(int(year) + 1)]:
             d = parse_date(f"{raw} {y}")
             if d:
@@ -1240,53 +1232,65 @@ def extract_itu(page):
     if not table:
         return None
 
-    deadline    = None
-    ug_test     = None
+    deadline      = None
+    ug_test_series = []   # list of {'series': label, 'deadline': None, 'testDate': date}
     in_ug_section = False
 
     for row in table.find_all('tr'):
         cells = row.find_all(['td', 'th'])
         if len(cells) < 2:
             continue
-        sr        = cells[0].get_text(strip=True)
-        event     = cells[1].get_text(separator=' ', strip=True)
-        date_raw  = cells[2].get_text(separator=' ', strip=True) if len(cells) > 2 else ''
+        sr       = cells[0].get_text(strip=True)
+        event    = cells[1].get_text(separator=' ', strip=True)
+        date_raw = cells[2].get_text(separator=' ', strip=True) if len(cells) > 2 else ''
 
-        # Detect section header: numbered row with empty date
+        # Section header row: numbered, empty date
         if sr.isdigit() and not date_raw:
             in_ug_section = bool(re.search(r'undergraduate', event, re.IGNORECASE))
             continue
 
-        # Leave UG section when a new numbered section begins
+        # New numbered section with a date — exit UG section
         if sr.isdigit() and date_raw:
-            in_ug_section = False   # numbered rows with dates are top-level events
+            in_ug_section = False
 
         # Skip graduate-only rows
         if re.search(r'\b(MS|PhD|EMBA|Graduate|GRE|GAT)\b', event, re.IGNORECASE) \
                 and not re.search(r'undergraduate', event, re.IGNORECASE):
             continue
 
-        # Online Admissions Deadline (applies to both UG and Grad — use for UG deadline)
+        # Online Admissions Deadline
         if re.search(r'online\s+admissions?\s+deadline|application\s+deadline', event, re.IGNORECASE):
             d = _parse_itu_date(date_raw)
             if d and not deadline:
                 deadline = d
 
-        # UG test dates (rows inside "ITU Undergraduate Admissions Test" section)
-        elif in_ug_section and date_raw and not re.search(r'upload|SAT|USAT|NAT|ECAT', event, re.IGNORECASE):
+        # UG test sub-rows (inside section 4, skip upload/SAT/ECAT/empty rows)
+        elif in_ug_section and date_raw \
+                and not re.search(r'upload|SAT|USAT|NAT|ECAT|^Test$', event.strip(), re.IGNORECASE):
             d = _parse_itu_date(date_raw)
-            if d and not ug_test:
-                ug_test = d   # first UG test date (June 28 for BSEDS, or June 29 for BSCS)
+            if d:
+                # Build a short degree-group label from the event text
+                # "BSEDS, BSM&T" → "BSEDS/BSM&T", "BSCS, BSAI, BSSE, BSCE and BSEE" → "BSCS/BSAI/etc"
+                label = re.sub(r',\s*', '/', event.strip())
+                label = re.sub(r'\s+and\s+', '/', label, flags=re.IGNORECASE)
+                label = label[:30]   # cap at 30 chars
+                # Avoid duplicate dates
+                if not any(s['testDate'] == d for s in ug_test_series):
+                    ug_test_series.append({'series': label, 'deadline': None, 'testDate': d})
 
-    if not deadline and not ug_test:
+    if not deadline and not ug_test_series:
         return None
 
+    ug_test_series.sort(key=lambda s: s['testDate'] or '9999')
+    top_test = ug_test_series[0]['testDate'] if ug_test_series else None
+
     return {
-        'deadline': deadline,
-        'testDate': ug_test,
-        'testName': 'ITU Undergraduate Admissions Test',
-        'method':   'playwright/itu-schedule-table',
-        'url':      url,
+        'deadline':   deadline,
+        'testDate':   top_test,
+        'testSeries': ug_test_series if len(ug_test_series) > 1 else None,
+        'testName':   'ITU Undergraduate Admissions Test',
+        'method':     'playwright/itu-schedule-table',
+        'url':        url,
     }
 
 def extract_ned(page):
