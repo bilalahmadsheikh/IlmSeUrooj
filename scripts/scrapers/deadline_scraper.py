@@ -1194,10 +1194,60 @@ def extract_itu(page):
     text = soup.get_text(separator=' ', strip=True)
     return _parse_generic_text(text, url)
 
-def extract_ned_pdf():
-    """Try 2026 PDF first, then 2025 as fallback, returning only upcoming dates."""
+def extract_ned(page):
+    """Extract NED UG admission deadline and test date.
+
+    Primary URL: https://www.neduet.edu.pk/key_admission_date  (HTML page)
+    Fallback:    https://www.neduet.edu.pk/sites/default/files/Admissions-{year}/ADMISSION_SCHEDULE_{year}.pdf
+
+    HTML page has a table with event names and dates.  We look for:
+      deadline = "last date" / "closing date" / "application deadline" row
+      testDate = "entry test" / "test date" row
+    If the HTML page yields nothing, falls back to the PDF scraper.
+    """
+    html_url = "https://www.neduet.edu.pk/key_admission_date"
+    html = fetch_with_playwright(page, html_url, 'body', timeout=20000)
+    if html:
+        soup = BeautifulSoup(html, 'html.parser')
+        deadline = None
+        test_date = None
+
+        for table in soup.find_all('table'):
+            for row in table.find_all('tr'):
+                cells = row.find_all(['td', 'th'])
+                if len(cells) < 2:
+                    continue
+                event     = cells[0].get_text(separator=' ', strip=True)
+                date_text = cells[-1].get_text(separator=' ', strip=True)
+
+                if re.search(r'last\s+date|closing\s+date|application\s+deadline|submission\s+of\s+form', event, re.IGNORECASE):
+                    dates = _extract_dates_from_text(date_text)
+                    if dates and not deadline:
+                        deadline = dates[0]
+
+                elif re.search(r'entry\s+test|admission\s+test|test\s+date', event, re.IGNORECASE):
+                    dates = _extract_dates_from_text(date_text)
+                    if dates and not test_date:
+                        test_date = dates[0]
+
+        # Also scan plain text on the page if no tables
+        if not deadline and not test_date:
+            text = soup.get_text(separator=' ', strip=True)
+            result = _parse_generic_text(text, html_url, r'NED|entry.test|last.date')
+            if result:
+                return result
+
+        if deadline or test_date:
+            return {
+                'deadline': deadline,
+                'testDate': test_date,
+                'testName': 'NED Entry Test',
+                'method':   'playwright/ned-keydates-page',
+                'url':      html_url,
+            }
+
+    # Fallback: year-based PDF
     year = datetime.today().year
-    # Try current year first, then fall back to previous year
     for y in [year, year - 1]:
         url = f"https://www.neduet.edu.pk/sites/default/files/Admissions-{y}/ADMISSION_SCHEDULE_{y}.pdf"
         try:
@@ -1211,27 +1261,138 @@ def extract_ned_pdf():
                 return result
         except Exception:
             pass
+
     return None
 
-def extract_air(_page):
-    """Air University: schedule page redirects to homepage — use homepage directly.
 
-    The webdata.au.edu.pk/Pages/Admission/admission_schedule.aspx redirects to
-    the main www.au.edu.pk site.  Use requests (faster than Playwright for this
-    static page) to grab the homepage which has admission announcements.
+def extract_air(page):
+    """Extract Air University UG admission phases from the schedule page.
+
+    Primary:  https://webdata.au.edu.pk/Pages/Admission/admission_schedule.aspx
+    Fallback: https://www.au.edu.pk/ (homepage, which the schedule page redirects to)
+
+    Page structure: table(s) with 2 columns — Event | Date.
+    Phases (Phase-I, Phase-II, …) appear as heading rows or in event names.
+    We build one testSeries entry per phase, UG only.
+
+    Per phase:
+      deadline  = "Application Deadline … (UG Programs)" row
+      testDate  = first "CBT" row date (Computer Based Test)
+    Top-level deadline/testDate = next upcoming phase (or latest if all past).
     """
-    url = "https://www.au.edu.pk"
+    schedule_url = "https://webdata.au.edu.pk/Pages/Admission/admission_schedule.aspx"
+    fallback_url = "https://www.au.edu.pk"
+
+    def _parse_au_html(html, src_url):
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # ── Strategy 1: Phase-aware table parse ──────────────────────────
+        phases = {}       # phase_label → {'deadline': str, 'testDate': str}
+        current_phase = None
+        today = datetime.today().strftime('%Y-%m-%d')
+
+        def _phase_label(text):
+            """Extract 'Phase-I', 'Phase-II', … or 'Fall/Spring YYYY' from text."""
+            pm = re.search(r'phase[-\s]*([IVXivx\d]+)', text, re.IGNORECASE)
+            if pm:
+                return f"Phase-{pm.group(1).upper()}"
+            sm = re.search(r'(Fall|Spring|Summer)\s*[-–]?\s*(\d{4})', text, re.IGNORECASE)
+            if sm:
+                return f"{sm.group(1).capitalize()} {sm.group(2)}"
+            return None
+
+        for table in soup.find_all('table'):
+            for row in table.find_all('tr'):
+                cells = row.find_all(['td', 'th'])
+                if not cells:
+                    continue
+                event = cells[0].get_text(separator=' ', strip=True)
+                date_text = cells[-1].get_text(separator=' ', strip=True) if len(cells) > 1 else ''
+
+                # Detect phase heading row (single cell or no date)
+                phase = _phase_label(event)
+                if phase:
+                    current_phase = phase
+                    if current_phase not in phases:
+                        phases[current_phase] = {'deadline': None, 'testDate': None}
+                    continue
+
+                # Also detect phase from event text itself (e.g. "Application Deadline Phase-II (UG Programs)")
+                inline_phase = _phase_label(event)
+                if inline_phase and inline_phase not in phases:
+                    phases[inline_phase] = {'deadline': None, 'testDate': None}
+                    current_phase = inline_phase
+
+                if not current_phase:
+                    continue
+
+                # Skip MS/PhD-only rows
+                if re.search(r'MS|PhD|Post.?Grad', event, re.IGNORECASE) and not re.search(r'UG|Under', event, re.IGNORECASE):
+                    continue
+
+                if re.search(r'application\s+deadline|last\s+date.*appl', event, re.IGNORECASE):
+                    if re.search(r'UG|Under', event, re.IGNORECASE) or not re.search(r'MS|PhD', event, re.IGNORECASE):
+                        dates = _extract_dates_from_text(date_text)
+                        if dates and not phases[current_phase]['deadline']:
+                            phases[current_phase]['deadline'] = dates[0]
+
+                elif re.search(r'\bCBT\b|Computer.Based.Test', event, re.IGNORECASE):
+                    if not re.search(r'MS|PhD', event, re.IGNORECASE):
+                        dates = _extract_dates_from_text(date_text)
+                        if dates and not phases[current_phase]['testDate']:
+                            phases[current_phase]['testDate'] = dates[0]
+
+        # Build testSeries from phases
+        test_series = []
+        for label, data in phases.items():
+            if data['deadline'] or data['testDate']:
+                test_series.append({
+                    'series':   label,
+                    'deadline': data['deadline'],
+                    'testDate': data['testDate'],
+                })
+
+        if test_series:
+            test_series.sort(key=lambda s: s.get('deadline') or s.get('testDate') or '9999')
+            upcoming = [s for s in test_series
+                        if max(s.get('deadline') or '', s.get('testDate') or '') >= today]
+            top = upcoming[0] if upcoming else test_series[-1]
+            return {
+                'deadline':   top.get('deadline'),
+                'testDate':   top.get('testDate'),
+                'testSeries': test_series if len(test_series) > 1 else None,
+                'testName':   'AU CBT',
+                'method':     f'playwright/air-phases-table',
+                'url':        src_url,
+            }
+
+        # ── Strategy 2: Generic text parse (fallback) ────────────────────
+        text = soup.get_text(separator=' ', strip=True)
+        result = _parse_generic_text(text, src_url, r'CBT|admission\s+test|last\s+date')
+        if result:
+            result['testName'] = 'AU CBT'
+        return result
+
+    # Try schedule page first
+    html = fetch_with_playwright(page, schedule_url, 'body', timeout=15000)
+    if html and len(html) > 5000:           # real content, not a redirect stub
+        result = _parse_au_html(html, schedule_url)
+        if result:
+            return result
+
+    # Fallback to homepage
     try:
         import urllib3; urllib3.disable_warnings()
-        r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, verify=False, timeout=15)
+        r = requests.get(fallback_url, headers={'User-Agent': 'Mozilla/5.0'}, verify=False, timeout=15)
         r.raise_for_status()
         r.encoding = 'utf-8'
-        soup = BeautifulSoup(r.text, 'html.parser')
-        text = soup.get_text(separator=' ', strip=True)
-        return _parse_generic_text(text, url, r'admission.*test|entry.*test|ECAT|last.*date.*admission')
+        result = _parse_au_html(r.text, fallback_url)
+        if result:
+            return result
     except Exception as e:
-        logger.warning(f"   ⚠️  Air University request failed: {str(e)[:60]}")
-        return None
+        logger.warning(f"   ⚠️  Air University fallback failed: {str(e)[:60]}")
+
+    return None
 
 def extract_szabist(page):
     """Extract SZABIST multi-session/multi-round admission schedule.
@@ -1420,7 +1581,7 @@ def main():
         'COMSATS Attock':     {'extractor': extract_comsats_attock,     'sharedKey': None},
         'COMSATS Vehari':     {'extractor': extract_comsats_vehari,     'sharedKey': None},
         'ITU': {'extractor': extract_itu, 'sharedKey': None},
-        'NED': {'extractor': lambda p: extract_ned_pdf(), 'sharedKey': None},
+        'NED': {'extractor': extract_ned, 'sharedKey': None},
         'Air': {'extractor': extract_air, 'sharedKey': None},
         'SZABIST': {'extractor': extract_szabist, 'sharedKey': None},
     }
