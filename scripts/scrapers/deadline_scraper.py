@@ -54,16 +54,8 @@ def extract_iba(page):
     shown separately.
 
     """
-    yr = datetime.today().year
-    url = None
-    html = None
-    for y in [yr, yr - 1]:
-        candidate = f"https://admissions.iba.edu.pk/admission-schedule-fall{y}.php"
-        h = fetch_with_playwright(page, candidate, 'table', timeout=15000)
-        if h and len(h) > 5000:
-            url = candidate
-            html = h
-            break
+    url = "https://admissions.iba.edu.pk/admission-schedule-fall2026.php"
+    html = fetch_with_playwright(page, url, 'table', timeout=15000)
     if not html:
         return None
     soup = BeautifulSoup(html, 'html.parser')
