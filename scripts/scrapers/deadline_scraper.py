@@ -54,7 +54,7 @@ def extract_iba(page):
     shown separately.
 
     """
-    url = "https://admissions.iba.edu.pk/admission-schedule-fall2026.php"
+    url = f"https://admissions.iba.edu.pk/admission-schedule-fall{datetime.today().year}.php"
     html = fetch_with_playwright(page, url, 'table', timeout=15000)
     if not html:
         return None
