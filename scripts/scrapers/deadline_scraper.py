@@ -52,9 +52,38 @@ def extract_iba(page):
     keep Undergraduate columns.  Each unique (deadline, testDate) pair becomes
     one testSeries entry so that rounds and schools with different dates are
     shown separately.
+
+    URL pattern: admission-schedule-{season}{year}.php
+    We try the most likely current/next cycle URLs based on today's date.
     """
-    url = "https://admissions.iba.edu.pk/admission-schedule-fall2026.php"
-    html = fetch_with_playwright(page, url, 'table', timeout=15000)
+    today = datetime.today()
+    yr = today.year
+    # Build candidate URLs: current likely cycle first, then fallbacks
+    # Jan-May  → spring current year first, then fall previous year
+    # Jun-Dec  → fall current year first, then spring current year
+    if today.month <= 5:
+        candidates = [
+            f"https://admissions.iba.edu.pk/admission-schedule-spring{yr}.php",
+            f"https://admissions.iba.edu.pk/admission-schedule-fall{yr - 1}.php",
+            f"https://admissions.iba.edu.pk/admission-schedule-fall{yr}.php",
+        ]
+    else:
+        candidates = [
+            f"https://admissions.iba.edu.pk/admission-schedule-fall{yr}.php",
+            f"https://admissions.iba.edu.pk/admission-schedule-spring{yr + 1}.php",
+            f"https://admissions.iba.edu.pk/admission-schedule-spring{yr}.php",
+        ]
+
+    url = None
+    html = None
+    for candidate in candidates:
+        h = fetch_with_playwright(page, candidate, 'table', timeout=15000)
+        if h and len(h) > 5000:
+            url = candidate
+            html = h
+            logger.info(f"   🔗 IBA URL: {candidate}")
+            break
+
     if not html:
         return None
     soup = BeautifulSoup(html, 'html.parser')
