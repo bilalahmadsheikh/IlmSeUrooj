@@ -154,6 +154,49 @@ function profileValueFor(key, profile) {
       return profile.cnic ? profile.cnic.replace(/-/g, '') : undefined;
     case 'phone_with_zero':
       return profile.phone ? TRANSFORMS.phone_pak(profile.phone) : undefined;
+    // ── Province / District (prefer domicile fields) ──────────
+    case 'province':
+      return profile.province || profile.domicile_province;
+    case 'district':
+      return profile.district || profile.domicile_district;
+    // ── Father / Mother status, income, profession ─────────────
+    case 'father_status':
+      return profile.father_status;
+    case 'mother_status':
+      return profile.mother_status;
+    case 'father_income':
+      return profile.father_income != null ? String(profile.father_income) : undefined;
+    case 'mother_income':
+      return profile.mother_income != null ? String(profile.mother_income) : undefined;
+    case 'father_occupation':
+    case 'father_profession':
+      return profile.father_occupation || profile.father_profession;
+    case 'mother_profession':
+    case 'mother_occupation':
+      return profile.mother_profession || profile.mother_occupation;
+    // ── Split phone components ─────────────────────────────────
+    case 'phone_country_code': {
+      if (profile.phone_country_code) return profile.phone_country_code;
+      return '+92';
+    }
+    case 'phone_area_code': {
+      if (profile.phone_area_code) return profile.phone_area_code;
+      const ph = String(profile.phone || '').replace(/\D/g, '');
+      if (ph.startsWith('92') && ph.length >= 5) return ph.slice(2, 5);
+      if (ph.startsWith('0') && ph.length >= 4) return ph.slice(1, 4);
+      return ph.slice(0, 3) || undefined;
+    }
+    case 'phone_local_number': {
+      if (profile.phone_local_number) return profile.phone_local_number;
+      const ph2 = String(profile.phone || '').replace(/\D/g, '');
+      if (ph2.startsWith('92') && ph2.length > 5) return ph2.slice(5);
+      if (ph2.startsWith('0') && ph2.length > 4) return ph2.slice(4);
+      return ph2.length > 3 ? ph2.slice(3) : undefined;
+    }
+    // ── Education system / Academic background ─────────────────
+    case 'education_system':
+    case 'academic_background':
+      return profile.education_system;
     case 'portal_username':
       // Generate the login username: CNIC (no dashes) → email prefix → name slug
       if (profile.cnic) return profile.cnic.replace(/-/g, '');
@@ -528,6 +571,88 @@ const FIELD_HEURISTICS = [
     'sop_text', 'personal_essay', 'motivation_statement', 'letter_of_intent',
     'why_this_university', 'why_apply_here'],
     profileKey: 'statement_of_purpose', priority: 3 },
+
+  // ── Father Occupation / Profession ────────────────────────────
+  { match: ['father_profession', 'father_occupation', 'fathers_profession', 'fathers_occupation',
+    "father's profession", "father's occupation", 'father_job', 'father_work',
+    'dad_profession', 'dad_occupation', 'father_employment', 'father_business',
+    'guardian_occupation', 'guardian_profession', 'parent_occupation',
+    'father profession', 'father occupation', 'father job',
+    'fathers_employment', 'father_vocation', 'father_trade',
+    // Pakistani portal variants
+    'father_prof', 'father_occ', 'father_emp', 'father_designation',
+    'guardian_job', 'guardian_work', 'wali_occupation', 'wali_profession'],
+    profileKey: 'father_occupation', priority: 7 },
+
+  // ── Father Status (alive / deceased / shaheed) ─────────────────
+  { match: ['father_status', 'father_alive', 'is_father_alive', 'father_living',
+    "father's status", 'father_vital_status', 'father_life_status', 'father_condition',
+    'father status', 'father alive', 'is father alive', 'father living',
+    // Pakistani portal variants
+    'father_state', 'father_condition', 'father_health', 'wali_status'],
+    profileKey: 'father_status', priority: 6 },
+
+  // ── Father Income ─────────────────────────────────────────────
+  { match: ['father_income', 'fathers_income', "father's income", 'father_monthly_income',
+    'father income', 'guardian_income', 'parent_income', 'father_salary',
+    'family_income', 'household_income', 'monthly_income', 'annual_income',
+    // Pakistani portal variants
+    'father_earn', 'wali_income', 'father_earnings', 'guardian_salary',
+    'father_monthly_salary', 'income_father'],
+    profileKey: 'father_income', priority: 5 },
+
+  // ── Mother Profession ──────────────────────────────────────────
+  { match: ['mother_profession', 'mother_occupation', 'mothers_profession', 'mothers_occupation',
+    "mother's profession", "mother's occupation", 'mother_job', 'mother_work',
+    'mom_profession', 'mom_occupation', 'mother_employment', 'mother_business',
+    'mother profession', 'mother occupation', 'mother job',
+    // Pakistani portal variants
+    'mother_prof', 'mother_occ', 'mother_emp', 'mother_vocation'],
+    profileKey: 'mother_profession', priority: 6 },
+
+  // ── Mother Status ─────────────────────────────────────────────
+  { match: ['mother_status', 'mother_alive', 'is_mother_alive', 'mother_living',
+    "mother's status", 'mother_vital_status', 'mother_life_status', 'mother_condition',
+    'mother status', 'mother alive', 'is mother alive', 'mother living',
+    'mother_state', 'mother_health'],
+    profileKey: 'mother_status', priority: 6 },
+
+  // ── Mother Income ─────────────────────────────────────────────
+  { match: ['mother_income', 'mothers_income', "mother's income", 'mother_monthly_income',
+    'mother income', 'mother_salary', 'mother_earnings', 'mother_monthly_salary',
+    'income_mother'],
+    profileKey: 'mother_income', priority: 5 },
+
+  // ── Phone Country Code ────────────────────────────────────────
+  { match: ['country_code', 'phone_country', 'country_code_phone', 'country_calling_code',
+    'intl_code', 'phone_prefix', 'phone_country_code', 'calling_code',
+    'international_code', 'dial_code', 'phone_dial_code', 'country dialing code',
+    'country code', 'phone country code', 'code_phone'],
+    profileKey: 'phone_country_code', priority: 9 },
+
+  // ── Phone Area Code ───────────────────────────────────────────
+  { match: ['area_code', 'std_code', 'operator_code', 'network_code', 'phone_area',
+    'local_exchange', 'city_code', 'exchange_code', 'phone_area_code',
+    'area code', 'network code', 'operator code', 'mobile_code',
+    'network_prefix', 'phone_exchange'],
+    profileKey: 'phone_area_code', priority: 8 },
+
+  // ── Phone Local Number ────────────────────────────────────────
+  { match: ['subscriber_number', 'local_number', 'phone_number_part', 'line_number',
+    'extension_number', 'phone_local', 'phone_subscriber', 'local_phone',
+    'subscriber number', 'local number', 'phone number', 'number_only',
+    'phone_no_number', 'mobile_number_only'],
+    profileKey: 'phone_local_number', priority: 7 },
+
+  // ── Education System / Academic Background ─────────────────────
+  { match: ['education_system', 'academic_background', 'academic_system', 'qualification_type',
+    'education_type', 'schooling_system', 'board_type', 'academic_qualification',
+    'education system', 'academic background', 'qualification type',
+    'previous_education', 'pre_education_type', 'inter_system', 'fsc_or_alevel',
+    // Pakistani portal variants
+    'edu_sys', 'academic_sys', 'study_system', 'education_category',
+    'qualification_category', 'academic_category', 'inter_type_qualification'],
+    profileKey: 'education_system', priority: 6 },
 ];
 
 // Fields that should NEVER be autofilled by heuristics
@@ -1255,6 +1380,13 @@ function fillSelect(el, value) {
       'female': ['f', 'girl', 'woman'],
       'sindh': ['sindh board', 'bsek'],
       'punjab': ['punjab board'],
+      // Education system
+      'cambridge': ['o level', 'a level', 'olevel', 'alevel', 'o/a level', 'o & a level', 'cambridge', 'cambridge system'],
+      'pakistani': ['fsc', 'matric', 'bise', 'intermediate', 'hssc/ssc', 'matric/fsc', 'local board', 'pakistan'],
+      // Father/mother status
+      'alive': ['alive', 'living', 'present', 'yes'],
+      'deceased': ['deceased', 'dead', 'passed', 'no', 'late', 'marhoom'],
+      'shaheed': ['shaheed', 'martyr'],
     };
     for (const [key, alts] of Object.entries(aliases)) {
       if (val === key || alts.some(a => val.includes(a))) {
@@ -1309,15 +1441,45 @@ function levenshtein(a, b) {
 }
 
 function fillRadio(el, value) {
-  const val = String(value).toLowerCase();
+  const val = String(value).toLowerCase().trim();
   // Find all radios with the same name
   const radios = document.querySelectorAll(`input[type="radio"][name="${el.name}"]`);
-  for (const radio of radios) {
-    if (radio.value.toLowerCase() === val ||
-      radio.labels?.[0]?.textContent?.toLowerCase().includes(val)) {
-      radio.checked = true;
-      radio.dispatchEvent(new Event('change', { bubbles: true }));
-      return true;
+
+  // Alias groups — maps profile values to all the strings that might appear in form radio labels/values
+  const RADIO_ALIASES = {
+    'cambridge':  ['cambridge', 'o level', 'a level', 'o_level', 'a_level', 'olevel', 'alevel',
+                   'o-level', 'a-level', 'o/a level', 'o / a level', 'o&a level', 'cambridge system'],
+    'pakistani':  ['fsc', 'matric', 'pakistani', 'fssc', 'bise', 'intermediate', 'intermediate/matric',
+                   'pak', 'pakistan', 'local', 'local board', 'sssc/hssc', 'ssc/hssc', 'matric/fsc'],
+    'male':       ['male', 'm', 'boy'],
+    'female':     ['female', 'f', 'girl', 'woman'],
+    'alive':      ['alive', 'living', 'present', 'yes', 'active'],
+    'deceased':   ['deceased', 'dead', 'passed away', 'late', 'no', 'marhoom', 'not alive'],
+    'shaheed':    ['shaheed', 'martyr', 'شہید'],
+  };
+  const checkValues = [val, ...(RADIO_ALIASES[val] || [])];
+
+  for (const checkVal of checkValues) {
+    for (const radio of radios) {
+      const labelText = (radio.labels?.[0]?.textContent || '').toLowerCase().trim();
+      // Also check TD proximity label
+      const tdLabel = (() => {
+        const cell = radio.closest('td, th');
+        if (!cell) return '';
+        const row = cell.parentElement;
+        if (!row) return '';
+        const nextCell = cell.nextElementSibling;
+        if (nextCell && !nextCell.querySelector('input, select, textarea')) return nextCell.textContent.toLowerCase();
+        return '';
+      })();
+      const radioVal = radio.value.toLowerCase().trim();
+      const combined = labelText + ' ' + tdLabel + ' ' + radioVal;
+
+      if (radioVal === checkVal || combined.includes(checkVal)) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
+      }
     }
   }
   return false;
@@ -1621,11 +1783,27 @@ async function tryThreePartSelects(container, day, month, year) {
   let daySel = null, monthSel = null, yearSel = null;
 
   // First pass: name/id/class heuristics (handles dob_day, dob_month, dob_year patterns)
+  // Also handles ASP.NET prefix-stripped names (ddlDOBDay → dobday after stripping ddl)
   for (const s of selects) {
-    const sig = (s.name + ' ' + s.id + ' ' + (s.className || '')).toLowerCase();
-    if (/(^|_|-)day($|_|-)|^dd$|_dd$/.test(sig) && !daySel) { daySel = s; continue; }
-    if (/(^|_|-)month($|_|-)|^mm$|_mm$/.test(sig) && !monthSel) { monthSel = s; continue; }
-    if (/(^|_|-)year($|_|-)|^yy$|_yy$|yyyy/.test(sig) && !yearSel) { yearSel = s; continue; }
+    const rawSig = (s.name + ' ' + s.id + ' ' + (s.className || '')).toLowerCase();
+    // Strip ASP.NET prefixes (ddl, txt, etc.) for additional matching
+    const strippedSig = rawSig.replace(/\b(ddl|txt|lbl|ctl|drp|sel|cmb)/g, '');
+    const sig = rawSig + ' ' + strippedSig;
+    // Also check adjacent TD label for day/month/year hint
+    const tdLabel = (() => {
+      const cell = s.closest('td, th');
+      if (!cell) return '';
+      const row = cell.parentElement;
+      if (!row) return '';
+      const prevCell = Array.from(row.children).find(c => {
+        const i = Array.from(row.children).indexOf(cell);
+        return Array.from(row.children).indexOf(c) === i - 1 && !c.querySelector('input,select,textarea');
+      });
+      return (prevCell?.textContent || '').toLowerCase();
+    })();
+    if (!daySel && (/(^|_|-)day($|_|-)|^dd$|_dd$|\bday\b|\bdin\b/.test(sig) || /\bday\b/.test(tdLabel))) { daySel = s; continue; }
+    if (!monthSel && (/(^|_|-)month($|_|-)|^mm$|_mm$|\bmonth\b/.test(sig) || /\bmonth\b|\bmah\b/.test(tdLabel))) { monthSel = s; continue; }
+    if (!yearSel && (/(^|_|-)year($|_|-)|^yy$|_yy$|yyyy|\byear\b/.test(sig) || /\byear\b|\bsaal\b/.test(tdLabel))) { yearSel = s; continue; }
   }
 
   // Second pass: guess by option count if name heuristics failed
@@ -2812,16 +2990,8 @@ async function handleAutofill() {
           if (el.tagName === 'SELECT') {
             filled = fillSelectWithMapping(el, value, uniConfig.selectOptions?.[profileKey]);
           } else if (el.type === 'radio') {
-            const radioName = el.name;
-            if (radioName) {
-              document.querySelectorAll(`[name="${radioName}"]`).forEach(r => {
-                if (r.value.toLowerCase() === String(value).toLowerCase()) {
-                  r.checked = true;
-                  r.dispatchEvent(new Event('change', { bubbles: true }));
-                  filled = true;
-                }
-              });
-            }
+            // Use enhanced fillRadio (handles aliases for education_system, gender, status etc.)
+            filled = fillRadio(el, String(value));
           } else if (profileKey === 'date_of_birth') {
             filled = await fillDateAdvanced(el, String(value));
           } else {
@@ -2937,16 +3107,19 @@ async function handleAutofill() {
     // ─── TIER 2.5: Explicit three-part date group scan ─────────
     // Guaranteed fill for .date-group containers regardless of name heuristics
     if (ctx.profile.date_of_birth) {
-      const dateGrps = document.querySelectorAll(
-        '.date-group, .dob-group, [class*="date-group"], [class*="dob-group"],' +
-        '[class*="date-field"], [class*="dob-field"], [class*="birth-date"]'
-      );
-      for (const grp of dateGrps) {
-        const grpSelects = grp.querySelectorAll('select');
-        if (grpSelects.length >= 2) {
-          const dDate = new Date(ctx.profile.date_of_birth + 'T00:00:00');
-          if (!isNaN(dDate.getTime())) {
-            const grpFilled = await tryThreePartSelects(grp, dDate.getDate(), dDate.getMonth() + 1, dDate.getFullYear());
+      const dDate = new Date(ctx.profile.date_of_birth + 'T00:00:00');
+      if (!isNaN(dDate.getTime())) {
+        const dobDay = dDate.getDate(), dobMonth = dDate.getMonth() + 1, dobYear = dDate.getFullYear();
+
+        // A. CSS class-based containers (modern forms)
+        const dateGrps = document.querySelectorAll(
+          '.date-group, .dob-group, [class*="date-group"], [class*="dob-group"],' +
+          '[class*="date-field"], [class*="dob-field"], [class*="birth-date"]'
+        );
+        for (const grp of dateGrps) {
+          const grpSelects = Array.from(grp.querySelectorAll('select')).filter(s => !alreadyHandled.has(s));
+          if (grpSelects.length >= 2) {
+            const grpFilled = await tryThreePartSelects(grp, dobDay, dobMonth, dobYear);
             if (grpFilled) {
               grpSelects.forEach(s => {
                 alreadyHandled.add(s);
@@ -2958,6 +3131,89 @@ async function handleAutofill() {
               filledCount += grpSelects.length;
             }
           }
+        }
+
+        // B. Table row scan — covers ASP.NET WebForms like NUST
+        // Finds any <tr> whose cells have a DOB label and contains 2+ selects
+        const DOB_LABEL_PATTERN = /date.*birth|d[\s.]?o[\s.]?b|birth.*date|تاریخ.*پیدائش/i;
+        for (const tr of document.querySelectorAll('tr')) {
+          // Skip if DOB selects in this row are already handled
+          const trSelects = Array.from(tr.querySelectorAll('select')).filter(s => !alreadyHandled.has(s));
+          if (trSelects.length < 2) continue;
+          // Check if any cell in this row carries a DOB label
+          const hasDOBLabel = Array.from(tr.children).some(cell => {
+            const t = cell.textContent;
+            return DOB_LABEL_PATTERN.test(t) && !cell.querySelector('input, select, textarea');
+          });
+          if (!hasDOBLabel) continue;
+          const trFilled = await tryThreePartSelects(tr, dobDay, dobMonth, dobYear);
+          if (trFilled) {
+            trSelects.forEach(s => {
+              alreadyHandled.add(s);
+              s.style.outline = '2px solid #4ade80';
+              s.style.outlineOffset = '2px';
+              s.classList.add('unimatch-filled');
+              sparkleField(s);
+            });
+            filledCount += trSelects.length;
+          }
+        }
+      }
+    }
+
+    // ─── TIER 2.6: Split phone group scan ─────────────────────
+    // Detects table rows / containers where a phone label is adjacent to 2-3 short inputs
+    // (country code + area code + local number pattern used by ASP.NET portals)
+    if (ctx.profile.phone) {
+      const phoneStr = String(ctx.profile.phone || '').replace(/\D/g, '');
+      if (phoneStr.length >= 7) {
+        // Compute split parts
+        let countryCode = '+92', areaCode = '', localNum = '';
+        if (phoneStr.startsWith('92') && phoneStr.length >= 5) {
+          areaCode  = phoneStr.slice(2, 5);
+          localNum  = phoneStr.slice(5);
+        } else if (phoneStr.startsWith('0') && phoneStr.length >= 4) {
+          areaCode  = phoneStr.slice(1, 4);
+          localNum  = phoneStr.slice(4);
+        } else {
+          areaCode  = phoneStr.slice(0, 3);
+          localNum  = phoneStr.slice(3);
+        }
+
+        const PHONE_LABEL_PATTERN = /phone|mobile|cell|تele|mob|contact.*no|موبائل|فون/i;
+        for (const tr of document.querySelectorAll('tr')) {
+          const tInputs = Array.from(tr.querySelectorAll('input[type="text"], input[type="tel"], input:not([type])'))
+            .filter(i => !alreadyHandled.has(i));
+          if (tInputs.length < 2) continue;
+          // Row must have a phone-related label cell
+          const hasPhoneLabel = Array.from(tr.children).some(cell => {
+            const t = cell.textContent;
+            return PHONE_LABEL_PATTERN.test(t) && !cell.querySelector('input, select, textarea');
+          });
+          if (!hasPhoneLabel) continue;
+
+          // Assign by maxlength or position
+          // Typical pattern: [country_code(2-4)] [area(3-4)] [number(6-8)]
+          // or just [area(4)] [number(7)]
+          let ccInp = null, areaInp = null, numInp = null;
+          for (const inp of tInputs) {
+            const ml = inp.maxLength || 0;
+            const sig = (inp.name + ' ' + inp.id).toLowerCase();
+            if (!ccInp && (ml > 0 && ml <= 4 || /country|code|prefix|intl/.test(sig))) { ccInp = inp; continue; }
+            if (!areaInp && (ml > 0 && ml <= 5 || /area|exchange|operator|network/.test(sig))) { areaInp = inp; continue; }
+            if (!numInp) { numInp = inp; }
+          }
+          // If only 2 inputs found, treat as area + number (no country code field)
+          if (tInputs.length === 2 && !numInp) {
+            areaInp = tInputs[0];
+            numInp  = tInputs[1];
+            ccInp   = null;
+          }
+
+          let phoneSplitFilled = false;
+          if (ccInp) { const ok = await fillInput(ccInp, countryCode); if (ok) { alreadyHandled.add(ccInp); ccInp.style.outline = '2px solid #4ade80'; ccInp.classList.add('unimatch-filled'); sparkleField(ccInp); filledCount++; phoneSplitFilled = true; } }
+          if (areaInp) { const ok = await fillInput(areaInp, areaCode); if (ok) { alreadyHandled.add(areaInp); areaInp.style.outline = '2px solid #4ade80'; areaInp.classList.add('unimatch-filled'); sparkleField(areaInp); filledCount++; phoneSplitFilled = true; } }
+          if (numInp) { const ok = await fillInput(numInp, localNum); if (ok) { alreadyHandled.add(numInp); numInp.style.outline = '2px solid #4ade80'; numInp.classList.add('unimatch-filled'); sparkleField(numInp); filledCount++; phoneSplitFilled = true; } }
         }
       }
     }

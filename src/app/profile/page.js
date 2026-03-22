@@ -254,6 +254,7 @@ export default function ProfilePage() {
                 'fsc_year', 'matric_year', 'passing_year', 'net_year',
                 'fsc_part1_marks', 'fsc_part1_total', 'fsc_projected_marks',
                 'sat_score', 'sat_subject_score', 'profile_completion',
+                'father_income', 'mother_income',
             ];
             for (const key of numericFields) {
                 if (payload[key] !== undefined && payload[key] !== null && payload[key] !== '') {
@@ -700,7 +701,14 @@ export default function ProfilePage() {
             <SectionCard title="Family Information" icon="👪">
                 <div className="field-grid">
                     <Field label="Father's CNIC" value={profile.father_cnic} onChange={v => updateField('father_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" />
-                    <Field label="Father's Occupation" value={profile.father_occupation} onChange={v => updateField('father_occupation', v)} placeholder="Government Officer" />
+                    <Field label="Father's Occupation / Profession" value={profile.father_occupation} onChange={v => updateField('father_occupation', v)} placeholder="Doctor, Engineer, Government Officer…" />
+                    <Field label="Father's Status" type="select" value={profile.father_status} onChange={v => updateField('father_status', v)}
+                        options={[{ value: 'alive', label: 'Alive' }, { value: 'deceased', label: 'Deceased' }, { value: 'shaheed', label: 'Shaheed' }]} />
+                    <Field label="Father's Monthly Income (PKR)" type="number" value={profile.father_income} onChange={v => updateField('father_income', v)} placeholder="50000" />
+                    <Field label="Mother's Profession" value={profile.mother_profession} onChange={v => updateField('mother_profession', v)} placeholder="Housewife, Teacher, Doctor…" />
+                    <Field label="Mother's Status" type="select" value={profile.mother_status} onChange={v => updateField('mother_status', v)}
+                        options={[{ value: 'alive', label: 'Alive' }, { value: 'deceased', label: 'Deceased' }, { value: 'shaheed', label: 'Shaheed' }]} />
+                    <Field label="Mother's Monthly Income (PKR)" type="number" value={profile.mother_income} onChange={v => updateField('mother_income', v)} placeholder="0" />
                     <Field label="Guardian Phone" type="tel" value={profile.guardian_phone} onChange={v => updateField('guardian_phone', v)} placeholder="03001234567" />
                 </div>
             </SectionCard>
