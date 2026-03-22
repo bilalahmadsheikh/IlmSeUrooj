@@ -952,12 +952,15 @@ function detectPageType() {
     pageTitle.includes('application'), pageTitle.includes('admission'),
   ].filter(Boolean).length;
 
-  // Small form with just email + password = login
-  if (loginSignals > 0 || (passwordFields >= 1 && allInputs <= 4 && emailFields >= 1)) {
+  // Login: has a password field + few total inputs (username+password pattern).
+  // The emailFields check is intentionally removed — many portals use type="text" for username.
+  // A password field + ≤4 total inputs is a strong login signal regardless of email type.
+  // If appSignals/registerSignals also fire, login takes priority when password is present.
+  if (loginSignals > 0 || (passwordFields >= 1 && allInputs <= 4)) {
     return 'login';
   }
 
-  // Registration: has password + more fields
+  // Registration: has password + more fields (e.g. name, father name, email, confirm email)
   if (registerSignals > 0 || (passwordFields >= 2 && allInputs > 4)) {
     return 'register';
   }
@@ -2272,19 +2275,22 @@ function renderState(container, state, data = {}) {
 
       let loginRegisterCard = '';
       if (pageType === 'login') {
-        const regBtnLabel = uniCfgReady?.slug === 'nust'
-          ? '📝 New NET Registration →'
-          : regLink ? '📝 No account? Create Account →' : '📝 Find Registration Page →';
+        // Use actual link text from page if found, otherwise use config name or generic
+        const regBtnLabel = regLink
+          ? `📝 ${regLink.text} →`
+          : uniCfgReady?.name ? `📝 Register at ${uniCfgReady.name} →` : '📝 Find Registration Page →';
+        const uniName = uniCfgReady?.name || 'this university';
+        const pwLabel = isEmailSentCred
+          ? `<span style="color:#60a5fa">Check email for credentials 📧</span>`
+          : `<span style="color:var(--um-accent)">●●●●●●●● (saved)</span>`;
         loginRegisterCard = `
           <div class="um-context-card login">
-            <div class="um-context-title">🔑 Login Page — Credentials Ready</div>
+            <div class="um-context-title">🔑 Login Page</div>
             <div class="um-cred-box">
-              <div class="um-cred-row"><span class="label">Username/Email:</span><span class="value">${portalEmail}</span></div>
-              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:${isEmailSentCred ? '#60a5fa' : 'var(--um-accent)'}">
-                ${isEmailSentCred ? 'Emailed by NUST 📧' : '●●●●●●●● (saved)'}
-              </span></div>
+              <div class="um-cred-row"><span class="label">Username:</span><span class="value">${portalEmail}</span></div>
+              <div class="um-cred-row"><span class="label">Password:</span><span class="value">${pwLabel}</span></div>
             </div>
-            ${isEmailSentCred ? `<div class="um-reg-note">📧 Your username &amp; password were emailed by NUST. Check your inbox.</div>` : ''}
+            ${isEmailSentCred ? `<div class="um-reg-note">📧 ${uniName} emails your username &amp; password after registration. Check your inbox — do not use your own password.</div>` : ''}
             <button class="um-context-btn" id="unimatch-goto-register">${regBtnLabel}</button>
           </div>`;
       } else if (pageType === 'register') {
@@ -2410,22 +2416,27 @@ function renderState(container, state, data = {}) {
       const uniCfgFilled = (typeof getConfigForDomain === 'function') ? getConfigForDomain(window.location.hostname) : null;
       const isEmailSentCredFilled = uniCfgFilled?.credentialSystem === 'email_sent';
 
+      const uniFilledName = uniCfgFilled?.name || 'this university';
+      const isLoginFilled = pageType === 'login';
+
       // Show credential summary on login/register pages so user knows what was filled
-      const credSummary = (pageType === 'login' || pageType === 'register') ? `
+      const credSummary = (isLoginFilled || pageType === 'register') ? `
         <div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:8px;padding:10px;margin-top:10px;font-size:10px">
-          <div style="font-weight:600;color:#4ade80;margin-bottom:6px">📋 ${pageType === 'register' ? 'Account Created With:' : 'Filled Credentials:'}</div>
+          <div style="font-weight:600;color:#4ade80;margin-bottom:6px">📋 ${pageType === 'register' ? 'Account Created With:' : 'Login Filled:'}</div>
           ${pageType === 'register' ? `
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
             <span style="color:#71717a">Name:</span>
             <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${displayFullName2}</span>
           </div>` : ''}
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-            <span style="color:#71717a">Email/UserID:</span>
+            <span style="color:#71717a">${isLoginFilled ? 'Username:' : 'Email/UserID:'}</span>
             <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${portalEmail2}</span>
           </div>
           ${isEmailSentCredFilled ? `
           <div style="margin-top:6px;padding:6px 8px;background:rgba(96,165,250,0.08);border-radius:5px;color:#60a5fa">
-            📧 Check your inbox — ${uniCfgFilled?.name || 'this university'} will email your username &amp; password.
+            📧 ${isLoginFilled
+              ? `${uniFilledName} emails your password — use the credentials from your inbox.`
+              : `Check your inbox — ${uniFilledName} will email your username &amp; password.`}
           </div>` : `
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="color:#71717a">Password:</span>
