@@ -670,8 +670,14 @@ function matchFieldHeuristically(el) {
   if (allSignals.length === 0) return null;
 
   // ── Exclusion check ─────────────────────────────────────────────
-  const combined = allSignals.join(' ');
+  // IMPORTANT: only check primary signals + placeholder/aria-label — NOT the TD proximity label.
+  // TD labels like "UserID (Email Address):" legitimately contain "userid" but are email fields.
+  const exclusionSignals = [...primarySignals, normPlaceholder, normAriaLabel].filter(Boolean);
+  const combined = exclusionSignals.join(' ');
   if (EXCLUDED_FIELD_PATTERNS.some(p => combined.includes(p))) return null;
+
+  // Still use full allSignals for the full pattern matching below
+  const fullCombined = allSignals.join(' ');
 
   // Proximity-based CAPTCHA image detection
   const isCaptchaImg = (img) => {
@@ -900,10 +906,14 @@ function detectPageType() {
       const el = document.querySelector(sel);
       if (el) { const t = el.textContent.toLowerCase().trim(); if (t.length > 2) return t; }
     }
-    // Fallback: first <th> or colspan <td> with only text (no form elements)
-    for (const el of document.querySelectorAll('th, td[colspan]')) {
-      const t = el.textContent.trim().toLowerCase();
-      if (t.length > 3 && t.length < 80 && !el.querySelector('input, select, button')) return t;
+    // Fallback: look for a heading-like td[colspan] or th that is INSIDE a form or the first
+    // table that contains inputs (scoped to form context to avoid nav/menu pollution)
+    const formContainer = document.querySelector('form') || document.querySelector('table:has(input)');
+    if (formContainer) {
+      for (const el of formContainer.querySelectorAll('td[colspan], th')) {
+        const t = el.textContent.trim().toLowerCase();
+        if (t.length > 3 && t.length < 80 && !el.querySelector('input, select, button')) return t;
+      }
     }
     return '';
   })();
@@ -2989,17 +2999,38 @@ async function handleAutofill() {
         const isUsernameField = USERNAME_PATTERNS.some(p => normSig.includes(p));
 
         if (isUsernameField) {
-          // On LOGIN pages: fill with email (the credential used to log in)
-          // On REGISTER pages: fill with full name (the display/account name)
-          // On other pages: fall back to email
           const pt = detectPageType();
+          const portalEmail = ctx.profile?.portal_email || ctx.profile?.email || '';
+
+          // If the field's label/placeholder ALSO mentions "email", it's a "UserID (Email Address)"
+          // style field — always fill with email, not full_name (email fields reject non-email values)
+          const fieldLabelText = (() => {
+            let lt = '';
+            if (input.labels?.length) lt = input.labels[0].textContent || '';
+            else if (input.id) { const lbl = document.querySelector(`label[for="${input.id}"]`); if (lbl) lt = lbl.textContent || ''; }
+            if (!lt) {
+              const cell = input.closest('td, th');
+              if (cell) {
+                const row = cell.parentElement;
+                if (row) {
+                  const cells = Array.from(row.children);
+                  const myIdx = cells.indexOf(cell);
+                  if (myIdx > 0 && !cells[myIdx - 1].querySelector('input, select, textarea')) lt = cells[myIdx - 1].textContent || '';
+                }
+              }
+            }
+            return lt.toLowerCase();
+          })();
+          const isEmailStyleUsername = fieldLabelText.includes('email') || fieldLabelText.includes('@')
+            || input.type === 'email' || (input.getAttribute('placeholder') || '').toLowerCase().includes('email');
+
           let usernameValue;
-          if (pt === 'login') {
-            usernameValue = ctx.profile?.portal_email || ctx.profile?.email || '';
+          if (isEmailStyleUsername || pt === 'login') {
+            // UserID (Email Address) style, or login page → always fill with email
+            usernameValue = portalEmail;
           } else {
-            // register / application / unknown — use full name as the account label
-            usernameValue = ctx.profile?.full_name
-              || ctx.profile?.portal_email || ctx.profile?.email || '';
+            // Register page, no email signal → use full name as display/account name
+            usernameValue = ctx.profile?.full_name || portalEmail;
           }
 
           if (usernameValue) {

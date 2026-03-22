@@ -15,7 +15,7 @@ const ALL_UNIVERSITIES = [];
 ALL_UNIVERSITIES.push({
     slug: 'nust', name: 'NUST',
     fullName: 'National University of Sciences and Technology',
-    registrationUrl: 'https://ugadmissions.nust.edu.pk/NewNETRegistration.aspx',
+    registrationUrl: 'https://ugadmissions.nust.edu.pk/registration.aspx',
     loginUrl: 'https://ugadmissions.nust.edu.pk',
     portalDomains: ['ugadmissions.nust.edu.pk', 'pgadmission.nust.edu.pk'],
     formType: 'requires_login_first',
