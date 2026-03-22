@@ -132,7 +132,7 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
                 <p className={styles.subtitle}>
                     {showElapsed
                         ? 'Past deadlines for reference. Applications are closed.'
-                        : "Don't miss your chance! Real 2026 deadlines from official sources."
+                        : `Don't miss your chance! Real ${new Date().getFullYear()} deadlines from official sources.`
                     }
                 </p>
             </div>

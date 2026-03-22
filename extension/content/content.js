@@ -3,6 +3,17 @@
  * Detects university portals, injects the sidebar, manages autofill + answer memory.
  */
 
+// Silently suppress "Extension context invalidated" unhandled rejections.
+// These happen when the extension is reloaded while the tab is still open.
+// The user just needs to refresh the page — no console noise needed.
+window.addEventListener('unhandledrejection', (e) => {
+  if (e.reason?.message?.includes('Extension context invalidated') ||
+      e.reason?.message?.includes('extension context') ||
+      String(e.reason).includes('Extension context')) {
+    e.preventDefault();
+  }
+});
+
 // ─── University Domain Registry ────────────────────────────────
 // Built dynamically from ALL_UNIVERSITIES (universities/index.js loaded first)
 
@@ -667,6 +678,11 @@ const EXCLUDED_FIELD_PATTERNS = [
   'verificationcode', 'verification_code', 'txtpin',
   // Explicit login/account-creation fields that aren't profile data
   'confirm_password', 'confirmpassword', 'password_confirm', 're_password', 'retype',
+  // Residence TYPE (accommodation type) — not a profile field; form-specific default
+  // Any field whose name/id contains "residence" is a residence-type dropdown (Own/Rented/etc.)
+  // City/province heuristic keywords like "city_of_residence" live in FIELD_HEURISTICS labels
+  // and never appear in actual field name attributes — so this exclusion is safe.
+  'residence',
 ];
 
 // Pakistani city → province lookup
@@ -871,14 +887,24 @@ function matchFieldHeuristically(el) {
 
         let score = -1;
 
-        if (sig === normKw || sig === normKw.replace(/_/g, '')) {
-          // Exact match
+        // Strip all separators, punctuation, ASP.NET $ delimiters, and quote variants so
+        // "father\u2019s income (pkr)" → "fathersinccomepkr" can match keyword "father's_income"
+        // Also strips $ (ASP.NET name delimiter) and parentheses from label signals
+        const sigNoSep = sig.replace(/[\s_\-$()''‛`"]+/g, '');
+        const normKwNoSep = normKw.replace(/[\s_\-$()''‛`"]+/g, '');
+        if (sig === normKw || sigNoSep === normKwNoSep) {
+          // Exact match (with and without separators)
           score = h.priority + 10 + bonus;
-        } else if (sig.startsWith(normKw) || sig.endsWith(normKw)) {
+        } else if (sig.startsWith(normKw) || sig.endsWith(normKw) ||
+                   sigNoSep.endsWith(normKwNoSep)) {
           // Prefix/suffix match
           score = h.priority + 6 + bonus;
-        } else if (sig.includes(normKw) || normKw.includes(sig)) {
-          // Contains match (only if sig is long enough to be meaningful)
+        } else if (sig.includes(normKw) || sigNoSep.includes(normKwNoSep)) {
+          // Contains match — also without separators (fixes ASP.NET camelCase IDs)
+          if (sig.length >= 3) score = h.priority + bonus;
+        } else if (normKw.includes(sig) && sig.length >= 6) {
+          // Keyword contains signal — only if signal is long enough to be unambiguous
+          // (prevents short signals like "residence" matching "city_of_residence" keyword)
           if (sig.length >= 3) score = h.priority + bonus;
         }
 
@@ -1404,7 +1430,60 @@ function fillSelect(el, value) {
     match = options.find(o => o.text.toLowerCase().includes(val)) ||
             options.find(o => val.includes(o.text.toLowerCase().trim()) && o.text.trim().length >= 3);
   }
-  // 7. Levenshtein distance fallback for close matches (typos in option values)
+  // 7. Income range matching — numeric value (e.g. 10000) matched to range option text
+  // e.g. "Less than Rs. 10,000" or "10,001 - 25,000" or "Below 10000"
+  // Picks the BEST match: smallest upper bound (for "less than"), or tightest range containing numVal.
+  if (!match) {
+    const numVal = parseFloat(val.replace(/,/g, ''));
+    if (!isNaN(numVal) && numVal >= 0) {
+      let bestOption = null;
+      let bestUpper = Infinity;  // for "less than" — prefer smallest upper bound
+      let bestGtLower = -Infinity; // for "above" — prefer largest lower bound
+      let bestRangeWidth = Infinity; // for ranges — prefer tightest range
+
+      for (const o of options) {
+        const ot = o.text.replace(/[,٬،]/g, '').toLowerCase().trim();
+        // "less than X" / "below X" / "up to X" / "under X" / "upto X"
+        // [^\d]*? skips any currency prefix (Rs., PKR, rupees, etc.) before the number
+        const ltMatch = ot.match(/(?:less\s*than|below|up\s*to|upto|under|<)\s*[^\d]*?(\d+)/i);
+        if (ltMatch) {
+          const upper = parseFloat(ltMatch[1]);
+          // numVal <= upper handles exact boundary (e.g. 10000 matches "Less than 10,000")
+          if (numVal <= upper && upper < bestUpper) {
+            bestUpper = upper;
+            bestOption = o;
+          }
+          continue;
+        }
+        // "above X" / "more than X" / "over X" / "greater than X"
+        const gtMatch = ot.match(/(?:above|more\s*than|over|greater\s*than|>)\s*[^\d]*?(\d+)/i);
+        if (gtMatch) {
+          const lower = parseFloat(gtMatch[1]);
+          if (numVal > lower && lower > bestGtLower && !bestOption) {
+            bestGtLower = lower;
+            bestOption = o;
+          }
+          continue;
+        }
+        // "X - Y" or "X to Y" range (with optional currency between)
+        const rangeMatch = ot.match(/(\d+)\s*(?:[^\d]*?)(?:[-–]|to)\s*[^\d]*?(\d+)/);
+        if (rangeMatch) {
+          const lo = parseFloat(rangeMatch[1]);
+          const hi = parseFloat(rangeMatch[2]);
+          // Allow ±1 tolerance for round-number boundaries (e.g. 10000 in "10001-30000")
+          if (numVal >= lo - 1 && numVal <= hi) {
+            const width = hi - lo;
+            if (width < bestRangeWidth) {
+              bestRangeWidth = width;
+              bestOption = o;
+            }
+          }
+        }
+      }
+      if (bestOption) match = bestOption;
+    }
+  }
+  // 8. Levenshtein distance fallback for close matches (typos in option values)
   if (!match && val.length >= 4) {
     let bestDist = Infinity;
     for (const o of options) {
@@ -2333,28 +2412,35 @@ function renderState(container, state, data = {}) {
         </div>
       `;
       document.getElementById('unimatch-signin')?.addEventListener('click', async () => {
-        if (isOnIlmSeUroojSite()) {
-          renderState(container, 'loading');
-          const ok = await tryAutoConnectFromSite();
-          if (ok) {
-            const stored = await chrome.storage.local.get(['unimatch_token', 'unimatch_profile']);
-            if (stored.unimatch_profile) {
-              const uni = detectUniversity();
-              window.__unimatch = { university: uni, profile: stored.unimatch_profile, fieldMap: null, filledFields: 0, manualFields: 0, filledSelectors: [], manualSelectors: [] };
-              renderState(container, 'ready', { profile: stored.unimatch_profile, university: uni });
-              return;
+        try {
+          if (!isExtensionValid()) { showRefreshNeeded(container); return; }
+          if (isOnIlmSeUroojSite()) {
+            renderState(container, 'loading');
+            const ok = await tryAutoConnectFromSite();
+            if (ok) {
+              const stored = await chrome.storage.local.get(['unimatch_token', 'unimatch_profile']);
+              if (stored.unimatch_profile) {
+                const uni = detectUniversity();
+                window.__unimatch = { university: uni, profile: stored.unimatch_profile, fieldMap: null, filledFields: 0, manualFields: 0, filledSelectors: [], manualSelectors: [] };
+                renderState(container, 'ready', { profile: stored.unimatch_profile, university: uni });
+                return;
+              }
             }
+            renderState(container, 'not_logged_in');
+            return;
           }
-          renderState(container, 'not_logged_in');
-          return;
+          const extId = chrome.runtime.id;
+          const base = await getSiteUrl();
+          window.open(`${base}/extension-auth?ext=${extId}`, '_blank', 'width=500,height=600');
+        } catch (e) {
+          if (e.message?.includes('Extension context invalidated')) showRefreshNeeded(container);
         }
-        const extId = chrome.runtime.id;
-        const base = await getSiteUrl();
-        window.open(`${base}/extension-auth?ext=${extId}`, '_blank', 'width=500,height=600');
       });
       document.getElementById('unimatch-goto-site')?.addEventListener('click', async () => {
-        const base = await getSiteUrl();
-        window.open(`${base}/${onSite ? 'profile' : 'profile'}`, '_blank');
+        try {
+          const base = await getSiteUrl();
+          window.open(`${base}/${onSite ? 'profile' : 'profile'}`, '_blank');
+        } catch { /* extension invalidated — ignore */ }
       });
       break;
     } // end case 'not_logged_in'
@@ -2945,6 +3031,9 @@ async function handleAutofill() {
         }
 
         for (const el of els) {
+          // Safety: skip non-form elements (avoids "Illegal invocation" from fillInput on divs/spans)
+          const elTag = el.tagName;
+          if (elTag !== 'INPUT' && elTag !== 'SELECT' && elTag !== 'TEXTAREA') continue;
           tickProgress();
           // Resolve value — use profileValueFor helper for computed/derived keys
           let rawValue;
@@ -3218,6 +3307,45 @@ async function handleAutofill() {
       }
     }
 
+    // ─── TIER 2.7: Education system radio-group scan ────────────
+    // Detects radio groups whose OPTIONS contain FSc / O/A Level / DAE labels,
+    // regardless of the group's name/id (handles unknown field names like NUST).
+    if (ctx.profile?.education_system) {
+      const eduVal = ctx.profile.education_system;
+      // Collect all unique radio group names not yet handled
+      const radioGroups = new Map(); // name → [radio, ...]
+      for (const el of document.querySelectorAll('input[type="radio"]')) {
+        if (alreadyHandled.has(el) || !el.name) continue;
+        if (!radioGroups.has(el.name)) radioGroups.set(el.name, []);
+        radioGroups.get(el.name).push(el);
+      }
+      for (const [, radios] of radioGroups) {
+        // Check if any radio in this group has a label hinting at education system
+        const allLabels = radios.map(r => {
+          const lbl = r.labels?.[0]?.textContent || '';
+          // Also check sibling label in same TD
+          const cell = r.closest('td, li, span');
+          const sibLbl = cell ? cell.textContent : '';
+          return (lbl + ' ' + sibLbl).toLowerCase();
+        });
+        const EDU_LABEL_PAT = /fsc|f\.s\.c|intermediate|o\/a\s*level|o\s*&\s*a|a\s*level|olevel|alevel|dae|diploma.*engineer|hssc|matric/i;
+        const looksLikeEduGroup = allLabels.some(l => EDU_LABEL_PAT.test(l));
+        if (!looksLikeEduGroup) continue;
+        // Fill using fillRadio on the first radio
+        const filled = fillRadio(radios[0], eduVal);
+        if (filled) {
+          radios.forEach(r => {
+            alreadyHandled.add(r);
+            r.style.outline = '2px solid #4ade80';
+            r.classList.add('unimatch-filled');
+          });
+          sparkleField(radios[0]);
+          filledCount++;
+          console.log(`[IlmSeUrooj] TIER 2.7 edu radio: ${eduVal}`);
+        }
+      }
+    }
+
     // ─── TIER 3: Heuristic fallback for remaining fields ───────
     const allInputs = collectAllFields();
 
@@ -3379,6 +3507,8 @@ async function handleAutofill() {
       }
 
       if (value == null || value === '') {
+        // Debug: field was detected but profile has no value for it
+        console.debug(`[IlmSeUrooj] Detected field "${profileKey}" (id="${input.id || ''}", name="${input.name || ''}") but profile.${profileKey} is empty — skipping.`);
         if (input.required && !input.value) {
           input.style.outline = '2px solid #fbbf24';
           input.style.outlineOffset = '2px';
@@ -3414,6 +3544,40 @@ async function handleAutofill() {
         manualCount++;
       }
       alreadyHandled.add(input);
+    }
+
+    // ─── TIER 4: AJAX-dependent dropdowns (e.g. District after Province) ───
+    // After all fills, wait for any AJAX-loaded dependent selects to populate,
+    // then retry filling them (district, tehsil, etc.)
+    {
+      const DEPENDENT_KEYS = ['district', 'tehsil', 'taluka', 'sub_district'];
+      const DEPENDENT_LABEL = /district|tehsil|taluka|sub.?district/i;
+      const hasDependentTargets = DEPENDENT_KEYS.some(k => profileValueFor(k, ctx.profile));
+      if (hasDependentTargets) {
+        await new Promise(r => setTimeout(r, 800));
+        const allInputsT4 = collectAllFields();
+        for (const input of allInputsT4) {
+          if (input.tagName !== 'SELECT') continue;
+          // Check if it looks like a district/tehsil field
+          const sig = buildFieldSignature(input);
+          if (!DEPENDENT_LABEL.test(sig) && !DEPENDENT_LABEL.test(input.name || '') && !DEPENDENT_LABEL.test(input.id || '')) continue;
+          if (input.options.length <= 1) continue; // Still not loaded
+          // Try to find the profile value (allow re-fill even if already handled, since options just loaded)
+          const profileKey = matchFieldHeuristically(input);
+          const pVal = profileKey ? profileValueFor(profileKey, ctx.profile) : null;
+          const distVal = pVal || profileValueFor('district', ctx.profile) || profileValueFor('domicile_district', ctx.profile);
+          if (!distVal) continue;
+          const ok = fillSelect(input, distVal);
+          if (ok) {
+            alreadyHandled.add(input);
+            input.style.outline = '2px solid #4ade80';
+            input.classList.add('unimatch-filled');
+            sparkleField(input);
+            filledCount++;
+            console.log(`[IlmSeUrooj] TIER 4 district fill: ${distVal}`);
+          }
+        }
+      }
     }
 
     // Update context
