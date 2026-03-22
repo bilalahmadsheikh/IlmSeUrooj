@@ -625,6 +625,32 @@ function matchFieldHeuristically(el) {
       const wrapping = el.closest('label');
       if (wrapping) labelText = wrapping.textContent || '';
     }
+    // Table-based forms (e.g. ASP.NET WebForms): label text is in adjacent <td>/<th>
+    if (!labelText) {
+      const cell = el.closest('td, th');
+      if (cell) {
+        const row = cell.parentElement;
+        if (row) {
+          const cells = Array.from(row.children);
+          const myIdx = cells.indexOf(cell);
+          if (myIdx > 0) {
+            const prevCell = cells[myIdx - 1];
+            if (!prevCell.querySelector('input, select, textarea')) {
+              labelText = prevCell.textContent || '';
+            }
+          }
+        }
+      }
+    }
+    // Immediate previous sibling that looks like a label (no form elements inside)
+    if (!labelText) {
+      const prev = el.previousElementSibling;
+      if (prev && !prev.querySelector('input, select, textarea')) {
+        if (['LABEL', 'SPAN', 'B', 'STRONG', 'P', 'DIV', 'LI'].includes(prev.tagName)) {
+          labelText = prev.textContent || '';
+        }
+      }
+    }
   }
 
   // Build normalized signals (name/id get extra weight as primary identifiers)
@@ -868,7 +894,19 @@ function detectPageType() {
   const url = window.location.href.toLowerCase();
   const bodyText = document.body?.innerText?.toLowerCase() || '';
   const pageTitle = document.title.toLowerCase();
-  const h1 = document.querySelector('h1, h2')?.textContent?.toLowerCase() || '';
+  // Look beyond h1/h2 — many university portals use h3, legend, caption, or table headings
+  const h1 = (() => {
+    for (const sel of ['h1', 'h2', 'h3', 'legend', 'caption']) {
+      const el = document.querySelector(sel);
+      if (el) { const t = el.textContent.toLowerCase().trim(); if (t.length > 2) return t; }
+    }
+    // Fallback: first <th> or colspan <td> with only text (no form elements)
+    for (const el of document.querySelectorAll('th, td[colspan]')) {
+      const t = el.textContent.trim().toLowerCase();
+      if (t.length > 3 && t.length < 80 && !el.querySelector('input, select, button')) return t;
+    }
+    return '';
+  })();
 
   // Count field types
   const passwordFields = document.querySelectorAll('input[type="password"]').length;
@@ -1014,6 +1052,12 @@ function findRegisterLink() {
 }
 
 async function handleGoToRegister() {
+  // Use university config's registrationUrl if available
+  const uniCfg = (typeof getConfigForDomain === 'function') ? getConfigForDomain(window.location.hostname) : null;
+  if (uniCfg?.registrationUrl && uniCfg.registrationUrl !== window.location.href) {
+    window.location.href = uniCfg.registrationUrl;
+    return;
+  }
   const el = findRegisterLinkEl();
   if (el) {
     if (el.tagName === 'A' && el.href) {
@@ -1893,11 +1937,22 @@ function injectSidebar(university) {
 
   toggle.addEventListener('click', e => {
     e.stopPropagation();
-    sidebar.classList.toggle('collapsed');
-    toggle.classList.toggle('sidebar-open');
+    const isNowCollapsed = sidebar.classList.toggle('collapsed');
+    toggle.classList.toggle('sidebar-open', !isNowCollapsed);
+    // Persist state across page navigations
+    chrome.storage.local.set({ unimatch_sidebar_open: !isNowCollapsed }).catch(() => {});
   });
 
   sidebarInstance = sidebar;
+
+  // Restore saved open/closed state
+  chrome.storage.local.get('unimatch_sidebar_open').then(stored => {
+    if (stored.unimatch_sidebar_open === true) {
+      sidebar.classList.remove('collapsed');
+      toggle.classList.add('sidebar-open');
+    }
+  }).catch(() => {});
+
   initSidebarState(university);
 }
 
@@ -1991,6 +2046,7 @@ async function initSidebarState(university) {
   document.getElementById('unimatch-close')?.addEventListener('click', () => {
     sidebarInstance?.classList.add('collapsed');
     document.getElementById('unimatch-toggle')?.classList.remove('sidebar-open');
+    chrome.storage.local.set({ unimatch_sidebar_open: false }).catch(() => {});
   });
 
   if (!isExtensionValid()) {
@@ -2206,14 +2262,20 @@ function renderState(container, state, data = {}) {
 
       let loginRegisterCard = '';
       if (pageType === 'login') {
+        const regBtnLabel = uniCfgReady?.slug === 'nust'
+          ? '📝 New NET Registration →'
+          : regLink ? '📝 No account? Create Account →' : '📝 Find Registration Page →';
         loginRegisterCard = `
           <div class="um-context-card login">
             <div class="um-context-title">🔑 Login Page — Credentials Ready</div>
             <div class="um-cred-box">
               <div class="um-cred-row"><span class="label">Username/Email:</span><span class="value">${portalEmail}</span></div>
-              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">●●●●●●●● (saved)</span></div>
+              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:${isEmailSentCred ? '#60a5fa' : 'var(--um-accent)'}">
+                ${isEmailSentCred ? 'Emailed by NUST 📧' : '●●●●●●●● (saved)'}
+              </span></div>
             </div>
-            <button class="um-context-btn" id="unimatch-goto-register">${regLink ? '📝 No account? Create Account →' : '📝 Find Registration Page →'}</button>
+            ${isEmailSentCred ? `<div class="um-reg-note">📧 Your username &amp; password were emailed by NUST. Check your inbox.</div>` : ''}
+            <button class="um-context-btn" id="unimatch-goto-register">${regBtnLabel}</button>
           </div>`;
       } else if (pageType === 'register') {
         loginRegisterCard = `
