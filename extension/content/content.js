@@ -1863,8 +1863,16 @@ function injectSidebar(university) {
 
   const sidebar = document.createElement('div');
   sidebar.id = 'unimatch-sidebar';
+  sidebar.classList.add('collapsed');
   sidebar.innerHTML = buildSidebarHTML(university);
   document.body.appendChild(sidebar);
+
+  // Block ALL clicks/mousedowns inside the sidebar from reaching the host page.
+  // This prevents things like COMSATS's chatbot widget from firing when the user
+  // clicks extension buttons.
+  sidebar.addEventListener('click', e => e.stopPropagation());
+  sidebar.addEventListener('mousedown', e => e.stopPropagation());
+  sidebar.addEventListener('mouseup', e => e.stopPropagation());
 
   const toggle = document.createElement('button');
   toggle.id = 'unimatch-toggle';
@@ -1877,7 +1885,8 @@ function injectSidebar(university) {
   toggle.title = 'UniMatch';
   document.body.appendChild(toggle);
 
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', e => {
+    e.stopPropagation();
     sidebar.classList.toggle('collapsed');
     toggle.classList.toggle('sidebar-open');
   });
@@ -1985,9 +1994,15 @@ async function initSidebarState(university) {
 
   // On the IlmSeUrooj site itself, silently pull the real Supabase session
   // from localStorage and send it to the background — zero manual steps.
+  // Skip if we already have a fresh cached token+profile (< 30 min old).
   if (isOnIlmSeUroojSite()) {
-    renderState(contentEl, 'loading');
-    await tryAutoConnectFromSite();
+    const cached = await chrome.storage.local.get(['unimatch_token', 'unimatch_profile', 'profile_cached_at']);
+    const isFresh = cached.unimatch_token && cached.unimatch_profile && cached.profile_cached_at
+      && (Date.now() - cached.profile_cached_at < 30 * 60 * 1000);
+    if (!isFresh) {
+      renderState(contentEl, 'loading');
+      await tryAutoConnectFromSite();
+    }
   }
 
   let stored;
@@ -2244,7 +2259,7 @@ function renderState(container, state, data = {}) {
           <div id="unimatch-field-stats" style="margin:4px 0"></div>
           <div class="um-btn-grid">
             <button class="btn-secondary" id="unimatch-review-btn">📋 Review</button>
-            <button class="btn-secondary" id="unimatch-timeline-btn">📅 Timeline</button>
+            <button class="btn-secondary" id="unimatch-timeline-btn">📅 Deadlines</button>
           </div>
           <button class="btn-secondary um-btn-full-row" id="unimatch-edit-profile">👤 Edit Profile on Website</button>
           <div class="um-safety-note">🔒 Never auto-submits · Only you submit</div>
@@ -2268,11 +2283,8 @@ function renderState(container, state, data = {}) {
       document.getElementById('unimatch-review-btn')?.addEventListener('click', handlePreSubmitCheck);
       document.getElementById('unimatch-goto-register')?.addEventListener('click', handleGoToRegister);
 
-      document.getElementById('unimatch-timeline-btn')?.addEventListener('click', async () => {
-        try {
-          const base = await chrome.runtime.sendMessage({ type: 'GET_SITE_BASE' });
-          window.open((base?.url || 'http://localhost:3000') + '/timeline', '_blank');
-        } catch { window.open('http://localhost:3000/timeline', '_blank'); }
+      document.getElementById('unimatch-timeline-btn')?.addEventListener('click', () => {
+        handleDeadlines(container);
       });
 
       document.getElementById('unimatch-refresh-profile')?.addEventListener('click', async () => {
@@ -2894,7 +2906,19 @@ async function handleAutofill() {
         const isUsernameField = USERNAME_PATTERNS.some(p => normSig.includes(p));
 
         if (isUsernameField) {
-          const usernameValue = generatePortalUsername(ctx.profile);
+          // On LOGIN pages: fill with email (the credential used to log in)
+          // On REGISTER pages: fill with full name (the display/account name)
+          // On other pages: fall back to email
+          const pt = detectPageType();
+          let usernameValue;
+          if (pt === 'login') {
+            usernameValue = ctx.profile?.portal_email || ctx.profile?.email || '';
+          } else {
+            // register / application / unknown — use full name as the account label
+            usernameValue = ctx.profile?.full_name
+              || ctx.profile?.portal_email || ctx.profile?.email || '';
+          }
+
           if (usernameValue) {
             await fillInput(input, usernameValue);
             input.style.outline = '2px solid #4ade80';
@@ -2912,12 +2936,11 @@ async function handleAutofill() {
           continue;
         }
 
-        // Login email field — on login pages, a text/email field that looks like a login field
+        // Login email field — explicit email-login signals
         const LOGIN_EMAIL_PATTERNS = [
           'login_email', 'loginemail', 'sign_in_email', 'user_email', 'account_email',
           'signin_email', 'login_mail', 'loginmail',
         ];
-        // Also treat a generic "login" text/email field (without password context) as login email
         const isLoginEmailField = LOGIN_EMAIL_PATTERNS.some(p => normSig.includes(p))
           || (normSig.includes('login') && (input.type === 'email' || normSig.includes('email')));
         if (isLoginEmailField) {
@@ -3091,6 +3114,298 @@ function getFormHTML() {
     if (parent) sections.add(parent.outerHTML);
   }
   return Array.from(sections).join('\n').substring(0, 6000);
+}
+
+// ─── Deadline / Calendar Detection ─────────────────────────────
+
+const MONTH_MAP_DETECT = {
+  january:1, jan:1, february:2, feb:2, march:3, mar:3,
+  april:4, apr:4, may:5, june:6, jun:6, july:7, jul:7,
+  august:8, aug:8, september:9, sep:9, sept:9,
+  october:10, oct:10, november:11, nov:11, december:12, dec:12,
+};
+
+function parseDetectedDate(str) {
+  str = str.trim();
+  let m;
+
+  // DD-MM-YYYY or DD/MM/YYYY
+  m = str.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  if (m) {
+    const day = parseInt(m[1]), month = parseInt(m[2]), year = parseInt(m[3]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 2020) return { year, month, day };
+  }
+
+  // YYYY-MM-DD
+  m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const year = parseInt(m[1]), month = parseInt(m[2]), day = parseInt(m[3]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 2020) return { year, month, day };
+  }
+
+  // DD Month YYYY or DD Mon YYYY (with optional ordinal)
+  m = str.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)\s+(\d{4})$/i);
+  if (m) {
+    const day = parseInt(m[1]), month = MONTH_MAP_DETECT[m[2].toLowerCase()], year = parseInt(m[3]);
+    if (month && day >= 1 && day <= 31 && year >= 2020) return { year, month, day };
+  }
+
+  // Month DD, YYYY
+  m = str.match(/^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$/i);
+  if (m) {
+    const month = MONTH_MAP_DETECT[m[1].toLowerCase()], day = parseInt(m[2]), year = parseInt(m[3]);
+    if (month && day >= 1 && day <= 31 && year >= 2020) return { year, month, day };
+  }
+
+  return null;
+}
+
+function findDatesInText(text) {
+  const results = [];
+  const seen = new Set();
+  const add = (d) => { if (!d) return; const k = `${d.year}-${d.month}-${d.day}`; if (!seen.has(k)) { seen.add(k); results.push(d); } };
+
+  let m;
+
+  // DD-MM-YYYY / DD/MM/YYYY
+  const re1 = /\b(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})\b/g;
+  while ((m = re1.exec(text)) !== null) add(parseDetectedDate(m[0]));
+
+  // YYYY-MM-DD
+  const re2 = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
+  while ((m = re2.exec(text)) !== null) add(parseDetectedDate(m[0]));
+
+  // DD Month YYYY
+  const re3 = /\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})\b/gi;
+  while ((m = re3.exec(text)) !== null) add(parseDetectedDate(`${m[1]} ${m[2]} ${m[3]}`));
+
+  // Month DD, YYYY
+  const re4 = /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b/gi;
+  while ((m = re4.exec(text)) !== null) add(parseDetectedDate(`${m[1]} ${m[2]} ${m[3]}`));
+
+  // DD Mon YYYY (abbreviated month)
+  const re5 = /\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\w*\s+(\d{4})\b/gi;
+  while ((m = re5.exec(text)) !== null) add(parseDetectedDate(`${m[1]} ${m[2]} ${m[3]}`));
+
+  return results;
+}
+
+function classifyDeadline(contextText) {
+  const t = contextText.toLowerCase();
+
+  // NET Series (Series I, Series 1, NET-Series II, etc.)
+  let mm = t.match(/net\s*[-–]?\s*series\s*([ivxlc\d]+)/i) || t.match(/series\s*([ivx\d]+)/i);
+  if (mm) return `NET Series ${romanOrNum(mm[1])}`;
+
+  // Admission Rounds
+  mm = t.match(/round\s*([ivx\d]+)/i);
+  if (mm) return `Admission Round ${romanOrNum(mm[1])}`;
+
+  if (/last\s*date|closing\s*date|deadline|apply\s*by|apply\s*before|application\s*due/.test(t)) return 'Application Deadline';
+  if (/registration\s*open|open.*registration|start.*registration/.test(t)) return 'Registration Opens';
+  if (/registration\s*clos|registration\s*last|close.*registration/.test(t)) return 'Registration Closes';
+  if (/merit\s*list|final\s*merit|merit\s*announc|display.*merit/.test(t)) return 'Merit List';
+  if (/entry\s*test|admission\s*test|test\s*date|test\s*schedul/.test(t)) return 'Entry Test';
+  if (/interview/.test(t)) return 'Interview Date';
+  if (/fee\s*deposit|fee\s*submission|fee\s*payment/.test(t)) return 'Fee Submission';
+  if (/result\s*announc|result\s*declar|result\s*out/.test(t)) return 'Result Announcement';
+  if (/class\s*comm|session\s*start|commencement/.test(t)) return 'Classes Commence';
+  if (/document\s*verif/.test(t)) return 'Document Verification';
+
+  return null;
+}
+
+function romanOrNum(s) {
+  // Keep roman numerals uppercase, convert digit to ordinal label
+  s = s.toUpperCase();
+  if (/^[IVXLC]+$/.test(s)) return s;
+  const n = parseInt(s);
+  if (!isNaN(n)) return `${n}`;
+  return s;
+}
+
+function makeGCalUrl(title, date, details) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const d1 = `${date.year}${pad(date.month)}${pad(date.day)}`;
+  const next = new Date(date.year, date.month - 1, date.day + 1);
+  const d2 = `${next.getFullYear()}${pad(next.getMonth()+1)}${pad(next.getDate())}`;
+  const p = new URLSearchParams({ action: 'TEMPLATE', text: title, dates: `${d1}/${d2}`, details: details || title });
+  return `https://calendar.google.com/calendar/render?${p.toString()}`;
+}
+
+function formatDeadlineDate(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${d.day} ${months[d.month - 1]} ${d.year}`;
+}
+
+function daysUntil(d) {
+  const target = new Date(d.year, d.month - 1, d.day);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.round((target - today) / 86400000);
+}
+
+/**
+ * Scan the current page for admission-related dates (NET series, rounds, deadlines, etc.)
+ */
+function detectPageDeadlines() {
+  const results = [];
+  const seen = new Set();
+  const add = (label, date, src) => {
+    if (!label || !date) return;
+    const k = `${label}|${date.year}-${date.month}-${date.day}`;
+    if (!seen.has(k)) { seen.add(k); results.push({ label, date, src }); }
+  };
+
+  // ── Strategy 1: Tables ─────────────────────────────────────────
+  // Uni portals often list schedules as: | Series | Open Date | Close Date |
+  const tables = document.querySelectorAll('table');
+  for (const table of tables) {
+    // Get column headers from first row
+    const headerRow = table.querySelector('thead tr, tr:first-child');
+    const headers = headerRow
+      ? Array.from(headerRow.querySelectorAll('th, td')).map(h => h.textContent.trim().toLowerCase())
+      : [];
+
+    const rows = table.querySelectorAll('tr');
+    for (const row of rows) {
+      if (row === headerRow) continue;
+      const cells = Array.from(row.querySelectorAll('td, th'));
+      if (cells.length < 2) continue;
+
+      const cellTexts = cells.map(c => c.textContent.trim());
+      const rowText = cellTexts.join(' ');
+
+      // Only process rows with admission-related keywords
+      if (!/series|round|deadline|last\s*date|closing|registration|merit|entry\s*test|interview|result|fee|admission|schedule/i.test(rowText)) continue;
+
+      // Identify which cells contain dates vs context
+      const dateCols = []; // { idx, dates[] }
+      const contextCols = [];
+
+      cellTexts.forEach((txt, i) => {
+        const dates = findDatesInText(txt);
+        if (dates.length > 0) dateCols.push({ i, dates, header: headers[i] || '' });
+        else if (txt.length > 2 && txt.length < 120) contextCols.push(txt);
+      });
+
+      if (dateCols.length === 0) continue;
+
+      const contextText = contextCols.join(' ') + ' ' + rowText;
+      const baseLabel = classifyDeadline(contextText) || contextCols[0] || cellTexts[0];
+
+      if (dateCols.length === 1) {
+        dateCols[0].dates.forEach(d => add(baseLabel, d, 'table'));
+      } else {
+        // Multiple date columns → label with column header
+        dateCols.forEach(({ dates, header }) => {
+          const colLabel = /open|start|from|begin/i.test(header) ? 'Opens'
+            : /clos|end|last|due|deadline/i.test(header) ? 'Deadline'
+            : header || '';
+          const label = colLabel ? `${baseLabel} – ${colLabel}` : baseLabel;
+          dates.forEach(d => add(label, d, 'table'));
+        });
+      }
+    }
+  }
+
+  // ── Strategy 2: List items & paragraphs ───────────────────────
+  const containers = document.querySelectorAll(
+    'p, li, dt, dd, h2, h3, h4, h5, ' +
+    '[class*="notice"], [class*="announce"], [class*="schedule"], [class*="deadline"], ' +
+    '[class*="timeline"], [class*="admission"], [class*="alert"], [class*="info"]'
+  );
+
+  for (const el of containers) {
+    if (el.closest('table')) continue; // already handled
+    if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue;
+    const text = el.textContent.trim();
+    if (text.length < 6 || text.length > 500) continue;
+
+    const dates = findDatesInText(text);
+    if (dates.length === 0) continue;
+
+    if (!/series|round|deadline|last\s*date|closing|registration|merit|entry\s*test|interview|result|admission|apply/i.test(text)) continue;
+
+    const label = classifyDeadline(text) ||
+      text.replace(/\d{1,2}[-\/]\d{1,2}[-\/]\d{4}|\d{4}-\d{2}-\d{2}/g, '').replace(/\s{2,}/g, ' ').trim().slice(0, 60);
+    dates.forEach(d => add(label, d, 'text'));
+  }
+
+  // Sort by date ascending, past dates last
+  results.sort((a, b) => {
+    const da = new Date(a.date.year, a.date.month - 1, a.date.day);
+    const db = new Date(b.date.year, b.date.month - 1, b.date.day);
+    return da - db;
+  });
+
+  return results;
+}
+
+async function handleDeadlines(container) {
+  const contentEl = container || document.getElementById('unimatch-content');
+  if (!contentEl) return;
+
+  contentEl.innerHTML = `<div style="padding:16px;text-align:center;color:#71717a;font-size:11px">🔍 Scanning page for dates…</div>`;
+
+  const deadlines = detectPageDeadlines();
+  const uni = detectUniversity();
+  const uniName = uni?.name || window.location.hostname.replace(/^www\./, '');
+
+  const goBack = async () => {
+    const s = await chrome.storage.local.get(['unimatch_token', 'unimatch_profile']);
+    renderState(contentEl, s.unimatch_token && s.unimatch_profile ? 'ready' : 'not_logged_in', { profile: s.unimatch_profile });
+  };
+
+  if (deadlines.length === 0) {
+    contentEl.innerHTML = `
+      <div style="padding:12px">
+        <div style="font-size:11px;font-weight:600;color:#4ade80;margin-bottom:8px">📅 Admission Dates</div>
+        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:10px;font-size:11px;color:#fbbf24;margin-bottom:10px">
+          No admission dates found on this page.<br>Try opening the portal's schedule or announcement page.
+        </div>
+        <button id="um-dl-back" style="width:100%;padding:8px;background:#27272a;color:#a1a1aa;border:none;border-radius:6px;font-size:11px;cursor:pointer">← Back</button>
+      </div>
+    `;
+    document.getElementById('um-dl-back')?.addEventListener('click', goBack);
+    return;
+  }
+
+  const items = deadlines.map(({ label, date }) => {
+    const days = daysUntil(date);
+    const isPast = days < 0;
+    const isToday = days === 0;
+    const isUrgent = days > 0 && days <= 7;
+    const isSoon = days > 7 && days <= 30;
+    const color = isPast ? '#52525b' : isToday ? '#f97316' : isUrgent ? '#ef4444' : isSoon ? '#fbbf24' : '#4ade80';
+    const badge = isPast ? `${Math.abs(days)}d ago` : isToday ? 'Today!' : `${days}d left`;
+    const gcalUrl = makeGCalUrl(`${uniName}: ${label}`, date, `Admission deadline – ${label}\n${window.location.href}`);
+
+    return `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid #27272a;border-radius:8px;padding:8px;margin-bottom:6px${isPast ? ';opacity:0.45' : ''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px">
+          <div style="font-size:10px;font-weight:600;color:#e4e4e7;line-height:1.4;flex:1">${label}</div>
+          <span style="font-size:9px;font-weight:700;color:${color};white-space:nowrap;background:${color}22;padding:2px 6px;border-radius:4px">${badge}</span>
+        </div>
+        <div style="font-size:11px;color:${color};margin-top:3px;font-weight:500">${formatDeadlineDate(date)}</div>
+        ${!isPast ? `<a href="${gcalUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:5px;font-size:9px;color:#60a5fa;text-decoration:none;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:4px;padding:2px 7px">+ Add to Google Calendar</a>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div style="padding:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:11px;font-weight:600;color:#4ade80">📅 Dates Found (${deadlines.length})</div>
+        <button id="um-dl-back" style="background:none;border:none;color:#71717a;font-size:10px;cursor:pointer;padding:0">← Back</button>
+      </div>
+      <div style="max-height:340px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#27272a transparent">
+        ${items}
+      </div>
+      <div style="font-size:9px;color:#3f3f46;margin-top:6px;text-align:center">From current page · Verify on portal</div>
+    </div>
+  `;
+
+  document.getElementById('um-dl-back')?.addEventListener('click', goBack);
 }
 
 // ─── Scan Fields (without filling) ─────────────────────────────
