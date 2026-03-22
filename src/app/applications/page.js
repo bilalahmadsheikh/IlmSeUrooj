@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { universities as uniData } from '@/data/universities';
+import { loadSavedFromStorage } from '@/utils/savedStorage';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -150,7 +151,36 @@ export default function ApplicationsPage() {
       .select('*')
       .eq('student_id', uid)
       .order('updated_at', { ascending: false });
-    setApps(data || []);
+
+    const supabaseApps = data || [];
+    const supabaseSlugs = new Set(supabaseApps.map(a => a.university_slug));
+
+    // Merge localStorage saved items not yet synced to Supabase
+    const localItems = loadSavedFromStorage();
+    const localApps = localItems
+      .map(item => {
+        const uni = uniData.find(u => u.id === item.id);
+        if (!uni) return null;
+        const slug = toSlug(uni.shortName);
+        if (supabaseSlugs.has(slug)) return null; // already in Supabase
+        return {
+          id: `local-${item.id}`,
+          university_slug: slug,
+          university_name: uni.name,
+          program_applied: null,
+          portal_domain: null,
+          status: 'saved',
+          tag: item.tag || null,
+          notes: item.note || null,
+          remembered_answers: null,
+          created_at: new Date(item.savedAt || Date.now()).toISOString(),
+          updated_at: new Date(item.savedAt || Date.now()).toISOString(),
+          _fromLocalStorage: true,
+        };
+      })
+      .filter(Boolean);
+
+    setApps([...supabaseApps, ...localApps]);
     setLoading(false);
   }
 
@@ -600,7 +630,7 @@ const s = {
   },
   statCard: {
     flex: '1 1 120px', background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12,
+    borderWidth: 1, borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.07)', borderRadius: 12,
     padding: '16px 20px', textAlign: 'center', transition: 'all 0.2s',
   },
   statValue: { fontSize: 28, fontWeight: 800, lineHeight: 1 },
@@ -613,7 +643,8 @@ const s = {
   filterTabs: { display: 'flex', gap: 4 },
   filterTab: {
     display: 'flex', alignItems: 'center', gap: 6,
-    padding: '7px 14px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.07)',
+    padding: '7px 14px', borderRadius: 8,
+    borderWidth: 1, borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.07)',
     background: 'transparent', color: '#71717a', cursor: 'pointer',
     fontSize: 13, fontFamily: 'inherit', transition: 'all 0.2s',
   },
@@ -642,7 +673,8 @@ const s = {
     gap: 14, maxWidth: 1200, margin: '20px auto 0',
   },
   card: {
-    background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)',
+    background: 'rgba(255,255,255,0.025)',
+    borderWidth: 1, borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.07)',
     borderRadius: 12, padding: 16, cursor: 'pointer', transition: 'all 0.2s',
     display: 'flex', flexDirection: 'column', gap: 10,
   },
