@@ -46,7 +46,6 @@ export default function SavedList({
   const [compareSelected, setCompareSelected] = useState(new Set());
   const [expandedNoteId, setExpandedNoteId] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [applyOpen, setApplyOpen] = useState(false);
   const panelRef = useRef(null);
   const closeBtnRef = useRef(null);
 
@@ -120,14 +119,6 @@ export default function SavedList({
     });
   };
 
-  const applyLinks = useMemo(() => {
-    return sortedItems
-      .filter((item) => item.university.admissions?.applyUrl)
-      .map((item) => ({
-        name: item.university.shortName,
-        url: item.university.admissions.applyUrl,
-      }));
-  }, [sortedItems]);
 
   return (
     <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="saved-list-title">
@@ -369,32 +360,9 @@ export default function SavedList({
                 <button type="button" className={styles.exportBtn} onClick={copyList}>
                   {copied ? 'Copied!' : 'Copy list'}
                 </button>
-                {applyLinks.length > 0 && (
-                  <div className={styles.applyWrap}>
-                    <button
-                      type="button"
-                      className={styles.applyBtn}
-                      onClick={() => setApplyOpen(!applyOpen)}
-                    >
-                      Apply to selected <IconArrowRight className={styles.applyArrow} aria-hidden />
-                    </button>
-                    {applyOpen && (
-                      <div className={styles.applyDropdown}>
-                        {applyLinks.map(({ name, url }) => (
-                          <a
-                            key={`${name}-${url}`}
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.applyLink}
-                          >
-                            {name}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+                <Link href="/applications" className={styles.applyBtn}>
+                  Applications <IconArrowRight className={styles.applyArrow} aria-hidden />
+                </Link>
               </div>
             </div>
           </>

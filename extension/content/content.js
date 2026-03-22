@@ -3053,6 +3053,17 @@ async function handleAutofill() {
     renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
     console.log(`[IlmSeUrooj] ✅ Autofill complete: ${filledCount} filled, ${manualCount} need input, ${conflictCount} conflicts`);
 
+    // Report fill progress to dashboard (fire-and-forget)
+    if (filledCount > 0 && ctx.university?.slug) {
+      const fillPct = Math.round((filledCount / Math.max(filledCount + manualCount + skippedCount, 1)) * 100);
+      chrome.runtime.sendMessage({
+        type: 'REPORT_FILL_PROGRESS',
+        slug: ctx.university.slug,
+        fillPct,
+        newStatus: 'form_filling',
+      }).catch(() => {});
+    }
+
   } catch (err) {
     console.error('[IlmSeUrooj] Autofill error:', err);
     if (err.message?.includes('Extension context invalidated') || !isExtensionValid()) {

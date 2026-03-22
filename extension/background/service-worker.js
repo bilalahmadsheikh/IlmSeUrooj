@@ -322,6 +322,32 @@ async function handleMessage(message, sender) {
       }
     }
 
+    case 'REPORT_FILL_PROGRESS': {
+      // Update the application's fill_pct in Supabase (stored in remembered_answers JSONB).
+      // Also nudge status to 'form_filling' if still at saved/pending/account_created.
+      try {
+        const slug = message.slug;
+        const fillPct = message.fillPct ?? 0;
+        const newStatus = message.newStatus || 'form_filling';
+        // Find the application by slug for this user (GET then PATCH)
+        const list = await apiRequest('/applications');
+        if (list?.applications) {
+          const app = list.applications.find(a => a.university_slug === slug);
+          if (app) {
+            const shouldUpgradeStatus = ['saved', 'pending', 'account_created'].includes(app.status);
+            await apiRequest(`/applications/${app.id}`, 'PATCH', {
+              remembered_answers: { ...(app.remembered_answers || {}), fill_pct: fillPct },
+              ...(shouldUpgradeStatus ? { status: newStatus } : {}),
+              updated_at: new Date().toISOString(),
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('[IlmSeUrooj] fill progress report failed:', e.message);
+      }
+      return { ok: true };
+    }
+
     case 'GET_REMEMBERED_ANSWERS':
       return await apiRequest('/remembered-answers');
 
