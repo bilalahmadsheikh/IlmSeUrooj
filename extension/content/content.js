@@ -875,18 +875,24 @@ function detectPageType() {
   const emailFields = document.querySelectorAll('input[type="email"], input[name*="email"]').length;
   const allInputs = document.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button])').length;
 
-  // Login signals
+  // Detect "Create Login" style pages — creating a new account despite "login" in title/heading
+  const isCreateLoginPage = (h1.includes('create') || pageTitle.includes('create')) &&
+    (h1.includes('login') || pageTitle.includes('login'));
+  const isNewRegistration = h1.includes('new registration') || pageTitle.includes('new registration');
+
+  // Login signals — exclude "create login" context
   const loginSignals = [
     url.includes('login'), url.includes('signin'), url.includes('log-in'), url.includes('sign-in'),
-    h1.includes('log in'), h1.includes('login'), h1.includes('sign in'), h1.includes('signin'),
-    pageTitle.includes('login'), pageTitle.includes('sign in'),
+    h1.includes('log in'), (h1.includes('login') && !isCreateLoginPage), h1.includes('sign in'), h1.includes('signin'),
+    (pageTitle.includes('login') && !isCreateLoginPage), pageTitle.includes('sign in'),
   ].filter(Boolean).length;
 
   // Registration signals
   const registerSignals = [
     url.includes('register'), url.includes('signup'), url.includes('sign-up'), url.includes('create-account'),
-    url.includes('new-user'), url.includes('create_account'),
+    url.includes('new-user'), url.includes('create_account'), url.includes('newregistration'),
     h1.includes('register'), h1.includes('sign up'), h1.includes('create account'), h1.includes('new user'),
+    isCreateLoginPage, isNewRegistration,
     pageTitle.includes('register'), pageTitle.includes('sign up'), pageTitle.includes('create'),
   ].filter(Boolean).length;
 
@@ -2194,6 +2200,10 @@ function renderState(container, state, data = {}) {
       const displayName2 = profile?.full_name || portalEmail || '';
       const regLink = findRegisterLink();
 
+      const uniCfgReady = (typeof getConfigForDomain === 'function') ? getConfigForDomain(window.location.hostname) : null;
+      const isEmailSentCred = uniCfgReady?.credentialSystem === 'email_sent';
+      const registrationNote = uniCfgReady?.registrationNote || '';
+
       let loginRegisterCard = '';
       if (pageType === 'login') {
         loginRegisterCard = `
@@ -2211,9 +2221,11 @@ function renderState(container, state, data = {}) {
             <div class="um-context-title">📝 Registration Page — Ready</div>
             <div class="um-cred-box">
               <div class="um-cred-row"><span class="label">Name:</span><span class="value">${displayName2}</span></div>
-              <div class="um-cred-row"><span class="label">Email:</span><span class="value">${portalEmail}</span></div>
-              <div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">Portal password ✓</span></div>
+              <div class="um-cred-row"><span class="label">Email/UserID:</span><span class="value">${portalEmail}</span></div>
+              ${isEmailSentCred ? '' : `<div class="um-cred-row"><span class="label">Password:</span><span class="value" style="color:var(--um-accent)">Portal password ✓</span></div>`}
             </div>
+            ${isEmailSentCred ? `<div class="um-reg-note">📧 Password will be emailed after submitting — no password field needed.</div>` : ''}
+            ${registrationNote ? `<div class="um-reg-note" style="margin-top:4px">${registrationNote}</div>` : ''}
           </div>`;
       }
 
@@ -2323,6 +2335,9 @@ function renderState(container, state, data = {}) {
       const displayFullName2 = filledProfile?.full_name || portalEmail2 || '';
       const filledPassword = data.password || ctx2?.generatedPassword || '';
 
+      const uniCfgFilled = (typeof getConfigForDomain === 'function') ? getConfigForDomain(window.location.hostname) : null;
+      const isEmailSentCredFilled = uniCfgFilled?.credentialSystem === 'email_sent';
+
       // Show credential summary on login/register pages so user knows what was filled
       const credSummary = (pageType === 'login' || pageType === 'register') ? `
         <div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:8px;padding:10px;margin-top:10px;font-size:10px">
@@ -2333,9 +2348,13 @@ function renderState(container, state, data = {}) {
             <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${displayFullName2}</span>
           </div>` : ''}
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-            <span style="color:#71717a">Email:</span>
+            <span style="color:#71717a">Email/UserID:</span>
             <span style="color:#e4e4e7;font-family:monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis">${portalEmail2}</span>
           </div>
+          ${isEmailSentCredFilled ? `
+          <div style="margin-top:6px;padding:6px 8px;background:rgba(96,165,250,0.08);border-radius:5px;color:#60a5fa">
+            📧 Check your inbox — ${uniCfgFilled?.name || 'this university'} will email your username &amp; password.
+          </div>` : `
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="color:#71717a">Password:</span>
             <div style="display:flex;gap:4px;align-items:center">
@@ -2343,9 +2362,9 @@ function renderState(container, state, data = {}) {
               <button id="pw-reveal" style="background:none;border:none;color:#4ade80;font-size:9px;cursor:pointer;padding:0">Show</button>
               <button id="pw-copy" style="background:none;border:none;color:#60a5fa;font-size:9px;cursor:pointer;padding:0">Copy</button>
             </div>
-          </div>
+          </div>`}
         </div>
-        ${pageType === 'register' ? `<div style="margin-top:8px;padding:6px 8px;background:rgba(251,191,36,0.06);border-radius:6px;font-size:9px;color:#fbbf24">⚠ Save these credentials! You need them to log back in later.</div>` : ''}
+        ${pageType === 'register' && !isEmailSentCredFilled ? `<div style="margin-top:8px;padding:6px 8px;background:rgba(251,191,36,0.06);border-radius:6px;font-size:9px;color:#fbbf24">⚠ Save these credentials! You need them to log back in later.</div>` : ''}
       ` : '';
 
       container.innerHTML = `
@@ -2673,6 +2692,8 @@ async function handleAutofill() {
           } else if (profileKey === 'portal_username') {
             rawValue = generatePortalUsername(ctx.profile);
           } else if (profileKey === 'portal_email') {
+            rawValue = ctx.profile?.portal_email || ctx.profile?.email;
+          } else if (profileKey === 'confirm_email') {
             rawValue = ctx.profile?.portal_email || ctx.profile?.email;
           } else {
             rawValue = profileValueFor(profileKey, ctx.profile) ?? ctx.profile?.[profileKey];

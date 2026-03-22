@@ -19,9 +19,19 @@ ALL_UNIVERSITIES.push({
     loginUrl: 'https://ugadmissions.nust.edu.pk',
     portalDomains: ['ugadmissions.nust.edu.pk', 'pgadmission.nust.edu.pk'],
     formType: 'requires_login_first',
+    // NUST sends username (email) and password via email after registration — no password field on form
+    credentialSystem: 'email_sent',
+    registrationNote: 'After submitting, NUST will email your username and password to the email address you enter. Check your inbox to get your login credentials.',
+    // Registration form: Name, Father Name, UserID (Email), Confirm Email — no password field
+    registerFieldMap: {
+        full_name: '[name="Name"], [name="name"], [name="FullName"], [name="fullName"], [name="ApplicantName"], [name="applicant_name"], #Name, #FullName',
+        father_name: '[name="FatherName"], [name="Father_Name"], [name="fatherName"], [name="father_name"], #FatherName',
+        portal_email: '[name="UserID"], [name="UserId"], [name="userid"], [name="Email"], [name="email"], [type="email"], #UserID, #Email',
+        confirm_email: '[name="ConfirmEmail"], [name="Confirm_Email"], [name="confirmEmail"], [name="ConfirmEmailAddress"], [name="confirm_email"], #ConfirmEmail',
+    },
     fieldMap: {
-        full_name: '[name="applicant_name"], [name="fullName"], #applicant_name, #fullName',
-        father_name: '[name="father_name"], [name="fatherName"], #father_name',
+        full_name: '[name="applicant_name"], [name="fullName"], [name="Name"], #applicant_name, #fullName, #Name',
+        father_name: '[name="father_name"], [name="fatherName"], [name="FatherName"], #father_name, #FatherName',
         cnic: '[name="cnic"], [name="cnic_no"], #cnic, #cnic_no',
         date_of_birth: '[name="dob"], [name="date_of_birth"], #dob',
         gender: '[name="gender"], #gender',
