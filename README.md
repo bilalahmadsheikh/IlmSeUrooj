@@ -19,7 +19,7 @@ UniMatch helps Pakistani students apply to multiple universities without filling
 - **Recommendations section** — personalized suggestions based on filters
 - **Similar universities** — based on saved list similarity
 - **Theme system** — dark/light mode with persistent preference
-- **Profile page** — 9 sections: personal, academic, education system (Pakistani/Cambridge), entry tests, portal credentials, preferences, documents
+- **Profile page** — 10 sections: personal, academic, education system (Pakistani/Cambridge), entry tests, family info (father/mother status, income, profession), portal credentials, preferences, documents
 - **Profile completion ring** — percentage-based SVG in header
 - **Floating action panel** — bottom-right FAB with quick links (hidden on profile/applications/extension)
 - **Application dashboard** — kanban board (Saved → Applying → Submitted → Decision) with real-time updates, detail panel, notes
@@ -27,7 +27,7 @@ UniMatch helps Pakistani students apply to multiple universities without filling
 - **Extension landing page** — product page with install CTA, how-it-works, university grid, comparison table
 
 ### Chrome Extension
-- **Per-university autofill** with 3-tier system (deterministic selectors → AI field mapping → heuristic detection)
+- **Per-university autofill** with 4+ tier system (deterministic selectors → AI field mapping → DOB/phone/education scans → heuristic detection → AJAX district retry)
 - **17 universities** with mapped CSS selectors (all pending live verification)
 - **Academic status aware** — handles projected marks, IBCC equivalence, Cambridge/Pakistani systems
 - **Sidebar** with 7 states: unknown_portal, not_logged_in, warning_ibcc, warning_no_marks, loading, ready, filled, review, submitted
@@ -127,7 +127,7 @@ ilmseurroj/
 ├── src/
 │   ├── app/              Next.js pages + API routes
 │   │   ├── api/          6 API routes (profile, applications, fieldmap, etc.)
-│   │   ├── profile/      Student profile page (9 sections)
+│   │   ├── profile/      Student profile page (10 sections)
 │   │   ├── applications/ Kanban application dashboard
 │   │   └── extension/    Extension landing page
 │   ├── components/       20 UI components

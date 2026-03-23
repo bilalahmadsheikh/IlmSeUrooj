@@ -22,6 +22,7 @@ gantt
     Iteration 7 - Tests & Scholarships:done, 2026-02-20, 1d
     Iteration 8 - Chrome Extension   :done, 2026-02-21, 1d
     Iteration 9 - URL Fixes & Polish :done, 2026-02-22, 1d
+    Iteration 10 - Family Fields & 4-Tier:done, 2026-03-24, 1d
 ```
 
 | # | Date | Iteration | Key Deliverable |
@@ -35,6 +36,7 @@ gantt
 | 7 | Feb 20 | Tests & Scholarships | Entry tests guide, scholarships database, UX improvements |
 | 8 | Feb 21 | Chrome Extension | Full MV3 extension with 3-tier autofill engine |
 | 9 | Feb 22 | URL Fixes & Polish | Corrected apply URLs, name splitting, extension detection |
+| 10 | Mar 24 | Family Fields & 4-Tier Autofill | Parent/family profile fields, income matching, 4+ tier engine |
 
 ---
 
@@ -375,6 +377,72 @@ Corrected all university application form URLs, fixed extension sidebar detectio
 
 ---
 
+## Iteration 10: NUST Autofill Intelligence: Parent/Family Fields + Robust Income Detection
+**Date**: March 24, 2026
+
+### What Was Built
+Extended the student profile with parent/family fields and upgraded the Chrome extension autofill engine from 3 tiers to a 4+ tier system, with income-range matching, compound CSS selectors, AJAX district retry, and a new radio-group education scan. The NUST per-university config was updated with 9 new field mappings to cover province, parent status/income/profession, education system, and district.
+
+### Step-by-Step
+
+#### 1. Supabase Migration (`002_parent_profile_fields.sql`)
+Added 6 new columns to the `profiles` table:
+- `father_status` TEXT CHECK ('alive','deceased','shaheed')
+- `mother_status` TEXT CHECK ('alive','deceased','shaheed')
+- `father_income` NUMERIC(12,2)
+- `mother_income` NUMERIC(12,2)
+- `mother_profession` TEXT
+- `domicile_district` TEXT (was missing before)
+
+#### 2. Profile Page Updates (`src/app/profile/page.js`)
+Added 6 new inputs to the Family Info section:
+- Father's Status dropdown (alive / deceased / shaheed)
+- Father's Monthly Income in PKR (number input)
+- Mother's Profession (text input)
+- Mother's Status dropdown (alive / deceased / shaheed)
+- Mother's Monthly Income in PKR (number input)
+- Guardian Phone (tel input)
+
+Profile page now has 10 sections (up from 9).
+
+#### 3. Autofill Engine Extended to 4+ Tiers (`extension/content/content.js`)
+- Added **Tier 2.5** — DOB scan
+- Added **Tier 2.6** — phone field split
+- Added **Tier 2.7** — education radio group scan (FSc/O-Level/A-Level detection)
+- Added **Tier 4** — AJAX district/tehsil retry (waits 800 ms after main fill)
+- Income range matching: numeric values matched to dropdown labels like "Less than Rs. 30,000"
+- Compound CSS selectors: `select[id*="Father"][id*="Income"]` for ASP.NET form IDs
+- `sigNoSep` separator stripping expanded: now includes `$`, `(`, `)`, curly apostrophes (U+2019)
+- Global `unhandledrejection` handler for "Extension context invalidated" errors
+- Tier 1 safety guard: skips non-INPUT/SELECT/TEXTAREA elements
+- Debug logging when field detected but profile value is null
+- `FIELD_HEURISTICS` expanded with 6 new entries (parent status, income, profession)
+- `EXCLUDED_FIELD_PATTERNS` — added `'residence'`
+- `profileValueFor()` updated for all new parent/family keys
+
+#### 4. NUST Config Updated (`extension/universities/index.js`)
+9 new field mappings in NUST's `fieldMap`:
+`province`, `father_occupation`, `father_status`, `father_income`, `mother_profession`, `mother_status`, `mother_income`, `education_system`, `district`
+
+#### 5. Other Updates
+- `src/data/entryTestsData.js` — entry test data refreshed
+- `src/components/EntryTests/EntryTests.js` — component refactored
+- `src/components/AdmissionsDeadlines/AdmissionsDeadlines.js` — minor fix
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `supabase/migrations/002_parent_profile_fields.sql` | New — 6 parent/family columns |
+| `src/app/profile/page.js` | 6 new family fields |
+| `src/hooks/useProfile.js` | Hook added |
+| `extension/content/content.js` | 4-tier engine, income matching, compound selectors, AJAX retry |
+| `extension/universities/index.js` | NUST fieldMap: 9 new keys |
+| `src/data/entryTestsData.js` | Entry test data updated |
+| `src/components/EntryTests/EntryTests.js` | Refactored |
+| `src/components/AdmissionsDeadlines/AdmissionsDeadlines.js` | Minor fix |
+
+---
+
 ## Summary: What Exists Today
 
 ### Website (Next.js)
@@ -391,7 +459,7 @@ Corrected all university application form URLs, fixed extension sidebar detectio
 
 ### Chrome Extension
 - MV3 manifest with 50+ portal domain support
-- 3-tier autofill engine (deterministic → AI → heuristic)
+- 4+ tier autofill engine (deterministic → AI → DOB/phone/education scans → heuristic → AJAX retry)
 - 17 per-university config files with verified CSS selectors
 - Floating sidebar with 6 UI states
 - Pre-submit review with Jump to Field
@@ -416,4 +484,6 @@ Corrected all university application form URLs, fixed extension sidebar detectio
 | API Routes | 5 |
 | GitHub Workflows | 6 |
 | Themes | 3 |
-| Lines of Code | ~20,000+ |
+| Profile Table Columns | 91 |
+| Autofill Tiers | 4+ (Tier 1 → 2 → 2.5/2.6/2.7 → 3 → 4) |
+| Lines of Code | ~21,000+ |

@@ -1,5 +1,5 @@
 # UniMatch — Feature Inventory
-Last updated: 2026-02-22
+Last updated: 2026-03-24
 
 ---
 
@@ -104,10 +104,11 @@ Last updated: 2026-02-22
 
 ## 12. Profile Page
 **Status:** ✅ Working
-**What it does:** Comprehensive student profile with 9 sections: personal info, education system, intermediate details, matric/O-Level, A-Level subjects, entry test scores, family info, portal credentials, preferences. Debounced auto-save.
+**What it does:** Comprehensive student profile with 10 sections: personal info, education system, intermediate details, matric/O-Level, A-Level subjects, entry test scores, family info (including father/mother status, income, and mother's profession), portal credentials, preferences. Debounced auto-save.
 **How it works:** `src/app/profile/page.js`. Reads/writes Supabase `profiles` table. Conditional rendering based on `education_system` (Pakistani/Cambridge) and `inter_status`. Auto-calculates percentages and profile completion.
 **Education system aware:** Yes — toggles between FSc/Matric fields and A-Level/O-Level/IBCC fields based on `education_system`. Shows projected marks controls when `inter_status` is `part1_only` or `appearing`.
-**Connected to:** `useProfile()` hook, Supabase auth, Header ProfileRing.
+**New family fields (Iteration 10):** `father_status`, `father_income`, `mother_profession`, `mother_status`, `mother_income`, `domicile_district`, `guardian_phone`.
+**Connected to:** `useProfile()` hook (`src/hooks/useProfile.js`), Supabase auth, Header ProfileRing.
 
 ---
 
@@ -156,11 +157,12 @@ Last updated: 2026-02-22
 
 ---
 
-## 18. Per-University Autofill (3-Tier)
+## 18. Per-University Autofill (4+ Tier)
 **Status:** ✅ Working (selectors pending live verification)
-**What it does:** Fills university application forms using student profile data. 3-tier system: Tier 1 (deterministic CSS selectors from per-university configs), Tier 2 (AI field mapping via Ollama), Tier 3 (heuristic label/name/id pattern matching).
-**How it works:** `extension/content/content.js` orchestrates all 3 tiers. 17 per-university configs in `extension/universities/`. Each config has a `fieldMap` mapping profile keys to CSS selectors, plus `selectOptions` for dropdowns and `transforms` for formatting.
+**What it does:** Fills university application forms using student profile data. 4+ tier system: Tier 1 (deterministic CSS selectors from per-university configs), Tier 2 (AI field mapping via Ollama), Tier 2.5/2.6/2.7 (DOB scan, phone split, education radio scan), Tier 3 (heuristic label/name/id pattern matching), Tier 4 (AJAX-dependent dropdowns retried after 800 ms).
+**How it works:** `extension/content/content.js` orchestrates all tiers. 17 per-university configs in `extension/universities/`. Each config has a `fieldMap` mapping profile keys to CSS selectors, plus `selectOptions` for dropdowns and `transforms` for formatting. Income range matching maps numeric profile values to form dropdown labels (e.g., "Less than Rs. 30,000"). Compound CSS selectors (e.g., `select[id*="Father"][id*="Income"]`) handle ASP.NET forms with structured IDs.
 **Education system aware:** Yes — uses `getInterMarks()`, `getInterPercentage()`, `getMatricPercentage()` helpers from `extension/universities/index.js` to pick correct marks based on education system and inter status.
+**New in Iteration 10:** Heuristics for `father_status`, `mother_status`, `father_income`, `mother_income`, `father_occupation`, `mother_profession`, `domicile_district`. NUST config updated with 9 new field mappings.
 **Connected to:** Profile data (via background script), Supabase field_maps table, sidebar UI.
 
 ---

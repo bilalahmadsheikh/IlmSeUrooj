@@ -100,6 +100,9 @@ ilmseurroj/
 │   ├── context/
 │   │   └── ThemeContext.js    # Theme state management (dark/light/treasure)
 │   │
+│   ├── hooks/
+│   │   └── useProfile.js      # Supabase profile read/write hook
+│   │
 │   └── data/
 │       ├── universities.js    # 28 universities with all attributes
 │       ├── departmentData.js  # Department-specific comparison data
@@ -349,6 +352,42 @@ Scholarship and financial aid data:
 - Apply URLs and deadlines
 - Categories: need-based, merit-based, government, university-specific
 - Quick links to HEC and Ehsaas portals
+
+---
+
+## Supabase Backend
+
+### profiles table
+Stores all student personal, academic, and portal information. RLS enforced (students read/write own row only).
+
+Key column groups:
+- **Identity**: `full_name`, `cnic`, `date_of_birth`, `gender`, `nationality`, `religion`
+- **Contact**: `email`, `phone`, `whatsapp`, `address`, `city`, `province`, `postal_code`
+- **Education**: `education_system`, `inter_type`, `inter_status`, `fsc_*`, `matric_*`, `alevel_*`, `olevel_*`, `ibcc_*`
+- **Entry tests**: `net_score`, `sat_score`, `ecat_score`, `mdcat_score`, `gat_score`, etc.
+- **Family** (added migration 002): `father_name`, `father_cnic`, `father_occupation`, `father_status`, `father_income`, `mother_name`, `mother_profession`, `mother_status`, `mother_income`, `guardian_phone`
+- **Domicile**: `domicile_province`, `domicile_district`
+- **Portal**: `portal_email`, `portal_password`, `preferred_field`, `preferred_cities`, `preferred_degree`
+- **Meta**: `profile_completion`, `photo_url`, `cnic_url`, `result_card_url`, `created_at`, `updated_at`
+
+See `docs/agent/SCHEMA.md` for the full column-by-column reference.
+
+### Chrome Extension Autofill Architecture
+`extension/content/content.js` runs a 4+ tier autofill pipeline on each university portal page:
+
+```
+Tier 1  — Deterministic CSS selectors (per-university configs)
+Tier 2  — AI field mapping via local Ollama (unknown portals only)
+Tier 2.5 — DOB field scan
+Tier 2.6 — Phone field split
+Tier 2.7 — Education radio group scan (FSc/O-Level/A-Level)
+Tier 3  — Heuristic label/name/id pattern matching
+Tier 4  — AJAX district/tehsil retry (800 ms delay)
+```
+
+Income-range matching: numeric profile values are matched to dropdown labels such as "Less than Rs. 30,000" or "30,001 - 50,000".
+
+Per-university configs live in `extension/universities/` (17 files + `index.js`). The NUST config uses compound attribute selectors (e.g., `select[id*="Father"][id*="Income"]`) to handle ASP.NET form ID conventions.
 
 ---
 

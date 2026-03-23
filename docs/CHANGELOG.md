@@ -17,6 +17,7 @@ All iterations of the IlmSeUrooj (UniMatch) project documented in one place.
 | 7 | 2026-02-20 | Entry tests, scholarships, recommendations, UX enhancements, Supabase |
 | 8 | 2026-02-21 | Chrome extension, 3-tier autofill engine, 17 university configs |
 | 9 | 2026-02-22 | Apply URL corrections, name splitting, extension detection fixes |
+| 10 | 2026-03-24 | NUST autofill intelligence: parent/family fields, income detection, 4-tier engine |
 
 ---
 
@@ -476,6 +477,86 @@ Updated `src/data/universities.js` (both university cards and upcoming deadlines
 
 ---
 
+## Iteration 10: NUST Autofill Intelligence: Parent/Family Fields + Robust Income Detection
+**Date**: 2026-03-24 | **Status**: ✅ Complete
+
+### Overview
+Extended the Supabase `profiles` table and profile page with parent/family fields (father/mother status, income, profession, domicile district). Upgraded the autofill engine from a 3-tier to a 4-tier system with income-range matching, compound CSS selectors, ASP.NET separator stripping, AJAX district retry, and a radio-group education scan. Updated the NUST config with 9 new field mappings.
+
+### Features Implemented
+
+#### Supabase Migration: `002_parent_profile_fields.sql`
+New columns added to `profiles` table:
+| Column | Type | Constraint |
+|--------|------|-----------|
+| `father_status` | TEXT | CHECK ('alive','deceased','shaheed') |
+| `mother_status` | TEXT | CHECK ('alive','deceased','shaheed') |
+| `father_income` | NUMERIC(12,2) | — |
+| `mother_income` | NUMERIC(12,2) | — |
+| `mother_profession` | TEXT | — |
+| `domicile_district` | TEXT | — (was missing) |
+
+#### Profile Page Updates (`src/app/profile/page.js`)
+New fields added to the Family Info section:
+- Father's Status dropdown (alive / deceased / shaheed)
+- Father's Monthly Income in PKR (number input)
+- Mother's Profession (text input)
+- Mother's Status dropdown (alive / deceased / shaheed)
+- Mother's Monthly Income in PKR (number input)
+- Guardian Phone (tel input)
+
+#### 4-Tier Autofill Engine (`extension/content/content.js`)
+The autofill engine was extended from 3 tiers to 4+ tiers:
+
+| Tier | Name | Description |
+|------|------|-------------|
+| 1 | Deterministic | Per-university CSS selectors (fastest, most accurate) |
+| 2 | AI (Ollama) | AI field mapping for unknown portals |
+| 2.5 | DOB scan | Date-of-birth field scan |
+| 2.6 | Phone split | Phone field splitting logic |
+| 2.7 | Education radio scan | FSc/O-Level/A-Level radio group detection |
+| 3 | Heuristic | Label/name/id pattern matching |
+| 4 | AJAX districts | Retries district/tehsil dropdowns after 800 ms |
+
+Additional improvements:
+- **Income range matching** in `fillSelect`: matches numeric profile values (e.g., `25000`) to form dropdown labels like "Less than Rs. 30,000" or "30,001 - 50,000"
+- **Compound CSS selectors**: e.g., `select[id*="Father"][id*="Income"]` to match IDs containing both keywords anywhere
+- **`sigNoSep` separator stripping**: now strips `$`, `(`, `)`, and curly apostrophes (U+2019) for robust ASP.NET form matching
+- **TIER 4 AJAX district retry**: waits 800 ms after main fill then retries district/tehsil dropdowns that load via AJAX
+- **Global `unhandledrejection` handler**: suppresses "Extension context invalidated" console errors
+- **TIER 1 safety guard**: skips non-INPUT/SELECT/TEXTAREA elements to prevent "Illegal invocation" TypeError
+- **Debug logging**: `console.debug` when a field is detected but the profile value is null
+- **FIELD_HEURISTICS expanded**: 6 new entries for `father_status`, `mother_status`, `father_income`, `mother_income`, `father_occupation`, `mother_profession`
+- **`EXCLUDED_FIELD_PATTERNS`**: added `'residence'` to prevent wrong autofill of accommodation-type dropdowns
+- **`profileValueFor()` updated**: handles `father_status`, `mother_status`, `father_income`, `mother_income`, `father_occupation`, `mother_profession`, `district`, `domicile_district`
+
+#### NUST Config Updates (`extension/universities/index.js`)
+9 new field mappings added to the NUST `fieldMap`:
+- `province`, `father_occupation`, `father_status`, `father_income`
+- `mother_profession`, `mother_status`, `mother_income`
+- `education_system`, `district`
+
+Uses compound selectors such as `select[id*="Father"][id*="Income"]`.
+
+#### Other Component Updates
+- `src/data/entryTestsData.js` — entry test data updated
+- `src/components/EntryTests/EntryTests.js` — refactored
+- `src/components/AdmissionsDeadlines/AdmissionsDeadlines.js` — minor fix
+
+### Technical Changes
+| File | Change |
+|------|--------|
+| `supabase/migrations/002_parent_profile_fields.sql` | New migration adding 6 parent/family columns |
+| `src/app/profile/page.js` | 6 new family fields in the Family Info section |
+| `src/hooks/useProfile.js` | New hook (added in Iteration 10 context) |
+| `extension/content/content.js` | 4-tier engine, income matching, compound selectors, AJAX retry, separator stripping |
+| `extension/universities/index.js` | NUST fieldMap expanded with 9 new keys |
+| `src/data/entryTestsData.js` | Updated entry test information |
+| `src/components/EntryTests/EntryTests.js` | Refactored component |
+| `src/components/AdmissionsDeadlines/AdmissionsDeadlines.js` | Minor fix |
+
+---
+
 ## Current Project Stats
 
 | Metric | Value |
@@ -492,7 +573,9 @@ Updated `src/data/universities.js` (both university cards and upcoming deadlines
 | Validation Scripts | 6 |
 | Scraper Configs | 16 |
 | Extension University Configs | 17 |
-| Lines of Code | ~20,000+ |
+| Profile Table Columns | 91 |
+| Autofill Tiers | 4+ (Tier 1 → 2 → 2.5/2.6/2.7 → 3 → 4) |
+| Lines of Code | ~21,000+ |
 
 ---
 

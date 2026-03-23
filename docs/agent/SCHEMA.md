@@ -1,6 +1,6 @@
 # UniMatch — Database Schema
 **Source of truth:** Supabase project `nqmvfierglxgjgqjmxmp`
-Last verified: 2026-02-22
+Last verified: 2026-03-24
 
 ---
 
@@ -75,6 +75,11 @@ Last verified: 2026-02-22
 | blood_group | text | YES | — | Blood group |
 | father_cnic | text | YES | — | Father's CNIC |
 | father_occupation | text | YES | — | Father's occupation |
+| father_status | text | YES | — | Father's status: 'alive', 'deceased', or 'shaheed' |
+| father_income | numeric(12,2) | YES | — | Father's monthly income (PKR) |
+| mother_profession | text | YES | — | Mother's profession |
+| mother_status | text | YES | — | Mother's status: 'alive', 'deceased', or 'shaheed' |
+| mother_income | numeric(12,2) | YES | — | Mother's monthly income (PKR) |
 | guardian_phone | text | YES | — | Guardian's phone number |
 | portal_email | text | YES | — | Consistent email for university portals |
 | portal_password | text | YES | — | Consistent password for university portals |
