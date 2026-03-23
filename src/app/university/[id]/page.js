@@ -566,6 +566,16 @@ export default function UniversityDetailPage() {
                 </div>
               )}
             </div>
+            {uni.facilities?.length > 0 && (
+              <div className={styles.facilitiesSection}>
+                <h3 className={styles.sectionHeading}>Campus Facilities</h3>
+                <div className={styles.facilitiesList}>
+                  {uni.facilities.map((f, i) => (
+                    <span key={i} className={styles.facilityTag}>{f}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Fees */}

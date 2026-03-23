@@ -34,6 +34,7 @@ export const universities = [
     description: "Pakistan's leading STEM university with world-class facilities and research programs.",
     website: "https://nust.edu.pk",
     avgFee: "PKR 170,000 - 202,050 per semester (varies by school)",
+    facilities: ["Central Library", "Sports Complex", "Student Hostels (Boys & Girls)", "Multiple Cafeterias", "Prayer Areas", "Medical Center", "Auditorium", "Research Centers", "Swimming Pool"],
     admissions: {
       deadline: "2026-03-30",
       testName: "NET",
@@ -78,6 +79,7 @@ export const universities = [
     description: "Premier private university known for its business and computer science programs.",
     website: "https://lums.edu.pk",
     avgFee: "PKR 850,000 - 1,200,000 per semester (Rs. 41,700/CH)",
+    facilities: ["Syed Babar Ali Library", "Sports Complex", "Swimming Pool", "Student Hostels", "Multiple Restaurants & Cafés", "Prayer Areas", "Health Center", "Amphitheater", "Business Incubator"],
     admissions: {
       deadline: "2026-01-27",
       testName: "LCAT",
@@ -108,7 +110,7 @@ export const universities = [
       "Business": 8
     },
     campusType: "Industry-Focused",
-    hostelAvailability: "On-Campus with Hostel",
+    hostelAvailability: "On-Campus without Hostel",
     fields: ["Computer Science", "Pre-Engineering", "Business"],
     programs: {
       "Computer Science": ["Computer Science", "Software Engineering", "Data Science", "Artificial Intelligence", "Cyber Security", "Internet of Things", "Robotics"],
@@ -120,6 +122,7 @@ export const universities = [
     description: "FAST Islamabad - Most competitive campus with highest merit cutoffs (CS: 75.3%, SE: 73%).",
     website: "https://isb.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
+    facilities: ["Library", "CS & AI Labs", "Cafeteria", "Prayer Area", "Sports Ground", "Parking"],
     admissions: {
       deadline: "2026-07-04",
       testName: "FAST NU Test",
@@ -153,6 +156,7 @@ export const universities = [
     description: "FAST Lahore - Second most competitive campus (CS: 76.8%, SE: 75.6%).",
     website: "https://lhr.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
+    facilities: ["Library", "Computer Labs", "Student Hostel (Boys & Girls)", "Cafeteria", "Prayer Area", "Sports Area"],
     admissions: {
       deadline: "2026-07-04",
       testName: "FAST NU Test",
@@ -186,6 +190,7 @@ export const universities = [
     description: "FAST Karachi - Good program quality with moderate cutoffs (CS: 68.08%, SE: 66.52%).",
     website: "https://khi.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
+    facilities: ["Library", "Computer Labs", "Cafeteria", "Prayer Area", "Sports Area"],
     admissions: {
       deadline: "2026-07-04",
       testName: "FAST NU Test",
@@ -217,6 +222,7 @@ export const universities = [
     description: "FAST Peshawar - Lower cutoffs campus (CS: 58.46%, SE: 59.73%).",
     website: "https://pwr.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
+    facilities: ["Library", "Computer Labs", "Student Hostel", "Cafeteria", "Prayer Area", "Sports Ground"],
     admissions: {
       deadline: "2026-07-04",
       testName: "FAST NU Test",
@@ -252,6 +258,7 @@ export const universities = [
     description: "FAST Chiniot-Faisalabad - Lowest cutoffs in FAST (CS: 67.02%, SE: 66.68%).",
     website: "https://cfd.nu.edu.pk",
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
+    facilities: ["Library", "Computer Labs", "Student Hostel", "Cafeteria", "Prayer Area", "Sports Area"],
     admissions: {
       deadline: "2026-07-04",
       testName: "FAST NU Test",
@@ -291,6 +298,7 @@ export const universities = [
     description: "COMSATS Islamabad - Flagship campus with high CS cutoffs (82.7%, SE: 81.6%).",
     website: "https://islamabad.comsats.edu.pk",
     avgFee: "PKR 180,000 - 220,000 per semester (CS/Engineering)",
+    facilities: ["Central Library", "Sports Complex", "Student Hostels (Boys & Girls)", "Cafeteria", "Prayer Area", "Medical Room", "Auditorium", "Incubation Center"],
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -332,6 +340,7 @@ export const universities = [
     description: "COMSATS Lahore - Highest CS cutoffs in COMSATS (87.36%, SE: 85.6%)!",
     website: "https://lahore.comsats.edu.pk",
     avgFee: "PKR 120,000 - 190,000 per semester",
+    facilities: ["Library", "Sports Grounds", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Room"],
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -371,6 +380,7 @@ export const universities = [
     description: "COMSATS Wah - Good middle-ground option with ~80% CS cutoffs.",
     website: "https://wah.comsats.edu.pk",
     avgFee: "PKR 96,000 - 140,000 per semester (Rs. 6,000/CH)",
+    facilities: ["Library", "Sports Area", "Student Hostel", "Cafeteria", "Prayer Area"],
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -410,6 +420,7 @@ export const universities = [
     description: "COMSATS Abbottabad - Scenic campus with CS cutoffs around 78%.",
     website: "https://abbottabad.comsats.edu.pk",
     avgFee: "PKR 75,000 - 140,000 per semester",
+    facilities: ["Library", "Sports Area", "Student Hostel", "Cafeteria", "Prayer Area", "Scenic Green Campus"],
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -453,6 +464,7 @@ export const universities = [
     description: "COMSATS Sahiwal - Lower cutoffs around 68%, easier admission.",
     website: "https://sahiwal.comsats.edu.pk",
     avgFee: "PKR 155,000 (1st sem) / PKR 133,000 (regular)",
+    facilities: ["Library", "Computer Labs", "Student Hostel", "Cafeteria", "Prayer Area"],
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -496,6 +508,7 @@ export const universities = [
     description: "COMSATS Attock - One of the easiest COMSATS campuses (~60-65%).",
     website: "https://attock.comsats.edu.pk",
     avgFee: "PKR 70,000 - 130,000 per semester",
+    facilities: ["Library", "Computer Labs", "Student Hostel", "Cafeteria", "Prayer Area"],
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -534,6 +547,7 @@ export const universities = [
     description: "COMSATS Vehari - Lowest cutoffs in COMSATS system (~55-60%).",
     website: "https://vehari.comsats.edu.pk",
     avgFee: "PKR 65,000 - 120,000 per semester",
+    facilities: ["Library", "Computer Labs", "Student Hostel", "Cafeteria", "Prayer Area"],
     admissions: {
       deadline: "2026-07-20",
       testName: "NTS NAT",
@@ -565,7 +579,7 @@ export const universities = [
     hostelAvailability: "On-Campus with Hostel",
     fields: ["Business", "Computer Science", "Others"],
     programs: {
-      "Business": ["Business Administration (BBA)", "Accounting & Finance", "Business Analytics", "Economics", "Economics & Mathematics"],
+      "Business": ["Business Administration", "Accounting & Finance", "Business Analytics", "Economics", "Economics & Mathematics"],
       "Computer Science": ["Computer Science"],
       "Others": ["Mathematics", "Social Sciences & Liberal Arts"]
     },
@@ -574,6 +588,7 @@ export const universities = [
     description: "Asia's oldest business school with exceptional corporate connections.",
     website: "https://iba.edu.pk",
     avgFee: "PKR 200,000 - 240,000 per semester (Rs. 29,400/CH)",
+    facilities: ["IBA Library", "Sports Complex", "Student Hostel", "Multiple Cafés", "Prayer Area", "Auditorium", "Center for Entrepreneurial Development", "IBA City Campus (separate)"],
     admissions: {
       deadline: "2026-03-25",
       testName: "IBA Aptitude Test",
@@ -616,6 +631,7 @@ export const universities = [
     description: "UET Lahore - Flagship campus with highest cutoffs (ME: 81.13%, CS: 78.57%).",
     website: "https://uet.edu.pk",
     avgFee: "PKR 150,000 - 250,000 per year (subsidized)",
+    facilities: ["Main Library", "Sports Complex", "8 Student Hostels (Boys)", "Girls Hostel", "Swimming Pool", "Medical Center", "Cafeterias", "Prayer Area", "Auditorium"],
     admissions: {
       deadline: "2026-03-22",
       testName: "ECAT",
@@ -649,6 +665,7 @@ export const universities = [
     description: "UET Taxila - Slightly lower cutoffs than Lahore, near Islamabad.",
     website: "https://uettaxila.edu.pk",
     avgFee: "PKR 150,000 - 250,000 per year (subsidized)",
+    facilities: ["Library", "Sports Grounds", "Student Hostel (Boys)", "Cafeteria", "Prayer Area", "Engineering Workshops"],
     admissions: {
       deadline: "2026-03-22",
       testName: "ECAT",
@@ -685,6 +702,7 @@ export const universities = [
     description: "Elite engineering institute with unique residential campus (CS: #324, AI: #499).",
     website: "https://giki.edu.pk",
     avgFee: "PKR 427,500 per semester (tuition + accommodation)",
+    facilities: ["Library", "Sports Complex", "Residential Hostels (mandatory for all students)", "Cafeteria", "Prayer Area", "Medical Center", "Swimming Pool", "Cricket Ground", "Basketball Courts"],
     admissions: {
       deadline: "2026-05-15",
       testName: "GIKI Entry Test",
@@ -721,6 +739,7 @@ export const universities = [
     description: "Premier research institute focusing on nuclear and advanced engineering.",
     website: "https://pieas.edu.pk",
     avgFee: "PKR 63,000 - 100,000 per semester (heavily subsidized)",
+    facilities: ["Research Library", "Sports Facilities", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Center", "Nuclear Research Labs", "High Security Campus"],
     admissions: {
       deadline: "2026-03-26",
       testName: "PIEAS Written Test",
@@ -764,6 +783,7 @@ export const universities = [
     description: "Bahria Islamabad - Most competitive campus (CS/SE: >80%).",
     website: "https://bahria.edu.pk/islamabad",
     avgFee: "PKR 85,000 - 145,000 per semester",
+    facilities: ["Library", "Sports Complex", "Student Hostels", "Cafeteria", "Prayer Area", "Medical Room", "Auditorium", "Navy Affiliated Discipline"],
     admissions: {
       deadline: "2026-07-23",
       testName: "BUET (Bahria Entry Test)",
@@ -790,7 +810,7 @@ export const universities = [
       "Business": 10
     },
     campusType: "Industry-Focused",
-    hostelAvailability: "On-Campus with Hostel",
+    hostelAvailability: "On-Campus without Hostel",
     fields: ["Computer Science", "Business"],
     programs: {
       "Computer Science": ["Computer Science", "Software Engineering", "Information Technology", "Business & Information Technology"],
@@ -801,6 +821,7 @@ export const universities = [
     description: "Bahria Lahore - Moderate cutoffs around 70-75%.",
     website: "https://bahria.edu.pk/lahore",
     avgFee: "PKR 85,000 - 145,000 per semester",
+    facilities: ["Library", "Computer Labs", "Cafeteria", "Prayer Area", "Sports Area"],
     admissions: {
       deadline: "2026-09-03",
       testName: "BUET (Bahria Entry Test)",
@@ -839,6 +860,7 @@ export const universities = [
     description: "Bahria Karachi - Lower cutoffs (~65-70%), has medical programs.",
     website: "https://bahria.edu.pk/karachi",
     avgFee: "PKR 85,000 - 145,000 per semester",
+    facilities: ["Library", "Sports Area", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Faculty Building"],
     admissions: {
       deadline: "2026-06-02",
       testName: "BUET (Bahria Entry Test)",
@@ -879,6 +901,7 @@ export const universities = [
     description: "Pakistan's first liberal arts university with a focus on innovation.",
     website: "https://habib.edu.pk",
     avgFee: "PKR 335,000 - 395,000 per semester (Engineering)",
+    facilities: ["Habib University Library", "Innovation Labs", "Cafeteria", "Prayer Area", "Sports Area", "Maker Space", "Seminar Halls"],
     admissions: {
       deadline: "2026-03-31",
       testName: "Habib Entrance Exam",
@@ -917,6 +940,7 @@ export const universities = [
     description: "Premier medical institution with world-class healthcare training.",
     website: "https://aku.edu",
     avgFee: "PKR 927,000 per semester (MBBS, ~PKR 1,854,000/year)",
+    facilities: ["Medical Library", "Teaching Hospital", "Simulation Labs", "Student Hostels", "Cafeteria", "Prayer Area", "Research Centers", "Medical Museum"],
     admissions: {
       deadline: "2026-05-13",
       testName: "AKU Entry Test",
@@ -956,6 +980,7 @@ export const universities = [
     description: "Historic Karachi engineering university. Software Eng is most competitive (87%).",
     website: "https://neduet.edu.pk",
     avgFee: "PKR 55,000 - 65,000 per semester (subsidized)",
+    facilities: ["Central Library", "Sports Complex", "Student Hostels (Boys & Girls)", "Cafeterias", "Prayer Area", "Medical Center", "Auditorium", "Engineering Workshops"],
     admissions: {
       deadline: "2026-07-15",
       testName: "NED Entry Test",
@@ -993,6 +1018,7 @@ export const universities = [
     description: "Air Force university excelling in aerospace and related fields.",
     website: "https://au.edu.pk",
     avgFee: "PKR 86,000 - 115,000 per semester (per credit hour)",
+    facilities: ["Library", "Aerospace Labs", "Sports Grounds", "Student Hostel", "Cafeteria", "Prayer Area", "Auditorium", "Air Force Affiliated Facilities"],
     admissions: {
       deadline: "2026-06-20",
       testName: "Air University Entry Test",
@@ -1027,6 +1053,7 @@ export const universities = [
     description: "Known for business and media programs with industry connections.",
     website: "https://szabist.edu.pk",
     avgFee: "PKR 120,000 - 165,000 per semester",
+    facilities: ["Library", "Media Production Studios", "Computer Labs", "Cafeteria", "Prayer Area", "Seminar Rooms", "Sports Area"],
     admissions: {
       deadline: "2026-02-12",
       testName: "SZABIST Admission Test",
@@ -1067,6 +1094,7 @@ export const universities = [
     description: "Modern IT-focused university promoting entrepreneurship and innovation.",
     website: "https://itu.edu.pk",
     avgFee: "PKR 80,000 - 175,000 per semester (Rs. 6,000/CH)",
+    facilities: ["Digital Library", "Innovation Hub", "Computer Labs", "Cafeteria", "Prayer Area", "Startup Incubator", "Seminar Halls"],
     admissions: {
       deadline: "2026-06-24",
       testName: "ITU Admission Test",
