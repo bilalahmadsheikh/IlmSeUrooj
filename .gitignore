@@ -48,3 +48,10 @@ reports/
 
 # agent
 .agents/
+
+# claude code
+.claude/
+
+# python cache
+__pycache__/
+*.pyc
