@@ -29,35 +29,27 @@
 }
 
 @keyframes wiggle {
-
-    0%,
-    100% {
-        transform: rotate(0deg);
-    }
-
-    25% {
-        transform: rotate(-5deg);
-    }
-
-    75% {
-        transform: rotate(5deg);
-    }
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
 }
 
 .subtitle {
     color: var(--color-text-secondary);
     margin-top: var(--space-2);
+    font-size: var(--font-size-sm);
 }
 
-/* Filter Section */
+/* ─── Filter Section ─────────────────────────────── */
 .filterSection {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-4);
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
     margin-bottom: var(--space-6);
-    padding: var(--space-4);
+    padding: var(--space-5) var(--space-6);
     background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
@@ -69,12 +61,14 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    min-width: 200px;
+    width: 100%;
+    max-width: 280px;
 }
 
 .filterLabel {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--space-2);
     font-size: var(--font-size-sm);
     font-weight: 600;
@@ -85,34 +79,38 @@
     font-size: var(--font-size-base);
 }
 
-.filterSelect {
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    color: var(--color-text-primary);
+.filterInfo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.filterInfoBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 var(--space-2);
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
     font-size: var(--font-size-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    font-weight: 500;
+    font-weight: 700;
+    color: white;
 }
 
-.filterSelect:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+.filterInfoText {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
 }
 
-.filterSelect:hover {
-    border-color: var(--color-primary);
-}
-
-/* Selectors */
+/* ─── University Selectors ───────────────────────── */
 .selectors {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-2);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
     position: relative;
     z-index: 50;
 }
@@ -126,6 +124,7 @@
 
 .selectorCard {
     background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
@@ -138,28 +137,7 @@
 
 .selectorCard:focus-within {
     z-index: 100;
-}
-
-.selectorCard:hover {
     border-color: var(--color-primary);
-}
-
-.select {
-    width: 100%;
-    padding: var(--space-3);
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.select:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .selectedInfo {
@@ -215,48 +193,147 @@
     color: white;
     border-radius: var(--radius-full);
     font-weight: 600;
+    white-space: nowrap;
 }
 
-/* Comparison Table */
+/* ─── Criteria Tabs ──────────────────────────────── */
+.criteriaTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    padding: var(--space-2);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+}
+
+.criteriaTab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.criteriaTab:hover {
+    color: var(--color-primary-light);
+    background: var(--glass-bg-light);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.criteriaTabActive {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: var(--color-primary);
+    color: var(--color-primary-light);
+    font-weight: 600;
+}
+
+.criteriaTabIcon {
+    font-size: var(--font-size-base);
+}
+
+.criteriaTabLabel {
+    line-height: 1;
+}
+
+/* ─── Comparison Table ───────────────────────────── */
 .comparisonTable {
     background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
+    overflow: hidden;
     position: relative;
     z-index: 1;
+    margin-bottom: var(--space-4);
 }
 
-.criteriaHeader {
+/* Sticky column headers */
+.tableHeader {
+    display: flex;
+    background: var(--color-bg-secondary);
+    border-bottom: 2px solid var(--glass-border);
+    position: sticky;
+    top: 60px;
+    z-index: 10;
+}
+
+.tableHeaderLabel {
+    min-width: 180px;
+    width: 25%;
+    padding: var(--space-3) var(--space-4);
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-4);
-    background: var(--color-bg-secondary);
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.criteriaIcon {
-    font-size: var(--font-size-2xl);
-}
-
-.criteriaTitle {
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--color-text-primary);
-    flex: 1;
 }
 
 .deptBadge {
     font-size: var(--font-size-xs);
     padding: var(--space-1) var(--space-3);
-    background: var(--glass-bg-light);
+    background: rgba(16, 185, 129, 0.1);
     border: 1px solid var(--color-primary);
     border-radius: var(--radius-full);
     color: var(--color-primary-light);
     font-weight: 600;
 }
 
+.tableHeaderCols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    flex: 1;
+}
+
+.tableHeaderCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--space-3) var(--space-2);
+    border-left: 1px solid var(--glass-border);
+    text-align: center;
+}
+
+.colLogo {
+    width: 32px;
+    height: 32px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: var(--font-size-sm);
+    margin-bottom: 2px;
+}
+
+.colName {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+}
+
+.colCity {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.colEmpty {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-lg);
+}
+
+/* ─── Rows ───────────────────────────────────────── */
 .row {
     display: flex;
     flex-direction: column;
@@ -264,22 +341,16 @@
     transition: background-color var(--transition-fast);
 }
 
-.row:hover {
-    background: var(--glass-bg-light);
-}
+.row:hover { background: var(--glass-bg-light); }
+
+.rowLast { border-bottom: none; }
 
 @media (min-width: 640px) {
-    .row {
-        flex-direction: row;
-    }
-}
-
-.row:last-child {
-    border-bottom: none;
+    .row { flex-direction: row; }
 }
 
 .rowLabel {
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     background: var(--color-bg-tertiary);
     min-width: 180px;
     display: flex;
@@ -287,9 +358,7 @@
 }
 
 @media (min-width: 640px) {
-    .rowLabel {
-        width: 25%;
-    }
+    .rowLabel { width: 25%; }
 }
 
 .fieldLabel {
@@ -320,12 +389,37 @@
 
 .value.best {
     background: rgba(52, 211, 153, 0.1);
-    color: var(--color-accent-1);
+    color: var(--color-primary-light);
     font-weight: 600;
 }
 
-.valueText {
-    word-break: break-word;
+.valueEmpty {
+    opacity: 0.35;
+}
+
+.valueText { word-break: break-word; }
+
+.valueTextSm { font-size: var(--font-size-xs); }
+
+/* Progress bar */
+.valueBar {
+    width: 100%;
+    max-width: 80px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.valueBarFill {
+    height: 100%;
+    background: rgba(16, 185, 129, 0.4);
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+.valueBarBest {
+    background: var(--color-primary);
 }
 
 .bestBadge {
@@ -337,7 +431,23 @@
     font-weight: 600;
 }
 
-/* Facilities Section */
+/* ─── At a Glance ────────────────────────────────── */
+.glanceSection {
+    border-top: 2px solid var(--glass-border);
+    background: rgba(16, 185, 129, 0.03);
+}
+
+.glanceTitle {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-primary-light);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+/* ─── Facilities & Recruiters ────────────────────── */
 .facilitiesSection,
 .recruitersSection {
     padding: var(--space-4);
@@ -370,9 +480,7 @@
 }
 
 .facilitiesCard:hover,
-.recruitersCard:hover {
-    border-color: var(--color-primary);
-}
+.recruitersCard:hover { border-color: var(--color-primary); }
 
 .facilitiesCard h5,
 .recruitersCard h5 {
@@ -413,7 +521,147 @@
     font-size: var(--font-size-sm);
 }
 
-/* Empty State */
+/* ─── Summary Winner Card ────────────────────────── */
+.summaryCard {
+    margin-top: var(--space-4);
+    padding: var(--space-6);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.06));
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: var(--radius-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.summaryCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+}
+
+.summaryTop {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.summaryTrophy {
+    font-size: 2.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.summaryTopText {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.summaryTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.summaryWinnerName {
+    color: var(--color-primary-light);
+}
+
+.summarySubtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.summaryBreakdown {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.summaryRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.summaryMedal {
+    font-size: var(--font-size-lg);
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.summaryName {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    min-width: 80px;
+}
+
+.summaryBar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.summaryBarFill {
+    height: 100%;
+    background: rgba(16, 185, 129, 0.35);
+    border-radius: var(--radius-full);
+    transition: width 0.6s ease;
+}
+
+.summaryBarGold {
+    background: var(--color-primary);
+}
+
+.summaryWinsCount {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    min-width: 44px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.summaryNote {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    border-top: 1px solid var(--glass-border);
+    padding-top: var(--space-3);
+    margin: 0;
+}
+
+/* Tie card */
+.summaryTieCard {
+    margin-top: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.summaryTieCard span {
+    font-size: var(--font-size-xl);
+}
+
+.summaryTieCard p {
+    margin: 0;
+}
+
+/* ─── Empty State ────────────────────────────────── */
 .emptyState {
     text-align: center;
     padding: var(--space-10);
@@ -438,126 +686,140 @@
 }
 
 @keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
-/* Mobile Responsive */
+/* ─── Mobile ─────────────────────────────────────── */
 @media (max-width: 640px) {
     .filterSection {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-2);
+        flex-direction: column;
+        gap: var(--space-3);
         padding: var(--space-3);
     }
 
-    .filterGroup {
-        min-width: 0;
-    }
+    .filterGroup { min-width: 0; width: 100%; }
 
-    .filterLabel {
-        font-size: var(--font-size-xs);
-        gap: var(--space-1);
-    }
-
-    .filterIcon {
-        font-size: var(--font-size-sm);
-    }
-
-    .filterSelect {
-        padding: var(--space-2);
-        font-size: var(--font-size-xs);
+    /* Selector cards: compact, side-by-side (hide 3rd) */
+    .selectors {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
     }
 
     .selectorCard {
         padding: var(--space-2);
     }
 
-    .selectorCard:nth-child(3) {
-        display: none;
+    .selectorCard:nth-child(3) { display: none; }
+
+    /* Smaller selectedInfo on mobile */
+    .selectedInfo {
+        padding: var(--space-2);
+        gap: var(--space-2);
+        flex-wrap: nowrap;
     }
 
-    .select {
-        padding: var(--space-2);
+    .uniLogo {
+        width: 28px;
+        height: 28px;
+        font-size: var(--font-size-sm);
+        flex-shrink: 0;
+    }
+
+    .uniName { font-size: 11px; }
+    .uniCity { font-size: 10px; }
+
+    .deptRank {
+        font-size: 10px;
+        padding: 2px 6px;
+        white-space: nowrap;
+    }
+
+    /* Criteria tabs: smaller */
+    .criteriaTabs {
+        gap: var(--space-1);
+        padding: var(--space-1);
+    }
+
+    .criteriaTab {
+        padding: var(--space-2) var(--space-3);
         font-size: var(--font-size-xs);
     }
 
+    .criteriaTabIcon { display: none; }
+
+    /* Table header: hide the left dept-badge column on mobile
+       so LUMS/NUST header columns span full width and align
+       perfectly with the value columns below */
+    .tableHeader {
+        top: 56px;
+        flex-direction: column;
+    }
+
+    .tableHeaderLabel {
+        /* Show dept badge as a full-width top bar */
+        width: 100%;
+        min-width: 0;
+        padding: var(--space-2) var(--space-3);
+        border-bottom: 1px solid var(--glass-border);
+        justify-content: center;
+    }
+
+    .tableHeaderCols {
+        /* Now spans 100% width — aligns with rowValues below */
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+    }
+
+    .tableHeaderCol:nth-child(3) { display: none; }
+
+    /* Rows: label full-width on top, values grid below */
+    .row { flex-direction: column; }
+
+    .rowLabel {
+        width: 100%;
+        min-width: 0;
+        padding: var(--space-2) var(--space-3);
+        background: var(--color-bg-secondary);
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .rowValues {
+        /* Full width, 2 cols — aligns with the 2-col header */
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+    }
+
+    .value:nth-child(3) { display: none; }
+
+    .value {
+        border-left: none;
+        border-top: none;
+    }
+
+    /* Facilities / recruiters */
     .facilitiesGrid,
     .recruitersGrid {
         grid-template-columns: repeat(2, 1fr);
     }
 
     .facilitiesCard:nth-child(3),
-    .recruitersCard:nth-child(3) {
-        display: none;
-    }
-
-    .rowValues {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .value:nth-child(3) {
-        display: none;
-    }
-
-    .value {
-        border-left: none;
-        border-top: 1px solid var(--glass-border);
-    }
+    .recruitersCard:nth-child(3) { display: none; }
 }
 
 @media (max-width: 480px) {
-    .section {
-        padding: var(--space-6) var(--space-3);
-    }
-
-    .header {
-        margin-bottom: var(--space-4);
-    }
+    .section { padding: var(--space-6) var(--space-3); }
 
     .title {
         font-size: var(--font-size-lg);
         gap: var(--space-2);
     }
 
-    .titleIcon {
-        font-size: var(--font-size-2xl);
-    }
+    .uniDetails { align-items: flex-start; }
 
-    .selectedInfo {
-        justify-content: center;
-        text-align: center;
-        padding: var(--space-2);
-        gap: var(--space-2);
-    }
+    .summaryCard { padding: var(--space-4); }
 
-    .uniLogo {
-        width: 32px;
-        height: 32px;
-        font-size: var(--font-size-base);
-    }
+    .summaryTrophy { font-size: 1.75rem; }
 
-    .uniName {
-        font-size: var(--font-size-xs);
-    }
-
-    .uniCity {
-        font-size: 10px;
-    }
-
-    .deptRank {
-        font-size: 10px;
-        padding: 2px var(--space-1);
-    }
-
-    .uniDetails {
-        align-items: center;
-    }
+    .summaryTitle { font-size: var(--font-size-base); }
 }
