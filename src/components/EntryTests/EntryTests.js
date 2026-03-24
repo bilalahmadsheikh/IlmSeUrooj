@@ -33,7 +33,6 @@ export default function EntryTests({ savedUniversities = [] }) {
         <section className={styles.section}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    <span className={styles.titleIcon}>📝</span>
                     Entry Tests Guide
                 </h2>
                 <p className={styles.subtitle}>
@@ -58,7 +57,6 @@ export default function EntryTests({ savedUniversities = [] }) {
                         </div>
 
                         <div className={styles.testPeriod}>
-                            <span className={styles.periodIcon}>📅</span>
                             {test.period}
                         </div>
 
@@ -92,7 +90,7 @@ export default function EntryTests({ savedUniversities = [] }) {
             )}
 
             <div className={styles.disclaimer}>
-                ⚠️ Test dates and registration windows may change — always verify on the official test portal.
+                ! Test dates and registration windows may change — always verify on the official test portal.
             </div>
         </section>
     );

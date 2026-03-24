@@ -99,7 +99,6 @@ export default function DecisionHelper({ apiFetch }) {
                     marginBottom: 20,
                     textAlign: 'center',
                 }}>
-                    <div style={{ fontSize: 36, marginBottom: 8 }}>🎓</div>
                     <h3 style={{ color: '#4ade80', fontSize: 18, margin: '0 0 4px' }}>Final Choice Made!</h3>
                     <p style={{ color: '#a1a1aa', fontSize: 14, margin: 0 }}>
                         <strong style={{ color: '#e4e4e7' }}>{finalChoice.university_name}</strong> — {finalChoice.program}
@@ -109,7 +108,7 @@ export default function DecisionHelper({ apiFetch }) {
 
             <div className="dash-section">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <h2 className="dash-section-title" style={{ marginBottom: 0 }}>🎓 Post-Admission Decision Helper</h2>
+                    <h2 className="dash-section-title" style={{ marginBottom: 0 }}>Post-Admission Decision Helper</h2>
                     <button className="dash-btn" onClick={() => setShowForm(!showForm)}>
                         {showForm ? '✕ Cancel' : '+ Add Application'}
                     </button>
@@ -117,7 +116,7 @@ export default function DecisionHelper({ apiFetch }) {
 
                 {accepted.length > 1 && !finalChoice && (
                     <div style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#fbbf24' }}>
-                        🤔 You have <strong>{accepted.length} offers</strong>. Mark your final choice to proceed with enrollment.
+                        You have <strong>{accepted.length} offers</strong>. Mark your final choice to proceed with enrollment.
                     </div>
                 )}
 
@@ -204,11 +203,11 @@ export default function DecisionHelper({ apiFetch }) {
                                         )}
                                         {deadline && (
                                             <span style={{ color: deadlineOverdue ? '#ef4444' : '#71717a' }}>
-                                                {deadlineOverdue ? '⚠ ' : '⏰ '}
+                                                {deadlineOverdue ? '! ' : ''}
                                                 Respond by: {deadline.toLocaleDateString()}
                                             </span>
                                         )}
-                                        {dec.notes && <span>📝 {dec.notes}</span>}
+                                        {dec.notes && <span>{dec.notes}</span>}
                                     </div>
 
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -241,17 +240,17 @@ export default function DecisionHelper({ apiFetch }) {
 
             {/* Decision guide */}
             <div className="dash-section">
-                <h2 className="dash-section-title">💡 Decision Guide</h2>
+                <h2 className="dash-section-title">Decision Guide</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {[
-                        { icon: '1️⃣', tip: 'Compare fees and scholarships across all your offers before deciding.' },
-                        { icon: '2️⃣', tip: 'Check the deadline to respond. Late responses may forfeit your seat.' },
-                        { icon: '3️⃣', tip: 'Confirm hostel availability separately — seats fill fast.' },
-                        { icon: '4️⃣', tip: 'Once enrolled, submit your fee challan within the specified timeframe.' },
-                        { icon: '5️⃣', tip: 'Keep attested document copies ready — you will need them on the first day.' },
+                        { num: '1.', tip: 'Compare fees and scholarships across all your offers before deciding.' },
+                        { num: '2.', tip: 'Check the deadline to respond. Late responses may forfeit your seat.' },
+                        { num: '3.', tip: 'Confirm hostel availability separately — seats fill fast.' },
+                        { num: '4.', tip: 'Once enrolled, submit your fee challan within the specified timeframe.' },
+                        { num: '5.', tip: 'Keep attested document copies ready — you will need them on the first day.' },
                     ].map((item, i) => (
                         <div key={i} style={{ display: 'flex', gap: 10, padding: '10px 14px', background: '#1a1c1a', borderRadius: 8, fontSize: 13 }}>
-                            <span style={{ fontSize: 18 }}>{item.icon}</span>
+                            <span style={{ fontSize: 14, color: '#a1a1aa', minWidth: 20 }}>{item.num}</span>
                             <span style={{ color: '#a1a1aa' }}>{item.tip}</span>
                         </div>
                     ))}

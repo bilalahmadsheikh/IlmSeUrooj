@@ -515,7 +515,7 @@ export default function UniversityDetailPage() {
           {details && (details.qsWorldRank || details.qsSubjectRankings || details.acceptanceRate) && (
             <section id="qs-rankings" className={styles.card} aria-labelledby="qs-heading">
               <h2 id="qs-heading" className={styles.cardTitle}>
-                <span className={styles.cardIconEmoji}>🌐</span> Global Rankings & Selectivity
+                Global Rankings & Selectivity
               </h2>
               <div className={styles.detailsGrid}>
                 {details.qsWorldRank && (
@@ -563,7 +563,7 @@ export default function UniversityDetailPage() {
           {details?.admissionTestDetails && (
             <section id="test-details" className={styles.card} aria-labelledby="test-heading">
               <h2 id="test-heading" className={styles.cardTitle}>
-                <span className={styles.cardIconEmoji}>📝</span> Entry Test Guide: {details.admissionTestDetails.name}
+                Entry Test Guide: {details.admissionTestDetails.name}
               </h2>
               <div className={styles.testGrid}>
                 {details.admissionTestDetails.totalMarks && (
@@ -622,7 +622,7 @@ export default function UniversityDetailPage() {
           {details?.financialAid && (
             <section id="financial-aid" className={styles.card} aria-labelledby="aid-heading">
               <h2 id="aid-heading" className={styles.cardTitle}>
-                <span className={styles.cardIconEmoji}>🎓</span> Scholarships & Financial Aid
+                Scholarships & Financial Aid
               </h2>
               {details.financialAid.percentOnAid && (
                 <p className={styles.aidHighlight}>{details.financialAid.percentOnAid}</p>
@@ -647,7 +647,7 @@ export default function UniversityDetailPage() {
           {details && (details.placementRate || details.topRecruiters || details.careerPathGuide) && (
             <section id="careers" className={styles.card} aria-labelledby="careers-heading">
               <h2 id="careers-heading" className={styles.cardTitle}>
-                <span className={styles.cardIconEmoji}>💼</span> Placement & Career Paths
+                Placement & Career Paths
               </h2>
               {details.placementRate && (
                 <div className={styles.placementStat}>
@@ -675,7 +675,7 @@ export default function UniversityDetailPage() {
           {details?.notableAlumni?.length > 0 && (
             <section className={styles.card} aria-labelledby="notable-alumni-heading">
               <h2 id="notable-alumni-heading" className={styles.cardTitle}>
-                <span className={styles.cardIconEmoji}>⭐</span> Notable Alumni
+                Notable Alumni
               </h2>
               <div className={styles.alumniCards}>
                 {details.notableAlumni.map((a, i) => (
@@ -696,7 +696,7 @@ export default function UniversityDetailPage() {
           {details && (details.researchCenters?.length > 0 || details.uniqueFeatures?.length > 0) && (
             <section id="research" className={styles.card} aria-labelledby="research-heading">
               <h2 id="research-heading" className={styles.cardTitle}>
-                <span className={styles.cardIconEmoji}>🔬</span> Research & Unique Strengths
+                Research & Unique Strengths
               </h2>
               {details.researchCenters?.length > 0 && (
                 <div className={styles.researchSection}>
@@ -946,7 +946,7 @@ export default function UniversityDetailPage() {
             if (!pulse && !alumni) return null;
             const snap = pulse?.outcomeSnapshot;
             const reachEntries = pulse?.reachMap ? Object.entries(pulse.reachMap) : [];
-            const countryFlags = { UAE: "🇦🇪", UK: "🇬🇧", USA: "🇺🇸", PK: "🇵🇰", DE: "🇩🇪", CA: "🇨🇦", SA: "🇸🇦", SG: "🇸🇬", AU: "🇦🇺" };
+            const countryFlags = { UAE: "UAE", UK: "UK", USA: "US", PK: "PK", DE: "DE", CA: "CA", SA: "SA", SG: "SG", AU: "AU" };
             return (
               <section id="alumni" className={styles.alumniPulse} aria-labelledby="alumni-heading">
                 <div className={styles.alumniPulseHeader}>
@@ -962,22 +962,18 @@ export default function UniversityDetailPage() {
                         <h3 className={styles.pulseBlockTitle}>Where are they now?</h3>
                         <div className={styles.outcomeGrid}>
                           <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeIcon}>🌍</span>
                             <span className={styles.outcomeValue}>{snap.abroadPercent != null ? `${snap.abroadPercent}%` : "—"}</span>
                             <span className={styles.outcomeLabel}>working abroad</span>
                           </div>
                           <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeIcon}>🏢</span>
                             <span className={styles.outcomeValue}>{Array.isArray(snap.topEmployers) ? snap.topEmployers.slice(0, 3).join(", ") : "—"}</span>
                             <span className={styles.outcomeLabel}>top employers</span>
                           </div>
                           <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeIcon}>🚀</span>
                             <span className={styles.outcomeValue}>{snap.startupsFounded != null ? `${snap.startupsFounded}+` : "—"}</span>
                             <span className={styles.outcomeLabel}>startups founded</span>
                           </div>
                           <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeIcon}>📈</span>
                             <span className={styles.outcomeValue}>{snap.employedWithin6Months != null ? `${snap.employedWithin6Months}%` : "—"}</span>
                             <span className={styles.outcomeLabel}>employed within 6 mo</span>
                           </div>

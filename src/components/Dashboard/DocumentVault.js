@@ -3,19 +3,19 @@
 import { useState, useEffect, useRef } from 'react';
 
 const DOC_TYPES = [
-    { value: 'cnic', label: 'CNIC', icon: '🪪' },
-    { value: 'cnic_parent', label: "Parent's CNIC", icon: '🪪' },
-    { value: 'matric_certificate', label: 'Matric Certificate', icon: '📜' },
-    { value: 'matric_dmc', label: 'Matric DMC', icon: '📋' },
-    { value: 'intermediate_certificate', label: 'Intermediate Certificate', icon: '📜' },
-    { value: 'intermediate_dmc', label: 'Intermediate DMC', icon: '📋' },
-    { value: 'domicile', label: 'Domicile Certificate', icon: '🏠' },
-    { value: 'character_certificate', label: 'Character Certificate', icon: '⭐' },
-    { value: 'passport_photo', label: 'Passport Photos', icon: '📷' },
-    { value: 'migration_certificate', label: 'Migration Certificate', icon: '📄' },
-    { value: 'hafiz_certificate', label: 'Hafiz Certificate', icon: '📖' },
-    { value: 'disability_certificate', label: 'Disability Certificate', icon: '♿' },
-    { value: 'other', label: 'Other', icon: '📎' },
+    { value: 'cnic', label: 'CNIC', icon: '' },
+    { value: 'cnic_parent', label: "Parent's CNIC", icon: '' },
+    { value: 'matric_certificate', label: 'Matric Certificate', icon: '' },
+    { value: 'matric_dmc', label: 'Matric DMC', icon: '' },
+    { value: 'intermediate_certificate', label: 'Intermediate Certificate', icon: '' },
+    { value: 'intermediate_dmc', label: 'Intermediate DMC', icon: '' },
+    { value: 'domicile', label: 'Domicile Certificate', icon: '' },
+    { value: 'character_certificate', label: 'Character Certificate', icon: '★' },
+    { value: 'passport_photo', label: 'Passport Photos', icon: '' },
+    { value: 'migration_certificate', label: 'Migration Certificate', icon: '' },
+    { value: 'hafiz_certificate', label: 'Hafiz Certificate', icon: '' },
+    { value: 'disability_certificate', label: 'Disability Certificate', icon: 'PWD' },
+    { value: 'other', label: 'Other', icon: '' },
 ];
 
 const REQUIRED_DOCS = [
@@ -97,7 +97,7 @@ export default function DocumentVault({ apiFetch, token }) {
         <div>
             {/* Readiness checker */}
             <div className="dash-section">
-                <h2 className="dash-section-title">✅ Document Readiness</h2>
+                <h2 className="dash-section-title">Document Readiness</h2>
                 <div style={{ marginBottom: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                         <span style={{ fontSize: 13, color: '#a1a1aa' }}>Overall Readiness</span>
@@ -135,7 +135,7 @@ export default function DocumentVault({ apiFetch, token }) {
 
             {/* Upload form */}
             <div className="dash-section">
-                <h2 className="dash-section-title">📁 Document Vault</h2>
+                <h2 className="dash-section-title">Document Vault</h2>
 
                 <div style={{
                     background: '#1a1c1a',

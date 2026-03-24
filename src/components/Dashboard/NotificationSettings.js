@@ -53,7 +53,7 @@ export default function NotificationSettings({ apiFetch }) {
     return (
         <div>
             <div className="dash-section">
-                <h2 className="dash-section-title">🔔 Notification Settings</h2>
+                <h2 className="dash-section-title">Notification Settings</h2>
                 <p style={{ fontSize: 13, color: '#a1a1aa', marginTop: -8, marginBottom: 20 }}>
                     Configure how and when you receive alerts about deadlines, payments, and merit lists.
                 </p>
@@ -67,7 +67,7 @@ export default function NotificationSettings({ apiFetch }) {
                     marginBottom: 16,
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                        <span style={{ fontSize: 24 }}>💬</span>
+                        <span style={{ fontSize: 24 }}></span>
                         <div>
                             <h3 style={{ fontSize: 14, fontWeight: 600, color: '#e4e4e7', margin: 0 }}>
                                 WhatsApp Notifications
@@ -100,7 +100,7 @@ export default function NotificationSettings({ apiFetch }) {
                                 style={{ maxWidth: 280 }}
                             />
                             <p style={{ fontSize: 11, color: '#71717a', margin: '4px 0 0' }}>
-                                ℹ WhatsApp integration uses a bot service. Numbers are kept private.
+                                i WhatsApp integration uses a bot service. Numbers are kept private.
                             </p>
                         </div>
                     )}
@@ -109,7 +109,7 @@ export default function NotificationSettings({ apiFetch }) {
                 {/* Email */}
                 <div style={{ background: '#1a1c1a', border: '1px solid #27272a', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                     <ToggleRow
-                        icon="📧"
+                        icon=""
                         title="Email Notifications"
                         desc="Receive alerts via email"
                         checked={prefs.email_enabled}
@@ -122,28 +122,28 @@ export default function NotificationSettings({ apiFetch }) {
                     <h3 style={{ fontSize: 13, color: '#a1a1aa', marginBottom: 12, fontWeight: 600 }}>Alert Types</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         <ToggleRow
-                            icon="📅"
+                            icon=""
                             title="Deadline Alerts"
                             desc="Get reminded before application deadlines"
                             checked={prefs.deadline_alerts}
                             onChange={v => setPrefs(p => ({ ...p, deadline_alerts: v }))}
                         />
                         <ToggleRow
-                            icon="💳"
+                            icon=""
                             title="Payment Reminders"
                             desc="Alerts for pending and due payments"
                             checked={prefs.payment_alerts}
                             onChange={v => setPrefs(p => ({ ...p, payment_alerts: v }))}
                         />
                         <ToggleRow
-                            icon="📋"
+                            icon=""
                             title="Merit List Alerts"
                             desc="Notify when merit lists are announced"
                             checked={prefs.merit_list_alerts}
                             onChange={v => setPrefs(p => ({ ...p, merit_list_alerts: v }))}
                         />
                         <ToggleRow
-                            icon="📰"
+                            icon=""
                             title="Weekly Digest"
                             desc="Summary of upcoming deadlines every week"
                             checked={prefs.weekly_digest}
@@ -187,7 +187,7 @@ export default function NotificationSettings({ apiFetch }) {
             </div>
 
             <div className="dash-section">
-                <h2 className="dash-section-title">ℹ️ How Notifications Work</h2>
+                <h2 className="dash-section-title">How Notifications Work</h2>
                 <div style={{ fontSize: 13, color: '#a1a1aa', lineHeight: 1.7 }}>
                     <p>• Deadline alerts are sent based on the deadlines you track in the Timeline tab.</p>
                     <p>• Payment reminders are triggered by due dates in your Payment Tracker.</p>

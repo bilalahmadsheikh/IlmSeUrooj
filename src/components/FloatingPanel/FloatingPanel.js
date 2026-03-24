@@ -102,26 +102,26 @@ export default function FloatingPanel() {
                         localStorage.setItem('applications_last_seen', new Date().toISOString());
                         setOpen(false);
                     }}>
-                    <span className={styles.panelIcon}>📊</span>
+                    <span className={styles.panelIcon}></span>
                     <span className={styles.panelLabel}>Applications</span>
                     {unseenCount > 0 && (
                         <span className={`${styles.panelBadge} ${styles.badgeCount}`}>{unseenCount}</span>
                     )}
                 </Link>
                 <Link href="/profile" className={styles.panelRow} onClick={() => setOpen(false)}>
-                    <span className={styles.panelIcon}>👤</span>
+                    <span className={styles.panelIcon}></span>
                     <span className={styles.panelLabel}>Profile</span>
                     <span className={`${styles.panelBadge} ${styles.badgePercent}`}>{completion}%</span>
                 </Link>
                 <Link href="/" className={styles.panelRow} onClick={() => setOpen(false)}>
-                    <span className={styles.panelIcon}>🔖</span>
+                    <span className={styles.panelIcon}></span>
                     <span className={styles.panelLabel}>Saved</span>
                     {savedCount > 0 && (
                         <span className={`${styles.panelBadge} ${styles.badgeSaved}`}>{savedCount}</span>
                     )}
                 </Link>
                 <Link href="/timeline" className={styles.panelRow} onClick={() => setOpen(false)}>
-                    <span className={styles.panelIcon}>📅</span>
+                    <span className={styles.panelIcon}></span>
                     <span className={styles.panelLabel}>Timeline</span>
                     {nextDeadlineDays !== null && nextDeadlineDays <= 14 && (
                         <span className={`${styles.panelBadge} ${nextDeadlineDays <= 3 ? styles.badgeUrgent : styles.badgeSoon}`}>
@@ -130,7 +130,7 @@ export default function FloatingPanel() {
                     )}
                 </Link>
                 <Link href="/extension" className={styles.panelRow} onClick={() => setOpen(false)}>
-                    <span className={styles.panelIcon}>🧩</span>
+                    <span className={styles.panelIcon}></span>
                     <span className={styles.panelLabel}>Extension</span>
                     <span className={`${styles.panelBadge} ${extensionInstalled ? styles.badgeActive : styles.badgeInactive}`}>
                         {extensionInstalled ? 'active' : 'not installed'}

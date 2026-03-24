@@ -251,7 +251,7 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
                                     <span className={styles.fieldBadge}>{deadline.field}</span>
                                     {isStale(deadline) && (
                                         <span className={styles.staleBadge} title="This deadline has not been verified recently. Please confirm on the official website.">
-                                            ⚠️ Not recently verified
+                                            ! Not recently verified
                                         </span>
                                     )}
                                 </div>
@@ -301,7 +301,7 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
             <div className={styles.disclaimer}>
                 <span className={styles.disclaimerIcon}></span>
                 Deadlines are auto-scraped from official university websites every 20 days.
-                Entries marked ⚠️ haven't been verified recently — always confirm on the official portal.
+                Entries marked ! haven't been verified recently — always confirm on the official portal.
                 {lastScraperRun && (
                     <span className={styles.lastUpdated}>
                         Last updated: {new Date(lastScraperRun).toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' })}

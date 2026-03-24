@@ -128,7 +128,7 @@ export default function ExtensionPage() {
                         </ul>
                     </div>
                     <div className="fill-col fill-amber">
-                        <h3 style={{ color: '#fbbf24' }}>✎ You Fill</h3>
+                        <h3 style={{ color: '#fbbf24' }}>You Fill</h3>
                         <ul>
                             <li>Guardian's name (if different)</li>
                             <li>"How did you hear about us?"</li>

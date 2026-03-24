@@ -150,16 +150,16 @@ export default function Header({ savedCount = 0, onShowSaved, onShowScholarships
                                     </div>
                                     <div className={styles.dropdownDivider} />
                                     <Link href="/profile" className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
-                                        👤 My Profile
+                                        My Profile
                                     </Link>
                                     <Link href="/applications" className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
-                                        📊 Applications
+                                        Applications
                                     </Link>
                                     <Link href="/timeline" className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
-                                        📅 Timeline
+                                        Timeline
                                     </Link>
                                     <Link href="/extension" className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
-                                        🧩 Extension
+                                        Extension
                                     </Link>
                                     <div className={styles.dropdownDivider} />
                                     <button className={styles.dropdownSignout} onClick={handleSignOut}>

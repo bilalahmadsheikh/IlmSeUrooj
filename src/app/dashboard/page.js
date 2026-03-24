@@ -18,14 +18,14 @@ const supabase = createClient(
 );
 
 const TABS = [
-    { id: 'analytics', label: '📊 Overview', icon: '📊' },
-    { id: 'timeline', label: '📅 Timeline', icon: '📅' },
-    { id: 'fees', label: '💰 Fee Estimator', icon: '💰' },
-    { id: 'documents', label: '📁 Documents', icon: '📁' },
-    { id: 'payments', label: '💳 Payments', icon: '💳' },
-    { id: 'decisions', label: '🎓 Decisions', icon: '🎓' },
-    { id: 'referrals', label: '👥 Referrals', icon: '👥' },
-    { id: 'notifications', label: '🔔 Alerts', icon: '🔔' },
+    { id: 'analytics', label: 'Overview', icon: '' },
+    { id: 'timeline', label: 'Timeline', icon: '' },
+    { id: 'fees', label: 'Fee Estimator', icon: '' },
+    { id: 'documents', label: 'Documents', icon: '' },
+    { id: 'payments', label: 'Payments', icon: '' },
+    { id: 'decisions', label: 'Decisions', icon: '' },
+    { id: 'referrals', label: 'Referrals', icon: '' },
+    { id: 'notifications', label: 'Alerts', icon: '' },
 ];
 
 export default function DashboardPage() {
@@ -89,7 +89,6 @@ export default function DashboardPage() {
                     <div className={styles.logo}>
                         <a href="/" className={styles.backLink}>← Home</a>
                         <h1 className={styles.title}>
-                            <span className={styles.titleIcon}>🎓</span>
                             My Admission Dashboard
                         </h1>
                     </div>
@@ -106,8 +105,7 @@ export default function DashboardPage() {
                         className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`}
                         onClick={() => setActiveTab(tab.id)}
                     >
-                        <span className={styles.tabIcon}>{tab.icon}</span>
-                        <span className={styles.tabLabel}>{tab.label.replace(tab.icon + ' ', '')}</span>
+                        <span className={styles.tabLabel}>{tab.label}</span>
                     </button>
                 ))}
             </nav>

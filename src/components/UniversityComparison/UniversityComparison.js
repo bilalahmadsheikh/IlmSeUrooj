@@ -161,7 +161,6 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
         <section className={styles.section} ref={sectionRef}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    <span className={styles.titleIcon}>⚖️</span>
                     Compare Universities
                 </h2>
                 <p className={styles.subtitle}>
@@ -173,7 +172,6 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
             <div className={styles.filterSection}>
                 <div className={styles.filterGroup}>
                     <label className={styles.filterLabel}>
-                        <span className={styles.filterIcon}>📚</span>
                         Department
                     </label>
                     <SearchableSelect
@@ -307,7 +305,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
                         <div className={styles.glanceTitle}>At a Glance</div>
 
                         <div className={styles.row}>
-                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>💰 Fee / Semester</span></div>
+                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>Fee / Semester</span></div>
                             <div className={styles.rowValues}>
                                 {selectedUnis.map((uni, i) => (
                                     <div key={i} className={`${styles.value} ${!uni ? styles.valueEmpty : ''}`}>
@@ -320,7 +318,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
                         </div>
 
                         <div className={styles.row}>
-                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>🎯 Acceptance Rate</span></div>
+                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>Acceptance Rate</span></div>
                             <div className={styles.rowValues}>
                                 {selectedUnis.map((uni, i) => (
                                     <div key={i} className={`${styles.value} ${!uni ? styles.valueEmpty : ''}`}>
@@ -333,7 +331,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
                         </div>
 
                         <div className={styles.row}>
-                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>🌐 QS World Rank</span></div>
+                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>QS World Rank</span></div>
                             <div className={styles.rowValues}>
                                 {selectedUnis.map((uni, i) => (
                                     <div key={i} className={`${styles.value} ${!uni ? styles.valueEmpty : ''}`}>
@@ -346,7 +344,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
                         </div>
 
                         <div className={styles.row}>
-                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>📝 Entry Test</span></div>
+                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>Entry Test</span></div>
                             <div className={styles.rowValues}>
                                 {selectedUnis.map((uni, i) => (
                                     <div key={i} className={`${styles.value} ${!uni ? styles.valueEmpty : ''}`}>
@@ -359,7 +357,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
                         </div>
 
                         <div className={`${styles.row} ${styles.rowLast}`}>
-                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>🏆 HEC Pakistan Rank</span></div>
+                            <div className={styles.rowLabel}><span className={styles.fieldLabel}>HEC Pakistan Rank</span></div>
                             <div className={styles.rowValues}>
                                 {selectedUnis.map((uni, i) => (
                                     <div key={i} className={`${styles.value} ${uni && bestHecId === uni.id ? styles.best : ''} ${!uni ? styles.valueEmpty : ''}`}>
@@ -429,7 +427,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
             {summaryWinner && !summaryWinner.isTie && (
                 <div className={styles.summaryCard}>
                     <div className={styles.summaryTop}>
-                        <span className={styles.summaryTrophy}>🏆</span>
+                        <span className={styles.summaryTrophy}></span>
                         <div className={styles.summaryTopText}>
                             <div className={styles.summaryTitle}>
                                 Overall Winner: <span className={styles.summaryWinnerName}>{summaryWinner.uni.shortName}</span>
@@ -443,7 +441,7 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
                         {summaryWinner.breakdown.map((item, i) => (
                             <div key={item.uni.id} className={styles.summaryRow}>
                                 <span className={styles.summaryMedal}>
-                                    {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                                    {i === 0 ? '1st' : i === 1 ? '2nd' : '3rd'}
                                 </span>
                                 <span className={styles.summaryName}>{item.uni.shortName}</span>
                                 <div className={styles.summaryBar}>
@@ -464,14 +462,14 @@ export default function UniversityComparison({ initialSelectedIds, onConsumeInit
 
             {summaryWinner?.isTie && (
                 <div className={styles.summaryTieCard}>
-                    <span>🤝</span>
+
                     <p>It&apos;s a tie! Both universities perform equally across {selectedDepartment} metrics.</p>
                 </div>
             )}
 
             {!hasSelection && (
                 <div className={styles.emptyState}>
-                    <span className={styles.emptyIcon}>⚖️</span>
+
                     <p>Select universities above to compare {selectedDepartment} departments</p>
                     <span className={styles.emptyHint}>
                         {filteredUniversities.length} universities offer {selectedDepartment}

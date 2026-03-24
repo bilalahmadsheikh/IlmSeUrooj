@@ -929,7 +929,7 @@ export default function AdmissionPredictor({ savedIds = [] }) {
 
         const typeConfig = {
             position:   { icon: '#', label: 'Merit Position', note: 'Admission is by merit position (rank of last admitted student), not aggregate %.' },
-            test_score: { icon: '✎', label: 'Test Score',    note: 'Admission is based entirely on entry test score. FSc determines eligibility only.' },
+            test_score: { icon: '', label: 'Test Score',    note: 'Admission is based entirely on entry test score. FSc determines eligibility only.' },
             holistic:   { icon: '◈', label: 'Holistic',      note: 'Holistic admissions — essays, interview, and test scores evaluated together. No fixed cutoffs.' },
         };
         const cfg = typeConfig[meritType] || { icon: '?', label: 'Requirements', note: '' };
@@ -977,7 +977,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
         <section className={styles.section}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    <span className={styles.titleIcon}></span>
                     Admission Chance Predictor
                 </h2>
                 <p className={styles.subtitle}>Enter your marks to see your chances at top Pakistani universities</p>
@@ -1183,7 +1182,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
 
                         {admissionCriteria[selectedUniversity].tips && (
                             <div className={styles.tipSection}>
-                                <span className={styles.tipIcon}></span>
                                 <p>{admissionCriteria[selectedUniversity].tips}</p>
                             </div>
                         )}
@@ -1243,16 +1241,16 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                     </>
                 ) : (
                     <div className={styles.methodologyGrid}>
-                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                        <div className={styles.methodItem}>
                             <div><strong>Entry Test (40–85%)</strong><p>NET, LCAT, ECAT, or university tests. Often the deciding factor.</p></div>
                         </div>
-                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                        <div className={styles.methodItem}>
                             <div><strong>FSc/A-Level (15–50%)</strong><p>Intermediate marks baseline. Most require 60–70% minimum.</p></div>
                         </div>
-                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                        <div className={styles.methodItem}>
                             <div><strong>Matric/O-Level (10–25%)</strong><p>SSC marks contribute to aggregate calculation.</p></div>
                         </div>
-                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                        <div className={styles.methodItem}>
                             <div><strong>Interview (0–30%)</strong><p>LUMS, PIEAS require interviews. Others are test-only.</p></div>
                         </div>
                     </div>
@@ -1312,7 +1310,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
             </div>
 
             <div className={styles.disclaimer}>
-                <span></span>
                 These predictions are estimates based on historical merit data. Actual admission depends on
                 test performance, seat availability, and university policies. Always check official sources.
             </div>

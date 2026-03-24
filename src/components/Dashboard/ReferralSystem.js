@@ -70,7 +70,7 @@ export default function ReferralSystem({ apiFetch, userId }) {
                 alignItems: 'center',
                 gap: 16,
             }}>
-                <div style={{ fontSize: 48 }}>👥</div>
+                <div style={{ fontSize: 48 }}></div>
                 <div>
                     <h2 style={{ color: '#e4e4e7', fontSize: 20, margin: '0 0 4px' }}>
                         Referral Program
@@ -90,7 +90,7 @@ export default function ReferralSystem({ apiFetch, userId }) {
             </div>
 
             <div className="dash-section">
-                <h2 className="dash-section-title">📨 Invite Someone</h2>
+                <h2 className="dash-section-title">Invite Someone</h2>
                 <p style={{ fontSize: 13, color: '#a1a1aa', marginTop: -8, marginBottom: 16 }}>
                     Enter their email to generate a unique referral code for them.
                 </p>
@@ -171,7 +171,7 @@ export default function ReferralSystem({ apiFetch, userId }) {
             </div>
 
             <div className="dash-section">
-                <h2 className="dash-section-title">🎁 How It Works</h2>
+                <h2 className="dash-section-title">How It Works</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {[
                         { step: '1', text: 'Generate a referral code for a friend or sibling.' },

@@ -139,19 +139,16 @@ export default function ExtensionAuthPage() {
 
                 {status === 'checking' ? (
                     <div style={styles.successBox}>
-                        <span style={{ fontSize: 40 }}>⏳</span>
                         <h2 style={{ color: '#4ade80', marginTop: 8, marginBottom: 4 }}>Checking session…</h2>
                         <p style={styles.subtitle}>Checking if you're already signed in…</p>
                     </div>
                 ) : status === 'token_sent' ? (
                     <div style={styles.successBox}>
-                        <span style={{ fontSize: 40 }}>✅</span>
                         <h2 style={{ color: '#4ade80', marginTop: 8, marginBottom: 4 }}>Connected!</h2>
                         <p style={styles.subtitle}>Your profile has been sent to the extension. This tab will close automatically.</p>
                     </div>
                 ) : status === 'success' ? (
                     <div style={styles.successBox}>
-                        <span style={{ fontSize: 40 }}>🔑</span>
                         <h2 style={{ color: '#4ade80', marginTop: 8, marginBottom: 4 }}>Signed In!</h2>
                         <p style={{ ...styles.subtitle, marginBottom: 16 }}>
                             The extension couldn't receive the token automatically.
@@ -162,7 +159,7 @@ export default function ExtensionAuthPage() {
                                 {tokenRef.current?.slice(0, 20)}...{tokenRef.current?.slice(-10)}
                             </code>
                             <button onClick={handleCopyToken} style={styles.copyBtn}>
-                                {copied ? '✓ Copied!' : '📋 Copy Token'}
+                                {copied ? '✓ Copied!' : 'Copy Token'}
                             </button>
                         </div>
                         <p style={{ fontSize: 11, color: '#71717a', marginTop: 12 }}>

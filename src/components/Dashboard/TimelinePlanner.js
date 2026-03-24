@@ -117,14 +117,13 @@ export default function TimelinePlanner({ apiFetch }) {
                     fontSize: 13,
                     color: '#ef4444',
                 }}>
-                    <span style={{ fontSize: 18 }}>⚠️</span>
-                    <strong>{overdue.length} overdue task{overdue.length > 1 ? 's' : ''}</strong> — take action now!
+                    <strong>! {overdue.length} overdue task{overdue.length > 1 ? 's' : ''}</strong> — take action now!
                 </div>
             )}
 
             <div className="dash-section">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <h2 className="dash-section-title" style={{ marginBottom: 0 }}>📅 Application Timeline</h2>
+                    <h2 className="dash-section-title" style={{ marginBottom: 0 }}>Application Timeline</h2>
                     <div style={{ display: 'flex', gap: 8 }}>
                         <button className="dash-btn-ghost" onClick={() => setShowAdd(!showAdd)}>
                             {showAdd ? '✕ Cancel' : '+ Add Task'}
@@ -317,7 +316,7 @@ export default function TimelinePlanner({ apiFetch }) {
                                                     fontSize: 11,
                                                     color: isOverdue ? '#ef4444' : '#71717a',
                                                 }}>
-                                                    {isOverdue ? '⚠ ' : '📅 '}
+                                                    {isOverdue ? '! ' : ''}
                                                     {new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-PK', {
                                                         month: 'short', day: 'numeric', year: 'numeric'
                                                     })}

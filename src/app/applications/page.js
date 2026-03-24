@@ -61,15 +61,15 @@ function getProgress(app) {
 // ─── Status Config ─────────────────────────────────────────────────────────────
 
 const STATUS = {
-  saved:           { label: 'Saved',          color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', icon: '🔖', step: 0 },
-  pending:         { label: 'Pending',         color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', icon: '⏳', step: 0 },
-  account_created: { label: 'Account Created', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  icon: '✅', step: 1 },
-  form_filling:    { label: 'Filling Form',    color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  icon: '✏️', step: 1 },
-  awaiting_review: { label: 'In Review',       color: '#c084fc', bg: 'rgba(192,132,252,0.12)', icon: '👁', step: 1 },
-  submitted:       { label: 'Submitted',       color: '#4ade80', bg: 'rgba(74,222,128,0.12)',  icon: '📤', step: 2 },
-  accepted:        { label: 'Accepted',        color: '#4ade80', bg: 'rgba(74,222,128,0.18)',  icon: '🎉', step: 3 },
-  rejected:        { label: 'Rejected',        color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   icon: '❌', step: 3 },
-  waitlisted:      { label: 'Waitlisted',      color: '#fb923c', bg: 'rgba(251,146,60,0.12)',  icon: '🕐', step: 3 },
+  saved:           { label: 'Saved',          color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', icon: '', step: 0 },
+  pending:         { label: 'Pending',         color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', icon: '', step: 0 },
+  account_created: { label: 'Account Created', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  icon: '', step: 1 },
+  form_filling:    { label: 'Filling Form',    color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  icon: '', step: 1 },
+  awaiting_review: { label: 'In Review',       color: '#c084fc', bg: 'rgba(192,132,252,0.12)', icon: '', step: 1 },
+  submitted:       { label: 'Submitted',       color: '#4ade80', bg: 'rgba(74,222,128,0.12)',  icon: '', step: 2 },
+  accepted:        { label: 'Accepted',        color: '#4ade80', bg: 'rgba(74,222,128,0.18)',  icon: '', step: 3 },
+  rejected:        { label: 'Rejected',        color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   icon: '', step: 3 },
+  waitlisted:      { label: 'Waitlisted',      color: '#fb923c', bg: 'rgba(251,146,60,0.12)',  icon: '', step: 3 },
 };
 
 const STATUS_OPTIONS = [
@@ -274,7 +274,7 @@ export default function ApplicationsPage() {
     <div style={s.page}>
       <AppNav />
       <div style={s.authPrompt}>
-        <div style={s.authIcon}>🎓</div>
+        <div style={s.authIcon}></div>
         <h2 style={s.authTitle}>Track your applications</h2>
         <p style={s.authSub}>Sign in to see deadlines, fill progress, and application statuses all in one place.</p>
         <Link href="/profile" style={s.btnPrimary}>Sign In →</Link>
@@ -300,7 +300,7 @@ export default function ApplicationsPage() {
         <StatCard label="In Progress"   value={stats.inProg}    color="#60a5fa" />
         <StatCard label="Submitted"     value={stats.submitted} color="#4ade80" />
         <StatCard label="Decisions"     value={stats.decisions} color="#c084fc" />
-        {stats.accepted > 0 && <StatCard label="Accepted 🎉" value={stats.accepted} color="#4ade80" urgent />}
+        {stats.accepted > 0 && <StatCard label="Accepted" value={stats.accepted} color="#4ade80" urgent />}
       </div>
 
       {/* ── Toolbar ── */}
@@ -333,7 +333,7 @@ export default function ApplicationsPage() {
       {/* ── Cards ── */}
       {visible.length === 0 ? (
         <div style={s.empty}>
-          <div style={s.emptyIcon}>📭</div>
+          <div style={s.emptyIcon}></div>
           <p style={s.emptyText}>
             {apps.length === 0
               ? 'No applications yet — save universities from the home page to get started.'
@@ -530,7 +530,7 @@ function AppCard({ app, onOpen, onQuickStatus }) {
           <span style={{ fontSize: 11, color: isUrgent ? '#fbbf24' : isPast ? '#ef4444' : '#94a3b8' }}>
             {isPast
               ? `Closed ${Math.abs(days)}d ago`
-              : days === 0 ? '⚠️ Due today!'
+              : days === 0 ? '! Due today!'
               : `${days}d left`}
           </span>
         ) : <span style={{ fontSize: 11, color: '#52525b' }}>No deadline</span>}
@@ -573,7 +573,7 @@ function StatCard({ label, value, color, urgent }) {
 function DeadlineChip({ days, date }) {
   if (days == null) return <span style={s.dateValue}>{fmtDate(date)}</span>;
   if (days < 0) return <span style={{ ...s.dateValue, color: '#ef4444' }}>Closed · {fmtDate(date)}</span>;
-  if (days === 0) return <span style={{ ...s.dateValue, color: '#fbbf24' }}>⚠️ Due today!</span>;
+  if (days === 0) return <span style={{ ...s.dateValue, color: '#fbbf24' }}>! Due today!</span>;
   if (days <= 7) return <span style={{ ...s.dateValue, color: '#fbbf24' }}>{days}d left · {fmtDate(date)}</span>;
   return <span style={{ ...s.dateValue, color: '#4ade80' }}>{days}d left · {fmtDate(date)}</span>;
 }

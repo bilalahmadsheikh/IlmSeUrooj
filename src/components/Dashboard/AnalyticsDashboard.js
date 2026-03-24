@@ -21,7 +21,7 @@ export default function AnalyticsDashboard({ apiFetch }) {
     return (
         <div>
             <div className="dash-section">
-                <h2 className="dash-section-title">📊 Your Admission Journey Overview</h2>
+                <h2 className="dash-section-title">Your Admission Journey Overview</h2>
                 <div className="dash-grid-3" style={{ marginBottom: 20 }}>
                     <div className="dash-stat-card">
                         <div className="dash-stat-value">{applications.total}</div>
@@ -58,7 +58,7 @@ export default function AnalyticsDashboard({ apiFetch }) {
             <div className="dash-grid-2">
                 {/* Financial Summary */}
                 <div className="dash-section">
-                    <h2 className="dash-section-title">💳 Financial Summary</h2>
+                    <h2 className="dash-section-title">Financial Summary</h2>
                     <div className="dash-grid-2">
                         <div className="dash-stat-card">
                             <div className="dash-stat-value" style={{ fontSize: 20 }}>
@@ -80,7 +80,7 @@ export default function AnalyticsDashboard({ apiFetch }) {
 
                 {/* Task Progress */}
                 <div className="dash-section">
-                    <h2 className="dash-section-title">✅ Task Progress</h2>
+                    <h2 className="dash-section-title">Task Progress</h2>
                     <div style={{ marginBottom: 12 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                             <span style={{ fontSize: 13, color: '#a1a1aa' }}>Completion Rate</span>
@@ -118,7 +118,7 @@ export default function AnalyticsDashboard({ apiFetch }) {
 
                 {/* Documents */}
                 <div className="dash-section">
-                    <h2 className="dash-section-title">📁 Documents</h2>
+                    <h2 className="dash-section-title">Documents</h2>
                     <div className="dash-stat-card" style={{ marginBottom: 12 }}>
                         <div className="dash-stat-value">{documents.total}</div>
                         <div className="dash-stat-label">Documents Uploaded</div>
@@ -135,7 +135,7 @@ export default function AnalyticsDashboard({ apiFetch }) {
 
                 {/* Referrals */}
                 <div className="dash-section">
-                    <h2 className="dash-section-title">👥 Referrals</h2>
+                    <h2 className="dash-section-title">Referrals</h2>
                     <div className="dash-grid-3">
                         <div className="dash-stat-card">
                             <div className="dash-stat-value" style={{ fontSize: 22 }}>{referrals.total}</div>

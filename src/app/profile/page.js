@@ -90,9 +90,9 @@ function Field({ label, type = 'text', value, onChange, placeholder, required, o
 
 function WarningBox({ children, type = 'warning' }) {
     const colors = {
-        warning: { bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.2)', icon: '⚠️' },
-        info: { bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.2)', icon: 'ℹ️' },
-        success: { bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.2)', icon: '✅' },
+        warning: { bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.2)', icon: '!' },
+        info: { bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.2)', icon: 'i' },
+        success: { bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.2)', icon: '' },
     };
     const c = colors[type] || colors.warning;
     return (
@@ -389,7 +389,7 @@ export default function ProfilePage() {
 
             {/* Extension Connect Banner */}
             <div className="ext-connect-banner">
-                <span className="ext-connect-icon">🧩</span>
+                <span className="ext-connect-icon"></span>
                 <div className="ext-connect-text">
                     <strong>Extension installed?</strong>
                     <span> Click to connect your real profile — autofill will use your actual data.</span>
@@ -420,18 +420,18 @@ export default function ProfilePage() {
             </div>
 
             {/* ─── SECTION 1: Education System ──────────────── */}
-            <SectionCard title="Education System" icon="🎓">
+            <SectionCard title="Education System" icon="">
                 <div className="edu-toggle">
                     <button className={`edu-card ${isPak ? 'active' : ''}`}
                         onClick={() => updateField('education_system', 'pakistani')}>
-                        <span className="edu-flag">🇵🇰</span>
+                        <span className="edu-flag">PK</span>
                         <strong>Pakistani System</strong>
                         <span className="edu-sub">Matric + FSc</span>
                         <span className="edu-desc">Select if you have Pakistani board results</span>
                     </button>
                     <button className={`edu-card ${isCambridge ? 'active' : ''}`}
                         onClick={() => updateField('education_system', 'cambridge')}>
-                        <span className="edu-flag">🌍</span>
+                        <span className="edu-flag">International</span>
                         <strong>Cambridge System</strong>
                         <span className="edu-sub">O-Level + A-Level</span>
                         <span className="edu-desc">Select if you have IBCC equivalence or will get it</span>
@@ -440,7 +440,7 @@ export default function ProfilePage() {
             </SectionCard>
 
             {/* ─── SECTION 2: Personal Information ───────────── */}
-            <SectionCard title="Personal Information" icon="👤">
+            <SectionCard title="Personal Information" icon="">
                 <div className="field-grid">
                     <Field label="Full Name" value={profile.full_name} onChange={v => updateField('full_name', v)} placeholder="Muhammad Ahmed Khan" required />
                     <Field label="Father's Name" value={profile.father_name} onChange={v => updateField('father_name', v)} placeholder="Muhammad Khan" required />
@@ -457,7 +457,7 @@ export default function ProfilePage() {
             </SectionCard>
 
             {/* ─── SECTION 3: Contact Information ─────────────── */}
-            <SectionCard title="Contact Information" icon="📱">
+            <SectionCard title="Contact Information" icon="">
                 <div className="field-grid">
                     <Field label="Email" type="email" value={profile.email} onChange={v => updateField('email', v)} placeholder="student@example.com" required />
                     <Field label="Phone" type="tel" value={profile.phone} onChange={v => updateField('phone', v)} placeholder="03001234567" required hint="Format: 03XXXXXXXXX" />
@@ -474,7 +474,7 @@ export default function ProfilePage() {
             {/* ─── SECTION 4A: Pakistani System ────────────────── */}
             {isPak && (
                 <>
-                    <SectionCard title="FSc / Intermediate Details" icon="📋">
+                    <SectionCard title="FSc / Intermediate Details" icon="">
                         <div className="field-grid">
                             <Field label="Intermediate Type" type="select" value={profile.inter_type} onChange={v => updateField('inter_type', v)} required
                                 options={[
@@ -494,11 +494,11 @@ export default function ProfilePage() {
                                 ]} />
                             <Field label="Intermediate Status" type="select" value={interStatus} onChange={v => updateField('inter_status', v)} required
                                 options={[
-                                    { value: 'not_started', label: '⏸ Not started yet' },
-                                    { value: 'part1_only', label: '📋 Part-I Only' },
-                                    { value: 'appearing', label: '⏳ Currently Appearing' },
-                                    { value: 'result_awaited', label: '⌛ Result Awaited' },
-                                    { value: 'complete', label: '✅ Complete' },
+                                    { value: 'not_started', label: 'Not started yet' },
+                                    { value: 'part1_only', label: 'Part-I Only' },
+                                    { value: 'appearing', label: 'Currently Appearing' },
+                                    { value: 'result_awaited', label: 'Result Awaited' },
+                                    { value: 'complete', label: 'Complete' },
                                 ]} />
                         </div>
 
@@ -557,7 +557,7 @@ export default function ProfilePage() {
                     </SectionCard>
 
                     {/* Matric Details */}
-                    <SectionCard title="Matric Details" icon="📝">
+                    <SectionCard title="Matric Details" icon="">
                         <div className="field-grid">
                             <Field label="Matric Marks" type="number" value={profile.matric_marks} onChange={v => updateField('matric_marks', v)} placeholder="1020" required />
                             <Field label="Matric Total" type="number" value={profile.matric_total || 1050} onChange={v => updateField('matric_total', v)} placeholder="1050" required />
@@ -578,14 +578,14 @@ export default function ProfilePage() {
             {/* ─── SECTION 4B: Cambridge System ───────────────── */}
             {isCambridge && (
                 <>
-                    <SectionCard title="A-Level Details" icon="🎓">
+                    <SectionCard title="A-Level Details" icon="">
                         <div className="field-grid">
                             <Field label="A-Level Status" type="select" value={interStatus} onChange={v => updateField('inter_status', v)} required
                                 options={[
-                                    { value: 'not_started', label: '⏸ Not started' },
-                                    { value: 'part1_only', label: '📋 AS-Level Only' },
-                                    { value: 'appearing', label: '⏳ Currently Appearing' },
-                                    { value: 'complete', label: '✅ Complete' },
+                                    { value: 'not_started', label: 'Not started' },
+                                    { value: 'part1_only', label: 'AS-Level Only' },
+                                    { value: 'appearing', label: 'Currently Appearing' },
+                                    { value: 'complete', label: 'Complete' },
                                 ]} />
                             <Field label="Board" type="select" value={profile.alevel_board} onChange={v => updateField('alevel_board', v)} required
                                 options={[
@@ -641,7 +641,7 @@ export default function ProfilePage() {
                     </SectionCard>
 
                     {/* IBCC Equivalence — Critical */}
-                    <SectionCard title="IBCC Equivalence Certificate" icon="⚠️"
+                    <SectionCard title="IBCC Equivalence Certificate" icon="!"
                         note="Pakistani universities require an IBCC equivalence certificate to convert your A-Level grades to a Pakistani percentage.">
                         <div className="field-grid">
                             <Field label="IBCC Equivalent % (Inter)" type="number" value={profile.ibcc_equivalent_inter} onChange={v => updateField('ibcc_equivalent_inter', v)} placeholder="85.5" hint="The percentage IBCC issues as equivalent to FSc" />
@@ -653,7 +653,7 @@ export default function ProfilePage() {
                     </SectionCard>
 
                     {/* O-Level Details */}
-                    <SectionCard title="O-Level Details" icon="📝">
+                    <SectionCard title="O-Level Details" icon="">
                         <div className="field-grid">
                             <Field label="Board" type="select" value={profile.olevel_board} onChange={v => updateField('olevel_board', v)}
                                 options={[
@@ -684,7 +684,7 @@ export default function ProfilePage() {
             )}
 
             {/* ─── SECTION 5: Entry Tests ──────────────────────── */}
-            <SectionCard title="Entry Test Scores" icon="📊" note="Fill whichever tests you have taken. Leave others blank.">
+            <SectionCard title="Entry Test Scores" icon="" note="Fill whichever tests you have taken. Leave others blank.">
                 <div className="field-grid">
                     <Field label="NUST NET Score" type="number" value={profile.net_score} onChange={v => updateField('net_score', v)} placeholder="155" hint="/200" />
                     <Field label="NET Year" type="number" value={profile.net_year} onChange={v => updateField('net_year', v)} placeholder="2024" />
@@ -698,7 +698,7 @@ export default function ProfilePage() {
             </SectionCard>
 
             {/* ─── SECTION 6: Family Information ───────────────── */}
-            <SectionCard title="Family Information" icon="👪">
+            <SectionCard title="Family Information" icon="">
                 <div className="field-grid">
                     <Field label="Father's CNIC" value={profile.father_cnic} onChange={v => updateField('father_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" />
                     <Field label="Father's Occupation / Profession" value={profile.father_occupation} onChange={v => updateField('father_occupation', v)} placeholder="Doctor, Engineer, Government Officer…" />
@@ -714,7 +714,7 @@ export default function ProfilePage() {
             </SectionCard>
 
             {/* ─── SECTION 7: Portal Credentials ──────────────── */}
-            <SectionCard title="University Portal Credentials" icon="🔐"
+            <SectionCard title="University Portal Credentials" icon=""
                 note="These will be autofilled when creating accounts on university portals. Keep them consistent across all portals.">
                 <div className="field-grid">
                     <Field label="Portal Email" type="email" value={profile.portal_email} onChange={v => updateField('portal_email', v)}
@@ -731,16 +731,16 @@ export default function ProfilePage() {
                                 Copy
                             </button>
                             <button type="button" className="btn-sm" onClick={() => updateField('portal_password', generatePortalPassword(profile.full_name, profile.cnic))}>
-                                🔄
+                                Regenerate
                             </button>
                         </div>
-                        <span className="field-hint">⚠️ Save this password somewhere safe. You'll need it to log back into portals.</span>
+                        <span className="field-hint">! Save this password somewhere safe. You'll need it to log back into portals.</span>
                     </div>
                 </div>
             </SectionCard>
 
             {/* ─── SECTION 8: Preferences ──────────────────────── */}
-            <SectionCard title="Preferences" icon="⭐">
+            <SectionCard title="Preferences" icon="★">
                 <div className="field-grid">
                     <Field label="Preferred Field" type="select" value={profile.preferred_field} onChange={v => updateField('preferred_field', v)}
                         options={['Computer Science', 'Engineering', 'Business', 'Medical', 'Law', 'Arts', 'Other']} />
@@ -753,7 +753,7 @@ export default function ProfilePage() {
             {saveError && <div className="save-error">{saveError}</div>}
             <div className="save-bar">
                 <button type="button" className="btn-primary-pf" onClick={saveProfile} disabled={saving}>
-                    {saving ? 'Saving...' : saved ? '✓ Profile Saved!' : '💾 Save Profile'}
+                    {saving ? 'Saving...' : saved ? '✓ Profile Saved!' : 'Save Profile'}
                 </button>
                 <p className="save-hint">Auto-saves on field blur. Your profile powers the extension autofill.</p>
             </div>

@@ -52,7 +52,7 @@ export default function FeeEstimator({ apiFetch }) {
     return (
         <div>
             <div className="dash-section">
-                <h2 className="dash-section-title">💰 Fee Estimation Dashboard</h2>
+                <h2 className="dash-section-title">Fee Estimation Dashboard</h2>
                 <p style={{ fontSize: 13, color: '#a1a1aa', marginBottom: 16, marginTop: -8 }}>
                     Estimate your total university costs and compare across institutions.
                 </p>
@@ -170,7 +170,7 @@ export default function FeeEstimator({ apiFetch }) {
                                         </div>
                                         {fee.notes && (
                                             <p style={{ fontSize: 11, color: '#71717a', marginTop: 10, marginBottom: 0 }}>
-                                                ℹ {fee.notes}
+                                                i {fee.notes}
                                             </p>
                                         )}
                                     </div>
@@ -184,7 +184,7 @@ export default function FeeEstimator({ apiFetch }) {
             {/* Comparison panel */}
             {compare.length > 0 && (
                 <div className="dash-section">
-                    <h2 className="dash-section-title">⚖️ Fee Comparison</h2>
+                    <h2 className="dash-section-title">Fee Comparison</h2>
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                             <thead>

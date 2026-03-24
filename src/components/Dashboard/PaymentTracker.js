@@ -67,14 +67,14 @@ export default function PaymentTracker({ apiFetch }) {
         <div>
             {overdue.length > 0 && (
                 <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#ef4444' }}>
-                    ⚠️ <strong>{overdue.length} overdue payment{overdue.length > 1 ? 's' : ''}!</strong> Deadlines have passed.
+                    <strong>! {overdue.length} overdue payment{overdue.length > 1 ? 's' : ''}!</strong> Deadlines have passed.
                 </div>
             )}
 
             {/* Summary */}
             <div className="dash-section">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <h2 className="dash-section-title" style={{ marginBottom: 0 }}>💳 Payment Tracker</h2>
+                    <h2 className="dash-section-title" style={{ marginBottom: 0 }}>Payment Tracker</h2>
                     <button className="dash-btn" onClick={() => setShowForm(!showForm)}>
                         {showForm ? '✕ Cancel' : '+ Add Payment'}
                     </button>
