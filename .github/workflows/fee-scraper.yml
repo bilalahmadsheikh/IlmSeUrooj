@@ -1,0 +1,220 @@
+name: Update University Fee Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      uni:
+        description: 'University name filter (leave blank for all)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run (print changes, do not patch)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  PYTHON_VERSION: '3.11'
+  NOTIFICATION_EMAIL: 'ba8516127@gmail.com'
+
+concurrency:
+  group: fee-scraper-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  scrape-fees:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      has_changes: ${{ steps.diff-check.outputs.has_changes }}
+      fee_summary: ${{ steps.run-scraper.outputs.summary }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml playwright
+          playwright install chromium --with-deps
+
+      - name: Run fee scraper
+        id: run-scraper
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.uni }}" ]; then
+            ARGS="--uni \"${{ github.event.inputs.uni }}\""
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          echo "Running: python scripts/scrapers/uni_fee_scraper.py $ARGS"
+          python scripts/scrapers/uni_fee_scraper.py $ARGS 2>&1 | tee /tmp/scraper_output.txt
+
+          # Capture last 20 lines as summary for PR body
+          SUMMARY=$(tail -20 /tmp/scraper_output.txt | tr '\n' '|')
+          echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
+
+      - name: Upload fee data output
+        uses: actions/upload-artifact@v4
+        with:
+          name: fee-data-output
+          path: scripts/scrapers/fee_data_output.json
+          retention-days: 14
+
+      - name: Check for data changes
+        id: diff-check
+        run: |
+          if git diff --quiet src/data/universities.js; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No fee changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Fee changes detected:"
+            git diff --stat src/data/universities.js
+            git diff src/data/universities.js | grep '^[+-].*avgFee' || true
+          fi
+
+  create-pr:
+    needs: scrape-fees
+    if: needs.scrape-fees.outputs.has_changes == 'true' && github.event.inputs.dry_run != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml playwright
+          playwright install chromium --with-deps
+
+      - name: Re-run scraper to get fresh changes
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.uni }}" ]; then
+            ARGS="--uni \"${{ github.event.inputs.uni }}\""
+          fi
+          python scripts/scrapers/uni_fee_scraper.py $ARGS
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update university fee data [automated]'
+          title: 'Fee Update: Automated university fee data refresh'
+          body: |
+            ## Automated Fee Data Update
+
+            This PR was created automatically by the fee scraper workflow.
+
+            ### What changed
+            Fee data in `src/data/universities.js` has been updated by scraping
+            official university fee pages.
+
+            ### Universities scraped
+            - IBA Karachi — https://www.iba.edu.pk/fee-structure.php
+            - FAST-NUCES — https://www.nu.edu.pk/Admissions/FeeStructure
+            - COMSATS (all campuses) — https://islamabad.comsats.edu.pk/fee-structure/
+            - Bahria University — https://www.bahria.edu.pk/fee-structure/
+            - NED UET — https://www.neduet.edu.pk/admissions/fee-structure
+            - GIKI — https://giki.edu.pk/admissions/admissions-undergraduates/ugrad-fees-and-expenses/
+            - PIEAS — https://admissions.pieas.edu.pk/
+            - ITU — https://itu.edu.pk/admissions/fee-structure/
+            - UET Taxila — https://uettaxila.edu.pk/index.php/admissions/fee-structure
+            - SZABIST — https://szabist.edu.pk/admissions/fee-structure/
+            - Air University — https://www.au.edu.pk/pages/Admissions/fee_structure.aspx
+
+            ### Scraper output
+            ```
+            ${{ needs.scrape-fees.outputs.fee_summary }}
+            ```
+
+            ---
+            *Automated PR. Please verify fee amounts against official sources before merging.*
+          branch: automated/fee-update
+          delete-branch: true
+          labels: |
+            automated
+            fee-update
+
+  notify-on-failure:
+    needs: [scrape-fees, create-pr]
+    if: failure()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send failure notification
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: 'Fee Scraper Failed - IlmSeUrooj'
+          to: ${{ env.NOTIFICATION_EMAIL }}
+          from: IlmSeUrooj Bot
+          body: |
+            The automated fee scraper workflow has failed.
+
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            Repository: ${{ github.repository }}
+
+            Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  notify-on-success:
+    needs: [scrape-fees, create-pr]
+    if: success() && needs.scrape-fees.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send success notification
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: 'Fee Update PR Created - IlmSeUrooj'
+          to: ${{ env.NOTIFICATION_EMAIL }}
+          from: IlmSeUrooj Bot
+          body: |
+            A fee update PR has been created.
+
+            Review and merge: https://github.com/${{ github.repository }}/pulls
+
+            ---
+            Automated notification from IlmSeUrooj.

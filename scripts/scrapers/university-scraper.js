@@ -158,6 +158,11 @@ const SCRAPE_CONFIGS = [
                 'https://admissions.comsats.edu.pk',
                 'https://www.comsats.edu.pk/Admissions.aspx',
             ],
+            // Official fee structure: Rs. 6,000/CH for all UG programs (Fall 2025)
+            fees: [
+                'https://islamabad.comsats.edu.pk/fee-structure/',
+                'https://lahore.comsats.edu.pk/fee-structure/',
+            ],
         },
         extract(html, url, tier) {
             const $ = cheerio.load(html);
@@ -383,6 +388,10 @@ const SCRAPE_CONFIGS = [
                 'https://www.bahria.edu.pk/admissions',
                 'https://bahria.edu.pk/',
             ],
+            // Official fee structure: BS CS ~Rs. 162,745/sem; BBA ~Rs. 172,000/sem (2024)
+            fees: [
+                'https://www.bahria.edu.pk/fee-structure/',
+            ],
         },
         extract(html, url, tier) {
             const $ = cheerio.load(html);
@@ -559,6 +568,10 @@ const SCRAPE_CONFIGS = [
             admissions: [
                 'https://itu.edu.pk/admissions/',
                 'https://itu.edu.pk/',
+            ],
+            // Official fee structure: Rs. 8,000/CH (confirmed 2024–25)
+            fees: [
+                'https://itu.edu.pk/admissions/fee-structure/',
             ],
         },
         extract(html, url, tier) {

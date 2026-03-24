@@ -587,7 +587,7 @@ export const universities = [
     highlights: ["Oldest Business School", "Strong Placement", "Merit Based"],
     description: "Asia's oldest business school with exceptional corporate connections.",
     website: "https://iba.edu.pk",
-    avgFee: "PKR 200,000 - 240,000 per semester (Rs. 29,400/CH)",
+    avgFee: "PKR 441,000 - 500,000 per semester (Rs. 29,400/CH)",
     facilities: ["IBA Library", "Sports Complex", "Student Hostel", "Multiple Cafés", "Prayer Area", "Auditorium", "Center for Entrepreneurial Development", "IBA City Campus (separate)"],
     admissions: {
       deadline: "2026-03-25",

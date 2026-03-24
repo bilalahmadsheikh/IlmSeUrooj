@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { universities, lastScraperRun } from '@/data/universities';
 import { departmentDetails } from '@/data/departmentData';
+import { universityDetails } from '@/data/universityDetails';
 import { getAlumniLinks } from '@/data/alumniLinks';
 import { getAlumniPulse, COUNTRY_COORDS } from '@/data/alumniPulseData';
 import Header from '@/components/Header/Header';
@@ -202,6 +203,7 @@ export default function UniversityDetailPage() {
     );
   }
 
+  const details = universityDetails[id] || null;
   const admissions = uni.admissions || {};
   const deadlineFormatted = formatDate(admissions.deadline);
   const testDateFormatted = formatDate(admissions.testDate);
@@ -225,7 +227,11 @@ export default function UniversityDetailPage() {
         <a href="#overview">Overview</a>
         <a href="#rankings">Rankings</a>
         <a href="#admissions">Admissions</a>
+        {details?.admissionTestDetails && <a href="#test-details">Entry Test</a>}
         <a href="#about">About</a>
+        {details?.financialAid && <a href="#financial-aid">Scholarships</a>}
+        {details?.placementRate && <a href="#careers">Careers</a>}
+        {details?.researchCenters && <a href="#research">Research</a>}
         <a href="#programs">Programs</a>
         <a href="#alumni">Alumni</a>
         <a href="#similar">Similar</a>
@@ -312,6 +318,18 @@ export default function UniversityDetailPage() {
                 <div className={styles.statCard}>
                   <span className={styles.statValue}>#{topFieldRank}</span>
                   <span className={styles.statLabel}>{Object.keys(fieldRankings)[0]}</span>
+                </div>
+              )}
+              {details?.acceptanceRate && (
+                <div className={styles.statCard}>
+                  <span className={styles.statValue}>{details.acceptanceRate}</span>
+                  <span className={styles.statLabel}>Accept Rate</span>
+                </div>
+              )}
+              {details?.qsWorldRank && (
+                <div className={styles.statCard}>
+                  <span className={styles.statValue} style={{fontSize:'0.85rem'}}>{details.qsWorldRank}</span>
+                  <span className={styles.statLabel}>QS / World</span>
                 </div>
               )}
             </div>
@@ -489,6 +507,216 @@ export default function UniversityDetailPage() {
                 >
                   Open Application Portal <IconExternalLink aria-hidden />
                 </a>
+              )}
+            </section>
+          )}
+
+          {/* QS Rankings & Selectivity */}
+          {details && (details.qsWorldRank || details.qsSubjectRankings || details.acceptanceRate) && (
+            <section id="qs-rankings" className={styles.card} aria-labelledby="qs-heading">
+              <h2 id="qs-heading" className={styles.cardTitle}>
+                <span className={styles.cardIconEmoji}>🌐</span> Global Rankings & Selectivity
+              </h2>
+              <div className={styles.detailsGrid}>
+                {details.qsWorldRank && (
+                  <div className={styles.detailCell}>
+                    <span className={styles.detailCellLabel}>QS World Rank</span>
+                    <span className={styles.detailCellValue}>{details.qsWorldRank}</span>
+                  </div>
+                )}
+                {details.acceptanceRate && (
+                  <div className={styles.detailCell}>
+                    <span className={styles.detailCellLabel}>Acceptance Rate</span>
+                    <span className={styles.detailCellValue}>{details.acceptanceRate}</span>
+                  </div>
+                )}
+                {details.enrollmentStats?.students && (
+                  <div className={styles.detailCell}>
+                    <span className={styles.detailCellLabel}>Students</span>
+                    <span className={styles.detailCellValue}>{details.enrollmentStats.students}</span>
+                  </div>
+                )}
+                {details.enrollmentStats?.faculty && (
+                  <div className={styles.detailCell}>
+                    <span className={styles.detailCellLabel}>Faculty / Research</span>
+                    <span className={styles.detailCellValue}>{details.enrollmentStats.faculty}</span>
+                  </div>
+                )}
+              </div>
+              {details.qsSubjectRankings && Object.keys(details.qsSubjectRankings).length > 0 && (
+                <div className={styles.subjectRankings}>
+                  <h3 className={styles.subRankTitle}>Subject Rankings</h3>
+                  <div className={styles.subRankGrid}>
+                    {Object.entries(details.qsSubjectRankings).map(([subj, rank]) => (
+                      <div key={subj} className={styles.subRankItem}>
+                        <span className={styles.subRankSubject}>{subj}</span>
+                        <span className={styles.subRankValue}>{rank}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Admission Test Deep-Dive */}
+          {details?.admissionTestDetails && (
+            <section id="test-details" className={styles.card} aria-labelledby="test-heading">
+              <h2 id="test-heading" className={styles.cardTitle}>
+                <span className={styles.cardIconEmoji}>📝</span> Entry Test Guide: {details.admissionTestDetails.name}
+              </h2>
+              <div className={styles.testGrid}>
+                {details.admissionTestDetails.totalMarks && (
+                  <div className={styles.testCell}>
+                    <span className={styles.testCellLabel}>Total Marks</span>
+                    <span className={styles.testCellValue}>{details.admissionTestDetails.totalMarks}</span>
+                  </div>
+                )}
+                {details.admissionTestDetails.duration && (
+                  <div className={styles.testCell}>
+                    <span className={styles.testCellLabel}>Duration</span>
+                    <span className={styles.testCellValue}>{details.admissionTestDetails.duration}</span>
+                  </div>
+                )}
+                {details.admissionTestDetails.negativeMarking && (
+                  <div className={styles.testCell}>
+                    <span className={styles.testCellLabel}>Negative Marking</span>
+                    <span className={styles.testCellValue}>{details.admissionTestDetails.negativeMarking}</span>
+                  </div>
+                )}
+                {details.admissionTestDetails.safeScore && (
+                  <div className={styles.testCell}>
+                    <span className={styles.testCellLabel}>Safe Score Target</span>
+                    <span className={`${styles.testCellValue} ${styles.testHighlight}`}>{details.admissionTestDetails.safeScore}</span>
+                  </div>
+                )}
+              </div>
+              {details.admissionTestDetails.subjects?.length > 0 && (
+                <div className={styles.testSubjects}>
+                  <span className={styles.testSubjectsLabel}>Subjects covered:</span>
+                  <div className={styles.testSubjectTags}>
+                    {details.admissionTestDetails.subjects.map((s) => (
+                      <span key={s} className={styles.testSubjectTag}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {details.admissionTestDetails.meritFormula && (
+                <div className={styles.testFormula}>
+                  <span className={styles.testFormulaLabel}>Merit Formula:</span>
+                  <span className={styles.testFormulaValue}>{details.admissionTestDetails.meritFormula}</span>
+                </div>
+              )}
+              {details.admissionTestDetails.syllabusNote && (
+                <p className={styles.testNote}>{details.admissionTestDetails.syllabusNote}</p>
+              )}
+              {details.admissionTestDetails.syllabusLink && (
+                <a href={details.admissionTestDetails.syllabusLink} target="_blank" rel="noopener noreferrer" className={styles.applyLink}>
+                  View Official Syllabus <IconExternalLink aria-hidden />
+                </a>
+              )}
+            </section>
+          )}
+
+          {/* Financial Aid & Scholarships */}
+          {details?.financialAid && (
+            <section id="financial-aid" className={styles.card} aria-labelledby="aid-heading">
+              <h2 id="aid-heading" className={styles.cardTitle}>
+                <span className={styles.cardIconEmoji}>🎓</span> Scholarships & Financial Aid
+              </h2>
+              {details.financialAid.percentOnAid && (
+                <p className={styles.aidHighlight}>{details.financialAid.percentOnAid}</p>
+              )}
+              {details.financialAid.keyFact && (
+                <p className={styles.aidKeyFact}>{details.financialAid.keyFact}</p>
+              )}
+              {details.financialAid.topScholarships?.length > 0 && (
+                <div className={styles.scholarshipList}>
+                  <h3 className={styles.sectionHeading}>Available Scholarships</h3>
+                  <ul className={styles.schList}>
+                    {details.financialAid.topScholarships.map((s, i) => (
+                      <li key={i} className={styles.schItem}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Placement & Careers */}
+          {details && (details.placementRate || details.topRecruiters || details.careerPathGuide) && (
+            <section id="careers" className={styles.card} aria-labelledby="careers-heading">
+              <h2 id="careers-heading" className={styles.cardTitle}>
+                <span className={styles.cardIconEmoji}>💼</span> Placement & Career Paths
+              </h2>
+              {details.placementRate && (
+                <div className={styles.placementStat}>
+                  <span className={styles.placementLabel}>Placement Rate</span>
+                  <span className={styles.placementValue}>{details.placementRate}</span>
+                </div>
+              )}
+              {details.careerPathGuide && (
+                <p className={styles.careerGuide}>{details.careerPathGuide}</p>
+              )}
+              {details.topRecruiters?.length > 0 && (
+                <div className={styles.recruitersWrap}>
+                  <h3 className={styles.sectionHeading}>Top Recruiters</h3>
+                  <div className={styles.recruiterTags}>
+                    {details.topRecruiters.map((r, i) => (
+                      <span key={i} className={styles.recruiterTag}>{r}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Notable Alumni */}
+          {details?.notableAlumni?.length > 0 && (
+            <section className={styles.card} aria-labelledby="notable-alumni-heading">
+              <h2 id="notable-alumni-heading" className={styles.cardTitle}>
+                <span className={styles.cardIconEmoji}>⭐</span> Notable Alumni
+              </h2>
+              <div className={styles.alumniCards}>
+                {details.notableAlumni.map((a, i) => (
+                  <div key={i} className={styles.alumniCard}>
+                    <div className={styles.alumniAvatar}>{a.name.charAt(0)}</div>
+                    <div className={styles.alumniInfo}>
+                      <span className={styles.alumniName}>{a.name}</span>
+                      <span className={styles.alumniRole}>{a.role}</span>
+                      {a.achievement && <span className={styles.alumniAchievement}>{a.achievement}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Research Centers & Unique Features */}
+          {details && (details.researchCenters?.length > 0 || details.uniqueFeatures?.length > 0) && (
+            <section id="research" className={styles.card} aria-labelledby="research-heading">
+              <h2 id="research-heading" className={styles.cardTitle}>
+                <span className={styles.cardIconEmoji}>🔬</span> Research & Unique Strengths
+              </h2>
+              {details.researchCenters?.length > 0 && (
+                <div className={styles.researchSection}>
+                  <h3 className={styles.sectionHeading}>Research Centers & Labs</h3>
+                  <ul className={styles.researchList}>
+                    {details.researchCenters.map((r, i) => (
+                      <li key={i} className={styles.researchItem}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {details.uniqueFeatures?.length > 0 && (
+                <div className={styles.uniqueSection}>
+                  <h3 className={styles.sectionHeading}>Why {uni.shortName}?</h3>
+                  <ul className={styles.uniqueList}>
+                    {details.uniqueFeatures.map((f, i) => (
+                      <li key={i} className={styles.uniqueItem}>{f}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </section>
           )}

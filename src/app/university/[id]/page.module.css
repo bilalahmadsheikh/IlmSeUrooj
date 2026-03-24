@@ -1768,3 +1768,412 @@
   letter-spacing: 0.06em;
   margin: 0 0 0.25rem;
 }
+
+/* ─── Card icon emoji ──────────────────────────────── */
+.cardIconEmoji {
+  font-size: 1.1rem;
+  margin-right: 0.35rem;
+}
+
+/* ─── QS Rankings / Selectivity ────────────────────── */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.detailCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  border-radius: var(--radius-lg);
+}
+
+.detailCellLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detailCellValue {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary-light);
+  line-height: 1.3;
+}
+
+.subjectRankings {
+  margin-top: var(--space-2);
+}
+
+.subRankTitle {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
+}
+
+.subRankGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.subRankItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+}
+
+.subRankSubject {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.subRankValue {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary-light);
+  text-align: right;
+}
+
+/* ─── Entry Test Deep-Dive ──────────────────────────── */
+.testGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.testCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.testCellLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.testCellValue {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.testHighlight {
+  color: #fbbf24;
+}
+
+.testSubjects {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.testSubjectsLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 4px;
+  white-space: nowrap;
+}
+
+.testSubjectTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.testSubjectTag {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--radius-full);
+  color: #fbbf24;
+}
+
+.testFormula {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.testFormulaLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.testFormulaValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-light);
+  font-weight: 500;
+}
+
+.testNote {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border-left: 3px solid var(--color-primary);
+}
+
+/* ─── Financial Aid ─────────────────────────────────── */
+.aidHighlight {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-primary-light);
+  margin-bottom: var(--space-2);
+}
+
+.aidKeyFact {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background: rgba(16, 185, 129, 0.06);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.scholarshipList {
+  margin-top: var(--space-2);
+}
+
+.schList {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.schItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+}
+
+.schItem::before {
+  content: '✓';
+  color: var(--color-primary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ─── Placement & Careers ───────────────────────────── */
+.placementStat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-4);
+}
+
+.placementLabel {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.placementValue {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-primary-light);
+  font-family: var(--font-display);
+}
+
+.careerGuide {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border-left: 3px solid var(--color-primary);
+}
+
+.recruitersWrap {
+  margin-top: var(--space-3);
+}
+
+.recruiterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.recruiterTag {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-full);
+  color: var(--color-primary-light);
+  font-weight: 500;
+}
+
+/* ─── Notable Alumni ────────────────────────────────── */
+.alumniCards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.alumniCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  transition: border-color var(--transition-fast);
+}
+
+.alumniCard:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.alumniAvatar {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: white;
+}
+
+.alumniInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alumniName {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.alumniRole {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-light);
+}
+
+.alumniAchievement {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* ─── Research & Unique Strengths ───────────────────── */
+.researchSection,
+.uniqueSection {
+  margin-bottom: var(--space-4);
+}
+
+.researchList,
+.uniqueList {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.researchItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  line-height: 1.5;
+}
+
+.researchItem::before {
+  content: '🔬';
+  flex-shrink: 0;
+}
+
+.uniqueItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(16, 185, 129, 0.04);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  line-height: 1.5;
+}
+
+.uniqueItem::before {
+  content: '✦';
+  color: var(--color-primary);
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  padding-top: 2px;
+}
