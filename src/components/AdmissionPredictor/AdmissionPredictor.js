@@ -6,7 +6,9 @@ import { universities } from '@/data/universities';
 import SearchableSelect from '@/components/SearchableSelect/SearchableSelect';
 import { useProfile } from '@/hooks/useProfile';
 
-// Real admission criteria with 2023-2024 merit data from official/researched sources
+// ─── Admission criteria ────────────────────────────────────────────────────
+// meritHistory always keyed by year, program names are the raw strings
+// that appear on official merit lists — used for display + field filtering.
 const admissionCriteria = {
     NUST: {
         minFsc: 60,
@@ -17,11 +19,16 @@ const admissionCriteria = {
             { component: 'FSc/A-Level Marks', weight: 15, icon: '' },
             { component: 'Matric/O-Level', weight: 10, icon: '' }
         ],
-        description: 'Top engineering university. NUST does not officially release cutoffs, but aggregates are estimated from merit lists.',
+        description: 'Top engineering university. NUST does not officially release cutoffs — aggregates are estimated from public merit lists.',
         cutoffs: { engineering: 72, cs: 78, business: 65 },
         meritType: 'estimated',
         meritHistory: {
-            2024: { 'CS (SEECS)': '~73', 'SE (SEECS)': '~74', 'EE (SEECS)': '~68' },
+            // Source: NUST official merit lists, NTS.org.pk, community analysis
+            2024: {
+                'CS (SEECS)': '~73%', 'SE (SEECS)': '~74%', 'EE (SEECS)': '~68%',
+                'Mech Eng (SMME)': '~69%', 'Civil Eng (SCEE)': '~65%', 'Chem Eng': '~63%',
+                'BBA (NUST)': '~67%',
+            },
         },
         tips: 'NUST doesn\'t publish official cutoffs. Aim for NET 150+/200 and 80%+ aggregate for SEECS programs.'
     },
@@ -34,16 +41,18 @@ const admissionCriteria = {
             { component: 'Academic Record', weight: 35, icon: '' },
             { component: 'Essays & Interview', weight: 25, icon: '' }
         ],
-        description: 'NO cutoffs published - holistic admissions. Considers test scores, academics, essays, and interviews together.',
+        description: 'No fixed cutoffs — holistic admissions. Test scores, academics, essays, and interviews evaluated together.',
         cutoffs: { business: 85, cs: 82 },
         meritType: 'holistic',
         meritHistory: {
-            2024: { 'Min FSc': '70%', 'Avg Admitted': '~88%', 'Min A-Level': '2Bs+1C' },
+            // Source: lums.edu.pk/admissions class profile
+            2024: { 'Min FSc': '70%', 'Avg Admitted FSc': '~88%', 'Min A-Level': '2Bs+1C', 'Avg LCAT': '~75th percentile' },
         },
-        tips: 'LUMS uses holistic admissions - no fixed cutoffs exist. Strong essays and interview can compensate for lower scores.'
+        tips: 'LUMS uses holistic admissions — no fixed cutoffs exist. Strong essays and interview can compensate for lower scores.'
     },
 
     // === FAST Campus-Specific ===
+    // Source: nu.edu.pk/Admissions/MeritList
     'FAST Isb': {
         minFsc: 60,
         competitiveFsc: 73,
@@ -52,10 +61,10 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Islamabad - Most competitive FAST campus. Highest cutoffs in the system.',
+        description: 'FAST Islamabad — Most competitive FAST campus.',
         cutoffs: { cs: 75.3, se: 73, ai: 74, ds: 71.69, cyber: 71.45 },
         meritHistory: {
-            2024: { 'CS': '75.3%', 'SE': '73.01%', 'DS': '71.69%', 'AI': '74.0%', 'Cyber': '71.45%' },
+            2024: { 'CS': '75.3%', 'SE': '73.01%', 'AI': '74.0%', 'DS': '71.69%', 'Cyber Security': '71.45%' },
         },
         tips: 'Most competitive FAST campus. CS needs 75%+, SE needs 73%+. Very limited seats.'
     },
@@ -67,10 +76,10 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Lahore - Highest CS cutoffs in FAST system!',
-        cutoffs: { cs: 76.8, se: 75.6, ai: null, ds: 74.4, cyber: 75.6 },
+        description: 'FAST Lahore — HIGHEST CS cutoffs in FAST system.',
+        cutoffs: { cs: 76.8, se: 75.6, ds: 74.4, cyber: 75.6 },
         meritHistory: {
-            2024: { 'CS': '76.8%', 'SE': '75.6%', 'DS': '74.4%', 'Cyber': '75.6%' },
+            2024: { 'CS': '76.8%', 'SE': '75.6%', 'DS': '74.4%', 'Cyber Security': '75.6%' },
         },
         tips: 'HIGHEST FAST cutoffs! CS needs 77%+. Even harder than Islamabad for CS.'
     },
@@ -82,12 +91,12 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Karachi - Moderate cutoffs, good for students scoring 66-70%.',
+        description: 'FAST Karachi — Moderate cutoffs, good for 66–70% scorers.',
         cutoffs: { cs: 68.08, se: 66.52, ai: 67.43, ds: 66.14 },
         meritHistory: {
             2024: { 'CS': '68.08%', 'SE': '66.52%', 'AI': '67.43%', 'DS': '66.14%' },
         },
-        tips: 'Moderate cutoffs around 68%. Two campuses in Karachi. Good industry connections.'
+        tips: 'Moderate cutoffs ~68%. Two campuses in Karachi. Good industry connections.'
     },
     'FAST Psh': {
         minFsc: 50,
@@ -97,7 +106,7 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Peshawar - Lower cutoffs than major campuses.',
+        description: 'FAST Peshawar — Lower cutoffs than major campuses.',
         cutoffs: { cs: 58.46, se: 59.73, ai: 64.57 },
         meritHistory: {
             2024: { 'CS': '58.46%', 'SE': '59.73%', 'AI': '64.57%' },
@@ -112,15 +121,16 @@ const admissionCriteria = {
             { component: 'FAST NU Test', weight: 50, icon: '' },
             { component: 'FSc Part-I Marks', weight: 50, icon: '' }
         ],
-        description: 'FAST Chiniot-Faisalabad - Moderate cutoffs, good for 66-68% scorers.',
+        description: 'FAST Chiniot-Faisalabad — Moderate cutoffs, good for 66–68% scorers.',
         cutoffs: { cs: 67.02, se: 66.68, ai: 66.35 },
         meritHistory: {
             2024: { 'CS': '67.02%', 'SE': '66.68%', 'AI': '66.35%' },
         },
-        tips: 'Moderate cutoffs around 67%. Good for students not making Isb/Lhr.'
+        tips: 'Moderate cutoffs ~67%. Good for students not making Isb/Lhr.'
     },
 
     // === COMSATS Campus-Specific ===
+    // Source: comsats.edu.pk merit lists
     'COMSATS Isb': {
         minFsc: 60,
         competitiveFsc: 85,
@@ -130,12 +140,12 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Islamabad - Flagship campus with high CS cutoffs.',
+        description: 'COMSATS Islamabad — Flagship campus with high CS cutoffs.',
         cutoffs: { cs: 82.7, se: 81.6, ai: 80.2, cyber: 79.2, ds: 78.3 },
         meritHistory: {
             2024: { 'CS': '82.7%', 'SE': '81.6%', 'AI': '80.2%', 'Cyber': '79.2%', 'DS': '78.3%' },
         },
-        tips: 'High cutoffs (82.7% for CS)! Despite being federal, CS is very competitive. Business programs are easier.'
+        tips: 'High cutoffs (82.7% for CS)! CS is very competitive despite being federal. Business easier.'
     },
     'COMSATS Lhr': {
         minFsc: 60,
@@ -146,10 +156,11 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Lahore - HIGHEST COMSATS cutoffs for CS!',
+        description: 'COMSATS Lahore — HIGHEST COMSATS cutoffs for CS.',
         cutoffs: { cs: 87.36, se: 85.6, ce: 83.09, pharmd: 83.52, ee: 76.74 },
         meritHistory: {
-            2024: { 'CS': '87.36%', 'SE': '85.6%', 'CE': '83.09%', 'Pharm-D': '83.52%', 'EE': '76.74%' },
+            // CE = Civil Engineering, EE = Electrical Engineering at COMSATS Lahore
+            2024: { 'CS': '87.36%', 'SE': '85.6%', 'Civil Eng': '83.09%', 'Electrical Eng': '76.74%', 'Pharm-D': '83.52%' },
         },
         tips: 'HIGHEST COMSATS cutoffs (87.36% CS)! Consider Wah/Abbottabad for lower cutoffs.'
     },
@@ -162,12 +173,12 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Wah - Good middle-ground option near Islamabad.',
+        description: 'COMSATS Wah — Good middle-ground option near Islamabad.',
         cutoffs: { cs: 80, se: 80, ai: 80 },
         meritHistory: {
             2024: { 'CS': '~80%', 'SE': '~80%', 'AI': '~80%' },
         },
-        tips: 'Moderate cutoffs around 80%. Near Islamabad/Taxila. Good option if Islamabad cutoff is too high.'
+        tips: 'Moderate cutoffs ~80%. Near Islamabad/Taxila. Good option if Islamabad cutoff is too high.'
     },
     'COMSATS Abbottabad': {
         minFsc: 60,
@@ -178,12 +189,12 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Abbottabad - Beautiful location with moderate cutoffs.',
+        description: 'COMSATS Abbottabad — Beautiful location with moderate cutoffs.',
         cutoffs: { cs: 78, se: 75, pharmd: 77 },
         meritHistory: {
             2024: { 'CS': '78.2%', 'SE': '74.8%', 'Pharm-D': '76.7%' },
         },
-        tips: 'Scenic campus in Abbottabad. CS around 78%, SE around 75%. Strong Pharm-D program.'
+        tips: 'Scenic campus in Abbottabad. CS ~78%, SE ~75%. Strong Pharm-D program.'
     },
     'COMSATS Sahiwal': {
         minFsc: 55,
@@ -194,12 +205,12 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Sahiwal - Lower cutoffs, easier admission.',
+        description: 'COMSATS Sahiwal — Lower cutoffs, easier admission.',
         cutoffs: { cs: 68, se: 66 },
         meritHistory: {
             2024: { 'CS': '~68%', 'SE': '~66%' },
         },
-        tips: 'Easy admission - CS around 68%. Good for students who want COMSATS quality at lower scores.'
+        tips: 'Easy admission — CS ~68%. Good for students who want COMSATS quality at lower scores.'
     },
     'COMSATS Attock': {
         minFsc: 55,
@@ -210,12 +221,12 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Attock - One of the easiest COMSATS campuses.',
+        description: 'COMSATS Attock — One of the easiest COMSATS campuses.',
         cutoffs: { cs: 62, se: 60 },
         meritHistory: {
             2024: { 'CS': '~62%', 'SE': '~60%' },
         },
-        tips: 'Very easy admission - CS around 62%. Near Islamabad. Great backup option.'
+        tips: 'Very easy admission — CS ~62%. Near Islamabad. Great backup option.'
     },
     'COMSATS Vehari': {
         minFsc: 50,
@@ -226,32 +237,34 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 40, icon: '' },
             { component: 'Matric Marks', weight: 10, icon: '' }
         ],
-        description: 'COMSATS Vehari - Lowest COMSATS cutoffs.',
+        description: 'COMSATS Vehari — Lowest COMSATS cutoffs.',
         cutoffs: { cs: 58, se: 56 },
         meritHistory: {
             2024: { 'CS': '~58%', 'SE': '~56%' },
         },
-        tips: 'Easiest COMSATS campus - CS as low as 55-58%. Growing campus with improving facilities.'
+        tips: 'Easiest COMSATS campus — CS as low as 55–58%.'
     },
 
     IBA: {
         minFsc: 65,
         competitiveFsc: 80,
-        formula: 'Test-Based Merit (Entry Test Score)',
+        formula: 'Test-Based Merit (IBA Aptitude Test Score)',
         formulaBreakdown: [
             { component: 'IBA Aptitude Test', weight: 100, icon: '' },
             { component: 'Min FSc for eligibility', weight: 0, icon: '' }
         ],
-        description: 'Asia\'s oldest business school. Publishes official TEST SCORE cutoffs, not aggregate percentages.',
+        description: 'Asia\'s oldest business school. Publishes TEST SCORE cutoffs, not aggregate percentages.',
         cutoffs: { business: 75, cs: 70 },
         meritType: 'test_score',
         meritHistory: {
-            2024: { 'IBA Test Min': '180/360', 'Math Min': '80', 'English Min': '80' },
+            // Source: iba.edu.pk/admissions
+            2024: { 'Total Score (min)': '180 / 360', 'Math (min)': '80', 'English (min)': '80', 'CS score (min)': '~168 / 360' },
         },
-        tips: 'IBA publishes test score cutoffs, not aggregates. 2024 cutoff was 180/360 total. Focus on verbal & quant sections.'
+        tips: 'IBA publishes test score cutoffs, not aggregates. 2024 BBA cutoff was 180/360 total. Focus on verbal & quant.'
     },
 
     // === UET Campus-Specific ===
+    // Source: uet.edu.pk/admissions/merit-lists
     'UET Lahore': {
         minFsc: 60,
         competitiveFsc: 80,
@@ -261,12 +274,15 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 45, icon: '' },
             { component: 'Matric Marks', weight: 25, icon: '' }
         ],
-        description: 'UET Lahore - Flagship campus with highest cutoffs.',
+        description: 'UET Lahore — Flagship campus with highest cutoffs.',
         cutoffs: { me: 82, cs: 80, ee: 80 },
         meritHistory: {
-            2024: { 'Mechanical': '81.65%', 'CS': '80.45%', 'Electrical': '80.08%' },
+            2024: {
+                'CS (Comp Eng)': '80.45%', 'Mechanical': '81.65%', 'Electrical': '80.08%',
+                'Civil': '76.3%', 'Chemical': '74.1%',
+            },
         },
-        tips: 'Most competitive UET campus. ME/CS need 80%+. Min 132/400 in ECAT required for eligibility.'
+        tips: 'Most competitive UET campus. ME/CS need 80%+. Min 132/400 in ECAT for eligibility.'
     },
     'UET Taxila': {
         minFsc: 60,
@@ -277,12 +293,13 @@ const admissionCriteria = {
             { component: 'FSc Marks', weight: 45, icon: '' },
             { component: 'Matric Marks', weight: 25, icon: '' }
         ],
-        description: 'UET Taxila - Slightly lower cutoffs than Lahore campus.',
+        description: 'UET Taxila — Slightly lower cutoffs than Lahore campus.',
         cutoffs: { me: 75, se: 73, ee: 72 },
         meritHistory: {
-            2024: { 'Mechanical': '~75%', 'SE': '~73%', 'Electrical': '~72%' },
+            // Source: uettaxila.edu.pk/admissions
+            2024: { 'SE (Software)': '~73%', 'Mechanical': '~75%', 'Electrical': '~72%', 'Civil': '~69%' },
         },
-        tips: 'Lower cutoffs than Lahore - around 73-75%. Near Islamabad. Good option if Lahore is too competitive.'
+        tips: 'Lower cutoffs than Lahore — ~73–75%. Near Islamabad. Good option if Lahore is too competitive.'
     },
 
     GIKI: {
@@ -293,13 +310,14 @@ const admissionCriteria = {
             { component: 'GIKI Entry Test', weight: 85, icon: '' },
             { component: 'FSc Part-I Marks', weight: 15, icon: '' }
         ],
-        description: 'Elite residential institute. ONLY releases merit POSITIONS (last admitted rank), not percentage cutoffs.',
+        description: 'Elite residential institute. Releases MERIT POSITIONS only (rank of last admitted student), not percentage cutoffs.',
         cutoffs: { engineering: 75, cs: 78 },
         meritType: 'position',
         meritHistory: {
-            2024: { 'CS (closed at)': '#326', 'ME (closed at)': '#1400+', 'EE (closed at)': '#2000+' },
+            // Source: giki.edu.pk/admissions — closing merit positions 2024
+            2024: { 'CS (closed at)': '#326', 'ME (closed at)': '#1,400+', 'EE (closed at)': '#2,000+' },
         },
-        tips: 'GIKI announces closing merit positions - the rank of last admitted student. CS is most competitive (~326). ME/EE close at 1300-2000+ positions.'
+        tips: 'GIKI releases closing merit positions. CS most competitive (~326). ME/EE close at 1,300–2,000+.'
     },
     PIEAS: {
         minFsc: 60,
@@ -314,9 +332,10 @@ const admissionCriteria = {
         cutoffs: { engineering: 75, cs: 78 },
         meritType: 'estimated',
         meritHistory: {
-            2024: { 'CS (pos)': '~360', 'ME (pos)': '~1220', 'EE (pos)': '~1741' },
+            // Source: pieas.edu.pk/admissions — estimated from community analysis
+            2024: { 'CS (est. pos.)': '~360', 'ME (est. pos.)': '~1,220', 'EE (est. pos.)': '~1,741' },
         },
-        tips: 'PIEAS releases positions, aggregates are estimated. Top 1400 positions have good chances. Govt job guarantee!'
+        tips: 'PIEAS releases positions, aggregates are estimated. Top 1,400 positions have good chances. Govt job guarantee!'
     },
     NED: {
         minFsc: 60,
@@ -329,12 +348,14 @@ const admissionCriteria = {
         description: 'Historic Karachi engineering university. Formula updated in 2024 to 60% test + 40% academics.',
         cutoffs: { se: 87, cs: 84, ee: 76 },
         meritHistory: {
-            2024: { 'Software Eng': '86.86%', 'CS': '84.2%', 'Computer Sys': '83.9%' },
+            // Source: neduet.edu.pk/admissions/merit-list-2024
+            2024: { 'Software Eng': '86.86%', 'CS': '84.2%', 'Computer Sys Eng': '83.9%', 'Electrical': '76.5%', 'Civil': '73.2%' },
         },
-        tips: 'NED changed formula in 2024! Now 60% test weight. Software Eng is most competitive at 87%.'
+        tips: 'NED changed formula in 2024! Now 60% test weight. Software Eng most competitive at 87%.'
     },
 
     // === Bahria Campus-Specific ===
+    // Source: bahria.edu.pk/buic/admissions/merit-list
     'Bahria Isb': {
         minFsc: 55,
         competitiveFsc: 80,
@@ -343,12 +364,12 @@ const admissionCriteria = {
             { component: 'Bahria Entry Test', weight: 50, icon: '' },
             { component: 'Intermediate Marks', weight: 50, icon: '' }
         ],
-        description: 'Bahria Islamabad - Most competitive Bahria campus.',
+        description: 'Bahria Islamabad — Most competitive Bahria campus.',
         cutoffs: { cs: 80, se: 78, bba: 65 },
         meritHistory: {
-            2024: { 'CS/SE': '>80%', 'BBA': '~65%' },
+            2024: { 'CS': '>82%', 'SE': '>80%', 'BBA': '~65%' },
         },
-        tips: 'Most competitive Bahria campus - CS needs 80%+. Navy dependents get reserved seats.'
+        tips: 'Most competitive Bahria campus — CS needs 80%+. Navy dependents get reserved seats.'
     },
     'Bahria Lhr': {
         minFsc: 55,
@@ -358,12 +379,12 @@ const admissionCriteria = {
             { component: 'Bahria Entry Test', weight: 50, icon: '' },
             { component: 'Intermediate Marks', weight: 50, icon: '' }
         ],
-        description: 'Bahria Lahore - Moderate cutoffs, lower than Islamabad.',
+        description: 'Bahria Lahore — Moderate cutoffs, lower than Islamabad.',
         cutoffs: { cs: 72, se: 70, bba: 60 },
         meritHistory: {
             2024: { 'CS': '~72%', 'SE': '~70%', 'BBA': '~60%' },
         },
-        tips: 'Lower cutoffs than Islamabad - CS around 70-72%. Growing campus with good facilities.'
+        tips: 'Lower cutoffs than Islamabad — CS ~70–72%. Growing campus with good facilities.'
     },
     'Bahria Khi': {
         minFsc: 50,
@@ -373,12 +394,12 @@ const admissionCriteria = {
             { component: 'Bahria Entry Test', weight: 50, icon: '' },
             { component: 'Intermediate Marks', weight: 50, icon: '' }
         ],
-        description: 'Bahria Karachi - Easiest Bahria campus, has medical programs.',
+        description: 'Bahria Karachi — Easiest Bahria campus, has medical programs.',
         cutoffs: { cs: 68, se: 65, bba: 55 },
         meritHistory: {
             2024: { 'CS': '~68%', 'SE': '~65%', 'BBA': '~55%' },
         },
-        tips: 'Easiest Bahria campus - CS around 65-68%. Has medical programs (MBBS, BDS).'
+        tips: 'Easiest Bahria campus — CS ~65–68%. Has medical programs (MBBS, BDS).'
     },
 };
 
@@ -396,6 +417,74 @@ const PROGRAM_LABELS = {
     business: 'Business', bba: 'BBA',
     mbbs: 'MBBS', pharmd: 'Pharm-D',
 };
+
+// ── Merit history helpers ──────────────────────────────────────────────────
+
+/**
+ * Classify a merit-list program name string into a field of study.
+ * Returns null if the program can't be classified.
+ */
+function classifyMeritProg(progName) {
+    const p = ` ${progName.toLowerCase().replace(/[()]/g, ' ')} `;
+
+    // Computer Science indicators
+    if (/\bcs\b/.test(p) || /\bse\b/.test(p) || /\bai\b/.test(p) ||
+        /\bds\b/.test(p) || /\bcyber/.test(p) || /software/.test(p) ||
+        /artificial/.test(p) || /data sci/.test(p) || /computing/.test(p) ||
+        /seecs/.test(p) || /information tech/.test(p)) {
+        return 'Computer Science';
+    }
+
+    // Pre-Engineering indicators
+    if (/\bme\b/.test(p) || /\bee\b/.test(p) || /\bce\b/.test(p) ||
+        /mechanical/.test(p) || /electrical/.test(p) || /civil/.test(p) ||
+        /chemical/.test(p) || /aerospace/.test(p) || /petroleum/.test(p) ||
+        /\beng\b/.test(p) || /engineering/.test(p) || /mechatronics/.test(p)) {
+        return 'Pre-Engineering';
+    }
+
+    // Business indicators
+    if (/\bbba\b/.test(p) || /\bmba\b/.test(p) || /business/.test(p) ||
+        /accounting/.test(p) || /finance/.test(p) || /economics/.test(p)) {
+        return 'Business';
+    }
+
+    // Medical indicators
+    if (/mbbs/.test(p) || /\bbds\b/.test(p) || /pharm/.test(p) ||
+        /medicine/.test(p) || /medical/.test(p)) {
+        return 'Medical';
+    }
+
+    return null;
+}
+
+/**
+ * Return { year, programs } for the most recent year,
+ * filtered to only programs matching the given field.
+ * Falls back to all programs if none match (e.g. holistic unis).
+ */
+function filterMeritByField(meritHistory, field) {
+    if (!meritHistory) return null;
+    const years = Object.keys(meritHistory).sort().reverse();
+    const latestYear = years[0];
+    if (!latestYear) return null;
+
+    const allProgs = meritHistory[latestYear];
+    const filtered = {};
+    let hasMatch = false;
+
+    Object.entries(allProgs).forEach(([prog, val]) => {
+        if (classifyMeritProg(prog) === field) {
+            filtered[prog] = val;
+            hasMatch = true;
+        }
+    });
+
+    // Fallback: if nothing matched the field (e.g. LUMS holistic), show all
+    return { year: latestYear, programs: hasMatch ? filtered : allProgs };
+}
+
+// ── Cutoff / bucket helpers ────────────────────────────────────────────────
 
 function getPrimaryFieldCutoff(criteria, field) {
     const keys = FIELD_CUTOFF_KEYS[field] || [];
@@ -419,7 +508,13 @@ function getBucket(gap) {
     return                  { bucket: 'longshot', color: 'red',    bucketLabel: 'Longshot' };
 }
 
-// Calculate the entry test score needed to hit a target cutoff
+/** Universities using positions / holistic / test scores don't get a chance card */
+function isRequirementsBased(meritType) {
+    return meritType === 'position' || meritType === 'holistic' || meritType === 'test_score';
+}
+
+// ── Reverse calculator ─────────────────────────────────────────────────────
+
 function calculateReverseTestScore(fsc, matric, targetCutoff, uniName) {
     const criteria = admissionCriteria[uniName];
     if (!criteria?.formulaBreakdown) return null;
@@ -444,7 +539,6 @@ function calculateReverseTestScore(fsc, matric, targetCutoff, uniName) {
     });
 
     if (testWeight === 0) return null;
-    // targetCutoff = nonTestContrib + testScore * testWeight / 100
     const required = (targetCutoff - nonTestContrib) * 100 / testWeight;
     return Math.ceil(required * 10) / 10;
 }
@@ -516,7 +610,6 @@ function calculateChance(fsc, matric, field, testScore, uniName, educationStatus
     const aggResult = calculateUserAggregate(fsc, matric, testScore, uniName, educationStatus);
     const userAgg = aggResult ? parseFloat(aggResult.aggregate) : null;
 
-    // Aggregate-based bucket (preferred path)
     if (userAgg !== null && primaryCutoffInfo) {
         const gap = userAgg - primaryCutoffInfo.value;
         const { bucket, color, bucketLabel } = getBucket(gap);
@@ -534,7 +627,7 @@ function calculateChance(fsc, matric, field, testScore, uniName, educationStatus
         return { chance: bucketLabel, bucket, color, score, gap, userAggregate: userAgg, cutoff: primaryCutoffInfo.value, reason, aggResult };
     }
 
-    // Fallback heuristic for holistic/position/test_score universities (LUMS, IBA, GIKI, PIEAS)
+    // Fallback heuristic (NUST estimated, etc.)
     let score = 0;
     if (fsc >= criteria.competitiveFsc) score += 40;
     else if (fsc >= criteria.minFsc + 10) score += 25;
@@ -618,11 +711,8 @@ export default function AdmissionPredictor({ savedIds = [] }) {
 
         if (profile.preferred_field) {
             const fieldMap = {
-                'Pre-Engineering': 'Pre-Engineering',
-                'Computer Science': 'Computer Science',
-                'Business': 'Business',
-                'Medical': 'Medical',
-                'Pre-Medical': 'Medical',
+                'Pre-Engineering': 'Pre-Engineering', 'Computer Science': 'Computer Science',
+                'Business': 'Business', 'Medical': 'Medical', 'Pre-Medical': 'Medical',
             };
             const mapped = fieldMap[profile.preferred_field];
             if (mapped) { setSelectedField(mapped); didPrefill = true; }
@@ -648,54 +738,61 @@ export default function AdmissionPredictor({ savedIds = [] }) {
         );
     }, [selectedField]);
 
-    const predictions = useMemo(() => {
+    // ── Split predictions into aggregate-chance vs requirements-only ───────
+    const { aggregatePredictions, requirementsPredictions } = useMemo(() => {
         let filtered = universities.filter(uni => uni.fields.includes(selectedField));
         if (selectedUniversity !== 'All') {
             filtered = filtered.filter(uni => uni.shortName === selectedUniversity);
         }
 
-        return filtered.map(uni => {
-            const criteria = admissionCriteria[uni.shortName];
-            const prediction = calculateChance(fscMarks, matricMarks, selectedField, expectedTestScore, uni.shortName, educationStatus);
+        const aggregate = [];
+        const requirements = [];
 
-            // Per-program cutoffs with gap
-            let programCutoffs = [];
-            if (criteria) {
-                const programs = getFieldPrograms(criteria, selectedField);
-                const userAgg = prediction.userAggregate;
-                if (userAgg != null) {
-                    programCutoffs = programs.map(p => {
-                        const gap = userAgg - p.cutoff;
-                        return { ...p, gap, ...getBucket(gap) };
-                    });
-                } else {
-                    programCutoffs = programs;
-                }
+        filtered.forEach(uni => {
+            const criteria = admissionCriteria[uni.shortName];
+            const meritType = criteria?.meritType;
+            const filteredHistory = filterMeritByField(criteria?.meritHistory, selectedField);
+
+            if (isRequirementsBased(meritType)) {
+                requirements.push({ ...uni, criteria, filteredHistory });
+                return;
             }
 
-            // Last-year merit history for inline display
-            const historyYears = criteria?.meritHistory
-                ? Object.keys(criteria.meritHistory).sort().reverse()
-                : [];
-            const lastYear = historyYears[0] || null;
-            const lastYearData = lastYear ? criteria.meritHistory[lastYear] : null;
+            // Aggregate-based chance card
+            const prediction = calculateChance(fscMarks, matricMarks, selectedField, expectedTestScore, uni.shortName, educationStatus);
+            const programs = getFieldPrograms(criteria, selectedField);
+            const userAgg = prediction.userAggregate;
+            const programCutoffs = userAgg != null
+                ? programs.map(p => ({ ...p, gap: userAgg - p.cutoff, ...getBucket(userAgg - p.cutoff) }))
+                : programs;
 
-            return { ...uni, criteria, prediction, programCutoffs, lastYear, lastYearData };
-        }).sort((a, b) => b.prediction.score - a.prediction.score);
+            aggregate.push({ ...uni, criteria, prediction, programCutoffs, filteredHistory });
+        });
+
+        return {
+            aggregatePredictions: aggregate.sort((a, b) => b.prediction.score - a.prediction.score),
+            requirementsPredictions: requirements,
+        };
     }, [fscMarks, matricMarks, expectedTestScore, selectedField, selectedUniversity, educationStatus]);
 
-    // Group predictions into Reach/Match/Safety buckets (for All view)
     const bucketGroups = useMemo(() => {
         if (selectedUniversity !== 'All') return null;
         const groups = { safety: [], match: [], reach: [], longshot: [], ineligible: [], unknown: [] };
-        predictions.forEach(p => {
+        aggregatePredictions.forEach(p => {
             const b = p.prediction.bucket || 'unknown';
             (groups[b] || groups.unknown).push(p);
         });
         return groups;
-    }, [predictions, selectedUniversity]);
+    }, [aggregatePredictions, selectedUniversity]);
 
-    // Reverse calculator: what entry test score do I need?
+    // Filtered merit for methodology section
+    const methodologyMerit = useMemo(() => {
+        if (selectedUniversity === 'All') return null;
+        const crit = admissionCriteria[selectedUniversity];
+        return filterMeritByField(crit?.meritHistory, selectedField);
+    }, [selectedUniversity, selectedField]);
+
+    // Reverse calculator
     const reverseCalcData = useMemo(() => {
         if (selectedUniversity === 'All' || !showReverse) return null;
         const criteria = admissionCriteria[selectedUniversity];
@@ -717,13 +814,13 @@ export default function AdmissionPredictor({ savedIds = [] }) {
 
         if (testWeight === 0) return { noTest: true };
 
-        return programs.map(prog => {
-            const required = calculateReverseTestScore(fscMarks, matricMarks, prog.cutoff, selectedUniversity);
-            return { ...prog, requiredTestScore: required };
-        });
+        return programs.map(prog => ({
+            ...prog,
+            requiredTestScore: calculateReverseTestScore(fscMarks, matricMarks, prog.cutoff, selectedUniversity),
+        }));
     }, [selectedUniversity, selectedField, fscMarks, matricMarks, showReverse]);
 
-    // Fix #6: default to most competitive uni for new field
+    // Fix #6: default to most competitive uni when field changes
     const handleFieldChange = (newField) => {
         setSelectedField(newField);
         const currentUni = universities.find(u => u.shortName === selectedUniversity);
@@ -735,20 +832,17 @@ export default function AdmissionPredictor({ savedIds = [] }) {
         }
     };
 
-    // Card renderer
+    // ── Aggregate-based card renderer ──────────────────────────────────────
     const renderCard = (uni) => {
         const isSavedUni = savedIds.includes(uni.id);
-        const { prediction, programCutoffs, lastYear, lastYearData } = uni;
+        const { prediction, programCutoffs, filteredHistory } = uni;
 
         return (
             <div key={uni.id} className={`${styles.predictionCard} ${isSavedUni ? styles.predictionCardSaved : ''}`}>
                 <div className={styles.predictionHeader}>
                     <div className={styles.uniLogo}>{uni.shortName.charAt(0)}</div>
                     <div className={styles.uniInfo}>
-                        <h4>
-                            {uni.shortName}
-                            {isSavedUni && <span className={styles.savedTag}>Saved</span>}
-                        </h4>
+                        <h4>{uni.shortName}{isSavedUni && <span className={styles.savedTag}>Saved</span>}</h4>
                         <p>{uni.city} • {uni.type}</p>
                     </div>
                     <div className={`${styles.chanceBadge} ${styles[prediction.color]}`}>
@@ -766,7 +860,7 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                 <div className={styles.predictionBody}>
                     {uni.criteria && (
                         <>
-                            {/* #1 Aggregate gap indicator */}
+                            {/* Aggregate gap indicator */}
                             {prediction.userAggregate != null && prediction.cutoff != null && (
                                 <div className={styles.aggregateGapRow}>
                                     <span>Your agg: <strong>{prediction.userAggregate.toFixed(1)}%</strong></span>
@@ -778,7 +872,7 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                                 </div>
                             )}
 
-                            {/* #2 Program-level cutoffs (only when multiple programs) */}
+                            {/* Program-level table (multiple programs) */}
                             {programCutoffs.length > 1 && (
                                 <div className={styles.programTable}>
                                     {programCutoffs.map(prog => (
@@ -798,11 +892,11 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                                 </div>
                             )}
 
-                            {/* #3 Inline last-year merit history (show when no aggregate gap, or always) */}
-                            {lastYear && lastYearData && (
+                            {/* Inline field-filtered merit history */}
+                            {filteredHistory && Object.keys(filteredHistory.programs).length > 0 && (
                                 <div className={styles.inlineHistory}>
-                                    <span className={styles.historyYear}>{lastYear}:</span>
-                                    {Object.entries(lastYearData).slice(0, 3).map(([prog, cut]) => (
+                                    <span className={styles.historyYear}>{filteredHistory.year}:</span>
+                                    {Object.entries(filteredHistory.programs).slice(0, 3).map(([prog, cut]) => (
                                         <span key={prog} className={styles.historyItem}>
                                             {prog} <strong>{cut}</strong>
                                         </span>
@@ -812,9 +906,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
 
                             <p className={styles.reason}>{prediction.reason}</p>
                         </>
-                    )}
-                    {!uni.criteria && (
-                        <p className={styles.reason}>No detailed merit data available for this university.</p>
                     )}
                 </div>
 
@@ -830,9 +921,56 @@ export default function AdmissionPredictor({ savedIds = [] }) {
         );
     };
 
-    // Score for the gauge: use the first (and usually only) prediction when specific uni selected
-    const gaugeScore = selectedUniversity !== 'All' && predictions.length > 0
-        ? predictions[0].prediction.score
+    // ── Requirements card renderer (GIKI/IBA/LUMS) ────────────────────────
+    const renderRequirementsCard = (uni) => {
+        const isSavedUni = savedIds.includes(uni.id);
+        const { criteria, filteredHistory } = uni;
+        const meritType = criteria?.meritType;
+
+        const typeConfig = {
+            position:   { icon: '#', label: 'Merit Position', note: 'Admission is by merit position (rank of last admitted student), not aggregate %.' },
+            test_score: { icon: '✎', label: 'Test Score',    note: 'Admission is based entirely on entry test score. FSc determines eligibility only.' },
+            holistic:   { icon: '◈', label: 'Holistic',      note: 'Holistic admissions — essays, interview, and test scores evaluated together. No fixed cutoffs.' },
+        };
+        const cfg = typeConfig[meritType] || { icon: '?', label: 'Requirements', note: '' };
+
+        return (
+            <div key={uni.id} className={`${styles.predictionCard} ${styles.requirementsCard} ${isSavedUni ? styles.predictionCardSaved : ''}`}>
+                <div className={styles.predictionHeader}>
+                    <div className={`${styles.uniLogo} ${styles.reqLogo}`}>{uni.shortName.charAt(0)}</div>
+                    <div className={styles.uniInfo}>
+                        <h4>{uni.shortName}{isSavedUni && <span className={styles.savedTag}>Saved</span>}</h4>
+                        <p>{uni.city} • {uni.type}</p>
+                    </div>
+                    <div className={`${styles.chanceBadge} ${styles.reqBadge}`}>
+                        <span className={styles.reqBadgeIcon}>{cfg.icon}</span>
+                        <span className={styles.reqBadgeLabel}>{cfg.label}</span>
+                    </div>
+                </div>
+
+                <div className={styles.predictionBody}>
+                    <p className={styles.reqNote}>{cfg.note}</p>
+
+                    {filteredHistory && Object.keys(filteredHistory.programs).length > 0 && (
+                        <div className={styles.reqTable}>
+                            <div className={styles.reqTableTitle}>{filteredHistory.year} data</div>
+                            {Object.entries(filteredHistory.programs).map(([prog, val]) => (
+                                <div key={prog} className={styles.reqRow}>
+                                    <span className={styles.reqProg}>{prog}</span>
+                                    <span className={styles.reqVal}>{val}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {criteria?.tips && <p className={styles.reason}>{criteria.tips}</p>}
+                </div>
+            </div>
+        );
+    };
+
+    const gaugeScore = selectedUniversity !== 'All' && aggregatePredictions.length > 0
+        ? aggregatePredictions[0].prediction.score
         : 0;
 
     return (
@@ -842,9 +980,7 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                     <span className={styles.titleIcon}></span>
                     Admission Chance Predictor
                 </h2>
-                <p className={styles.subtitle}>
-                    Enter your marks to see your chances at top Pakistani universities
-                </p>
+                <p className={styles.subtitle}>Enter your marks to see your chances at top Pakistani universities</p>
                 {profilePreFilled && (
                     <span className={styles.profileBadge}>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
@@ -855,7 +991,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
 
             {/* Input Form */}
             <div className={styles.inputCard}>
-                {/* Sliders Row — 3 cols desktop, 2+1 on mobile */}
                 <div className={styles.slidersRow}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>
@@ -891,7 +1026,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                     </div>
                 </div>
 
-                {/* Field Row */}
                 <div className={styles.fieldRow}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>Field of Study</label>
@@ -909,7 +1043,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                     </div>
                 </div>
 
-                {/* Selectors Row */}
                 <div className={styles.selectorsRow}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>Education Status</label>
@@ -925,7 +1058,6 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                             placeholder="Select status..."
                         />
                     </div>
-
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>University</label>
                         <SearchableSelect
@@ -952,8 +1084,7 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                             ? `How ${selectedUniversity} Calculates Merit`
                             : 'How We Calculate Chances'}
                     </h4>
-                    {/* #7 Gauge — only when a specific uni is selected */}
-                    {selectedUniversity !== 'All' && predictions.length > 0 && (
+                    {selectedUniversity !== 'All' && aggregatePredictions.length > 0 && (
                         <Gauge score={gaugeScore} />
                     )}
                 </div>
@@ -980,7 +1111,7 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                                 ))}
                             </div>
 
-                            {/* User's aggregate */}
+                            {/* User aggregate */}
                             {(() => {
                                 const result = calculateUserAggregate(fscMarks, matricMarks, expectedTestScore, selectedUniversity, educationStatus);
                                 if (!result) return null;
@@ -992,12 +1123,11 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                                     return (
                                         <div className={styles.userAggregateSection}>
                                             <div className={styles.aggregateNote}>
-                                                {selectedUniversity} uses {meritType === 'position' ? 'merit positions' : 'test scores'}, not percentage aggregates
+                                                {selectedUniversity} uses {meritType === 'position' ? 'merit positions' : 'test scores'} — aggregate % is not the selection criterion
                                             </div>
                                         </div>
                                     );
                                 }
-
                                 return (
                                     <div className={styles.userAggregateSection}>
                                         <div className={styles.aggregateHeader}>
@@ -1015,50 +1145,38 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                                             </div>
                                         )}
                                         {meritType === 'holistic' && (
-                                            <div className={styles.aggregateNote}>
-                                                Note: LUMS uses holistic admissions — this aggregate is just for reference
-                                            </div>
+                                            <div className={styles.aggregateNote}>Note: LUMS uses holistic admissions — this aggregate is just for reference</div>
                                         )}
                                         {result.hasTestComponent && !isIncomplete && (
-                                            <div className={styles.aggregateNote}>
-                                                Your actual aggregate will depend on your entry test performance
-                                            </div>
+                                            <div className={styles.aggregateNote}>Your actual aggregate will depend on your entry test performance</div>
                                         )}
                                     </div>
                                 );
                             })()}
                         </div>
 
-                        {/* #3 Historical Merit Data */}
-                        {admissionCriteria[selectedUniversity].meritHistory && (
+                        {/* Merit history — last year only, filtered by selected field */}
+                        {methodologyMerit && Object.keys(methodologyMerit.programs).length > 0 && (
                             <div className={styles.meritHistorySection}>
-                                <h5>Last Year {
-                                    admissionCriteria[selectedUniversity].meritType === 'position' ? 'Merit Positions' :
-                                    admissionCriteria[selectedUniversity].meritType === 'test_score' ? 'Test Score Cutoffs' :
-                                    admissionCriteria[selectedUniversity].meritType === 'holistic' ? 'Eligibility Requirements' :
-                                    admissionCriteria[selectedUniversity].meritType === 'estimated' ? 'Estimated Merit Data' :
-                                    'Merit Cutoffs'
-                                }</h5>
+                                <h5>
+                                    {admissionCriteria[selectedUniversity].meritType === 'position' ? 'Closing Merit Positions' :
+                                     admissionCriteria[selectedUniversity].meritType === 'test_score' ? 'Test Score Requirements' :
+                                     admissionCriteria[selectedUniversity].meritType === 'holistic' ? 'Admission Profile' :
+                                     admissionCriteria[selectedUniversity].meritType === 'estimated' ? 'Estimated Cutoffs' :
+                                     'Merit Cutoffs'}
+                                    {' — '}{methodologyMerit.year}
+                                    {' '}<span className={styles.meritFieldTag}>{selectedField}</span>
+                                </h5>
                                 <div className={styles.meritTable}>
-                                    <div className={styles.meritTableHeader}>
-                                        <span>Year</span><span>Program</span><span>Cutoff</span>
+                                    <div className={styles.meritTableHeader2}>
+                                        <span>Program</span><span>Cutoff / Value</span>
                                     </div>
-                                    {Object.entries(admissionCriteria[selectedUniversity].meritHistory).map(([year, programs]) =>
-                                        Object.entries(programs).map(([program, cutoff], idx) => (
-                                            <div key={`${year}-${program}`} className={styles.meritTableRow}>
-                                                {idx === 0 && (
-                                                    <span className={styles.meritYear}
-                                                        style={{ gridRow: `span ${Object.keys(programs).length}` }}>
-                                                        {year}
-                                                    </span>
-                                                )}
-                                                <span className={styles.meritProgram}>{program}</span>
-                                                <span className={styles.meritCutoff}>
-                                                    {cutoff}{!admissionCriteria[selectedUniversity].meritType && typeof cutoff === 'number' && '%'}
-                                                </span>
-                                            </div>
-                                        ))
-                                    )}
+                                    {Object.entries(methodologyMerit.programs).map(([prog, val]) => (
+                                        <div key={prog} className={styles.meritTableRow2}>
+                                            <span className={styles.meritProgram}>{prog}</span>
+                                            <span className={styles.meritCutoff}>{val}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -1070,16 +1188,11 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                             </div>
                         )}
 
-                        <p className={styles.uniDescription}>
-                            {admissionCriteria[selectedUniversity].description}
-                        </p>
+                        <p className={styles.uniDescription}>{admissionCriteria[selectedUniversity].description}</p>
 
-                        {/* #8 Reverse Calculator */}
+                        {/* Reverse Calculator */}
                         <div className={styles.reverseSection}>
-                            <button
-                                className={styles.reverseToggle}
-                                onClick={() => setShowReverse(v => !v)}
-                            >
+                            <button className={styles.reverseToggle} onClick={() => setShowReverse(v => !v)}>
                                 <span>{showReverse ? '▲' : '▼'}</span>
                                 What entry test score do I need?
                             </button>
@@ -1090,12 +1203,10 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                                         <p className={styles.reverseNote}>
                                             {reverseCalcData.meritType === 'position'
                                                 ? 'This university uses merit positions — focus on maximising your test score.'
-                                                : 'This university uses holistic admissions — no single test score determines admission.'}
+                                                : 'Holistic admissions — no single score determines admission.'}
                                         </p>
                                     ) : reverseCalcData.noTest ? (
-                                        <p className={styles.reverseNote}>
-                                            This university does not use a standardised entry test.
-                                        </p>
+                                        <p className={styles.reverseNote}>This university does not use a standardised entry test.</p>
                                     ) : (
                                         <>
                                             <p className={styles.reverseIntro}>
@@ -1131,27 +1242,18 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                         </div>
                     </>
                 ) : (
-                    /* Generic methodology for All Universities */
                     <div className={styles.methodologyGrid}>
-                        <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}></span>
-                            <div><strong>Entry Test (40–85%)</strong>
-                                <p>NET, LCAT, ECAT, or university tests. Often the deciding factor.</p></div>
+                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                            <div><strong>Entry Test (40–85%)</strong><p>NET, LCAT, ECAT, or university tests. Often the deciding factor.</p></div>
                         </div>
-                        <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}></span>
-                            <div><strong>FSc/A-Level (15–50%)</strong>
-                                <p>Intermediate marks baseline. Most require 60–70% minimum.</p></div>
+                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                            <div><strong>FSc/A-Level (15–50%)</strong><p>Intermediate marks baseline. Most require 60–70% minimum.</p></div>
                         </div>
-                        <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}></span>
-                            <div><strong>Matric/O-Level (10–25%)</strong>
-                                <p>SSC marks contribute to aggregate calculation.</p></div>
+                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                            <div><strong>Matric/O-Level (10–25%)</strong><p>SSC marks contribute to aggregate calculation.</p></div>
                         </div>
-                        <div className={styles.methodItem}>
-                            <span className={styles.methodIcon}></span>
-                            <div><strong>Interview (0–30%)</strong>
-                                <p>LUMS, PIEAS require interviews. Others are test-only.</p></div>
+                        <div className={styles.methodItem}><span className={styles.methodIcon}></span>
+                            <div><strong>Interview (0–30%)</strong><p>LUMS, PIEAS require interviews. Others are test-only.</p></div>
                         </div>
                     </div>
                 )}
@@ -1164,14 +1266,14 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                     {selectedUniversity !== 'All' && ` at ${selectedUniversity}`}
                 </h3>
 
-                {/* #4/#5 Bucket-grouped view for "All Universities" */}
+                {/* Aggregate-based — bucketed or flat */}
                 {selectedUniversity === 'All' && bucketGroups ? (
                     <div className={styles.bucketedList}>
                         {[
-                            { key: 'safety',   label: 'Safety',   icon: '✓', desc: '2%+ above cutoff' },
-                            { key: 'match',    label: 'Match',    icon: '~', desc: 'Within 3% of cutoff' },
-                            { key: 'reach',    label: 'Reach',    icon: '↑', desc: '3–10% below cutoff' },
-                            { key: 'longshot', label: 'Longshot', icon: '!', desc: '10%+ below cutoff' },
+                            { key: 'safety',     label: 'Safety',      icon: '✓', desc: '2%+ above cutoff' },
+                            { key: 'match',      label: 'Match',       icon: '~', desc: 'Within 3% of cutoff' },
+                            { key: 'reach',      label: 'Reach',       icon: '↑', desc: '3–10% below cutoff' },
+                            { key: 'longshot',   label: 'Longshot',    icon: '!', desc: '10%+ below cutoff' },
                             { key: 'ineligible', label: 'Not Eligible', icon: '✕', desc: 'Below minimum FSc' },
                         ].filter(g => bucketGroups[g.key]?.length > 0).map(group => (
                             <div key={group.key} className={styles.bucketSection}>
@@ -1189,14 +1291,29 @@ export default function AdmissionPredictor({ savedIds = [] }) {
                     </div>
                 ) : (
                     <div className={styles.predictionsList}>
-                        {predictions.map(uni => renderCard(uni))}
+                        {aggregatePredictions.map(uni => renderCard(uni))}
+                    </div>
+                )}
+
+                {/* Requirements-based unis (GIKI, IBA, LUMS) */}
+                {requirementsPredictions.length > 0 && (
+                    <div className={styles.requirementsSection}>
+                        {selectedUniversity === 'All' && (
+                            <div className={styles.requirementsSectionHeader}>
+                                <span>No % Cutoff — Requirements Only</span>
+                                <span className={styles.bucketCount}>{requirementsPredictions.length}</span>
+                            </div>
+                        )}
+                        <div className={styles.predictionsList}>
+                            {requirementsPredictions.map(uni => renderRequirementsCard(uni))}
+                        </div>
                     </div>
                 )}
             </div>
 
             <div className={styles.disclaimer}>
                 <span></span>
-                These predictions are estimates based on historical data. Actual admission depends on
+                These predictions are estimates based on historical merit data. Actual admission depends on
                 test performance, seat availability, and university policies. Always check official sources.
             </div>
         </section>

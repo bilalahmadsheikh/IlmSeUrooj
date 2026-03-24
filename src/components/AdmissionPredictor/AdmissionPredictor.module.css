@@ -73,6 +73,8 @@
     margin-bottom: var(--space-6);
     position: relative;
     overflow: visible;
+    /* Must be above methodology so dropdown is never clipped */
+    z-index: 20;
 }
 
 .inputCard::before {
@@ -124,7 +126,8 @@
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-4);
     position: relative;
-    z-index: 1;
+    /* No z-index here — let SearchableSelect's containerOpen (z-index:1000)
+       escape freely within inputCard's stacking context */
 }
 
 .inputGroup {
@@ -268,6 +271,8 @@
     border-radius: var(--radius-xl);
     padding: var(--space-6);
     margin-bottom: var(--space-6);
+    position: relative;
+    z-index: 1; /* below inputCard (z-index:20) */
 }
 
 .methodologyTop {
@@ -1044,6 +1049,154 @@
     color: #10B981;
     font-size: 11px;
     font-weight: 600;
+    vertical-align: middle;
+}
+
+/* ── Requirements-based Cards (GIKI / IBA / LUMS) ──────────────────────── */
+.requirementsSection {
+    margin-top: var(--space-6);
+}
+
+.requirementsSectionHeader {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-3);
+    padding-left: var(--space-1);
+}
+
+.requirementsCard {
+    border-color: rgba(99, 102, 241, 0.35);
+}
+
+.reqLogo {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.25);
+    color: var(--color-text-secondary);
+}
+
+.reqBadge {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.3);
+    min-width: 72px;
+}
+
+.reqBadgeIcon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.reqBadgeLabel {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+}
+
+.reqNote {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin: 0 0 var(--space-2);
+}
+
+.reqTable {
+    margin-top: var(--space-2);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+}
+
+.reqTableTitle {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.reqRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--glass-border);
+    gap: var(--space-2);
+}
+
+.reqRow:last-child {
+    border-bottom: none;
+}
+
+.reqProg {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reqVal {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-primary);
+    flex-shrink: 0;
+    text-align: right;
+}
+
+/* ── Methodology Merit Table v2 (2-column, field-filtered) ──────────────── */
+.meritTableHeader2 {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.meritTableRow2 {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--glass-border);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    align-items: center;
+}
+
+.meritTableRow2:last-child {
+    border-bottom: none;
+}
+
+.meritFieldTag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--color-primary);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    margin-left: var(--space-2);
     vertical-align: middle;
 }
 
