@@ -76,9 +76,7 @@
         "matches": [
             "https://ilmseurooj.com/*",
             "https://www.ilmseurooj.com/*",
-            "https://*.vercel.app/*",
-            "http://localhost/*",
-            "http://127.0.0.1/*"
+            "https://*.vercel.app/*"
         ]
     }
 }

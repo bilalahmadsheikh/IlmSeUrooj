@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createAuthClient, unauthorizedResponse, getUser, createPublicClient } from '@/lib/supabase';
+import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
 
 function generateReferralCode(userId: string): string {
     const base = userId.replace(/-/g, '').slice(0, 6).toUpperCase();
@@ -50,13 +50,17 @@ export async function POST(req: NextRequest) {
     return Response.json({ referral: data }, { status: 201 });
 }
 
-// GET /api/referrals/validate?code=ISU-XXX
+// PUT /api/referrals — validate a referral code for the authenticated user
 export async function PUT(req: NextRequest) {
-    const body = await req.json();
-    const { code, user_id } = body;
-    if (!code || !user_id) return Response.json({ error: 'Missing code or user_id' }, { status: 400 });
+    const supabase = createAuthClient(req);
+    if (!supabase) return unauthorizedResponse();
+    const user = await getUser(supabase);
+    if (!user) return unauthorizedResponse();
 
-    const supabase = createPublicClient();
+    const body = await req.json();
+    const { code } = body;
+    if (!code) return Response.json({ error: 'Missing code' }, { status: 400 });
+
     const { data: referral, error } = await supabase
         .from('referrals')
         .select('*')
@@ -65,11 +69,12 @@ export async function PUT(req: NextRequest) {
 
     if (error || !referral) return Response.json({ error: 'Invalid referral code' }, { status: 404 });
     if (referral.status !== 'pending') return Response.json({ error: 'Referral already used' }, { status: 400 });
+    if (referral.referrer_id === user.id) return Response.json({ error: 'Cannot use your own referral code' }, { status: 400 });
 
     const { data, error: updateError } = await supabase
         .from('referrals')
         .update({
-            referred_id: user_id,
+            referred_id: user.id,
             status: 'registered',
             completed_at: new Date().toISOString(),
             reward_points: 50,

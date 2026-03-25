@@ -49,6 +49,15 @@ CREATE TABLE IF NOT EXISTS university_fees (
 
 CREATE INDEX IF NOT EXISTS idx_fees_university ON university_fees(university_id);
 
+ALTER TABLE university_fees ENABLE ROW LEVEL SECURITY;
+
+-- Public read — fee data is not sensitive
+CREATE POLICY "Public read university_fees"
+    ON university_fees FOR SELECT
+    USING (true);
+
+-- Only service_role can write (no INSERT/UPDATE/DELETE policy for anon/authenticated)
+
 -- ============================================================
 -- 3. USER DOCUMENTS
 -- ============================================================
@@ -154,13 +163,25 @@ CREATE TABLE IF NOT EXISTS referrals (
 
 ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can see their own referrals"
+-- Referrer sees referrals they sent; referred user sees their own; any authenticated user
+-- can see unclaimed referrals (needed to validate a code during registration)
+CREATE POLICY "Users can see relevant referrals"
     ON referrals FOR SELECT
-    USING (auth.uid() = referrer_id);
+    USING (
+        auth.uid() = referrer_id
+        OR auth.uid() = referred_id
+        OR (referred_id IS NULL AND auth.uid() IS NOT NULL)
+    );
 
 CREATE POLICY "Users can create referrals"
     ON referrals FOR INSERT
     WITH CHECK (auth.uid() = referrer_id);
+
+-- Authenticated users can claim an unclaimed referral (setting themselves as referred_id)
+CREATE POLICY "Users can claim unclaimed referrals"
+    ON referrals FOR UPDATE
+    USING (referred_id IS NULL AND auth.uid() != referrer_id)
+    WITH CHECK (auth.uid() = referred_id);
 
 CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_id);
 CREATE INDEX IF NOT EXISTS idx_referrals_code ON referrals(referral_code);

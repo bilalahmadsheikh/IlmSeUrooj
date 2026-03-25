@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createPublicClient, createAuthClient, getUser } from '@/lib/supabase';
+import { createPublicClient, createAuthClient, getUser, unauthorizedResponse } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -15,13 +15,20 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    // Admin only — check service role or special header in production
-    const supabase = createPublicClient();
+    const supabase = createAuthClient(req);
+    if (!supabase) return unauthorizedResponse();
+    const user = await getUser(supabase);
+    if (!user) return unauthorizedResponse();
+
     const body = await req.json();
+    const { university_id, university_name, program, annual_fee, currency } = body;
+    if (!university_id || !university_name || annual_fee === undefined) {
+        return Response.json({ error: 'university_id, university_name, and annual_fee are required' }, { status: 400 });
+    }
 
     const { data, error } = await supabase
         .from('university_fees')
-        .insert(body)
+        .insert({ university_id, university_name, program, annual_fee, currency })
         .select()
         .single();
 
