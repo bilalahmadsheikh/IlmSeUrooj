@@ -24,9 +24,10 @@ export async function POST(req: NextRequest) {
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
+    const { title, description, due_date, category, status, priority, university_id, university_name } = body;
     const { data, error } = await supabase
         .from('user_timeline_tasks')
-        .insert({ ...body, user_id: user.id })
+        .insert({ user_id: user.id, title, description, due_date, category, status, priority, university_id, university_name })
         .select()
         .single();
 
@@ -41,12 +42,12 @@ export async function PUT(req: NextRequest) {
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
-    const { id, ...updates } = body;
+    const { id, title, description, due_date, category, status, priority, university_id, university_name } = body;
     if (!id) return Response.json({ error: 'Missing task id' }, { status: 400 });
 
     const { data, error } = await supabase
         .from('user_timeline_tasks')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({ title, description, due_date, category, status, priority, university_id, university_name, updated_at: new Date().toISOString() })
         .eq('id', id)
         .eq('user_id', user.id)
         .select()

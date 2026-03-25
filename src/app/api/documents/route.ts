@@ -24,9 +24,10 @@ export async function POST(req: NextRequest) {
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
+    const { document_type, document_name, file_url, file_size, notes } = body;
     const { data, error } = await supabase
         .from('user_documents')
-        .insert({ ...body, user_id: user.id })
+        .insert({ user_id: user.id, document_type, document_name, file_url, file_size, notes })
         .select()
         .single();
 

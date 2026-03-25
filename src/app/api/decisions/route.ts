@@ -24,9 +24,10 @@ export async function POST(req: NextRequest) {
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
+    const { university_id, university_name, program_name, status, application_date, notes, is_final_choice } = body;
     const { data, error } = await supabase
         .from('admission_decisions')
-        .insert({ ...body, user_id: user.id })
+        .insert({ user_id: user.id, university_id, university_name, program_name, status, application_date, notes, is_final_choice })
         .select()
         .single();
 
@@ -41,11 +42,11 @@ export async function PUT(req: NextRequest) {
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
-    const { id, ...updates } = body;
+    const { id, university_id, university_name, program_name, status, application_date, notes, is_final_choice } = body;
     if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
 
     // If marking as final choice, unmark all others first
-    if (updates.is_final_choice === true) {
+    if (is_final_choice === true) {
         await supabase
             .from('admission_decisions')
             .update({ is_final_choice: false })
@@ -54,7 +55,7 @@ export async function PUT(req: NextRequest) {
 
     const { data, error } = await supabase
         .from('admission_decisions')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({ university_id, university_name, program_name, status, application_date, notes, is_final_choice, updated_at: new Date().toISOString() })
         .eq('id', id)
         .eq('user_id', user.id)
         .select()

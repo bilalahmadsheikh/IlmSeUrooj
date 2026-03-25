@@ -24,9 +24,10 @@ export async function POST(req: NextRequest) {
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
+    const { university_id, university_name, payment_type, amount, due_date, paid_date, status, notes, receipt_url } = body;
     const { data, error } = await supabase
         .from('payment_tracker')
-        .insert({ ...body, user_id: user.id })
+        .insert({ user_id: user.id, university_id, university_name, payment_type, amount, due_date, paid_date, status, notes, receipt_url })
         .select()
         .single();
 
@@ -41,12 +42,12 @@ export async function PUT(req: NextRequest) {
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
-    const { id, ...updates } = body;
+    const { id, university_id, university_name, payment_type, amount, due_date, paid_date, status, notes, receipt_url } = body;
     if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
 
     const { data, error } = await supabase
         .from('payment_tracker')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({ university_id, university_name, payment_type, amount, due_date, paid_date, status, notes, receipt_url, updated_at: new Date().toISOString() })
         .eq('id', id)
         .eq('user_id', user.id)
         .select()

@@ -1,6 +1,20 @@
 import { NextRequest } from 'next/server';
 import { createPublicClient } from '@/lib/supabase';
 
+// In-memory rate limiter: 10 AI requests per IP per minute
+const rlMap = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(ip: string): boolean {
+    const now = Date.now();
+    const entry = rlMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+        rlMap.set(ip, { count: 1, resetAt: now + 60_000 });
+        return true;
+    }
+    if (entry.count >= 10) return false;
+    entry.count++;
+    return true;
+}
+
 // Ollama local model config
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3';
@@ -69,6 +83,11 @@ export async function GET(req: NextRequest) {
  * Body: { domain: string, formHTML: string, universitySlug?: string }
  */
 export async function POST(req: NextRequest) {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+    if (!checkRateLimit(ip)) {
+        return Response.json({ error: 'Too many requests. Try again in a minute.' }, { status: 429 });
+    }
+
     const body = await req.json();
 
     if (!body.domain || !body.formHTML) {

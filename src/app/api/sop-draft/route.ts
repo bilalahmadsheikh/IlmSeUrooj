@@ -1,5 +1,19 @@
 import { NextRequest } from 'next/server';
 
+// In-memory rate limiter: 5 AI draft requests per IP per minute
+const rlMap = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(ip: string): boolean {
+    const now = Date.now();
+    const entry = rlMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+        rlMap.set(ip, { count: 1, resetAt: now + 60_000 });
+        return true;
+    }
+    if (entry.count >= 5) return false;
+    entry.count++;
+    return true;
+}
+
 // Ollama local model config
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3';
@@ -22,6 +36,11 @@ function sanitizeText(val: unknown, maxLen: number): string {
  * Body: { university: string, program: string, profile: object, fieldLabel: string, maxLength?: number }
  */
 export async function POST(req: NextRequest) {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+    if (!checkRateLimit(ip)) {
+        return Response.json({ error: 'Too many requests. Try again in a minute.' }, { status: 429 });
+    }
+
     let body: Record<string, unknown>;
     try {
         body = await req.json();
