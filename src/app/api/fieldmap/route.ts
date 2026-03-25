@@ -117,10 +117,14 @@ export async function POST(req: NextRequest) {
     const trimmedHTML = body.formHTML.substring(0, 6000);
     const prompt = FIELD_MAPPING_PROMPT.replace('{FORM_HTML}', trimmedHTML);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30_000);
+
     try {
         const aiResponse = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
             body: JSON.stringify({
                 model: OLLAMA_MODEL,
                 messages: [
@@ -203,10 +207,18 @@ export async function POST(req: NextRequest) {
             source: 'ai-local',
         });
     } catch (err) {
+        const isTimeout = (err as Error).name === 'AbortError';
         console.error('[fieldmap] Unexpected error:', err);
         return Response.json(
-            { error: 'AI mapping request failed — is Ollama running?', detail: (err as Error).message },
-            { status: 500 }
+            {
+                error: isTimeout
+                    ? 'Field mapping timed out (30s). Is Ollama running?'
+                    : 'AI mapping request failed — is Ollama running?',
+                detail: (err as Error).message,
+            },
+            { status: isTimeout ? 504 : 500 }
         );
+    } finally {
+        clearTimeout(timeout);
     }
 }

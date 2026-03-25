@@ -40,15 +40,22 @@ export function decryptPassword(stored: string): string {
     const { createDecipheriv } = require('crypto');
     const key = getKey();
     const parts = stored.slice(PREFIX.length).split(':');
-    if (parts.length !== 3) return stored; // malformed, return as-is
+    if (parts.length !== 3) return ''; // malformed
 
     const [ivHex, authTagHex, ciphertextHex] = parts;
+    if (!/^[0-9a-f]+$/i.test(ivHex) || !/^[0-9a-f]+$/i.test(authTagHex) || !/^[0-9a-f]+$/i.test(ciphertextHex)) {
+        return ''; // invalid hex
+    }
     const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
     const ciphertext = Buffer.from(ciphertextHex, 'hex');
 
-    const decipher = createDecipheriv('aes-256-gcm', key, iv);
-    decipher.setAuthTag(authTag);
-
-    return decipher.update(ciphertext) + decipher.final('utf8');
+    try {
+        const decipher = createDecipheriv('aes-256-gcm', key, iv);
+        decipher.setAuthTag(authTag);
+        return decipher.update(ciphertext) + decipher.final('utf8');
+    } catch {
+        // Decryption failed (tampered data or wrong key) — return empty string
+        return '';
+    }
 }

@@ -2,8 +2,9 @@ import { NextRequest } from 'next/server';
 import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
 
 function generateReferralCode(userId: string): string {
+    const { randomBytes } = require('crypto');
     const base = userId.replace(/-/g, '').slice(0, 6).toUpperCase();
-    const suffix = Math.random().toString(36).slice(2, 5).toUpperCase();
+    const suffix = randomBytes(3).toString('hex').toUpperCase();
     return `ISU-${base}-${suffix}`;
 }
 
