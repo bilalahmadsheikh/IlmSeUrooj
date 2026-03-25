@@ -382,9 +382,9 @@ export const universityDetails = {
   },
 
   // ============================================================
-  // 18 — NED UET
+  // 25 — NED UET
   // ============================================================
-  18: {
+  25: {
     qsWorldRank: "Not in top global overall ranking",
     qsSubjectRankings: {
       "Engineering (QS Subject 2025)": "#101–150 globally",
@@ -430,9 +430,9 @@ export const universityDetails = {
   },
 
   // ============================================================
-  // 19 — GIKI
+  // 18 — GIKI
   // ============================================================
-  19: {
+  18: {
     qsWorldRank: "QS Subject listed",
     qsSubjectRankings: {
       "Engineering (QS Subject 2025)": "#401–450 globally",
@@ -646,9 +646,9 @@ export const universityDetails = {
   },
 
   // ============================================================
-  // 25 — PIEAS
+  // 19 — PIEAS
   // ============================================================
-  25: {
+  19: {
     qsWorldRank: "#721–730 (QS 2026)",
     qsSubjectRankings: {
       "QS 50 Under 50": "Listed (top universities under 50 years old)",
