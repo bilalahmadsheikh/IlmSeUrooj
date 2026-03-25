@@ -165,26 +165,36 @@ export default function ProfilePage() {
 
     async function loadProfile(userId) {
         try {
-            const { data, error } = await supabase
-                .from('profiles').select('*').eq('id', userId).single();
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            if (!token) { setLoading(false); return; }
+
+            const res = await fetch('/api/profile', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const json = await res.json();
+            const data = json.profile;
+
             if (data) {
-                // Generate portal password on first load if missing, and persist it
+                let needsSave = false;
+                // Generate portal password on first load if missing
                 if (!data.portal_password) {
                     data.portal_password = generatePortalPassword(data.full_name, data.cnic);
-                    // Save to DB so the extension can read it
-                    supabase.from('profiles')
-                        .update({ portal_password: data.portal_password })
-                        .eq('id', userId)
-                        .then(() => {});
+                    needsSave = true;
                 }
                 if (!data.portal_email) {
                     data.portal_email = data.email || '';
-                    supabase.from('profiles')
-                        .update({ portal_email: data.portal_email })
-                        .eq('id', userId)
-                        .then(() => {});
+                    needsSave = true;
                 }
                 setProfile(data);
+                // Persist generated values through the API so they get encrypted
+                if (needsSave) {
+                    fetch('/api/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ portal_password: data.portal_password, portal_email: data.portal_email }),
+                    }).catch(() => {});
+                }
             }
         } catch (e) {
             console.error('Failed to load profile:', e);
@@ -244,6 +254,10 @@ export default function ProfilePage() {
         setSaving(true);
         setSaveError('');
         try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            if (!token) throw new Error('Not authenticated');
+
             const payload = { ...profile };
             delete payload.id;
             delete payload.created_at;
@@ -274,13 +288,15 @@ export default function ProfilePage() {
             }
 
             payload.profile_completion = calculateCompletion(profile);
-            payload.updated_at = new Date().toISOString();
 
-            const { error } = await supabase
-                .from('profiles')
-                .upsert({ id: user.id, ...payload }, { onConflict: 'id' });
+            const res = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify(payload),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || 'Failed to save');
 
-            if (error) throw error;
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (err) {

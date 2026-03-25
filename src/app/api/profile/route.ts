@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
+import { encryptPassword, decryptPassword } from '@/lib/encryption';
 
 /**
  * GET /api/profile
@@ -27,6 +28,11 @@ export async function GET(req: NextRequest) {
         return Response.json({ error: error.message }, { status: 500 });
     }
 
+    // Decrypt portal_password before returning to client
+    if (data?.portal_password) {
+        data.portal_password = decryptPassword(data.portal_password);
+    }
+
     return Response.json({ profile: data });
 }
 
@@ -48,6 +54,11 @@ export async function PUT(req: NextRequest) {
     delete body.id;
     delete body.created_at;
 
+    // Encrypt portal_password before storing
+    if (body.portal_password) {
+        body.portal_password = encryptPassword(body.portal_password);
+    }
+
     const { data, error } = await supabase
         .from('profiles')
         .upsert(
@@ -63,6 +74,11 @@ export async function PUT(req: NextRequest) {
 
     if (error) {
         return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    // Decrypt before returning so client always sees plaintext
+    if (data?.portal_password) {
+        data.portal_password = decryptPassword(data.portal_password);
     }
 
     return Response.json({ profile: data });
