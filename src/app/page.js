@@ -515,32 +515,23 @@ export default function Home() {
           {/* Admissions Deadlines Section */}
           <AdmissionsDeadlines currentField={filters.field} savedIds={savedIds} />
 
-          {/* Timeline Strategy CTA */}
-          <section className={styles.timelineCta}>
-            <div className={styles.timelineCtaInner}>
-              <div className={styles.timelineCtaText}>
-                <h3 className={styles.timelineCtaTitle}>Plan Your Application Strategy</h3>
-                <p className={styles.timelineCtaDesc}>
-                  See all deadlines on a visual timeline, detect test date conflicts, and get a personalized priority list.
-                </p>
-              </div>
-              <Link href="/timeline" className={styles.timelineCtaBtn}>
-                Open Timeline Planner
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </Link>
-            </div>
-          </section>
-
-          {/* University Comparison Tool */}
-          <UniversityComparison initialSelectedIds={compareInitialIds} onConsumeInitialIds={() => setCompareInitialIds(null)} />
-
-          {/* Admission Chance Predictor */}
-          <AdmissionPredictor savedIds={savedIds} />
-
-          {/* Entry Tests & Cutoffs */}
-          <EntryTests savedUniversities={savedUniversities} />
         </div>
       )}
+
+      {/* University Comparison Tool — always rendered for hash nav */}
+      <div id="compare">
+        <UniversityComparison initialSelectedIds={compareInitialIds} onConsumeInitialIds={() => setCompareInitialIds(null)} />
+      </div>
+
+      {/* Admission Chance Predictor */}
+      <div id="predictor">
+        <AdmissionPredictor savedIds={savedIds} />
+      </div>
+
+      {/* Entry Tests & Cutoffs */}
+      <div id="entry-tests">
+        <EntryTests savedUniversities={savedUniversities} />
+      </div>
 
       {showSaved && (
         <SavedList

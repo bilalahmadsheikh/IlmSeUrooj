@@ -225,14 +225,14 @@ export default function UniversityDetailPage() {
       {/* Quick nav */}
       <nav className={styles.quickNav} aria-label="Page sections">
         <a href="#overview">Overview</a>
+        <a href="#about">About</a>
         <a href="#rankings">Rankings</a>
         <a href="#admissions">Admissions</a>
         {details?.admissionTestDetails && <a href="#test-details">Entry Test</a>}
-        <a href="#about">About</a>
         {details?.financialAid && <a href="#financial-aid">Scholarships</a>}
+        <a href="#programs">Programs</a>
         {details?.placementRate && <a href="#careers">Careers</a>}
         {details?.researchCenters && <a href="#research">Research</a>}
-        <a href="#programs">Programs</a>
         <a href="#alumni">Alumni</a>
         <a href="#similar">Similar</a>
       </nav>
@@ -419,6 +419,54 @@ export default function UniversityDetailPage() {
             </ul>
           </div>
 
+          {/* About */}
+          <section id="about" className={styles.card} aria-labelledby="about-heading">
+            <h2 id="about-heading" className={styles.cardTitle}>About {uni.shortName}</h2>
+            {uni.description && <p className={styles.description}>{uni.description}</p>}
+            <div className={styles.factsGrid}>
+              {uni.established && (
+                <div className={styles.fact}>
+                  <span className={styles.factLabel}>Established</span>
+                  <span className={styles.factValue}>{uni.established}</span>
+                </div>
+              )}
+              {uni.type && (
+                <div className={styles.fact}>
+                  <span className={styles.factLabel}>Type</span>
+                  <span className={styles.factValue}>{uni.type}</span>
+                </div>
+              )}
+              {uni.city && (
+                <div className={styles.fact}>
+                  <span className={styles.factLabel}>City</span>
+                  <span className={styles.factValue}>{uni.city}</span>
+                </div>
+              )}
+              {uni.campusType && (
+                <div className={styles.fact}>
+                  <span className={styles.factLabel}>Focus</span>
+                  <span className={styles.factValue}>{uni.campusType}</span>
+                </div>
+              )}
+              {uni.hostelAvailability && (
+                <div className={styles.fact}>
+                  <span className={styles.factLabel}>Campus & hostels</span>
+                  <span className={styles.factValue}>{uni.hostelAvailability}</span>
+                </div>
+              )}
+            </div>
+            {uni.facilities?.length > 0 && (
+              <div className={styles.facilitiesSection}>
+                <h3 className={styles.sectionHeading}>Campus Facilities</h3>
+                <div className={styles.facilitiesList}>
+                  {uni.facilities.map((f, i) => (
+                    <span key={i} className={styles.facilityTag}>{f}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+
           {/* Field Rankings - Clear & Visual */}
           {Object.keys(fieldRankings).length > 0 && (
             <section id="rankings" className={styles.card} aria-labelledby="rankings-heading">
@@ -559,41 +607,39 @@ export default function UniversityDetailPage() {
             </section>
           )}
 
-          {/* Admission Test Deep-Dive */}
+          {/* Entry Test Guide — Enhanced */}
           {details?.admissionTestDetails && (
             <section id="test-details" className={styles.card} aria-labelledby="test-heading">
               <h2 id="test-heading" className={styles.cardTitle}>
-                Entry Test Guide: {details.admissionTestDetails.name}
+                Entry Test Guide — {details.admissionTestDetails.name}
               </h2>
-              <div className={styles.testGrid}>
+
+              {/* Key stat cards */}
+              <div className={styles.testStatsRow}>
                 {details.admissionTestDetails.totalMarks && (
-                  <div className={styles.testCell}>
-                    <span className={styles.testCellLabel}>Total Marks</span>
-                    <span className={styles.testCellValue}>{details.admissionTestDetails.totalMarks}</span>
+                  <div className={styles.testStatBox}>
+                    <span className={styles.testStatNum}>{details.admissionTestDetails.totalMarks}</span>
+                    <span className={styles.testStatLbl}>Total Marks</span>
                   </div>
                 )}
                 {details.admissionTestDetails.duration && (
-                  <div className={styles.testCell}>
-                    <span className={styles.testCellLabel}>Duration</span>
-                    <span className={styles.testCellValue}>{details.admissionTestDetails.duration}</span>
-                  </div>
-                )}
-                {details.admissionTestDetails.negativeMarking && (
-                  <div className={styles.testCell}>
-                    <span className={styles.testCellLabel}>Negative Marking</span>
-                    <span className={styles.testCellValue}>{details.admissionTestDetails.negativeMarking}</span>
+                  <div className={styles.testStatBox}>
+                    <span className={styles.testStatNum}>{details.admissionTestDetails.duration}</span>
+                    <span className={styles.testStatLbl}>Duration</span>
                   </div>
                 )}
                 {details.admissionTestDetails.safeScore && (
-                  <div className={styles.testCell}>
-                    <span className={styles.testCellLabel}>Safe Score Target</span>
-                    <span className={`${styles.testCellValue} ${styles.testHighlight}`}>{details.admissionTestDetails.safeScore}</span>
+                  <div className={`${styles.testStatBox} ${styles.testStatBoxSafe}`}>
+                    <span className={styles.testStatNum}>{details.admissionTestDetails.safeScore}</span>
+                    <span className={styles.testStatLbl}>Safe Score</span>
                   </div>
                 )}
               </div>
+
+              {/* Subjects */}
               {details.admissionTestDetails.subjects?.length > 0 && (
-                <div className={styles.testSubjects}>
-                  <span className={styles.testSubjectsLabel}>Subjects covered:</span>
+                <div className={styles.testSubjectBreakdown}>
+                  <h3 className={styles.testSectionLabel}>Subjects Covered</h3>
                   <div className={styles.testSubjectTags}>
                     {details.admissionTestDetails.subjects.map((s) => (
                       <span key={s} className={styles.testSubjectTag}>{s}</span>
@@ -601,15 +647,22 @@ export default function UniversityDetailPage() {
                   </div>
                 </div>
               )}
+
+              {/* Merit Formula */}
               {details.admissionTestDetails.meritFormula && (
-                <div className={styles.testFormula}>
-                  <span className={styles.testFormulaLabel}>Merit Formula:</span>
-                  <span className={styles.testFormulaValue}>{details.admissionTestDetails.meritFormula}</span>
+                <div className={styles.testFormulaWrap}>
+                  <h3 className={styles.testSectionLabel}>Merit Formula</h3>
+                  <div className={styles.testFormulaBadge}>
+                    <span className={styles.testFormulaText}>{details.admissionTestDetails.meritFormula}</span>
+                  </div>
                 </div>
               )}
+
+              {/* Syllabus note */}
               {details.admissionTestDetails.syllabusNote && (
                 <p className={styles.testNote}>{details.admissionTestDetails.syllabusNote}</p>
               )}
+
               {details.admissionTestDetails.syllabusLink && (
                 <a href={details.admissionTestDetails.syllabusLink} target="_blank" rel="noopener noreferrer" className={styles.applyLink}>
                   View Official Syllabus <IconExternalLink aria-hidden />
@@ -643,54 +696,16 @@ export default function UniversityDetailPage() {
             </section>
           )}
 
-          {/* Placement & Careers */}
-          {details && (details.placementRate || details.topRecruiters || details.careerPathGuide) && (
-            <section id="careers" className={styles.card} aria-labelledby="careers-heading">
-              <h2 id="careers-heading" className={styles.cardTitle}>
-                Placement & Career Paths
-              </h2>
-              {details.placementRate && (
-                <div className={styles.placementStat}>
-                  <span className={styles.placementLabel}>Placement Rate</span>
-                  <span className={styles.placementValue}>{details.placementRate}</span>
-                </div>
-              )}
-              {details.careerPathGuide && (
-                <p className={styles.careerGuide}>{details.careerPathGuide}</p>
-              )}
-              {details.topRecruiters?.length > 0 && (
-                <div className={styles.recruitersWrap}>
-                  <h3 className={styles.sectionHeading}>Top Recruiters</h3>
-                  <div className={styles.recruiterTags}>
-                    {details.topRecruiters.map((r, i) => (
-                      <span key={i} className={styles.recruiterTag}>{r}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
+          {/* Fees */}
+          {uni.avgFee && (
+            <section id="fees" className={styles.card} aria-labelledby="fees-heading">
+              <h2 id="fees-heading" className={styles.cardTitle}>Fee Structure</h2>
+              <p className={styles.feeText}>{uni.avgFee}</p>
+              <p className={styles.feeNote}>Confirm exact amounts on the official portal.</p>
             </section>
           )}
 
-          {/* Notable Alumni */}
-          {details?.notableAlumni?.length > 0 && (
-            <section className={styles.card} aria-labelledby="notable-alumni-heading">
-              <h2 id="notable-alumni-heading" className={styles.cardTitle}>
-                Notable Alumni
-              </h2>
-              <div className={styles.alumniCards}>
-                {details.notableAlumni.map((a, i) => (
-                  <div key={i} className={styles.alumniCard}>
-                    <div className={styles.alumniAvatar}>{a.name.charAt(0)}</div>
-                    <div className={styles.alumniInfo}>
-                      <span className={styles.alumniName}>{a.name}</span>
-                      <span className={styles.alumniRole}>{a.role}</span>
-                      {a.achievement && <span className={styles.alumniAchievement}>{a.achievement}</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+
 
           {/* Research Centers & Unique Features */}
           {details && (details.researchCenters?.length > 0 || details.uniqueFeatures?.length > 0) && (
@@ -721,99 +736,6 @@ export default function UniversityDetailPage() {
             </section>
           )}
 
-          {/* Official Links - Verified */}
-          {(admissions.applyUrl || uni.website) && (
-            <section className={styles.card} aria-labelledby="official-heading">
-              <h2 id="official-heading" className={styles.cardTitle}>
-                <IconShield className={styles.cardIcon} aria-hidden />
-                Official Links
-              </h2>
-              <p className={styles.officialNote}>Direct links to official university sources</p>
-              <div className={styles.officialLinks}>
-                {admissions.applyUrl && (
-                  <a
-                    href={admissions.applyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.officialCard}
-                  >
-                    <span className={styles.officialLabel}>Application Portal</span>
-                    <span className={styles.officialUrl}>{getHostname(admissions.applyUrl)}</span>
-                    <IconExternalLink className={styles.officialIcon} aria-hidden />
-                  </a>
-                )}
-                {uni.website && (
-                  <a
-                    href={uni.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.officialCard}
-                  >
-                    <span className={styles.officialLabel}>University Website</span>
-                    <span className={styles.officialUrl}>{getHostname(uni.website)}</span>
-                    <IconExternalLink className={styles.officialIcon} aria-hidden />
-                  </a>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* About */}
-          <section id="about" className={styles.card} aria-labelledby="about-heading">
-            <h2 id="about-heading" className={styles.cardTitle}>About {uni.shortName}</h2>
-            {uni.description && <p className={styles.description}>{uni.description}</p>}
-            <div className={styles.factsGrid}>
-              {uni.established && (
-                <div className={styles.fact}>
-                  <span className={styles.factLabel}>Established</span>
-                  <span className={styles.factValue}>{uni.established}</span>
-                </div>
-              )}
-              {uni.type && (
-                <div className={styles.fact}>
-                  <span className={styles.factLabel}>Type</span>
-                  <span className={styles.factValue}>{uni.type}</span>
-                </div>
-              )}
-              {uni.city && (
-                <div className={styles.fact}>
-                  <span className={styles.factLabel}>City</span>
-                  <span className={styles.factValue}>{uni.city}</span>
-                </div>
-              )}
-              {uni.campusType && (
-                <div className={styles.fact}>
-                  <span className={styles.factLabel}>Focus</span>
-                  <span className={styles.factValue}>{uni.campusType}</span>
-                </div>
-              )}
-              {uni.hostelAvailability && (
-                <div className={styles.fact}>
-                  <span className={styles.factLabel}>Campus & hostels</span>
-                  <span className={styles.factValue}>{uni.hostelAvailability}</span>
-                </div>
-              )}
-            </div>
-            {uni.facilities?.length > 0 && (
-              <div className={styles.facilitiesSection}>
-                <h3 className={styles.sectionHeading}>Campus Facilities</h3>
-                <div className={styles.facilitiesList}>
-                  {uni.facilities.map((f, i) => (
-                    <span key={i} className={styles.facilityTag}>{f}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
-
-          {/* Fees */}
-          {uni.avgFee && (
-            <section id="fees" className={styles.card} aria-labelledby="fees-heading">
-              <h2 id="fees-heading" className={styles.cardTitle}>Fee structure</h2>
-              <p className={styles.feeText}>{uni.avgFee}</p>
-              <p className={styles.feeNote}>Confirm exact amounts on the official portal.</p>
-            </section>
-          )}
 
           {/* Programs by Field - with field selector */}
           {fields.length > 0 && (
@@ -915,17 +837,6 @@ export default function UniversityDetailPage() {
             </section>
           )}
 
-          {/* Highlights */}
-          {highlights.length > 0 && (
-            <section className={styles.card} aria-labelledby="highlights-heading">
-              <h2 id="highlights-heading" className={styles.cardTitle}>Highlights</h2>
-              <ul className={styles.highlightList}>
-                {highlights.map((h, i) => (
-                  <li key={i} className={styles.highlightItem}>{h}</li>
-                ))}
-              </ul>
-            </section>
-          )}
 
           {/* Degree Levels */}
           {uni.degreeLevel?.length > 0 && (
@@ -939,14 +850,47 @@ export default function UniversityDetailPage() {
             </section>
           )}
 
+          {/* Careers & Placement — Enhanced */}
+          {details && (details.placementRate || details.topRecruiters || details.careerPathGuide) && (
+            <section id="careers" className={styles.card} aria-labelledby="careers-heading">
+              <h2 id="careers-heading" className={styles.cardTitle}>Careers & Placement</h2>
+
+              {details.placementRate && (
+                <div className={styles.careerStatBlock}>
+                  <span className={styles.careerStatLabel}>Placement Rate</span>
+                  <span className={styles.careerStatValue}>{details.placementRate}</span>
+                </div>
+              )}
+
+              {details.careerPathGuide && (
+                <p className={styles.careerGuide}>{details.careerPathGuide}</p>
+              )}
+
+              {details.topRecruiters?.length > 0 && (
+                <div className={styles.recruitersSection}>
+                  <h3 className={styles.testSectionLabel}>Top Recruiters</h3>
+                  <div className={styles.recruiterGrid}>
+                    {details.topRecruiters.map((r, i) => (
+                      <div key={i} className={styles.recruiterCard}>
+                        <span className={styles.recruiterInitial}>{r.charAt(0)}</span>
+                        <span className={styles.recruiterName}>{r}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Alumni Pulse */}
           {(() => {
             const pulse = getAlumniPulse(uni.id, alumniFieldFilter);
             const alumni = getAlumniLinks(uni.shortName);
             if (!pulse && !alumni) return null;
             const snap = pulse?.outcomeSnapshot;
-            const reachEntries = pulse?.reachMap ? Object.entries(pulse.reachMap) : [];
-            const countryFlags = { UAE: "UAE", UK: "UK", USA: "US", PK: "PK", DE: "DE", CA: "CA", SA: "SA", SG: "SG", AU: "AU" };
+            const reachEntries = pulse?.reachMap ? Object.entries(pulse.reachMap).sort(([, a], [, b]) => b - a) : [];
+            const countryNames = { UAE: "UAE", UK: "UK", USA: "USA", PK: "Pakistan", DE: "Germany", CA: "Canada", SA: "Saudi Arabia", SG: "Singapore", AU: "Australia" };
+            const networkLabel = pulse?.networkStrength >= 9 ? "Elite" : pulse?.networkStrength >= 7 ? "Strong" : pulse?.networkStrength >= 5 ? "Moderate" : "Developing";
             return (
               <section id="alumni" className={styles.alumniPulse} aria-labelledby="alumni-heading">
                 <div className={styles.alumniPulseHeader}>
@@ -956,45 +900,61 @@ export default function UniversityDetailPage() {
 
                 {pulse && (
                   <>
-                    {/* 1. Outcome Snapshot */}
+                    {/* Outcome Snapshot */}
                     {snap && (
                       <div className={styles.pulseBlock}>
                         <h3 className={styles.pulseBlockTitle}>Where are they now?</h3>
-                        <div className={styles.outcomeGrid}>
-                          <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeValue}>{snap.abroadPercent != null ? `${snap.abroadPercent}%` : "—"}</span>
-                            <span className={styles.outcomeLabel}>working abroad</span>
-                          </div>
-                          <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeValue}>{Array.isArray(snap.topEmployers) ? snap.topEmployers.slice(0, 3).join(", ") : "—"}</span>
-                            <span className={styles.outcomeLabel}>top employers</span>
-                          </div>
-                          <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeValue}>{snap.startupsFounded != null ? `${snap.startupsFounded}+` : "—"}</span>
-                            <span className={styles.outcomeLabel}>startups founded</span>
-                          </div>
-                          <div className={styles.outcomeItem}>
-                            <span className={styles.outcomeValue}>{snap.employedWithin6Months != null ? `${snap.employedWithin6Months}%` : "—"}</span>
-                            <span className={styles.outcomeLabel}>employed within 6 mo</span>
-                          </div>
+                        <div className={styles.pulseOutcomeGrid}>
+                          {snap.employedWithin6Months != null && (
+                            <div className={styles.pulseOutcomeCard}>
+                              <span className={styles.pulseOutcomeStat}>{snap.employedWithin6Months}%</span>
+                              <span className={styles.pulseOutcomeLbl}>hired within 6 months</span>
+                            </div>
+                          )}
+                          {snap.abroadPercent != null && (
+                            <div className={styles.pulseOutcomeCard}>
+                              <span className={styles.pulseOutcomeStat}>{snap.abroadPercent}%</span>
+                              <span className={styles.pulseOutcomeLbl}>working abroad</span>
+                            </div>
+                          )}
+                          {snap.startupsFounded != null && (
+                            <div className={styles.pulseOutcomeCard}>
+                              <span className={styles.pulseOutcomeStat}>{snap.startupsFounded}+</span>
+                              <span className={styles.pulseOutcomeLbl}>startups founded</span>
+                            </div>
+                          )}
+                          {Array.isArray(snap.topEmployers) && snap.topEmployers.length > 0 && (
+                            <div className={`${styles.pulseOutcomeCard} ${styles.pulseOutcomeCardWide}`}>
+                              <span className={styles.pulseOutcomeEmployers}>{snap.topEmployers.slice(0, 3).join(', ')}</span>
+                              <span className={styles.pulseOutcomeLbl}>top employers</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
 
-                    {/* 2. Network Strength Meter */}
+                    {/* Network Strength */}
                     {pulse.networkStrength != null && (
                       <div className={styles.pulseBlock}>
-                        <div className={styles.strengthHeader}>
+                        <div className={styles.pulseNetworkHeader}>
                           <h3 className={styles.pulseBlockTitle}>Alumni network strength</h3>
-                          <span className={styles.strengthScore}>{pulse.networkStrength}/10</span>
+                          <div className={styles.pulseNetworkBadge}>
+                            <span className={styles.pulseNetworkScore}>{pulse.networkStrength}/10</span>
+                            <span className={styles.pulseNetworkLabel}>{networkLabel}</span>
+                          </div>
                         </div>
-                        <div className={styles.strengthBar}>
-                          <div className={styles.strengthFill} style={{ width: `${pulse.networkStrength * 10}%` }} />
+                        <div className={styles.pulseNetworkBar}>
+                          <div className={styles.pulseNetworkFill} style={{ width: `${pulse.networkStrength * 10}%` }} />
+                        </div>
+                        <div className={styles.pulseNetworkScale}>
+                          {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                            <span key={n} className={n <= pulse.networkStrength ? styles.pulseScaleDotActive : styles.pulseScaleDot} />
+                          ))}
                         </div>
                       </div>
                     )}
 
-                    {/* 4. Reach Map Micro */}
+                    {/* Alumni Reach — SVG globe map */}
                     {reachEntries.length > 0 && (
                       <div className={styles.pulseBlock}>
                         <h3 className={styles.pulseBlockTitle}>Alumni reach</h3>
@@ -1005,10 +965,10 @@ export default function UniversityDetailPage() {
                               {reachEntries.map(([code, count]) => {
                                 const c = COUNTRY_COORDS[code] || { x: 50, y: 30 };
                                 const r = 2 + Math.min(count / 50, 3);
-                                const countryName = code === "PK" ? "Pakistan" : code;
+                                const label = countryNames[code] || code;
                                 return (
                                   <g key={code}>
-                                    <title>{count} alumni in {countryName}</title>
+                                    <title>{count} alumni in {label}</title>
                                     <circle cx={c.x} cy={c.y} r={r} fill="var(--color-primary)" opacity={0.4 + Math.min(count / 150, 0.5)} className={styles.reachDot} />
                                   </g>
                                 );
@@ -1017,8 +977,10 @@ export default function UniversityDetailPage() {
                           </div>
                           <div className={styles.reachLegend}>
                             {reachEntries.slice(0, 5).map(([code, count]) => (
-                              <span key={code} className={styles.reachLegendItem} title={`${count} alumni in ${code === "PK" ? "Pakistan" : code}`}>
-                                {countryFlags[code] || "•"} {count}
+                              <span key={code} className={styles.reachLegendItem} title={`${count} alumni in ${countryNames[code] || code}`}>
+                                <span className={styles.reachLegendDot} />
+                                <span className={styles.reachLegendCode}>{code}</span>
+                                <span className={styles.reachLegendCount}>{count.toLocaleString()}</span>
                               </span>
                             ))}
                           </div>
@@ -1047,7 +1009,7 @@ export default function UniversityDetailPage() {
                   </>
                 )}
 
-                {/* Connect links - minimal */}
+                {/* Connect */}
                 {alumni && (
                   <div className={styles.pulseConnect}>
                     {alumni.linkedin && (

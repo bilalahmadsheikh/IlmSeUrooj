@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './AdmissionsDeadlines.module.css';
-import { upcomingDeadlines, lastScraperRun } from '@/data/universities';
+import { upcomingDeadlines } from '@/data/universities';
 
 // Responsive visibility limits
 const DESKTOP_LIMITS = [6, 15];
@@ -14,7 +14,6 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
     const [showElapsed, setShowElapsed] = useState(false);
     const [showSavedOnly, setShowSavedOnly] = useState(false);
     const [now, setNow] = useState(new Date());
-    const [visibleCount, setVisibleCount] = useState(DESKTOP_LIMITS[0]);
     const [isMobile, setIsMobile] = useState(false);
     const savedIdSet = new Set(savedIds);
 
@@ -23,8 +22,6 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
         const checkMobile = () => {
             const mobile = window.innerWidth < MOBILE_BREAKPOINT;
             setIsMobile(mobile);
-            // Reset visible count when switching between mobile/desktop
-            setVisibleCount(mobile ? MOBILE_LIMITS[0] : DESKTOP_LIMITS[0]);
         };
 
         checkMobile();
@@ -37,9 +34,6 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
         const timer = setInterval(() => setNow(new Date()), 60000);
         return () => clearInterval(timer);
     }, []);
-
-    // Get current limits based on device
-    const currentLimits = isMobile ? MOBILE_LIMITS : DESKTOP_LIMITS;
 
     // Calculate days remaining
     const getDaysRemaining = (deadline) => {
@@ -67,25 +61,6 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
         return showElapsed ? dateB - dateA : dateA - dateB;
     });
 
-    // Handle View More
-    const handleViewMore = () => {
-        const currentLimitIndex = currentLimits.findIndex(limit => limit >= visibleCount);
-        if (currentLimitIndex < currentLimits.length - 1) {
-            setVisibleCount(currentLimits[currentLimitIndex + 1]);
-        } else {
-            setVisibleCount(filteredDeadlines.length);
-        }
-    };
-
-    // Get next limit
-    const getNextLimit = () => {
-        const currentLimitIndex = currentLimits.findIndex(limit => limit >= visibleCount);
-        if (currentLimitIndex < currentLimits.length - 1) {
-            return Math.min(currentLimits[currentLimitIndex + 1], filteredDeadlines.length);
-        }
-        return filteredDeadlines.length;
-    };
-
     // Get urgency class
     const getUrgencyClass = (days) => {
         if (days <= 3) return styles.urgent;
@@ -112,15 +87,9 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
         });
     };
 
-    // Reset visible count when toggle changes
-    useEffect(() => {
-        setVisibleCount(isMobile ? MOBILE_LIMITS[0] : DESKTOP_LIMITS[0]);
-    }, [showElapsed, filter, isMobile]);
-
-    // Visible deadlines
-    const visibleDeadlines = filteredDeadlines.slice(0, visibleCount);
-    const hasMore = visibleCount < filteredDeadlines.length;
-    const remainingCount = filteredDeadlines.length - visibleCount;
+    // Visible deadlines (cap at initial limit — rest lives on Timeline)
+    const visibleDeadlines = filteredDeadlines.slice(0, isMobile ? MOBILE_LIMITS[0] : DESKTOP_LIMITS[0]);
+    const urgentCount = filteredDeadlines.filter(d => getDaysRemaining(d.deadline) >= 0 && getDaysRemaining(d.deadline) <= 7).length;
 
     return (
         <section className={styles.section}>
@@ -270,27 +239,6 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
                 })}
             </div>
 
-            {/* View More Button */}
-            {hasMore && (
-                <div className={styles.viewMoreContainer}>
-                    <button
-                        className={styles.viewMoreBtn}
-                        onClick={handleViewMore}
-                    >
-                        <span className={styles.viewMoreIcon}></span>
-                        <span className={styles.viewMoreText}>
-                            View More Deadlines
-                        </span>
-                        <span className={styles.viewMoreCount}>
-                            +{Math.min(getNextLimit() - visibleCount, remainingCount)} more
-                        </span>
-                    </button>
-                    <p className={styles.viewMoreHint}>
-                        {remainingCount} deadlines remaining
-                    </p>
-                </div>
-            )}
-
             {filteredDeadlines.length === 0 && (
                 <div className={styles.empty}>
                     <span className={styles.emptyIcon}></span>
@@ -298,25 +246,22 @@ export default function AdmissionsDeadlines({ currentField, savedIds = [] }) {
                 </div>
             )}
 
-            <div className={styles.disclaimer}>
-                <span className={styles.disclaimerIcon}></span>
-                Deadlines are auto-scraped from official university websites every 20 days.
-                Entries marked ! haven't been verified recently — always confirm on the official portal.
-                {lastScraperRun && (
-                    <span className={styles.lastUpdated}>
-                        Last updated: {new Date(lastScraperRun).toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                )}
-            </div>
-
-            <div className={styles.timelineBanner}>
-                <span className={styles.timelineBannerText}>
-                    Want a visual timeline with conflict detection &amp; strategy?
-                </span>
-                <a href="/timeline" className={styles.timelineBannerLink}>
-                    Open Timeline Planner →
-                </a>
-            </div>
+            {/* Timeline CTA */}
+            {!showElapsed && filteredDeadlines.length > 0 && (
+                <div className={styles.timelineCta}>
+                    <div className={styles.timelineCtaLeft}>
+                        <p className={styles.timelineCtaLabel}>
+                            {filteredDeadlines.length} upcoming{urgentCount > 0 && <span className={styles.timelineCtaUrgentPill}>{urgentCount} urgent</span>}
+                        </p>
+                        <h3 className={styles.timelineCtaTitle}>See all deadlines on the Timeline</h3>
+                        <p className={styles.timelineCtaSub}>Visual Gantt · Conflict detection · Strategy planner</p>
+                    </div>
+                    <a href="/timeline" className={styles.timelineCtaBtn}>
+                        Open Timeline
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            )}
         </section>
     );
 }

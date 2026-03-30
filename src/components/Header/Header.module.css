@@ -408,6 +408,105 @@
     font-size: 10px;
 }
 
+/* ── Tools Dropdown ─────────────────────────────────────────── */
+.toolsWrap {
+    position: relative;
+}
+
+.toolsBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+}
+
+.toolsBtnActive {
+    border-color: var(--color-primary) !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.toolsChevron {
+    transition: transform 0.2s ease;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.toolsChevronOpen {
+    transform: rotate(180deg);
+}
+
+.toolsDropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    background: var(--glass-bg, #161916);
+    border: 1px solid var(--glass-border, #27272a);
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(16,185,129,0.08);
+    z-index: 200;
+    overflow: hidden;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    animation: dropdownIn 0.15s ease-out;
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.toolsItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-3);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.15s;
+    color: var(--color-text-primary);
+}
+
+.toolsItem:hover {
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.toolsItemIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.toolsItem:hover .toolsItemIcon {
+    background: rgba(16, 185, 129, 0.18);
+}
+
+.toolsItemText {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.toolsItemName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.toolsItemDesc {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    line-height: 1.2;
+}
+
 /* Dropdown Menu */
 .dropdown {
     position: absolute;
