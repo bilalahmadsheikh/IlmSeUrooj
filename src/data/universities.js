@@ -707,7 +707,7 @@ export const universities = [
       deadline: "2026-05-15",
       testName: "GIKI Entry Test",
       testDate: "2026-07-06",
-      applyUrl: "https://giki.edu.pk/admissions",
+      applyUrl: "https://giki.edu.pk/admissions/admissions-undergraduates/",
     lastVerified: "2026-03-25"
   }
   },

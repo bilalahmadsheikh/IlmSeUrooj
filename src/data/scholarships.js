@@ -159,7 +159,7 @@ export const scholarships = [
     featured: false,
     description: 'Merit and need-based support for undergraduates. Partial to full fee waiver for eligible candidates. GIKI is known for supporting deserving students.',
     eligibility: 'Admitted students. Both financial need and academic merit are considered. Apply during admission process.',
-    applyUrl: 'https://giki.edu.pk/admissions',
+    applyUrl: 'https://giki.edu.pk/admissions/admissions-undergraduates/',
     deadlineNote: 'With admission application',
     universityIds: [18],
     coverage: 'Partial to full',

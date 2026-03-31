@@ -474,7 +474,7 @@ export const universityDetails = {
       meritFormula: "GIKI test score + academic record; GIKI test carries most weight",
       safeScore: "<9% acceptance — one of Pakistan's hardest admission processes",
       syllabusNote: "Concept-based, NOT formula-memorization. Tests deep understanding of Physics and Math principles. Questions require logical reasoning and application — students who only memorize formulas perform poorly. English section tests comprehension. Preparation requires understanding WHY formulas work, not just WHAT they are.",
-      syllabusLink: "https://giki.edu.pk/admissions",
+      syllabusLink: "https://giki.edu.pk/admissions/admissions-undergraduates/",
     },
   },
 

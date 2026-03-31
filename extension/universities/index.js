@@ -210,7 +210,7 @@ ALL_UNIVERSITIES.push({
         date_of_birth: '[name="dob"], [name="date_of_birth"], #dob',
         gender: '[name="gender"], #gender',
         email: '[name="email"], [type="email"], #email',
-        phone: '[name="phone"], [name="mobile"], [name="contact_no"], #phone, #mobile',
+        phone: '.vti__input, [name="phone"], [name="mobile"], [name="contact_no"], #phone, #mobile, .iti input[type="tel"], input[type="tel"]',
         address: '[name="address"], [name="permanent_address"], #address',
         city: '[name="city"], #city',
         province: '[name="province"], #province',

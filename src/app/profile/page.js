@@ -717,6 +717,7 @@ export default function ProfilePage() {
             <SectionCard title="Family Information" icon="">
                 <div className="field-grid">
                     <Field label="Father's CNIC" value={profile.father_cnic} onChange={v => updateField('father_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" />
+                    <Field label="Mother's CNIC" value={profile.mother_cnic} onChange={v => updateField('mother_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" />
                     <Field label="Father's Occupation / Profession" value={profile.father_occupation} onChange={v => updateField('father_occupation', v)} placeholder="Doctor, Engineer, Government Officer…" />
                     <Field label="Father's Status" type="select" value={profile.father_status} onChange={v => updateField('father_status', v)}
                         options={[{ value: 'alive', label: 'Alive' }, { value: 'deceased', label: 'Deceased' }, { value: 'shaheed', label: 'Shaheed' }]} />

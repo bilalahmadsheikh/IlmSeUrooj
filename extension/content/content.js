@@ -171,6 +171,22 @@ function profileValueFor(key, profile) {
     case 'district':
       return profile.district || profile.domicile_district;
     // ── Father / Mother status, income, profession ─────────────
+    case 'father_first_name': {
+      const n = (profile.father_name || '').trim();
+      return n ? n.split(/\s+/)[0] : undefined;
+    }
+    case 'father_last_name': {
+      const parts = (profile.father_name || '').trim().split(/\s+/);
+      return parts.length > 1 ? parts[parts.length - 1] : undefined;
+    }
+    case 'mother_first_name': {
+      const n = (profile.mother_name || '').trim();
+      return n ? n.split(/\s+/)[0] : undefined;
+    }
+    case 'mother_last_name': {
+      const parts = (profile.mother_name || '').trim().split(/\s+/);
+      return parts.length > 1 ? parts[parts.length - 1] : undefined;
+    }
     case 'father_status':
       return profile.father_status;
     case 'mother_status':
@@ -279,16 +295,51 @@ const FIELD_HEURISTICS = [
     // Pakistani portal variants
     'phone_no', 'mob_number', 'cell_phone', 'applicant_cell', 'student_cell',
     'home_phone', 'res_phone', 'contact_no_cell', 'mobile_ph', 'phone_mob',
-    'applicant_contact', 'student_contact', 'emergency_contact', 'guardian_phone',
-    'father_phone', 'father_mobile', 'father_cell', 'parent_phone', 'parent_mobile',
-    'alternate_phone', 'alt_phone', 'other_phone', 'secondary_phone',
+    'applicant_contact', 'student_contact',
     'phone (with country code)', 'mobile (pakistan)', 'cell (pk)'],
     profileKey: 'phone', priority: 8 },
+
+  // ── Guardian / Parent / Alternate Phone ───────────────────────
+  { match: ['guardian_phone', 'guardian_mobile', 'guardian_cell', 'guardian_contact',
+    'guardian_no', 'guardian_number', 'guardian phone', 'guardian mobile',
+    'parent_phone', 'parent_mobile', 'parent_cell', 'parent_contact', 'parent_number',
+    'parents_phone', 'parents_mobile', 'parent phone', 'parent mobile',
+    'father_phone', 'father_mobile', 'father_cell', 'father_contact', 'father_phone_no',
+    'father phone', 'father mobile',
+    'alternate_phone', 'alt_phone', 'other_phone', 'secondary_phone',
+    'alternate_mobile', 'alt_mobile', 'other_mobile', 'secondary_mobile',
+    'alternate_contact', 'alt_contact', 'other_contact', 'secondary_contact',
+    'alternate phone', 'alt phone', 'other phone', 'emergency_contact',
+    'emergency_phone', 'emergency_mobile', 'emergency contact',
+    'contact2', 'phone2', 'mobile2', 'second_phone', 'second_mobile',
+    // Pakistani portal variants
+    'wali_phone', 'wali_mobile', 'wali_contact', 'sarparest_phone',
+    'parent_guardian_phone', 'guardian_or_parent_phone'],
+    profileKey: 'guardian_phone', priority: 8 },
 
   // ── WhatsApp ──────────────────────────────────────────────────
   { match: ['whatsapp', 'whatsapp_no', 'whatsapp_number', 'whatsapp number', 'wp_no',
     'whatsapp_mob', 'whatsapp_mobile', 'wp_number', 'wapp_no', 'whatsapp_cell'],
     profileKey: 'whatsapp', priority: 7 },
+
+  // ── Father / Mother split names — MUST be before first_name/last_name ──
+  // Priority 13 so "Father's First Name" label beats the generic first_name (11).
+  { match: ["father's first name", "father first name", "father_first_name",
+    "father's given name", 'dad first name', 'paternal first name',
+    'fathers first name', 'father_fname'],
+    profileKey: 'father_first_name', priority: 13 },
+  { match: ["father's last name", "father last name", "father_last_name",
+    "father's surname", 'dad last name', 'paternal last name',
+    'fathers last name', 'father_lname', 'father_surname'],
+    profileKey: 'father_last_name', priority: 13 },
+  { match: ["mother's first name", "mother first name", "mother_first_name",
+    "mother's given name", 'mom first name', 'maternal first name',
+    'mothers first name', 'mother_fname'],
+    profileKey: 'mother_first_name', priority: 13 },
+  { match: ["mother's last name", "mother last name", "mother_last_name",
+    "mother's surname", 'mom last name', 'maternal last name',
+    'mothers last name', 'mother_lname', 'mother_surname'],
+    profileKey: 'mother_last_name', priority: 13 },
 
   // ── First / Last / Middle — MUST be before full_name ──────────
   { match: ['first_name', 'firstname', 'fname', 'f_name', 'given_name', 'givenname',
@@ -342,6 +393,12 @@ const FIELD_HEURISTICS = [
     'father_cnic_no', 'guardian_nic', 'wali_cnic', 'father_nadra', 'parent_nic'],
     profileKey: 'father_cnic', priority: 6 },
 
+  // ── Mother CNIC ────────────────────────────────────────────────
+  { match: ['mother_cnic', 'mothercnic', 'mother_nic', 'mother_id', 'mother_id_card',
+    'mother cnic', "mother's cnic", 'mom_cnic', 'mcnic', 'mother_cnic_no',
+    'mother_nadra', 'mother_nic_no', 'mother_national_id'],
+    profileKey: 'mother_cnic', priority: 6 },
+
   // ── Mother's Name ──────────────────────────────────────────────
   { match: ['mother_name', 'mothername', 'mothers_name', "mother's name", 'mom_name',
     'mother', 'mother_full_name', 'mname', 'mother_nm', 'mother_name_en',
@@ -387,6 +444,7 @@ const FIELD_HEURISTICS = [
 
   // ── Province / Domicile ────────────────────────────────────────
   { match: ['province', 'state', 'domicile', 'domicile_province', 'province_name', 'region',
+    'state / province', 'state/province', 'province / state', 'province/state',
     'home_province', 'applicant_province', 'province of domicile', 'prov',
     'domicile_prov', 'province_of_domicile', 'residence_province',
     // Pakistani portal variants
@@ -412,7 +470,9 @@ const FIELD_HEURISTICS = [
     'address1', 'address_line1', 'address_line_1', 'address_line2',
     'permanent_addr', 'perm_addr', 'home_addr', 'local_addr', 'curr_address',
     'applicant_addr', 'student_address', 'correspondence_addr', 'corr_address',
-    'contact_address', 'resident_address', 'house_address', 'house_no_street'],
+    'contact_address', 'resident_address', 'house_address', 'house_no_street',
+    'house_no', 'house_number', 'house #', 'house#', 'house no', 'house number',
+    'house_num', 'hno', 'h_no', 'flat_no', 'flat_number', 'building_no'],
     profileKey: 'address', priority: 4 },
 
   // ── Postal Code ────────────────────────────────────────────────
@@ -751,6 +811,9 @@ function matchFieldHeuristically(el) {
   const rawAriaLabel = el.getAttribute('aria-label') || '';
   const rawDataLabel = el.getAttribute('data-label') || el.getAttribute('data-field') || '';
   const rawAutocomplete = el.getAttribute('autocomplete') || '';
+  // For custom widget divs (typeahead etc.) use title as placeholder-equivalent signal
+  const rawTitle = (el.tagName !== 'INPUT' && el.tagName !== 'SELECT' && el.tagName !== 'TEXTAREA')
+    ? (el.getAttribute('title') || '') : '';
   // Find associated label
   let labelText = '';
   if (el.labels?.length) {
@@ -805,8 +868,24 @@ function matchFieldHeuristically(el) {
 
   // All signals as array (primary ones first for priority ordering)
   const primarySignals = [normName, normId].filter(Boolean);
-  const secondarySignals = [normLabel, normAriaLabel, normPlaceholder, normData, normAC].filter(Boolean);
+  const normTitle = rawTitle.toLowerCase().trim();
+  const secondarySignals = [normLabel, normAriaLabel, normPlaceholder, normData, normAC, normTitle].filter(Boolean);
   const allSignals = [...primarySignals, ...secondarySignals];
+
+  // ── HTML type shortcuts (checked before signal-based logic) ─────
+  // These widgets have no name/id/placeholder, so they must be identified
+  // by type or class before the allSignals empty-check.
+  if (el.type === 'email') return 'email';
+  if (el.type === 'tel' || el.classList.contains('vti__input') || el.closest('.vue-tel-input')) {
+    // Check parent container text for alternate/guardian context so the
+    // second phone field on a form (e.g. IBA alternate number) maps to guardian_phone.
+    const container = el.closest('tr, .form-group, .field-group, [class*="form"], [class*="field"], [class*="row"]');
+    const ctxText = (container?.textContent || el.parentElement?.textContent || '').toLowerCase();
+    if (/alternate|alt\b|guardian|parent\b|emergency|secondary|other\s*(?:phone|mobile|number)/.test(ctxText)) {
+      return 'guardian_phone';
+    }
+    return 'phone';
+  }
 
   if (allSignals.length === 0) return null;
 
@@ -835,8 +914,6 @@ function matchFieldHeuristically(el) {
   }
 
   // ── HTML type shortcuts ─────────────────────────────────────────
-  if (el.type === 'email') return 'email';
-  if (el.type === 'tel') return 'phone';
   if (el.type === 'date') {
     if (allSignals.some(s => s.includes('birth') || s.includes('dob') || s.includes('born'))) return 'date_of_birth';
   }
@@ -851,14 +928,26 @@ function matchFieldHeuristically(el) {
   };
   if (normAC && acMap[normAC]) return acMap[normAC];
 
-  // ── First / Last / Middle before generic name ───────────────────
-  if (allSignals.some(s => /\bfirst[_\s-]?name\b/.test(s) || /\bgiven[_\s-]?name\b/.test(s) ||
-      s === 'fname' || s === 'first_name' || s === 'firstname' || s === 'f_name' ||
-      s === 'f_nm' || s === 'frst_nm' || s === 'sfname')) return 'first_name';
+  // ── Father / Mother split name fast paths (MUST be before first_name/last_name) ──
+  if (allSignals.some(s => /father|dad|paternal/.test(s) && /\bfirst[_\s-]?name\b/.test(s))) return 'father_first_name';
+  if (allSignals.some(s => /father|dad|paternal/.test(s) && (/\blast[_\s-]?name\b/.test(s) || /\bsurname\b/.test(s)))) return 'father_last_name';
+  if (allSignals.some(s => /mother|mom|maternal/.test(s) && /\bfirst[_\s-]?name\b/.test(s))) return 'mother_first_name';
+  if (allSignals.some(s => /mother|mom|maternal/.test(s) && (/\blast[_\s-]?name\b/.test(s) || /\bsurname\b/.test(s)))) return 'mother_last_name';
 
-  if (allSignals.some(s => /\blast[_\s-]?name\b/.test(s) || /\bsurname\b/.test(s) ||
+  // ── First / Last / Middle before generic name ───────────────────
+  if (allSignals.some(s => {
+    if (/father|mother|dad|mom|parent|guardian/.test(s)) return false;
+    return /\bfirst[_\s-]?name\b/.test(s) || /\bgiven[_\s-]?name\b/.test(s) ||
+      s === 'fname' || s === 'first_name' || s === 'firstname' || s === 'f_name' ||
+      s === 'f_nm' || s === 'frst_nm' || s === 'sfname';
+  })) return 'first_name';
+
+  if (allSignals.some(s => {
+    if (/father|mother|dad|mom|parent|guardian/.test(s)) return false;
+    return /\blast[_\s-]?name\b/.test(s) || /\bsurname\b/.test(s) ||
       /\bfamily[_\s-]?name\b/.test(s) || s === 'lname' || s === 'last_name' ||
-      s === 'lastname' || s === 'l_name' || s === 'l_nm' || s === 'slname')) return 'last_name';
+      s === 'lastname' || s === 'l_name' || s === 'l_nm' || s === 'slname';
+  })) return 'last_name';
 
   if (allSignals.some(s => /\bmiddle[_\s-]?name\b/.test(s) || s === 'mname' ||
       s === 'middle_name' || s === 'middlename' || s === 'm_name')) return 'middle_name';
@@ -941,7 +1030,7 @@ async function getSiteUrl() {
  */
 function collectAllFields(root = document) {
   const results = [];
-  const SELECTOR = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]), select, textarea';
+  const SELECTOR = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]), select, textarea, div.typeahead, [class*="typeahead"][tabindex]';
 
   try {
     results.push(...root.querySelectorAll(SELECTOR));
@@ -1353,10 +1442,72 @@ async function fillInput(el, value) {
   } catch (_) { /* InputEvent not supported in older browsers */ }
   el.dispatchEvent(new Event('blur', { bubbles: true }));
 
+  // Handle intl-tel-input (iti) widgets — must call setNumber() to sync the library's
+  // internal state, otherwise the flag picker widget ignores the raw value assignment.
+  if (inputType === 'tel') {
+    try {
+      const itiInstance = window.intlTelInputGlobals?.getInstance(el);
+      if (itiInstance) {
+        itiInstance.setNumber(String(value));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    } catch (_) { /* intl-tel-input not present */ }
+  }
+
+  // Handle vue-tel-input — identified by class vti__input; Vue listens on the
+  // wrapper element, so dispatch the input event there as well.
+  if (el.classList.contains('vti__input')) {
+    const wrapper = el.closest('.vue-tel-input');
+    if (wrapper) wrapper.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   // Small random delay to avoid bot detection
   await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
   return true;
 }
+
+/**
+ * Fill a Vue typeahead widget (class="typeahead") by clicking to open it,
+ * typing the value into the search input, then clicking the best matching option.
+ * Used for IBA's State/Province and City custom dropdowns.
+ */
+async function fillTypeahead(container, value) {
+  if (!container || !value) return false;
+  const trigger = container.querySelector('.typeahead-selected, [class*="typeahead-selected"]') || container;
+  trigger.click();
+  await new Promise(r => setTimeout(r, 200));
+
+  // Look for a search input that appeared inside or near the typeahead
+  const searchInput = container.querySelector('input[type="text"], input:not([type])') ||
+                      container.parentElement?.querySelector('.typeahead input');
+  if (searchInput) {
+    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    if (nativeSetter) nativeSetter.call(searchInput, value);
+    else searchInput.value = value;
+    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  // Find dropdown options and click the best match
+  const optionEls = container.querySelectorAll('li, [class*="option"], [class*="item"], [role="option"]');
+  const valLow = value.toLowerCase();
+  let best = null;
+  for (const opt of optionEls) {
+    const t = opt.textContent.toLowerCase().trim();
+    if (t === valLow) { best = opt; break; }
+    if (!best && t.includes(valLow)) best = opt;
+  }
+  if (best) {
+    best.click();
+    await new Promise(r => setTimeout(r, 100));
+    return true;
+  }
+
+  // Close if nothing matched
+  trigger.click();
+  return false;
+}
+
 
 function fillSelect(el, value) {
   if (!value && value !== 0) return false;
@@ -1404,6 +1555,9 @@ function fillSelect(el, value) {
       'cambridge': ['cie', 'cambridge international', 'o level', 'a level'],
       'male': ['m', 'boy'],
       'female': ['f', 'girl', 'woman'],
+      // Religion — map stored value to common dropdown variants
+      'muslim': ['islam', 'islamic', 'muslim', 'muslims'],
+      'non-muslim': ['non-muslim', 'non muslim', 'nonmuslim', 'christian', 'hindu', 'sikh', 'other religion'],
       'sindh': ['sindh board', 'bsek'],
       'punjab': ['punjab board'],
       // Education system
@@ -2993,6 +3147,7 @@ async function handleAutofill() {
     const manualSelectors = [];
     const conflictList = [];
     const alreadyHandled = new Set();
+    const filledProfileKeyOnce = new Set(); // tracks which profileKeys have been filled once
     const masterPassword = await getConsistentPassword();
 
     // Animated progress bar
@@ -3051,6 +3206,13 @@ async function handleAutofill() {
 
           alreadyHandled.add(el);
 
+          // Redirect duplicate phone fills to guardian_phone (e.g. "Alternate Number" field)
+          let effectiveKey = profileKey;
+          if (profileKey === 'phone' && filledProfileKeyOnce.has('phone')) {
+            effectiveKey = 'guardian_phone';
+            rawValue = profileValueFor('guardian_phone', ctx.profile) ?? ctx.profile?.['guardian_phone'];
+          }
+
           if (rawValue == null || rawValue === '') {
             // No value — highlight amber
             el.style.outline = '2px solid #fbbf24';
@@ -3093,6 +3255,7 @@ async function handleAutofill() {
             el.classList.add('unimatch-filled');
             el.classList.remove('unimatch-manual');
             filledCount++;
+            filledProfileKeyOnce.add(effectiveKey);
             filledSelectors.push(selectorString);
           } else {
             el.style.outline = '2px solid #fbbf24';
@@ -3480,8 +3643,15 @@ async function handleAutofill() {
         continue;
       }
 
+      // If this profileKey was already filled once, redirect phone → guardian_phone
+      // so the second tel field (alternate number) gets the guardian number, not the student's.
+      let resolvedKey = profileKey;
+      if (profileKey === 'phone' && filledProfileKeyOnce.has('phone')) {
+        resolvedKey = 'guardian_phone';
+      }
+
       // Resolve value using profileValueFor helper
-      let value = profileValueFor(profileKey, ctx.profile) ?? ctx.profile[profileKey];
+      let value = profileValueFor(resolvedKey, ctx.profile) ?? ctx.profile[resolvedKey];
 
       // Smart transforms
       if (profileKey === 'cnic' && value) {
@@ -3492,8 +3662,14 @@ async function handleAutofill() {
           cnicSig.includes('digits') || cnicSig.includes('cnic13'));
         value = noDash ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
       }
-      if ((profileKey === 'phone' || profileKey === 'whatsapp') && value) {
+      if ((resolvedKey === 'phone' || resolvedKey === 'whatsapp' || resolvedKey === 'guardian_phone') && value) {
         value = TRANSFORMS.phone_pak(value);
+      }
+      if ((resolvedKey === 'father_cnic' || resolvedKey === 'mother_cnic') && value) {
+        const cnicSig = ((input.name || '') + ' ' + (input.id || '') + ' ' + (input.className || '')).toLowerCase();
+        const noDash = (input.maxLength === 13 ||
+          cnicSig.includes('nodash') || cnicSig.includes('no_dash') || cnicSig.includes('digits'));
+        value = noDash ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
       }
       if (profileKey === 'province' && (!value || value === '') && ctx.profile?.city) {
         value = CITY_TO_PROVINCE[String(ctx.profile.city).toLowerCase()] || '';
@@ -3523,7 +3699,10 @@ async function handleAutofill() {
       let filled = false;
       if (input.tagName === 'SELECT') {
         filled = fillSelect(input, String(value));
-      } else if (profileKey === 'date_of_birth') {
+      } else if (input.tagName === 'DIV' &&
+                 (input.classList.contains('typeahead') || input.getAttribute('tabindex') !== null)) {
+        filled = await fillTypeahead(input, String(value));
+      } else if (resolvedKey === 'date_of_birth') {
         filled = await fillDateAdvanced(input, String(ctx.profile.date_of_birth));
       } else {
         filled = await fillInput(input, String(value));
@@ -3537,6 +3716,7 @@ async function handleAutofill() {
         sparkleField(input);
         playFillTone(filledCount, allInputs.length);
         filledCount++;
+        filledProfileKeyOnce.add(resolvedKey);
       } else if (input.required && !input.value) {
         input.style.outline = '2px solid #fbbf24';
         input.style.outlineOffset = '2px';
