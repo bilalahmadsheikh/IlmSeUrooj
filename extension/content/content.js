@@ -1467,43 +1467,55 @@ async function fillInput(el, value) {
 }
 
 /**
- * Fill a Vue typeahead widget (class="typeahead") by clicking to open it,
- * typing the value into the search input, then clicking the best matching option.
- * Used for IBA's State/Province and City custom dropdowns.
+ * Fill an IBA-style typeahead widget (class="typeahead"):
+ *   1. Click .typeahead-selected to open the dropdown
+ *   2. Wait for .typeahead-dropdown to appear in the DOM
+ *   3. Type into input.typeahead-input to filter options
+ *   4. Click the matching a.ac-result
  */
 async function fillTypeahead(container, value) {
   if (!container || !value) return false;
-  const trigger = container.querySelector('.typeahead-selected, [class*="typeahead-selected"]') || container;
-  trigger.click();
-  await new Promise(r => setTimeout(r, 200));
+  const valLow = value.toLowerCase().trim();
 
-  // Look for a search input that appeared inside or near the typeahead
-  const searchInput = container.querySelector('input[type="text"], input:not([type])') ||
-                      container.parentElement?.querySelector('.typeahead input');
+  const trigger = container.querySelector('.typeahead-selected');
+  if (!trigger) return false;
+
+  // Open the dropdown
+  trigger.click();
+
+  // Wait up to 1 s for .typeahead-dropdown to appear
+  let dropdown = null;
+  for (let i = 0; i < 10; i++) {
+    dropdown = container.querySelector('.typeahead-dropdown');
+    if (dropdown) break;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  if (!dropdown) return false;
+
+  // Type into the search input to filter options
+  const searchInput = dropdown.querySelector('input.typeahead-input');
   if (searchInput) {
+    searchInput.focus();
     const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
     if (nativeSetter) nativeSetter.call(searchInput, value);
     else searchInput.value = value;
     searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 250));
   }
 
-  // Find dropdown options and click the best match
-  const optionEls = container.querySelectorAll('li, [class*="option"], [class*="item"], [role="option"]');
-  const valLow = value.toLowerCase();
-  let best = null;
-  for (const opt of optionEls) {
-    const t = opt.textContent.toLowerCase().trim();
-    if (t === valLow) { best = opt; break; }
-    if (!best && t.includes(valLow)) best = opt;
-  }
+  // Click the best matching a.ac-result
+  const options = Array.from(container.querySelectorAll('a.ac-result'));
+  let best = options.find(a => a.textContent.trim().toLowerCase() === valLow) ||
+             options.find(a => a.textContent.trim().toLowerCase().includes(valLow)) ||
+             options.find(a => valLow.includes(a.textContent.trim().toLowerCase()));
+
   if (best) {
     best.click();
     await new Promise(r => setTimeout(r, 100));
     return true;
   }
 
-  // Close if nothing matched
+  // Nothing matched — close by clicking trigger again
   trigger.click();
   return false;
 }
