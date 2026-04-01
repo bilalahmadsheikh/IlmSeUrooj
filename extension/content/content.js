@@ -224,6 +224,66 @@ function profileValueFor(key, profile) {
     case 'education_system':
     case 'academic_background':
       return profile.education_system;
+    // ── Education page: certificate type per section ────────────
+    case 'matric_certificate':
+      return profile.education_system === 'cambridge' ? 'O-Level' : 'Matriculation';
+    case 'inter_certificate':
+      return profile.education_system === 'cambridge' ? 'A-Level' : 'Intermediate';
+    // ── Education page: result status ───────────────────────────
+    case 'inter_result_status': {
+      const statusMap = {
+        completed:   'Exam given and result in Hand',
+        appearing:   'Appearing in Annual Exam',
+        part1_only:  'As Level',
+      };
+      return statusMap[profile.inter_status] || undefined;
+    }
+    // ── Education page: discipline (stream) ─────────────────────
+    case 'inter_discipline': {
+      const streamMap = {
+        pre_medical:      'Medical',
+        pre_engineering:  'Engineering',
+        ics:              'Science',
+        icom:             'Commerce',
+        arts:             'Art',
+        general:          'General',
+      };
+      return streamMap[profile.fsc_stream] || undefined;
+    }
+    // ── Education page: current level ───────────────────────────
+    case 'inter_current_level': {
+      const levelMap = {
+        part1_only: 'As Level',
+        appearing:  'First Year Intermediate/Equivalent',
+        completed:  profile.education_system === 'cambridge' ? 'A Level' : 'Second Year Intermediate/12 Grade/Equivalent',
+      };
+      return levelMap[profile.inter_status] || undefined;
+    }
+    // ── Education page: marks/year per section ──────────────────
+    case 'matric_obtained':
+      return profile.matric_marks != null ? String(profile.matric_marks) : undefined;
+    case 'matric_total_marks':
+      return profile.matric_total != null ? String(profile.matric_total) : undefined;
+    case 'matric_pct':
+      return profile.matric_percentage != null ? String(profile.matric_percentage) : undefined;
+    case 'matric_passing_year':
+      return profile.matric_year != null ? String(profile.matric_year) : undefined;
+    case 'inter_obtained':
+      return profile.fsc_marks != null ? String(profile.fsc_marks) : undefined;
+    case 'inter_total_marks':
+      return profile.fsc_total != null ? String(profile.fsc_total) : undefined;
+    case 'inter_pct':
+      return profile.fsc_percentage != null ? String(profile.fsc_percentage) : undefined;
+    case 'inter_passing_year':
+      return profile.fsc_year != null ? String(profile.fsc_year) : undefined;
+    case 'matric_board_name':
+      return profile.olevel_board || profile.matric_board || profile.board_name;
+    case 'inter_board_name':
+      return profile.alevel_board || profile.fsc_board || profile.board_name;
+    case 'matric_school_name':
+      return profile.matric_school || profile.school_name;
+    case 'inter_school_name':
+      return profile.fsc_school || profile.school_name;
     case 'portal_username':
       // Generate the login username: CNIC (no dashes) → email prefix → name slug
       if (profile.cnic) return profile.cnic.replace(/-/g, '');
@@ -604,6 +664,38 @@ const FIELD_HEURISTICS = [
     'ssc_pct_age', 'matric_pct_age'],
     profileKey: 'matric_percentage', priority: 5 },
 
+  // ── Education form: section-context-aware generic labels ──────
+  // IBA and similar portals repeat generic labels ("Obtained Marks", "Total Marks",
+  // "Year of Passing", "Name of Board") in each education section.
+  // These heuristics provide the CONTEXT-SPECIFIC profileKey.
+  // matchFieldHeuristically resolves the right key via getEduSectionContext().
+  { match: ['obtained marks', 'obtained_marks', 'marks obtained', 'marks_obtained'],
+    profileKey: 'edu_obtained_marks', priority: 7 },
+  { match: ['total marks', 'total_marks', 'maximum marks', 'max_marks', 'full marks'],
+    profileKey: 'edu_total_marks', priority: 7 },
+  { match: ['percentage(%)', 'percentage (%)', 'percentage', 'percent', 'pct', 'percentage(%)'],
+    profileKey: 'edu_percentage', priority: 6 },
+  { match: ['year of passing', 'year_of_passing', 'passing year', 'passing_year'],
+    profileKey: 'edu_passing_year', priority: 7 },
+  { match: ['name of board', 'name_of_board', 'board name', 'board_name'],
+    profileKey: 'edu_board_name', priority: 7 },
+  { match: ['name of school / college', 'name of school/college', 'name of school',
+    'name of college', 'name of institute', 'name_of_school', 'name_of_college',
+    'name_of_institute', 'name of institution'],
+    profileKey: 'edu_school_name', priority: 7 },
+  { match: ['certificate / degree', 'certificate/degree', 'certificate degree',
+    'degree certificate', 'certificate_degree', 'degree_type', 'certificate_type'],
+    profileKey: 'edu_certificate', priority: 8 },
+  { match: ['result status', 'result_status', 'exam status', 'exam_status',
+    'current status', 'current_status', 'result_type'],
+    profileKey: 'inter_result_status', priority: 7 },
+  { match: ['discipline', 'stream', 'subject_group', 'subject group', 'faculty',
+    'field of study', 'field_of_study'],
+    profileKey: 'inter_discipline', priority: 6 },
+  { match: ['current level', 'current_level', 'education level', 'education_level',
+    'class level', 'class_level', 'level of education'],
+    profileKey: 'inter_current_level', priority: 7 },
+
   // ── NET / NTS Score ────────────────────────────────────────────
   { match: ['net_score', 'net_marks', 'netscore', 'net', 'nts_score', 'nts_marks',
     'entry_test', 'entry_test_score', 'entrance_score', 'entrance_marks', 'admission_test',
@@ -767,6 +859,25 @@ const CITY_TO_PROVINCE = {
  * lowercases, strips common ASP.NET prefixes (txt, lbl, ctl, txt_),
  * and collapses separators.
  */
+/**
+ * Walk up the DOM from el to find the nearest section heading text.
+ * Returns 'matric', 'inter', 'undergrad', 'grad', or null.
+ */
+function getEduSectionContext(el) {
+  let node = el.parentElement;
+  while (node && node !== document.body) {
+    // Check headings or card-title children of this container
+    const heading = node.querySelector('h1,h2,h3,h4,h5,h6,legend,.card-title,.panel-title,.section-title,.accordion-title,.tab-title');
+    const headText = (heading?.textContent || '').toLowerCase();
+    if (/matric|ssc|secondary|o[\s.-]?level|class\s*10/.test(headText)) return 'matric';
+    if (/inter|hssc|higher secondary|a[\s.-]?level|class\s*12/.test(headText)) return 'inter';
+    if (/under.?grad|bachelor|b\.a|b\.sc|b\.com/.test(headText)) return 'undergrad';
+    if (/\bgrad|master|m\.a|m\.sc|m\.com/.test(headText)) return 'grad';
+    node = node.parentElement;
+  }
+  return null;
+}
+
 function normalizeSignal(s) {
   return s
     .toLowerCase()
@@ -962,6 +1073,8 @@ function matchFieldHeuristically(el) {
   })) return 'full_name';
 
   // ── Heuristic table scan ────────────────────────────────────────
+  // After the scan, context-aware keys (edu_*) are resolved to their
+  // section-specific profileKeys using the DOM section heading.
   let bestKey = null;
   let bestScore = -1;
 
@@ -1002,6 +1115,23 @@ function matchFieldHeuristically(el) {
           bestKey = h.profileKey;
         }
       }
+    }
+  }
+
+  // ── Resolve context-aware education keys ────────────────────────
+  if (bestKey && bestKey.startsWith('edu_')) {
+    const ctx = getEduSectionContext(el);
+    const isInter = ctx === 'inter';
+    const isMatric = ctx === 'matric';
+    switch (bestKey) {
+      case 'edu_obtained_marks':  return isInter ? 'inter_obtained' : isMatric ? 'matric_obtained' : 'matric_obtained';
+      case 'edu_total_marks':     return isInter ? 'inter_total_marks' : isMatric ? 'matric_total_marks' : 'matric_total_marks';
+      case 'edu_percentage':      return isInter ? 'inter_pct' : isMatric ? 'matric_pct' : 'matric_pct';
+      case 'edu_passing_year':    return isInter ? 'inter_passing_year' : isMatric ? 'matric_passing_year' : 'matric_passing_year';
+      case 'edu_board_name':      return isInter ? 'inter_board_name' : 'matric_board_name';
+      case 'edu_school_name':     return isInter ? 'inter_school_name' : 'matric_school_name';
+      case 'edu_certificate':     return isInter ? 'inter_certificate' : 'matric_certificate';
+      default: return bestKey;
     }
   }
 
@@ -1574,6 +1704,25 @@ function fillSelect(el, value) {
       // Religion — map stored value to common dropdown variants
       'muslim': ['islam', 'islamic', 'muslim', 'muslims'],
       'non-muslim': ['non-muslim', 'non muslim', 'nonmuslim', 'christian', 'hindu', 'sikh', 'other religion'],
+      // Education: certificate type
+      'o-level': ['o-level', 'o level', 'olevel', 'o/level'],
+      'a-level': ['a-level', 'a level', 'alevel', 'a/level'],
+      'matriculation': ['matriculation', 'matric', 'ssc', 'secondary'],
+      'intermediate': ['intermediate', 'inter', 'hssc', 'fsc', 'fa', 'ics', 'icom'],
+      // Education: discipline/stream
+      'medical':      ['medical', 'pre-medical', 'pre medical', 'pre_medical', 'biology', 'bio'],
+      'engineering':  ['engineering', 'pre-engineering', 'pre engineering', 'pre_engineering', 'engg'],
+      'science':      ['science', 'ics', 'computer science', 'general science'],
+      'commerce':     ['commerce', 'icom', 'business'],
+      'art':          ['art', 'arts', 'humanities', 'fa'],
+      'general':      ['general', 'general studies'],
+      // Education: result status
+      'exam given and result in hand': ['completed', 'result in hand', 'result available', 'passed'],
+      'appearing in annual exam':      ['appearing', 'will appear', 'going to appear'],
+      'as level':                      ['part1_only', 'as level', 'as-level', 'first year only', 'part 1'],
+      // Education: current level
+      'first year intermediate/equivalent': ['appearing', 'first year', '1st year', 'part 1 only'],
+      'second year intermediate/12 grade/equivalent': ['completed', 'second year', '2nd year'],
       'sindh': ['sindh board', 'bsek'],
       'punjab': ['punjab board'],
       // Education system
