@@ -3307,6 +3307,309 @@ function showContextInvalidatedUI(container) {
   `;
 }
 
+// ─── IBA Education Background Page — Dedicated Handler ────────────────────
+// Detects and sequentially fills the IBA "Educational Background" multi-section form.
+// Skips all *_school_address fields (Google Places autocomplete — must be filled manually).
+// Ticks "Not Applicable To Me" for Undergraduate / Graduate / Other sections.
+
+function isIBAEducationPage() {
+  if (!window.location.hostname.includes('iba.edu.pk')) return false;
+  // Detect by presence of education-specific IDs or page text landmarks
+  return !!(
+    document.querySelector('[id*="_school_address"]') ||
+    (document.querySelector('[id*="matric"]') &&
+     (document.querySelector('[id*="undergrad"]') || document.body.innerText.includes('Not Applicable To Me')))
+  );
+}
+
+async function fillIBAEducationPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  const nativeSelectSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
+
+  function markGreen(el) {
+    el.style.outline = '2px solid #4ade80';
+    el.style.outlineOffset = '2px';
+    el.classList.add('unimatch-filled');
+    el.classList.remove('unimatch-manual');
+  }
+  function markAmber(el) {
+    el.style.outline = '2px solid #fbbf24';
+    el.style.outlineOffset = '2px';
+    el.classList.add('unimatch-manual');
+  }
+
+  async function doFillSelect(el, value) {
+    if (!el || value == null || value === '') return false;
+    const ok = fillSelect(el, String(value));
+    if (ok) {
+      if (nativeSelectSetter) nativeSelectSetter.call(el, el.value);
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      markGreen(el);
+      onFilled?.(el);
+      await delay(300);
+      return true;
+    }
+    markAmber(el);
+    onManual?.(el);
+    return false;
+  }
+
+  async function doFillInput(el, value) {
+    if (!el || value == null || value === '') return false;
+    const ok = await fillInput(el, String(value));
+    if (ok) { markGreen(el); onFilled?.(el); await delay(200); return true; }
+    markAmber(el); onManual?.(el);
+    return false;
+  }
+
+  async function doFillTypeahead(container, value) {
+    if (!container || !value) return false;
+    const ok = await fillTypeahead(container, value);
+    if (ok) { markGreen(container); onFilled?.(container); return true; }
+    markAmber(container); onManual?.(container);
+    return false;
+  }
+
+  async function tickNotApplicable(section) {
+    if (!section) return false;
+    const allCheckboxes = Array.from(section.querySelectorAll('input[type="checkbox"]'));
+    for (const cb of allCheckboxes) {
+      // Look for associated label text
+      const labelEl = cb.closest('label') ||
+                      document.querySelector(`label[for="${cb.id}"]`) ||
+                      cb.parentElement;
+      const labelText = (labelEl?.textContent || '').toLowerCase();
+      // Also check sibling text nodes
+      const sibText = Array.from(cb.parentElement?.childNodes || [])
+        .map(n => n.textContent || '').join(' ').toLowerCase();
+      if (labelText.includes('not applicable') || sibText.includes('not applicable')) {
+        if (!cb.checked) { cb.click(); await delay(300); }
+        markGreen(cb);
+        onFilled?.(cb);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Find a section container by heading keywords; returns { heading, container } or null
+  function findSection(keywords) {
+    const kws = (Array.isArray(keywords) ? keywords : [keywords]).map(k => k.toLowerCase());
+    const headingSelectors = 'h1,h2,h3,h4,h5,h6,.card-title,.panel-title,.section-title,.section-heading,legend,.form-section-header,[class*="section-header"]';
+    for (const h of document.querySelectorAll(headingSelectors)) {
+      const ht = h.textContent.toLowerCase().trim();
+      if (!kws.some(k => ht.includes(k))) continue;
+      // Walk up to find the enclosing container that holds form fields
+      let el = h.parentElement;
+      for (let i = 0; i < 6 && el && el !== document.body; i++, el = el.parentElement) {
+        if (el.querySelectorAll('input,select,.typeahead').length > 0) return { heading: h, container: el };
+      }
+      // Try next siblings if no ancestor matches
+      let sib = h.nextElementSibling;
+      while (sib) {
+        if (sib.querySelectorAll('input,select,.typeahead').length > 0) return { heading: h, container: sib };
+        if (sib.querySelectorAll(headingSelectors).length > 0) break; // hit next section
+        sib = sib.nextElementSibling;
+      }
+    }
+    return null;
+  }
+
+  // Get SELECTs from a container, excluding any that are part of Google Places address inputs
+  function sectionSelects(c) {
+    return Array.from(c.querySelectorAll('select')).filter(s => {
+      const key = (s.id + ' ' + (s.name || '')).toLowerCase();
+      return !key.includes('school_address') && !key.includes('_address');
+    });
+  }
+
+  // Get text/number inputs from a container, excluding Google Places address inputs
+  function sectionInputs(c) {
+    return Array.from(c.querySelectorAll('input[type="text"],input[type="number"],input:not([type])')).filter(i => {
+      const key = (i.id + ' ' + (i.name || '')).toLowerCase();
+      return !key.includes('school_address') && !key.includes('_address') &&
+             !i.classList.contains('pac-target-input'); // Google Places class
+    });
+  }
+
+  // Get typeahead containers from a section
+  function sectionTypeaheads(c) {
+    return Array.from(c.querySelectorAll('[class*="typeahead"][tabindex], .typeahead, div.typeahead'));
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  MATRIC / O-LEVEL SECTION
+  // ═══════════════════════════════════════════════════
+  const matricSec = findSection(['matric', 'secondary', 'o-level', 'o level', 'ssc']);
+  if (matricSec) {
+    console.log('[IlmSeUrooj] IBA Edu: Matric section found');
+    const mc = matricSec.container;
+    const sels = sectionSelects(mc);
+    const ths  = sectionTypeaheads(mc);
+    const inps = sectionInputs(mc);
+
+    // 1. Certificate / Degree type SELECT
+    const certSel = sels.find(s => {
+      const id = s.id.toLowerCase();
+      return id.includes('cert') || id.includes('degree') || id.includes('type') ||
+             Array.from(s.options).some(o => ['matric','o-level','ssc','secondary'].some(v => o.text.toLowerCase().includes(v)));
+    }) || sels[0];
+    const certVal = profile.education_system === 'cambridge' ? 'O-Level' : 'Matriculation';
+    if (certSel) await doFillSelect(certSel, certVal);
+
+    // 2. School name typeahead (1st typeahead in section)
+    const schoolVal = profile.olevel_school || profile.matric_school;
+    if (ths[0] && schoolVal) await doFillTypeahead(ths[0], schoolVal);
+
+    // 3. Board typeahead (2nd typeahead in section)
+    const boardVal = profile.education_system === 'cambridge'
+      ? 'Cambridge' : (profile.olevel_board || profile.matric_board);
+    if (ths[1] && boardVal) await doFillTypeahead(ths[1], boardVal);
+
+    // 4. Passing year SELECT
+    const yearSel = sels.find(s => {
+      const id = s.id.toLowerCase();
+      return id.includes('year') || id.includes('pass') ||
+             Array.from(s.options).some(o => /^(19|20)\d\d$/.test((o.value || o.text).trim()));
+    });
+    const yearVal = profile.olevel_year || profile.matric_year;
+    if (yearSel && yearVal) await doFillSelect(yearSel, String(yearVal));
+
+    // 5. Obtained marks
+    const obtInp = inps.find(i => {
+      const id = i.id.toLowerCase(); return id.includes('obtain') || id.includes('marks') || id.includes('score');
+    });
+    if (obtInp && profile.matric_marks) await doFillInput(obtInp, profile.matric_marks);
+
+    // 6. Total marks
+    const totInp = inps.find(i => { const id = i.id.toLowerCase(); return id.includes('total') || id.includes('max'); });
+    if (totInp && profile.matric_total) await doFillInput(totInp, profile.matric_total);
+
+    // 7. Percentage
+    const pctInp = inps.find(i => { const id = i.id.toLowerCase(); return id.includes('pct') || id.includes('percent') || id.includes('perc'); });
+    const pctVal = profile.matric_percentage ||
+      (profile.matric_marks && profile.matric_total
+        ? ((profile.matric_marks / profile.matric_total) * 100).toFixed(2) : null);
+    if (pctInp && pctVal) await doFillInput(pctInp, pctVal);
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  INTERMEDIATE / A-LEVEL SECTION
+  // ═══════════════════════════════════════════════════
+  const interSec = findSection(['intermediate', 'a-level', 'a level', 'hssc', 'higher secondary']);
+  if (interSec) {
+    console.log('[IlmSeUrooj] IBA Edu: Intermediate section found');
+    const ic = interSec.container;
+    const sels = sectionSelects(ic);
+    const ths  = sectionTypeaheads(ic);
+    const inps = sectionInputs(ic);
+
+    // 1. Certificate / Degree type SELECT
+    const certSel = sels.find(s => {
+      const id = s.id.toLowerCase();
+      return id.includes('cert') || id.includes('degree') || id.includes('type') ||
+             Array.from(s.options).some(o => ['intermediate','a-level','hssc','fsc','fa','ics'].some(v => o.text.toLowerCase().includes(v)));
+    }) || sels[0];
+    const certVal = profile.education_system === 'cambridge' ? 'A-Level' : 'Intermediate';
+    if (certSel) await doFillSelect(certSel, certVal);
+
+    // 2. School name typeahead
+    const schoolVal = profile.alevel_school || profile.fsc_school;
+    if (ths[0] && schoolVal) await doFillTypeahead(ths[0], schoolVal);
+
+    // 3. Board typeahead
+    const boardVal = profile.education_system === 'cambridge'
+      ? 'Cambridge' : (profile.alevel_board || profile.fsc_board);
+    if (ths[1] && boardVal) await doFillTypeahead(ths[1], boardVal);
+
+    // 4. Result Status SELECT
+    const statusSel = sels.find(s => {
+      const id = s.id.toLowerCase();
+      return id.includes('status') || id.includes('result') ||
+             Array.from(s.options).some(o =>
+               o.text.toLowerCase().includes('appearing') || o.text.toLowerCase().includes('result in hand'));
+    });
+    const statusVal = profileValueFor('inter_result_status', profile);
+    if (statusSel && statusVal) await doFillSelect(statusSel, statusVal);
+
+    // 5. Passing year SELECT
+    const yearSel = sels.find(s => {
+      const id = s.id.toLowerCase();
+      return id.includes('year') || id.includes('pass') ||
+             Array.from(s.options).some(o => /^(19|20)\d\d$/.test((o.value || o.text).trim()));
+    });
+    const yearVal = profile.alevel_year || profile.fsc_year || profile.inter_year;
+    if (yearSel && yearVal) await doFillSelect(yearSel, String(yearVal));
+
+    // 6. Discipline SELECT
+    const discSel = sels.find(s => {
+      const id = s.id.toLowerCase();
+      return id.includes('discipline') || id.includes('stream') ||
+             Array.from(s.options).some(o =>
+               ['engineering','medical','science','commerce','arts','general'].some(v => o.text.toLowerCase().includes(v)));
+    });
+    const discVal = profileValueFor('inter_discipline', profile);
+    if (discSel && discVal) await doFillSelect(discSel, discVal);
+
+    // 7. Current Level SELECT
+    const levelSel = sels.find(s => {
+      const id = s.id.toLowerCase();
+      return id.includes('level') || id.includes('current') ||
+             Array.from(s.options).some(o =>
+               o.text.toLowerCase().includes('first year') || o.text.toLowerCase().includes('a level') ||
+               o.text.toLowerCase().includes('second year') || o.text.toLowerCase().includes('12 grade'));
+    });
+    const levelVal = profileValueFor('inter_current_level', profile);
+    if (levelSel && levelVal) await doFillSelect(levelSel, levelVal);
+
+    // 8. Obtained marks
+    const obtInp = inps.find(i => {
+      const id = i.id.toLowerCase(); return id.includes('obtain') || id.includes('marks') || id.includes('score');
+    });
+    const obtVal = profile.fsc_marks || profile.inter_marks;
+    if (obtInp && obtVal) await doFillInput(obtInp, obtVal);
+
+    // 9. Total marks
+    const totInp = inps.find(i => { const id = i.id.toLowerCase(); return id.includes('total') || id.includes('max'); });
+    const totVal = profile.fsc_total || profile.inter_total;
+    if (totInp && totVal) await doFillInput(totInp, totVal);
+
+    // 10. Percentage
+    const pctInp = inps.find(i => { const id = i.id.toLowerCase(); return id.includes('pct') || id.includes('percent') || id.includes('perc'); });
+    const pctVal = profile.fsc_percentage ||
+      (obtVal && totVal ? ((obtVal / totVal) * 100).toFixed(2) : null);
+    if (pctInp && pctVal) await doFillInput(pctInp, pctVal);
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  UNDERGRADUATE — tick "Not Applicable To Me"
+  // ═══════════════════════════════════════════════════
+  const ugSec = findSection(['undergraduate', 'bachelor', "bachelor's", 'b.s program', 'bs program', 'bachelors']);
+  if (ugSec) {
+    console.log('[IlmSeUrooj] IBA Edu: ticking Not Applicable for Undergraduate');
+    await tickNotApplicable(ugSec.container);
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  GRADUATE — tick "Not Applicable To Me"
+  // ═══════════════════════════════════════════════════
+  const gradSec = findSection(['graduate', "master's", 'masters', 'm.s program', 'ms program', 'mba', 'post-graduate', 'postgraduate', 'phd', 'mphil']);
+  if (gradSec && gradSec.container !== ugSec?.container) {
+    console.log('[IlmSeUrooj] IBA Edu: ticking Not Applicable for Graduate');
+    await tickNotApplicable(gradSec.container);
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  OTHER QUALIFICATION — tick "Not Applicable To Me"
+  // ═══════════════════════════════════════════════════
+  const otherSec = findSection(['other qualification', 'other education', 'other degree', 'other academic', 'any other', 'other (specify)']);
+  if (otherSec && otherSec.container !== ugSec?.container && otherSec.container !== gradSec?.container) {
+    console.log('[IlmSeUrooj] IBA Edu: ticking Not Applicable for Other');
+    await tickNotApplicable(otherSec.container);
+  }
+}
+
 // ─── Core Autofill Logic ───────────────────────────────────────
 
 async function handleAutofill() {
@@ -3344,6 +3647,18 @@ async function handleAutofill() {
       processedFields++;
       if (progressBar) progressBar.style.width = `${Math.min(100, (processedFields / totalFields) * 100)}%`;
     };
+
+    // ─── SPECIAL: IBA Education Background Page ──────────────────
+    // Runs before all tiers — dedicated sequential handler for the multi-section form.
+    if (isIBAEducationPage()) {
+      console.log('[IlmSeUrooj] IBA Education page detected — running dedicated handler');
+      await fillIBAEducationPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); filledSelectors.push(el.id || el.name || 'iba-edu'); tickProgress(); },
+        (el) => { manualCount++;  alreadyHandled.add(el); tickProgress(); }
+      );
+      console.log(`[IlmSeUrooj] IBA Edu handler done: ${filledCount} filled, ${manualCount} manual`);
+    }
 
     // ─── TIER 1: Deterministic per-university config ───────────
     // Uses verified CSS selectors from extension/universities/index.js
