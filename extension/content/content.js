@@ -281,9 +281,23 @@ function profileValueFor(key, profile) {
     case 'inter_board_name':
       return profile.alevel_board || profile.fsc_board || profile.board_name;
     case 'matric_school_name':
-      return profile.matric_school || profile.school_name;
+      return profile.olevel_school || profile.matric_school || profile.school_name;
     case 'inter_school_name':
-      return profile.fsc_school || profile.school_name;
+      return profile.alevel_school || profile.fsc_school || profile.school_name;
+    case 'matric_passing_year':
+      return profile.olevel_year != null ? String(profile.olevel_year)
+           : profile.matric_year != null ? String(profile.matric_year) : undefined;
+    case 'inter_passing_year':
+      return profile.alevel_year != null ? String(profile.alevel_year)
+           : profile.fsc_year != null ? String(profile.fsc_year) : undefined;
+    case 'matric_board_name': {
+      const b = profile.olevel_board || profile.matric_board || profile.board_name;
+      return b === 'cambridge' ? 'Cambridge' : b === 'edexcel' ? 'Edexcel' : b;
+    }
+    case 'inter_board_name': {
+      const b = profile.alevel_board || profile.fsc_board || profile.board_name;
+      return b === 'cambridge' ? 'Cambridge' : b === 'edexcel' ? 'Edexcel' : b;
+    }
     case 'portal_username':
       // Generate the login username: CNIC (no dashes) → email prefix → name slug
       if (profile.cnic) return profile.cnic.replace(/-/g, '');
@@ -1630,7 +1644,8 @@ async function fillTypeahead(container, value) {
     if (nativeSetter) nativeSetter.call(searchInput, value);
     else searchInput.value = value;
     searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-    await new Promise(r => setTimeout(r, 250));
+    // Wait for the list to filter — AJAX-loaded typeaheads need longer
+    await new Promise(r => setTimeout(r, 500));
   }
 
   // Click the best matching a.ac-result
@@ -1645,7 +1660,9 @@ async function fillTypeahead(container, value) {
     best.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
     await new Promise(r => setTimeout(r, 30));
     best.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    await new Promise(r => setTimeout(r, 150));
+    // Extra settle time so Vue re-renders and dependent fields (e.g. AJAX-loaded
+    // board/school lists) fully populate before the next fill runs.
+    await new Promise(r => setTimeout(r, 400));
     return true;
   }
 

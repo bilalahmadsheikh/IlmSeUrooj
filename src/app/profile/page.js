@@ -23,8 +23,26 @@ const PROVINCES = [
 
 const ALEVEL_SUBJECTS = [
     'Physics', 'Chemistry', 'Biology', 'Mathematics', 'Further Mathematics',
-    'Computer Science', 'Economics', 'Accounting', 'Business Studies',
-    'Psychology', 'English Literature', 'Urdu', 'Pakistan Studies'
+    'Statistics', 'Computer Science', 'Information Technology',
+    'Economics', 'Accounting', 'Business Studies', 'Law',
+    'Psychology', 'Sociology', 'History', 'Geography',
+    'English Language', 'English Literature', 'General Paper', 'Thinking Skills',
+    'Urdu Language', 'Urdu Literature', 'Islamiyat', 'Pakistan Studies',
+    'Art & Design', 'Design & Technology', 'Music', 'Drama',
+    'Physical Education', 'Environmental Management', 'Media Studies',
+    'Travel & Tourism', 'French', 'Arabic'
+];
+
+const OLEVEL_SUBJECTS = [
+    'Mathematics (D)', 'Additional Mathematics', 'Physics', 'Chemistry', 'Biology',
+    'Computer Science', 'Information & Communication Technology', 'Statistics',
+    'Economics', 'Accounting', 'Business Studies',
+    'English Language', 'English Literature',
+    'Urdu Language', 'Urdu Literature', 'Islamiyat', 'Pakistan Studies',
+    'History', 'Geography',
+    'Art & Design', 'Design & Technology', 'Food & Nutrition',
+    'Physical Education', 'Sociology', 'Environmental Management',
+    'Travel & Tourism', 'French', 'Arabic'
 ];
 
 // ─── Required fields for completion calculation ────────────────
@@ -610,6 +628,8 @@ export default function ProfilePage() {
                                     { value: 'ib', label: 'IB' },
                                     { value: 'other', label: 'Other' },
                                 ]} />
+                            <Field label="Passing Year" type="number" value={profile.alevel_year} onChange={v => updateField('alevel_year', v)} placeholder="2025" />
+                            <Field label="School / College" value={profile.alevel_school} onChange={v => updateField('alevel_school', v)} placeholder="Beaconhouse, LGS, City School..." />
                         </div>
 
                         {interStatus !== 'not_started' && (
@@ -677,6 +697,8 @@ export default function ProfilePage() {
                                     { value: 'edexcel', label: 'Edexcel' },
                                     { value: 'other', label: 'Other' },
                                 ]} />
+                            <Field label="Passing Year" type="number" value={profile.olevel_year} onChange={v => updateField('olevel_year', v)} placeholder="2023" />
+                            <Field label="School / College" value={profile.olevel_school} onChange={v => updateField('olevel_school', v)} placeholder="Beaconhouse, LGS, City School..." />
                         </div>
                         <h3 className="sub-section-title">Subjects</h3>
                         <div className="subjects-table">
@@ -685,7 +707,10 @@ export default function ProfilePage() {
                             </div>
                             {oSubjects.map((s, i) => (
                                 <div key={i} className="subjects-row three-col">
-                                    <input value={s.subject} onChange={e => updateOSubject(i, 'subject', e.target.value)} placeholder="Mathematics" />
+                                    <select value={s.subject || ''} onChange={e => updateOSubject(i, 'subject', e.target.value)}>
+                                        <option value="">Select subject...</option>
+                                        {OLEVEL_SUBJECTS.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+                                    </select>
                                     <select value={s.grade || ''} onChange={e => updateOSubject(i, 'grade', e.target.value)}>
                                         <option value="">--</option>
                                         {['A*', 'A', 'B', 'C', 'D', 'E'].map(g => <option key={g} value={g}>{g}</option>)}
@@ -694,7 +719,17 @@ export default function ProfilePage() {
                                 </div>
                             ))}
                         </div>
-                        <button className="btn-add" onClick={() => addOSubject('')} style={{ marginTop: 8 }}>+ Add Subject</button>
+                        <div className="subject-add-row">
+                            <select id="add-olevel-subject-select" defaultValue="">
+                                <option value="">Quick add subject...</option>
+                                {OLEVEL_SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                            <button className="btn-add" onClick={() => {
+                                const sel = document.getElementById('add-olevel-subject-select');
+                                addOSubject(sel?.value || '');
+                                if (sel) sel.value = '';
+                            }}>+ Add Subject</button>
+                        </div>
                     </SectionCard>
                 </>
             )}
