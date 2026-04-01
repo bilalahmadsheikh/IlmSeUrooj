@@ -1668,7 +1668,11 @@ function fillSelect(el, value) {
   }
 
   if (match) {
-    el.value = match.value;
+    // Use native setter so Vue/React reactivity proxies intercept the assignment.
+    // Direct el.value = x bypasses the proxy and Vue re-renders revert the value.
+    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
+    if (nativeSetter) nativeSetter.call(el, match.value);
+    else el.value = match.value;
     el.dispatchEvent(new Event('change', { bubbles: true }));
     el.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
