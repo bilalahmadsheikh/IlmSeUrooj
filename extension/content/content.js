@@ -1510,8 +1510,12 @@ async function fillTypeahead(container, value) {
              options.find(a => valLow.includes(a.textContent.trim().toLowerCase()));
 
   if (best) {
-    best.click();
-    await new Promise(r => setTimeout(r, 100));
+    // Vue typeaheads register selection on mousedown (before blur fires on the search input).
+    // A plain click() alone causes blur to fire first and reset the value.
+    best.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    await new Promise(r => setTimeout(r, 30));
+    best.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await new Promise(r => setTimeout(r, 150));
     return true;
   }
 
