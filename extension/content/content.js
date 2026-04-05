@@ -8,8 +8,8 @@
 // The user just needs to refresh the page — no console noise needed.
 window.addEventListener('unhandledrejection', (e) => {
   if (e.reason?.message?.includes('Extension context invalidated') ||
-      e.reason?.message?.includes('extension context') ||
-      String(e.reason).includes('Extension context')) {
+    e.reason?.message?.includes('extension context') ||
+    String(e.reason).includes('Extension context')) {
     e.preventDefault();
   }
 });
@@ -232,21 +232,21 @@ function profileValueFor(key, profile) {
     // ── Education page: result status ───────────────────────────
     case 'inter_result_status': {
       const statusMap = {
-        completed:   'Exam given and result in Hand',
-        appearing:   'Appearing in Annual Exam',
-        part1_only:  'As Level',
+        completed: 'Exam given and result in Hand',
+        appearing: 'Appearing in Annual Exam',
+        part1_only: 'As Level',
       };
       return statusMap[profile.inter_status] || undefined;
     }
     // ── Education page: discipline (stream) ─────────────────────
     case 'inter_discipline': {
       const streamMap = {
-        pre_medical:      'Medical',
-        pre_engineering:  'Engineering',
-        ics:              'Science',
-        icom:             'Commerce',
-        arts:             'Art',
-        general:          'General',
+        pre_medical: 'Medical',
+        pre_engineering: 'Engineering',
+        ics: 'Science',
+        icom: 'Commerce',
+        arts: 'Art',
+        general: 'General',
       };
       return streamMap[profile.fsc_stream] || undefined;
     }
@@ -254,8 +254,8 @@ function profileValueFor(key, profile) {
     case 'inter_current_level': {
       const levelMap = {
         part1_only: 'As Level',
-        appearing:  'First Year Intermediate/Equivalent',
-        completed:  profile.education_system === 'cambridge' ? 'A Level' : 'Second Year Intermediate/12 Grade/Equivalent',
+        appearing: 'First Year Intermediate/Equivalent',
+        completed: profile.education_system === 'cambridge' ? 'A Level' : 'Second Year Intermediate/12 Grade/Equivalent',
       };
       return levelMap[profile.inter_status] || undefined;
     }
@@ -286,10 +286,10 @@ function profileValueFor(key, profile) {
       return profile.alevel_school || profile.fsc_school || profile.school_name;
     case 'matric_passing_year':
       return profile.olevel_year != null ? String(profile.olevel_year)
-           : profile.matric_year != null ? String(profile.matric_year) : undefined;
+        : profile.matric_year != null ? String(profile.matric_year) : undefined;
     case 'inter_passing_year':
       return profile.alevel_year != null ? String(profile.alevel_year)
-           : profile.fsc_year != null ? String(profile.fsc_year) : undefined;
+        : profile.fsc_year != null ? String(profile.fsc_year) : undefined;
     case 'matric_board_name': {
       const b = profile.olevel_board || profile.matric_board || profile.board_name;
       return b === 'cambridge' ? 'Cambridge' : b === 'edexcel' ? 'Edexcel' : b;
@@ -331,505 +331,635 @@ function marksToGrade(marks, total) {
 const FIELD_HEURISTICS = [
   // ── Email ──────────────────────────────────────────────────────
   // Covers: standard, ASP.NET (txtEmail, txtEmailAddress), common Pakistani portals
-  { match: ['email', 'e-mail', 'e_mail', 'emailaddress', 'email_address', 'email_id', 'emailid',
-    'student_email', 'applicant_email', 'user_email', 'contact_email', 'email_contact',
-    'email address', 'your email', 'applicantemail', 'mail_id', 'mailid',
-    // Pakistani portal variants
-    'email_addr', 'email_input', 'applicant_mail', 'student_mail', 'reg_email',
-    'registration_email', 'primary_email', 'alternate_email', 'alt_email',
-    'personal_email', 'official_email', 'institutional_email',
-    // ASP.NET style (after prefix stripping: txtEmail → email, but keep for label match)
-    'email address *', 'email *', 'your email address'],
-    profileKey: 'email', priority: 10 },
+  {
+    match: ['email', 'e-mail', 'e_mail', 'emailaddress', 'email_address', 'email_id', 'emailid',
+      'student_email', 'applicant_email', 'user_email', 'contact_email', 'email_contact',
+      'email address', 'your email', 'applicantemail', 'mail_id', 'mailid',
+      // Pakistani portal variants
+      'email_addr', 'email_input', 'applicant_mail', 'student_mail', 'reg_email',
+      'registration_email', 'primary_email', 'alternate_email', 'alt_email',
+      'personal_email', 'official_email', 'institutional_email',
+      // ASP.NET style (after prefix stripping: txtEmail → email, but keep for label match)
+      'email address *', 'email *', 'your email address'],
+    profileKey: 'email', priority: 10
+  },
 
   // ── CNIC / National ID ─────────────────────────────────────────
-  { match: ['cnic', 'nic', 'national_id', 'nationalid', 'id_card', 'idcard', 'cnic_no', 'cnic_number',
-    'b_form', 'bform', 'nicop', 'identity_card', 'id_number', 'id_no', 'national_identity',
-    'nadra', 'id_card_no', 'nic_number', 'form_b', 'form-b', 'nicno', 'id card', 'cnicno',
-    'national id', 'national identity card', 'cnic/nicop', 'identity_no',
-    // Pakistani portal variants
-    'cnic_num', 'nadra_id', 'national_id_card', 'applicant_cnic', 'student_cnic',
-    'applicant_nic', 'father_id_proof', 'cnic_or_nicop', 'nic_no', 'id_proof',
-    'identity_number', 'national_identity_number', 'cnic_nicop', 'applicantcnic',
-    'cnic / b-form', 'cnic / b form', 'b-form', 'bform_no', 'form_b_no'],
-    profileKey: 'cnic', priority: 9 },
+  {
+    match: ['cnic', 'nic', 'national_id', 'nationalid', 'id_card', 'idcard', 'cnic_no', 'cnic_number',
+      'b_form', 'bform', 'nicop', 'identity_card', 'id_number', 'id_no', 'national_identity',
+      'nadra', 'id_card_no', 'nic_number', 'form_b', 'form-b', 'nicno', 'id card', 'cnicno',
+      'national id', 'national identity card', 'cnic/nicop', 'identity_no',
+      // Pakistani portal variants
+      'cnic_num', 'nadra_id', 'national_id_card', 'applicant_cnic', 'student_cnic',
+      'applicant_nic', 'father_id_proof', 'cnic_or_nicop', 'nic_no', 'id_proof',
+      'identity_number', 'national_identity_number', 'cnic_nicop', 'applicantcnic',
+      'cnic / b-form', 'cnic / b form', 'b-form', 'bform_no', 'form_b_no'],
+    profileKey: 'cnic', priority: 9
+  },
 
   // ── CNIC (no dashes) ──────────────────────────────────────────
-  { match: ['cnic_no_dash', 'cnicnodash', 'cnic_without_dash', 'cnic_nodash', 'nic_no_dash',
-    'cnic_digits', 'cnic13', 'nadra_no', 'cnicno_dash', 'cnic_plain', 'cnic_raw'],
-    profileKey: 'cnic', priority: 9 },
+  {
+    match: ['cnic_no_dash', 'cnicnodash', 'cnic_without_dash', 'cnic_nodash', 'nic_no_dash',
+      'cnic_digits', 'cnic13', 'nadra_no', 'cnicno_dash', 'cnic_plain', 'cnic_raw'],
+    profileKey: 'cnic', priority: 9
+  },
 
   // ── Phone ──────────────────────────────────────────────────────
-  { match: ['phone', 'mobile', 'cell', 'tel', 'telephone', 'phone_number', 'mobileno', 'contact_no',
-    'mob_no', 'cell_no', 'cellno', 'mobile_no', 'contact_number', 'mobile_number', 'phone_no',
-    'cell_number', 'phone_num', 'mob_num', 'ph_no', 'phno', 'contact_cell',
-    'mobile number', 'phone number', 'cell number', 'mobile no', 'phone no',
-    'contact mobile', 'applicant_phone', 'student_phone', 'applicant_mobile',
-    'contact_mob', 'mob', 'contact_phone', 'personal_phone', 'personal_mobile',
-    // Pakistani portal variants
-    'phone_no', 'mob_number', 'cell_phone', 'applicant_cell', 'student_cell',
-    'home_phone', 'res_phone', 'contact_no_cell', 'mobile_ph', 'phone_mob',
-    'applicant_contact', 'student_contact',
-    'phone (with country code)', 'mobile (pakistan)', 'cell (pk)'],
-    profileKey: 'phone', priority: 8 },
+  {
+    match: ['phone', 'mobile', 'cell', 'tel', 'telephone', 'phone_number', 'mobileno', 'contact_no',
+      'mob_no', 'cell_no', 'cellno', 'mobile_no', 'contact_number', 'mobile_number', 'phone_no',
+      'cell_number', 'phone_num', 'mob_num', 'ph_no', 'phno', 'contact_cell',
+      'mobile number', 'phone number', 'cell number', 'mobile no', 'phone no',
+      'contact mobile', 'applicant_phone', 'student_phone', 'applicant_mobile',
+      'contact_mob', 'mob', 'contact_phone', 'personal_phone', 'personal_mobile',
+      // Pakistani portal variants
+      'phone_no', 'mob_number', 'cell_phone', 'applicant_cell', 'student_cell',
+      'home_phone', 'res_phone', 'contact_no_cell', 'mobile_ph', 'phone_mob',
+      'applicant_contact', 'student_contact',
+      'phone (with country code)', 'mobile (pakistan)', 'cell (pk)'],
+    profileKey: 'phone', priority: 8
+  },
 
   // ── Guardian / Parent / Alternate Phone ───────────────────────
-  { match: ['guardian_phone', 'guardian_mobile', 'guardian_cell', 'guardian_contact',
-    'guardian_no', 'guardian_number', 'guardian phone', 'guardian mobile',
-    'parent_phone', 'parent_mobile', 'parent_cell', 'parent_contact', 'parent_number',
-    'parents_phone', 'parents_mobile', 'parent phone', 'parent mobile',
-    'father_phone', 'father_mobile', 'father_cell', 'father_contact', 'father_phone_no',
-    'father phone', 'father mobile',
-    'alternate_phone', 'alt_phone', 'other_phone', 'secondary_phone',
-    'alternate_mobile', 'alt_mobile', 'other_mobile', 'secondary_mobile',
-    'alternate_contact', 'alt_contact', 'other_contact', 'secondary_contact',
-    'alternate phone', 'alt phone', 'other phone', 'emergency_contact',
-    'emergency_phone', 'emergency_mobile', 'emergency contact',
-    'contact2', 'phone2', 'mobile2', 'second_phone', 'second_mobile',
-    // Pakistani portal variants
-    'wali_phone', 'wali_mobile', 'wali_contact', 'sarparest_phone',
-    'parent_guardian_phone', 'guardian_or_parent_phone'],
-    profileKey: 'guardian_phone', priority: 8 },
+  {
+    match: ['guardian_phone', 'guardian_mobile', 'guardian_cell', 'guardian_contact',
+      'guardian_no', 'guardian_number', 'guardian phone', 'guardian mobile',
+      'parent_phone', 'parent_mobile', 'parent_cell', 'parent_contact', 'parent_number',
+      'parents_phone', 'parents_mobile', 'parent phone', 'parent mobile',
+      'father_phone', 'father_mobile', 'father_cell', 'father_contact', 'father_phone_no',
+      'father phone', 'father mobile',
+      'alternate_phone', 'alt_phone', 'other_phone', 'secondary_phone',
+      'alternate_mobile', 'alt_mobile', 'other_mobile', 'secondary_mobile',
+      'alternate_contact', 'alt_contact', 'other_contact', 'secondary_contact',
+      'alternate phone', 'alt phone', 'other phone', 'emergency_contact',
+      'emergency_phone', 'emergency_mobile', 'emergency contact',
+      'contact2', 'phone2', 'mobile2', 'second_phone', 'second_mobile',
+      // Pakistani portal variants
+      'wali_phone', 'wali_mobile', 'wali_contact', 'sarparest_phone',
+      'parent_guardian_phone', 'guardian_or_parent_phone'],
+    profileKey: 'guardian_phone', priority: 8
+  },
 
   // ── WhatsApp ──────────────────────────────────────────────────
-  { match: ['whatsapp', 'whatsapp_no', 'whatsapp_number', 'whatsapp number', 'wp_no',
-    'whatsapp_mob', 'whatsapp_mobile', 'wp_number', 'wapp_no', 'whatsapp_cell'],
-    profileKey: 'whatsapp', priority: 7 },
+  {
+    match: ['whatsapp', 'whatsapp_no', 'whatsapp_number', 'whatsapp number', 'wp_no',
+      'whatsapp_mob', 'whatsapp_mobile', 'wp_number', 'wapp_no', 'whatsapp_cell'],
+    profileKey: 'whatsapp', priority: 7
+  },
 
   // ── Father / Mother split names — MUST be before first_name/last_name ──
   // Priority 13 so "Father's First Name" label beats the generic first_name (11).
-  { match: ["father's first name", "father first name", "father_first_name",
-    "father's given name", 'dad first name', 'paternal first name',
-    'fathers first name', 'father_fname'],
-    profileKey: 'father_first_name', priority: 13 },
-  { match: ["father's last name", "father last name", "father_last_name",
-    "father's surname", 'dad last name', 'paternal last name',
-    'fathers last name', 'father_lname', 'father_surname'],
-    profileKey: 'father_last_name', priority: 13 },
-  { match: ["mother's first name", "mother first name", "mother_first_name",
-    "mother's given name", 'mom first name', 'maternal first name',
-    'mothers first name', 'mother_fname'],
-    profileKey: 'mother_first_name', priority: 13 },
-  { match: ["mother's last name", "mother last name", "mother_last_name",
-    "mother's surname", 'mom last name', 'maternal last name',
-    'mothers last name', 'mother_lname', 'mother_surname'],
-    profileKey: 'mother_last_name', priority: 13 },
+  {
+    match: ["father's first name", "father first name", "father_first_name",
+      "father's given name", 'dad first name', 'paternal first name',
+      'fathers first name', 'father_fname'],
+    profileKey: 'father_first_name', priority: 13
+  },
+  {
+    match: ["father's last name", "father last name", "father_last_name",
+      "father's surname", 'dad last name', 'paternal last name',
+      'fathers last name', 'father_lname', 'father_surname'],
+    profileKey: 'father_last_name', priority: 13
+  },
+  {
+    match: ["mother's first name", "mother first name", "mother_first_name",
+      "mother's given name", 'mom first name', 'maternal first name',
+      'mothers first name', 'mother_fname'],
+    profileKey: 'mother_first_name', priority: 13
+  },
+  {
+    match: ["mother's last name", "mother last name", "mother_last_name",
+      "mother's surname", 'mom last name', 'maternal last name',
+      'mothers last name', 'mother_lname', 'mother_surname'],
+    profileKey: 'mother_last_name', priority: 13
+  },
 
   // ── First / Last / Middle — MUST be before full_name ──────────
-  { match: ['first_name', 'firstname', 'fname', 'f_name', 'given_name', 'givenname',
-    'f_nm', 'frst_nm', 'first_nm', 'applicant_fname', 'student_fname', 'sfname',
-    'first name', 'given name', 'name1', 'first-name', 'forename', 'fore_name',
-    'name_first', 'applicant_first', 'candidate_first_name',
-    // Pakistani portal variants
-    'first_name_eng', 'fname_en', 'first_name_en', 'applicant_first_name',
-    'student_first_name', 'name_en_first', 'fname_english'],
-    profileKey: 'first_name', priority: 11 },
+  {
+    match: ['first_name', 'firstname', 'fname', 'f_name', 'given_name', 'givenname',
+      'f_nm', 'frst_nm', 'first_nm', 'applicant_fname', 'student_fname', 'sfname',
+      'first name', 'given name', 'name1', 'first-name', 'forename', 'fore_name',
+      'name_first', 'applicant_first', 'candidate_first_name',
+      // Pakistani portal variants
+      'first_name_eng', 'fname_en', 'first_name_en', 'applicant_first_name',
+      'student_first_name', 'name_en_first', 'fname_english'],
+    profileKey: 'first_name', priority: 11
+  },
 
-  { match: ['last_name', 'lastname', 'lname', 'l_name', 'surname', 'family_name', 'familyname',
-    'l_nm', 'lst_nm', 'last_nm', 'applicant_lname', 'slname', 'sur_name', 'surename',
-    'last name', 'family name', 'name2', 'last-name', 'name_last', 'candidate_last_name',
-    'lname_en', 'last_name_en', 'surname_en', 'applicant_last_name', 'student_last_name'],
-    profileKey: 'last_name', priority: 11 },
+  {
+    match: ['last_name', 'lastname', 'lname', 'l_name', 'surname', 'family_name', 'familyname',
+      'l_nm', 'lst_nm', 'last_nm', 'applicant_lname', 'slname', 'sur_name', 'surename',
+      'last name', 'family name', 'name2', 'last-name', 'name_last', 'candidate_last_name',
+      'lname_en', 'last_name_en', 'surname_en', 'applicant_last_name', 'student_last_name'],
+    profileKey: 'last_name', priority: 11
+  },
 
-  { match: ['middle_name', 'middlename', 'mname', 'm_name', 'middle_nm', 'mid_name',
-    'middle name', 'middle-name', 'middle_initial', 'mid_nm', 'middle_name_en'],
-    profileKey: 'middle_name', priority: 11 },
+  {
+    match: ['middle_name', 'middlename', 'mname', 'm_name', 'middle_nm', 'mid_name',
+      'middle name', 'middle-name', 'middle_initial', 'mid_nm', 'middle_name_en'],
+    profileKey: 'middle_name', priority: 11
+  },
 
   // ── Full Name ──────────────────────────────────────────────────
-  { match: ['full_name', 'fullname', 'applicant_name', 'student_name', 'candidatename',
-    'candidate_name', 'name_of_applicant', 'name_of_student', 'complete_name', 'full_nm',
-    'full name', 'complete name', 'applicant name', 'student name', 'name of applicant',
-    'yourname', 'your_name', 'applicantname', 'name_complete', 'complete_nm',
-    // Pakistani portal variants
-    'full_name_eng', 'name_en', 'name_english', 'fullname_en', 'applicant_full_name',
-    'student_full_name', 'name_as_on_cnic', 'name_on_cnic', 'name_cnic',
-    'applicant_name_en', 'name_in_english', 'full_name_english',
-    'name_urdu', 'full_name_urdu', 'name_in_urdu',
-    'name_as_matric', 'name_as_per_matric'],
-    profileKey: 'full_name', priority: 7 },
+  {
+    match: ['full_name', 'fullname', 'applicant_name', 'student_name', 'candidatename',
+      'candidate_name', 'name_of_applicant', 'name_of_student', 'complete_name', 'full_nm',
+      'full name', 'complete name', 'applicant name', 'student name', 'name of applicant',
+      'yourname', 'your_name', 'applicantname', 'name_complete', 'complete_nm',
+      // Pakistani portal variants
+      'full_name_eng', 'name_en', 'name_english', 'fullname_en', 'applicant_full_name',
+      'student_full_name', 'name_as_on_cnic', 'name_on_cnic', 'name_cnic',
+      'applicant_name_en', 'name_in_english', 'full_name_english',
+      'name_urdu', 'full_name_urdu', 'name_in_urdu',
+      'name_as_matric', 'name_as_per_matric'],
+    profileKey: 'full_name', priority: 7
+  },
 
   // ── Father / Guardian ──────────────────────────────────────────
-  { match: ['father', 'father_name', 'fathername', 'fathers_name', 'fathersname', 'father_nm',
-    "father's name", 'fathers name', 'dad_name', 'father_first_name',
-    'guardian', 'guardian_name', 'parent_name', 'parentname',
-    'wali', 'wali_name', 'father_full_name', 'sarparest',
-    // Pakistani portal variants
-    'father_name_en', 'father_name_urdu', 'fname_father', 'father_nm_en',
-    'father_or_guardian', 'father_guardian_name', 'guardian_father_name',
-    'applicant_father_name', 'student_father_name', 'father_s_name',
-    "father / guardian's name", 'fathers_full_name', 'guardians_name',
-    'parent_guardian_name', 'father_name_as_cnic', 'father_name_on_cnic'],
-    profileKey: 'father_name', priority: 7 },
+  {
+    match: ['father', 'father_name', 'fathername', 'fathers_name', 'fathersname', 'father_nm',
+      "father's name", 'fathers name', 'dad_name', 'father_first_name',
+      'guardian', 'guardian_name', 'parent_name', 'parentname',
+      'wali', 'wali_name', 'father_full_name', 'sarparest',
+      // Pakistani portal variants
+      'father_name_en', 'father_name_urdu', 'fname_father', 'father_nm_en',
+      'father_or_guardian', 'father_guardian_name', 'guardian_father_name',
+      'applicant_father_name', 'student_father_name', 'father_s_name',
+      "father / guardian's name", 'fathers_full_name', 'guardians_name',
+      'parent_guardian_name', 'father_name_as_cnic', 'father_name_on_cnic'],
+    profileKey: 'father_name', priority: 7
+  },
 
   // ── Father CNIC ────────────────────────────────────────────────
-  { match: ['father_cnic', 'fathercnic', 'guardian_cnic', 'parent_cnic', 'father_nic',
-    'father_id', 'father_id_card', 'father cnic', "father's cnic", 'dad_cnic', 'fcnic',
-    'father_cnic_no', 'guardian_nic', 'wali_cnic', 'father_nadra', 'parent_nic'],
-    profileKey: 'father_cnic', priority: 6 },
+  {
+    match: ['father_cnic', 'fathercnic', 'guardian_cnic', 'parent_cnic', 'father_nic',
+      'father_id', 'father_id_card', 'father cnic', "father's cnic", 'dad_cnic', 'fcnic',
+      'father_cnic_no', 'guardian_nic', 'wali_cnic', 'father_nadra', 'parent_nic'],
+    profileKey: 'father_cnic', priority: 6
+  },
 
   // ── Mother CNIC ────────────────────────────────────────────────
-  { match: ['mother_cnic', 'mothercnic', 'mother_nic', 'mother_id', 'mother_id_card',
-    'mother cnic', "mother's cnic", 'mom_cnic', 'mcnic', 'mother_cnic_no',
-    'mother_nadra', 'mother_nic_no', 'mother_national_id'],
-    profileKey: 'mother_cnic', priority: 6 },
+  {
+    match: ['mother_cnic', 'mothercnic', 'mother_nic', 'mother_id', 'mother_id_card',
+      'mother cnic', "mother's cnic", 'mom_cnic', 'mcnic', 'mother_cnic_no',
+      'mother_nadra', 'mother_nic_no', 'mother_national_id'],
+    profileKey: 'mother_cnic', priority: 6
+  },
 
   // ── Mother's Name ──────────────────────────────────────────────
-  { match: ['mother_name', 'mothername', 'mothers_name', "mother's name", 'mom_name',
-    'mother', 'mother_full_name', 'mname', 'mother_nm', 'mother_name_en',
-    'applicant_mother_name', 'student_mother_name'],
-    profileKey: 'mother_name', priority: 5 },
+  {
+    match: ['mother_name', 'mothername', 'mothers_name', "mother's name", 'mom_name',
+      'mother', 'mother_full_name', 'mname', 'mother_nm', 'mother_name_en',
+      'applicant_mother_name', 'student_mother_name'],
+    profileKey: 'mother_name', priority: 5
+  },
 
   // ── Date of Birth ──────────────────────────────────────────────
-  { match: ['dob', 'date_of_birth', 'dateofbirth', 'birthdate', 'birth_date', 'birth_dt',
-    'bdate', 'date_birth', 'd_o_b', 'dob_date', 'born_date', 'date_born',
-    'date of birth', 'birthday', 'birth date', 'applicant_dob', 'student_dob',
-    'date_of_birth_applicant', 'dob_full',
-    // Three-part select names (day/month/year components all map here)
-    'birth_day', 'birth_month', 'birth_year', 'dob_day', 'dob_month', 'dob_year',
-    'day_of_birth', 'month_of_birth', 'year_of_birth',
-    'bd_day', 'bd_month', 'bd_year', 'dob_dd', 'dob_mm', 'dob_yyyy',
-    'birth_dd', 'birth_mm', 'birth_yyyy',
-    // Pakistani portal variants
-    'date_birth', 'applicant_birth_date', 'student_birth_date', 'dob_applicant',
-    'date_of_birth_dd_mm_yyyy', 'dob_format', 'birth_date_full',
-    'date_of_birth (dd/mm/yyyy)', 'dob (dd/mm/yyyy)'],
-    profileKey: 'date_of_birth', priority: 6 },
+  {
+    match: ['dob', 'date_of_birth', 'dateofbirth', 'birthdate', 'birth_date', 'birth_dt',
+      'bdate', 'date_birth', 'd_o_b', 'dob_date', 'born_date', 'date_born',
+      'date of birth', 'birthday', 'birth date', 'applicant_dob', 'student_dob',
+      'date_of_birth_applicant', 'dob_full',
+      // Three-part select names (day/month/year components all map here)
+      'birth_day', 'birth_month', 'birth_year', 'dob_day', 'dob_month', 'dob_year',
+      'day_of_birth', 'month_of_birth', 'year_of_birth',
+      'bd_day', 'bd_month', 'bd_year', 'dob_dd', 'dob_mm', 'dob_yyyy',
+      'birth_dd', 'birth_mm', 'birth_yyyy',
+      // Pakistani portal variants
+      'date_birth', 'applicant_birth_date', 'student_birth_date', 'dob_applicant',
+      'date_of_birth_dd_mm_yyyy', 'dob_format', 'birth_date_full',
+      'date_of_birth (dd/mm/yyyy)', 'dob (dd/mm/yyyy)'],
+    profileKey: 'date_of_birth', priority: 6
+  },
 
   // ── Gender ──────────────────────────────────────────────────────
-  { match: ['gender', 'sex', 'gender_id', 'applicant_gender', 'student_gender', 'male_female',
-    'gender_type', 'applicant_sex', 'gen',
-    'gender_select', 'sex_type', 'gender_code', 'applicant_sex_type'],
-    profileKey: 'gender', priority: 5 },
+  {
+    match: ['gender', 'sex', 'gender_id', 'applicant_gender', 'student_gender', 'male_female',
+      'gender_type', 'applicant_sex', 'gen',
+      'gender_select', 'sex_type', 'gender_code', 'applicant_sex_type'],
+    profileKey: 'gender', priority: 5
+  },
 
   // ── Blood Group ────────────────────────────────────────────────
-  { match: ['blood_group', 'bloodgroup', 'blood_type', 'bloodtype', 'blood group', 'blood type',
-    'blood_grp', 'bg', 'blood_group_type', 'applicant_blood_group', 'student_blood_group'],
-    profileKey: 'blood_group', priority: 4 },
+  {
+    match: ['blood_group', 'bloodgroup', 'blood_type', 'bloodtype', 'blood group', 'blood type',
+      'blood_grp', 'bg', 'blood_group_type', 'applicant_blood_group', 'student_blood_group'],
+    profileKey: 'blood_group', priority: 4
+  },
 
   // ── City ───────────────────────────────────────────────────────
-  { match: ['city', 'town', 'city_name', 'resident_city', 'current_city', 'home_city',
-    'city of residence', 'city_residence', 'applicant_city', 'domicile_city',
-    'city_of_residence', 'residence_city', 'student_city',
-    // Pakistani portal variants
-    'city_id', 'city_code', 'permanent_city', 'perm_city', 'local_city',
-    'domicile_city_name', 'birth_city', 'city_birth', 'mailing_city',
-    'correspondence_city', 'applicant_city_name'],
-    profileKey: 'city', priority: 5 },
+  {
+    match: ['city', 'town', 'city_name', 'resident_city', 'current_city', 'home_city',
+      'city of residence', 'city_residence', 'applicant_city', 'domicile_city',
+      'city_of_residence', 'residence_city', 'student_city',
+      // Pakistani portal variants
+      'city_id', 'city_code', 'permanent_city', 'perm_city', 'local_city',
+      'domicile_city_name', 'birth_city', 'city_birth', 'mailing_city',
+      'correspondence_city', 'applicant_city_name'],
+    profileKey: 'city', priority: 5
+  },
 
   // ── Province / Domicile ────────────────────────────────────────
-  { match: ['province', 'state', 'domicile', 'domicile_province', 'province_name', 'region',
-    'state / province', 'state/province', 'province / state', 'province/state',
-    'home_province', 'applicant_province', 'province of domicile', 'prov',
-    'domicile_prov', 'province_of_domicile', 'residence_province',
-    // Pakistani portal variants
-    'province_id', 'province_code', 'domicile_id', 'domicile_code',
-    'prov_name', 'domicile_name', 'permanent_province', 'perm_province',
-    'applicant_domicile', 'student_domicile', 'domicile_certificate',
-    'domicile_prov_name', 'province of origin', 'province_of_origin'],
-    profileKey: 'province', priority: 5 },
+  {
+    match: ['province', 'state', 'domicile', 'domicile_province', 'province_name', 'region',
+      'state / province', 'state/province', 'province / state', 'province/state',
+      'home_province', 'applicant_province', 'province of domicile', 'prov',
+      'domicile_prov', 'province_of_domicile', 'residence_province',
+      // Pakistani portal variants
+      'province_id', 'province_code', 'domicile_id', 'domicile_code',
+      'prov_name', 'domicile_name', 'permanent_province', 'perm_province',
+      'applicant_domicile', 'student_domicile', 'domicile_certificate',
+      'domicile_prov_name', 'province of origin', 'province_of_origin'],
+    profileKey: 'province', priority: 5
+  },
 
   // ── District ───────────────────────────────────────────────────
-  { match: ['district', 'district_name', 'domicile_district', 'home_district', 'tehsil',
-    'zila', 'district_of_domicile', 'dist',
-    'district_id', 'domicile_district_name', 'perm_district', 'district_code'],
-    profileKey: 'district', priority: 4 },
+  {
+    match: ['district', 'district_name', 'domicile_district', 'home_district', 'tehsil',
+      'zila', 'district_of_domicile', 'dist',
+      'district_id', 'domicile_district_name', 'perm_district', 'district_code'],
+    profileKey: 'district', priority: 4
+  },
 
   // ── Address ────────────────────────────────────────────────────
-  { match: ['address', 'postal_address', 'mailing_address', 'residential_address',
-    'permanent_address', 'home_address', 'current_address', 'present_address',
-    'local_address', 'street_address', 'street', 'addr', 'full_address',
-    'correspondence_address', 'home address', 'mailing address', 'residence address',
-    'permanent address', 'perm_address', 'res_address', 'applicant_address',
-    // Pakistani portal variants
-    'address1', 'address_line1', 'address_line_1', 'address_line2',
-    'permanent_addr', 'perm_addr', 'home_addr', 'local_addr', 'curr_address',
-    'applicant_addr', 'student_address', 'correspondence_addr', 'corr_address',
-    'contact_address', 'resident_address', 'house_address', 'house_no_street',
-    'house_no', 'house_number', 'house #', 'house#', 'house no', 'house number',
-    'house_num', 'hno', 'h_no', 'flat_no', 'flat_number', 'building_no'],
-    profileKey: 'address', priority: 4 },
+  {
+    match: ['address', 'postal_address', 'mailing_address', 'residential_address',
+      'permanent_address', 'home_address', 'current_address', 'present_address',
+      'local_address', 'street_address', 'street', 'addr', 'full_address',
+      'correspondence_address', 'home address', 'mailing address', 'residence address',
+      'permanent address', 'perm_address', 'res_address', 'applicant_address',
+      // Pakistani portal variants
+      'address1', 'address_line1', 'address_line_1', 'address_line2',
+      'permanent_addr', 'perm_addr', 'home_addr', 'local_addr', 'curr_address',
+      'applicant_addr', 'student_address', 'correspondence_addr', 'corr_address',
+      'contact_address', 'resident_address', 'house_address', 'house_no_street',
+      'house_no', 'house_number', 'house #', 'house#', 'house no', 'house number',
+      'house_num', 'hno', 'h_no', 'flat_no', 'flat_number', 'building_no'],
+    profileKey: 'address', priority: 4
+  },
 
   // ── Postal Code ────────────────────────────────────────────────
-  { match: ['postal_code', 'postalcode', 'zipcode', 'zip', 'zip_code', 'post_code', 'postcode',
-    'area_code', 'pincode', 'pin_code', 'postal code', 'zip code',
-    'postal_zip', 'zip_postal', 'post_zip', 'area_postal_code'],
-    profileKey: 'postal_code', priority: 3 },
+  {
+    match: ['postal_code', 'postalcode', 'zipcode', 'zip', 'zip_code', 'post_code', 'postcode',
+      'area_code', 'pincode', 'pin_code', 'postal code', 'zip code',
+      'postal_zip', 'zip_postal', 'post_zip', 'area_postal_code'],
+    profileKey: 'postal_code', priority: 3
+  },
 
   // ── Nationality / Religion ─────────────────────────────────────
-  { match: ['nationality', 'citizenship', 'country_of_citizenship', 'country', 'citizen',
-    'applicant_nationality', 'national_status', 'nationality_id', 'citizenship_status',
-    'country_of_origin', 'national_origin'],
-    profileKey: 'nationality', priority: 3 },
-  { match: ['religion', 'faith', 'religion_name', 'mazhab', 'deen', 'religious_affiliation',
-    'religion_id', 'religion_code', 'applicant_religion', 'student_religion'],
-    profileKey: 'religion', priority: 3 },
+  {
+    match: ['nationality', 'citizenship', 'country_of_citizenship', 'country', 'citizen',
+      'applicant_nationality', 'national_status', 'nationality_id', 'citizenship_status',
+      'country_of_origin', 'national_origin'],
+    profileKey: 'nationality', priority: 3
+  },
+  {
+    match: ['religion', 'faith', 'religion_name', 'mazhab', 'deen', 'religious_affiliation',
+      'religion_id', 'religion_code', 'applicant_religion', 'student_religion'],
+    profileKey: 'religion', priority: 3
+  },
 
   // ── Board ──────────────────────────────────────────────────────
-  { match: ['board', 'board_name', 'boardname', 'examination_board', 'exam_board',
-    'board_of_inter', 'hssc_board', 'inter_board', 'fsc_board', 'matric_board',
-    'ssc_board', 'bise', 'board of intermediate', 'board of education',
-    'board_of_education', 'board_exam', 'inter_board_name',
-    // Pakistani portal variants
-    'board_id', 'board_code', 'bise_board', 'board_inter', 'board_matric',
-    'inter_exam_board', 'ssc_exam_board', 'hssc_exam_board',
-    'board_of_intermediate_education', 'board_of_secondary_education',
-    'matric_board_name', 'inter_board_name', 'bise_name', 'bise_id'],
-    profileKey: 'board_name', priority: 4 },
+  {
+    match: ['board', 'board_name', 'boardname', 'examination_board', 'exam_board',
+      'board_of_inter', 'hssc_board', 'inter_board', 'fsc_board', 'matric_board',
+      'ssc_board', 'bise', 'board of intermediate', 'board of education',
+      'board_of_education', 'board_exam', 'inter_board_name',
+      // Pakistani portal variants
+      'board_id', 'board_code', 'bise_board', 'board_inter', 'board_matric',
+      'inter_exam_board', 'ssc_exam_board', 'hssc_exam_board',
+      'board_of_intermediate_education', 'board_of_secondary_education',
+      'matric_board_name', 'inter_board_name', 'bise_name', 'bise_id'],
+    profileKey: 'board_name', priority: 4
+  },
 
   // ── School / College ───────────────────────────────────────────
-  { match: ['school', 'college', 'school_name', 'institution', 'school_college', 'college_name',
-    'last_institution', 'previous_institution', 'last_school', 'institution_name',
-    'last_attended', 'school_attended', 'name of college', 'college attended',
-    'school_college_name', 'intermediate_college', 'fsc_college',
-    'hssc_college', 'last_college', 'attended_school',
-    // Pakistani portal variants
-    'college_id', 'school_id', 'institution_id', 'fsc_institution',
-    'inter_college', 'inter_institution', 'matric_school', 'matric_institution',
-    'college_attended', 'school_last', 'college_last', 'previous_school',
-    'previous_college', 'last_attended_school', 'last_attended_college',
-    'hssc_institution', 'ssc_school', 'ssc_institution',
-    'school_college_attended', 'inst_name', 'instname'],
-    profileKey: 'school_name', priority: 4 },
+  {
+    match: ['school', 'college', 'school_name', 'institution', 'school_college', 'college_name',
+      'last_institution', 'previous_institution', 'last_school', 'institution_name',
+      'last_attended', 'school_attended', 'name of college', 'college attended',
+      'school_college_name', 'intermediate_college', 'fsc_college',
+      'hssc_college', 'last_college', 'attended_school',
+      // Pakistani portal variants
+      'college_id', 'school_id', 'institution_id', 'fsc_institution',
+      'inter_college', 'inter_institution', 'matric_school', 'matric_institution',
+      'college_attended', 'school_last', 'college_last', 'previous_school',
+      'previous_college', 'last_attended_school', 'last_attended_college',
+      'hssc_institution', 'ssc_school', 'ssc_institution',
+      'school_college_attended', 'inst_name', 'instname'],
+    profileKey: 'school_name', priority: 4
+  },
 
   // ── Passing Year ───────────────────────────────────────────────
-  { match: ['passing_year', 'passingyear', 'year_of_passing', 'grad_year', 'graduation_year',
-    'pass_year', 'year_passed', 'completion_year', 'exam_year', 'inter_year',
-    'fsc_year', 'hssc_year', 'year of passing', 'passing year', 'ssc_year',
-    'matric_year', 'year_of_completion', 'passing_yr',
-    // Pakistani portal variants
-    'year_of_pass', 'exam_passing_year', 'fsc_passing_year', 'inter_passing_year',
-    'matric_passing_year', 'ssc_passing_year', 'hssc_passing_year',
-    'year_exam', 'pass_yr', 'year_completion', 'graduation_yr', 'exam_yr'],
-    profileKey: 'passing_year', priority: 4 },
+  {
+    match: ['passing_year', 'passingyear', 'year_of_passing', 'grad_year', 'graduation_year',
+      'pass_year', 'year_passed', 'completion_year', 'exam_year', 'inter_year',
+      'fsc_year', 'hssc_year', 'year of passing', 'passing year', 'ssc_year',
+      'matric_year', 'year_of_completion', 'passing_yr',
+      // Pakistani portal variants
+      'year_of_pass', 'exam_passing_year', 'fsc_passing_year', 'inter_passing_year',
+      'matric_passing_year', 'ssc_passing_year', 'hssc_passing_year',
+      'year_exam', 'pass_yr', 'year_completion', 'graduation_yr', 'exam_yr'],
+    profileKey: 'passing_year', priority: 4
+  },
 
   // ── Roll Number ────────────────────────────────────────────────
-  { match: ['roll_number', 'rollnumber', 'roll_no', 'rollno', 'roll', 'exam_roll',
-    'matric_roll', 'inter_roll', 'ssc_roll', 'hssc_roll', 'candidate_roll',
-    'board_roll', 'roll_num', 'roll number', 'board roll no', 'roll_no_inter',
-    'inter_roll_no', 'fsc_roll_no', 'hssc_roll_no', 'roll_no_ssc', 'ssc_roll_no',
-    // Pakistani portal variants
-    'roll_no_matric', 'roll_no_fsc', 'examination_roll_no', 'board_roll_no',
-    'matric_roll_no', 'inter_roll_number', 'fsc_roll_number', 'ssc_roll_number',
-    'hssc_roll_number', 'rollno_inter', 'rollno_matric', 'exam_rollno'],
-    profileKey: 'roll_number', priority: 5 },
+  {
+    match: ['roll_number', 'rollnumber', 'roll_no', 'rollno', 'roll', 'exam_roll',
+      'matric_roll', 'inter_roll', 'ssc_roll', 'hssc_roll', 'candidate_roll',
+      'board_roll', 'roll_num', 'roll number', 'board roll no', 'roll_no_inter',
+      'inter_roll_no', 'fsc_roll_no', 'hssc_roll_no', 'roll_no_ssc', 'ssc_roll_no',
+      // Pakistani portal variants
+      'roll_no_matric', 'roll_no_fsc', 'examination_roll_no', 'board_roll_no',
+      'matric_roll_no', 'inter_roll_number', 'fsc_roll_number', 'ssc_roll_number',
+      'hssc_roll_number', 'rollno_inter', 'rollno_matric', 'exam_rollno'],
+    profileKey: 'roll_number', priority: 5
+  },
 
   // ── FSc Marks (obtained) ───────────────────────────────────────
-  { match: ['fsc_marks', 'fscmarks', 'hssc_marks', 'inter_marks', 'intermediate_marks',
-    'fsc_obtained', 'inter_obtained', 'hssc_obtained', 'inter_obt_marks',
-    'f_sc_marks', 'fsc_obt', 'inter_obt', 'total_marks_inter',
-    'marks_obtained_inter', 'hssc_marks_obtained', 'intermarks', 'marks_inter',
-    'fsc obtained marks', 'inter obtained', 'hssc obtained', 'marks_intermediate',
-    'hsc_marks', 'hscmarks', 'inter_marks_obtained', 'fsc_total_obtained',
-    // Pakistani portal variants
-    'inter_obtained_marks', 'hssc_obtained_marks', 'fsc_obtained_marks',
-    'inter_marks_obt', 'hssc_marks_obt', 'fsc_marks_obt',
-    'class_12_marks', 'grade_12_marks', 'pre_engineering_marks',
-    'pre_medical_marks', 'fa_marks', 'fsc_part_1_2_marks',
-    'inter_part1_part2_marks', 'combined_inter_marks'],
-    profileKey: 'fsc_marks', priority: 6 },
+  {
+    match: ['fsc_marks', 'fscmarks', 'hssc_marks', 'inter_marks', 'intermediate_marks',
+      'fsc_obtained', 'inter_obtained', 'hssc_obtained', 'inter_obt_marks',
+      'f_sc_marks', 'fsc_obt', 'inter_obt', 'total_marks_inter',
+      'marks_obtained_inter', 'hssc_marks_obtained', 'intermarks', 'marks_inter',
+      'fsc obtained marks', 'inter obtained', 'hssc obtained', 'marks_intermediate',
+      'hsc_marks', 'hscmarks', 'inter_marks_obtained', 'fsc_total_obtained',
+      // Pakistani portal variants
+      'inter_obtained_marks', 'hssc_obtained_marks', 'fsc_obtained_marks',
+      'inter_marks_obt', 'hssc_marks_obt', 'fsc_marks_obt',
+      'class_12_marks', 'grade_12_marks', 'pre_engineering_marks',
+      'pre_medical_marks', 'fa_marks', 'fsc_part_1_2_marks',
+      'inter_part1_part2_marks', 'combined_inter_marks'],
+    profileKey: 'fsc_marks', priority: 6
+  },
 
   // ── FSc Total ──────────────────────────────────────────────────
-  { match: ['fsc_total', 'fsctotal', 'hssc_total', 'inter_total', 'total_marks_fsc',
-    'total_fsc', 'fsc_max', 'inter_max', 'hssc_max', 'total_inter',
-    'inter total marks', 'fsc total', 'hsc_total', 'intermediate_total',
-    'hssc_total_marks', 'fsc_total_marks',
-    'inter_total_marks', 'fsc_max_marks', 'inter_max_marks', 'hssc_max_marks',
-    'class_12_total', 'grade_12_total', 'fsc_full_marks'],
-    profileKey: 'fsc_total', priority: 5 },
+  {
+    match: ['fsc_total', 'fsctotal', 'hssc_total', 'inter_total', 'total_marks_fsc',
+      'total_fsc', 'fsc_max', 'inter_max', 'hssc_max', 'total_inter',
+      'inter total marks', 'fsc total', 'hsc_total', 'intermediate_total',
+      'hssc_total_marks', 'fsc_total_marks',
+      'inter_total_marks', 'fsc_max_marks', 'inter_max_marks', 'hssc_max_marks',
+      'class_12_total', 'grade_12_total', 'fsc_full_marks'],
+    profileKey: 'fsc_total', priority: 5
+  },
 
   // ── FSc Percentage ─────────────────────────────────────────────
-  { match: ['fsc_percentage', 'fscpercentage', 'inter_percentage', 'hssc_percentage',
-    'fsc_pct', 'inter_pct', 'percentage_fsc', 'hssc_pct', 'intermediate_percentage',
-    'fsc_percent', 'inter_percent',
-    'inter_pct_age', 'hssc_pct_age', 'fsc_pct_age', 'intermediate_pct',
-    'class_12_percentage', 'grade_12_percentage', 'inter_score_pct'],
-    profileKey: 'fsc_percentage', priority: 5 },
+  {
+    match: ['fsc_percentage', 'fscpercentage', 'inter_percentage', 'hssc_percentage',
+      'fsc_pct', 'inter_pct', 'percentage_fsc', 'hssc_pct', 'intermediate_percentage',
+      'fsc_percent', 'inter_percent',
+      'inter_pct_age', 'hssc_pct_age', 'fsc_pct_age', 'intermediate_pct',
+      'class_12_percentage', 'grade_12_percentage', 'inter_score_pct'],
+    profileKey: 'fsc_percentage', priority: 5
+  },
 
   // ── FSc Part-I marks ───────────────────────────────────────────
-  { match: ['part1_marks', 'part_1_marks', 'fsc_part1', 'part1_obtained', 'partone_marks',
-    'part_i_marks', 'year1_marks', 'part 1 marks', 'part-1 marks', 'part1marks',
-    'part_one_marks', 'yr1_marks', 'inter_part1', 'hssc_part1', 'fsc_part_1'],
-    profileKey: 'fsc_part1_marks', priority: 6 },
+  {
+    match: ['part1_marks', 'part_1_marks', 'fsc_part1', 'part1_obtained', 'partone_marks',
+      'part_i_marks', 'year1_marks', 'part 1 marks', 'part-1 marks', 'part1marks',
+      'part_one_marks', 'yr1_marks', 'inter_part1', 'hssc_part1', 'fsc_part_1'],
+    profileKey: 'fsc_part1_marks', priority: 6
+  },
 
   // ── Matric Marks ───────────────────────────────────────────────
-  { match: ['matric_marks', 'matricmarks', 'ssc_marks', 'matric_obtained', 'ssc_obtained',
-    'matric_obt', 'ssc_obt', 'marks_obtained_matric', 'marks_matric',
-    'matric_obtained_marks', 'ssc_marks_obtained', 'marks_ssc',
-    'matriculation_marks', 'matric obtained', 'ssc obtained marks',
-    'class_10_marks', 'grade_10_marks', 'secondary_marks', 'ssc_obt_marks',
-    // Pakistani portal variants
-    'matric_obt_marks', 'ssc_obtained_marks', 'matric_marks_obtained',
-    'ssc_marks_obt', 'matriculation_obtained', 'class_9_10_marks',
-    'secondary_school_marks', 'matric_score'],
-    profileKey: 'matric_marks', priority: 6 },
+  {
+    match: ['matric_marks', 'matricmarks', 'ssc_marks', 'matric_obtained', 'ssc_obtained',
+      'matric_obt', 'ssc_obt', 'marks_obtained_matric', 'marks_matric',
+      'matric_obtained_marks', 'ssc_marks_obtained', 'marks_ssc',
+      'matriculation_marks', 'matric obtained', 'ssc obtained marks',
+      'class_10_marks', 'grade_10_marks', 'secondary_marks', 'ssc_obt_marks',
+      // Pakistani portal variants
+      'matric_obt_marks', 'ssc_obtained_marks', 'matric_marks_obtained',
+      'ssc_marks_obt', 'matriculation_obtained', 'class_9_10_marks',
+      'secondary_school_marks', 'matric_score'],
+    profileKey: 'matric_marks', priority: 6
+  },
 
   // ── Matric Total ───────────────────────────────────────────────
-  { match: ['matric_total', 'matrictotal', 'ssc_total', 'total_marks_matric',
-    'total_matric', 'matric_max', 'ssc_max', 'total_ssc', 'matriculation_total',
-    'matric total', 'ssc total marks', 'secondary_total', 'class_10_total',
-    'matric_total_marks', 'ssc_total_marks', 'matric_max_marks', 'ssc_max_marks',
-    'matric_full_marks', 'class_10_total_marks'],
-    profileKey: 'matric_total', priority: 5 },
+  {
+    match: ['matric_total', 'matrictotal', 'ssc_total', 'total_marks_matric',
+      'total_matric', 'matric_max', 'ssc_max', 'total_ssc', 'matriculation_total',
+      'matric total', 'ssc total marks', 'secondary_total', 'class_10_total',
+      'matric_total_marks', 'ssc_total_marks', 'matric_max_marks', 'ssc_max_marks',
+      'matric_full_marks', 'class_10_total_marks'],
+    profileKey: 'matric_total', priority: 5
+  },
 
   // ── Matric Percentage ──────────────────────────────────────────
-  { match: ['matric_percentage', 'matricpercentage', 'ssc_percentage', 'matric_pct',
-    'matric_percent', 'ssc_pct', 'secondary_percentage',
-    'class_10_percentage', 'grade_10_percentage', 'matric_score_pct',
-    'ssc_pct_age', 'matric_pct_age'],
-    profileKey: 'matric_percentage', priority: 5 },
+  {
+    match: ['matric_percentage', 'matricpercentage', 'ssc_percentage', 'matric_pct',
+      'matric_percent', 'ssc_pct', 'secondary_percentage',
+      'class_10_percentage', 'grade_10_percentage', 'matric_score_pct',
+      'ssc_pct_age', 'matric_pct_age'],
+    profileKey: 'matric_percentage', priority: 5
+  },
 
   // ── Education form: section-context-aware generic labels ──────
   // IBA and similar portals repeat generic labels ("Obtained Marks", "Total Marks",
   // "Year of Passing", "Name of Board") in each education section.
   // These heuristics provide the CONTEXT-SPECIFIC profileKey.
   // matchFieldHeuristically resolves the right key via getEduSectionContext().
-  { match: ['obtained marks', 'obtained_marks', 'marks obtained', 'marks_obtained'],
-    profileKey: 'edu_obtained_marks', priority: 7 },
-  { match: ['total marks', 'total_marks', 'maximum marks', 'max_marks', 'full marks'],
-    profileKey: 'edu_total_marks', priority: 7 },
-  { match: ['percentage(%)', 'percentage (%)', 'percentage', 'percent', 'pct', 'percentage(%)'],
-    profileKey: 'edu_percentage', priority: 6 },
-  { match: ['year of passing', 'year_of_passing', 'passing year', 'passing_year'],
-    profileKey: 'edu_passing_year', priority: 7 },
-  { match: ['name of board', 'name_of_board', 'board name', 'board_name'],
-    profileKey: 'edu_board_name', priority: 7 },
-  { match: ['name of school / college', 'name of school/college', 'name of school',
-    'name of college', 'name of institute', 'name_of_school', 'name_of_college',
-    'name_of_institute', 'name of institution'],
-    profileKey: 'edu_school_name', priority: 7 },
-  { match: ['certificate / degree', 'certificate/degree', 'certificate degree',
-    'degree certificate', 'certificate_degree', 'degree_type', 'certificate_type'],
-    profileKey: 'edu_certificate', priority: 8 },
-  { match: ['result status', 'result_status', 'exam status', 'exam_status',
-    'current status', 'current_status', 'result_type'],
-    profileKey: 'inter_result_status', priority: 7 },
-  { match: ['discipline', 'stream', 'subject_group', 'subject group', 'faculty',
-    'field of study', 'field_of_study'],
-    profileKey: 'inter_discipline', priority: 6 },
-  { match: ['current level', 'current_level', 'education level', 'education_level',
-    'class level', 'class_level', 'level of education'],
-    profileKey: 'inter_current_level', priority: 7 },
+  {
+    match: ['obtained marks', 'obtained_marks', 'marks obtained', 'marks_obtained'],
+    profileKey: 'edu_obtained_marks', priority: 7
+  },
+  {
+    match: ['total marks', 'total_marks', 'maximum marks', 'max_marks', 'full marks'],
+    profileKey: 'edu_total_marks', priority: 7
+  },
+  {
+    match: ['percentage(%)', 'percentage (%)', 'percentage', 'percent', 'pct', 'percentage(%)'],
+    profileKey: 'edu_percentage', priority: 6
+  },
+  {
+    match: ['year of passing', 'year_of_passing', 'passing year', 'passing_year'],
+    profileKey: 'edu_passing_year', priority: 7
+  },
+  {
+    match: ['name of board', 'name_of_board', 'board name', 'board_name'],
+    profileKey: 'edu_board_name', priority: 7
+  },
+  {
+    match: ['name of school / college', 'name of school/college', 'name of school',
+      'name of college', 'name of institute', 'name_of_school', 'name_of_college',
+      'name_of_institute', 'name of institution'],
+    profileKey: 'edu_school_name', priority: 7
+  },
+  {
+    match: ['certificate / degree', 'certificate/degree', 'certificate degree',
+      'degree certificate', 'certificate_degree', 'degree_type', 'certificate_type'],
+    profileKey: 'edu_certificate', priority: 8
+  },
+  {
+    match: ['result status', 'result_status', 'exam status', 'exam_status',
+      'current status', 'current_status', 'result_type'],
+    profileKey: 'inter_result_status', priority: 7
+  },
+  {
+    match: ['discipline', 'stream', 'subject_group', 'subject group', 'faculty',
+      'field of study', 'field_of_study'],
+    profileKey: 'inter_discipline', priority: 6
+  },
+  {
+    match: ['current level', 'current_level', 'education level', 'education_level',
+      'class level', 'class_level', 'level of education'],
+    profileKey: 'inter_current_level', priority: 7
+  },
 
   // ── NET / NTS Score ────────────────────────────────────────────
-  { match: ['net_score', 'net_marks', 'netscore', 'net', 'nts_score', 'nts_marks',
-    'entry_test', 'entry_test_score', 'entrance_score', 'entrance_marks', 'admission_test',
-    'test_score', 'test_marks', 'merit_score', 'aggregate_score', 'entry_test_marks',
-    'aggregate_marks', 'test_percentile', 'merit_aggregate', 'admission_test_score',
-    // Pakistani portal variants
-    'nts_marks_obtained', 'net_marks_obtained', 'nts_test_score', 'entry_test_result',
-    'admission_test_marks', 'university_test_score', 'uni_test_score',
-    'hat_score', 'hat_marks', 'lcat_score', 'ncat_score', 'step_score',
-    'paf_test_score', 'navy_test_score', 'army_test_score'],
-    profileKey: 'net_score', priority: 5 },
+  {
+    match: ['net_score', 'net_marks', 'netscore', 'net', 'nts_score', 'nts_marks',
+      'entry_test', 'entry_test_score', 'entrance_score', 'entrance_marks', 'admission_test',
+      'test_score', 'test_marks', 'merit_score', 'aggregate_score', 'entry_test_marks',
+      'aggregate_marks', 'test_percentile', 'merit_aggregate', 'admission_test_score',
+      // Pakistani portal variants
+      'nts_marks_obtained', 'net_marks_obtained', 'nts_test_score', 'entry_test_result',
+      'admission_test_marks', 'university_test_score', 'uni_test_score',
+      'hat_score', 'hat_marks', 'lcat_score', 'ncat_score', 'step_score',
+      'paf_test_score', 'navy_test_score', 'army_test_score'],
+    profileKey: 'net_score', priority: 5
+  },
 
   // ── ECAT Score ─────────────────────────────────────────────────
-  { match: ['ecat_score', 'ecat_marks', 'ecat', 'engineering_test', 'enet_score',
-    'ecat_result', 'ecat_marks_obtained', 'engineering_admission_test'],
-    profileKey: 'ecat_score', priority: 6 },
+  {
+    match: ['ecat_score', 'ecat_marks', 'ecat', 'engineering_test', 'enet_score',
+      'ecat_result', 'ecat_marks_obtained', 'engineering_admission_test'],
+    profileKey: 'ecat_score', priority: 6
+  },
 
   // ── MCAT/MDCAT Score ──────────────────────────────────────────
-  { match: ['mcat_score', 'mcat', 'mcat_marks', 'mdcat_score', 'mdcat', 'mdcat_marks',
-    'medical_test', 'uhs_score', 'mdcat_result', 'mcat_result', 'uhs_test_score'],
-    profileKey: 'net_score', priority: 6 },
+  {
+    match: ['mcat_score', 'mcat', 'mcat_marks', 'mdcat_score', 'mdcat', 'mdcat_marks',
+      'medical_test', 'uhs_score', 'mdcat_result', 'mcat_result', 'uhs_test_score'],
+    profileKey: 'net_score', priority: 6
+  },
 
   // ── SAT Score ─────────────────────────────────────────────────
-  { match: ['sat_score', 'sat', 'sat_marks', 'sat1', 'sat2', 'sat_result', 'sat_total'],
-    profileKey: 'sat_score', priority: 6 },
+  {
+    match: ['sat_score', 'sat', 'sat_marks', 'sat1', 'sat2', 'sat_result', 'sat_total'],
+    profileKey: 'sat_score', priority: 6
+  },
 
   // ── GAT/GRE ───────────────────────────────────────────────────
-  { match: ['gat_score', 'gat', 'gre_score', 'gre', 'gmat_score', 'gmat', 'ielts', 'toefl',
-    'ielts_score', 'toefl_score', 'gat_general', 'gat_subject'],
-    profileKey: 'net_score', priority: 4 },
+  {
+    match: ['gat_score', 'gat', 'gre_score', 'gre', 'gmat_score', 'gmat', 'ielts', 'toefl',
+      'ielts_score', 'toefl_score', 'gat_general', 'gat_subject'],
+    profileKey: 'net_score', priority: 4
+  },
 
   // ── Statement of Purpose ───────────────────────────────────────
-  { match: ['statement_of_purpose', 'sop', 'personal_statement', 'essay', 'motivation_letter',
-    'statement', 'why_join', 'why_apply', 'about_yourself', 'motivation', 'cover_letter',
-    'statement of purpose', 'personal statement', 'application essay',
-    'sop_text', 'personal_essay', 'motivation_statement', 'letter_of_intent',
-    'why_this_university', 'why_apply_here'],
-    profileKey: 'statement_of_purpose', priority: 3 },
+  {
+    match: ['statement_of_purpose', 'sop', 'personal_statement', 'essay', 'motivation_letter',
+      'statement', 'why_join', 'why_apply', 'about_yourself', 'motivation', 'cover_letter',
+      'statement of purpose', 'personal statement', 'application essay',
+      'sop_text', 'personal_essay', 'motivation_statement', 'letter_of_intent',
+      'why_this_university', 'why_apply_here'],
+    profileKey: 'statement_of_purpose', priority: 3
+  },
 
   // ── Father Occupation / Profession ────────────────────────────
-  { match: ['father_profession', 'father_occupation', 'fathers_profession', 'fathers_occupation',
-    "father's profession", "father's occupation", 'father_job', 'father_work',
-    'dad_profession', 'dad_occupation', 'father_employment', 'father_business',
-    'guardian_occupation', 'guardian_profession', 'parent_occupation',
-    'father profession', 'father occupation', 'father job',
-    'fathers_employment', 'father_vocation', 'father_trade',
-    // Pakistani portal variants
-    'father_prof', 'father_occ', 'father_emp', 'father_designation',
-    'guardian_job', 'guardian_work', 'wali_occupation', 'wali_profession'],
-    profileKey: 'father_occupation', priority: 7 },
+  {
+    match: ['father_profession', 'father_occupation', 'fathers_profession', 'fathers_occupation',
+      "father's profession", "father's occupation", 'father_job', 'father_work',
+      'dad_profession', 'dad_occupation', 'father_employment', 'father_business',
+      'guardian_occupation', 'guardian_profession', 'parent_occupation',
+      'father profession', 'father occupation', 'father job',
+      'fathers_employment', 'father_vocation', 'father_trade',
+      // Pakistani portal variants
+      'father_prof', 'father_occ', 'father_emp', 'father_designation',
+      'guardian_job', 'guardian_work', 'wali_occupation', 'wali_profession'],
+    profileKey: 'father_occupation', priority: 7
+  },
 
   // ── Father Status (alive / deceased / shaheed) ─────────────────
-  { match: ['father_status', 'father_alive', 'is_father_alive', 'father_living',
-    "father's status", 'father_vital_status', 'father_life_status', 'father_condition',
-    'father status', 'father alive', 'is father alive', 'father living',
-    // Pakistani portal variants
-    'father_state', 'father_condition', 'father_health', 'wali_status'],
-    profileKey: 'father_status', priority: 6 },
+  {
+    match: ['father_status', 'father_alive', 'is_father_alive', 'father_living',
+      "father's status", 'father_vital_status', 'father_life_status', 'father_condition',
+      'father status', 'father alive', 'is father alive', 'father living',
+      // Pakistani portal variants
+      'father_state', 'father_condition', 'father_health', 'wali_status'],
+    profileKey: 'father_status', priority: 6
+  },
 
   // ── Father Income ─────────────────────────────────────────────
-  { match: ['father_income', 'fathers_income', "father's income", 'father_monthly_income',
-    'father income', 'guardian_income', 'parent_income', 'father_salary',
-    'family_income', 'household_income', 'monthly_income', 'annual_income',
-    // Pakistani portal variants
-    'father_earn', 'wali_income', 'father_earnings', 'guardian_salary',
-    'father_monthly_salary', 'income_father'],
-    profileKey: 'father_income', priority: 5 },
+  {
+    match: ['father_income', 'fathers_income', "father's income", 'father_monthly_income',
+      'father income', 'guardian_income', 'parent_income', 'father_salary',
+      'family_income', 'household_income', 'monthly_income', 'annual_income',
+      // Pakistani portal variants
+      'father_earn', 'wali_income', 'father_earnings', 'guardian_salary',
+      'father_monthly_salary', 'income_father'],
+    profileKey: 'father_income', priority: 5
+  },
 
   // ── Mother Profession ──────────────────────────────────────────
-  { match: ['mother_profession', 'mother_occupation', 'mothers_profession', 'mothers_occupation',
-    "mother's profession", "mother's occupation", 'mother_job', 'mother_work',
-    'mom_profession', 'mom_occupation', 'mother_employment', 'mother_business',
-    'mother profession', 'mother occupation', 'mother job',
-    // Pakistani portal variants
-    'mother_prof', 'mother_occ', 'mother_emp', 'mother_vocation'],
-    profileKey: 'mother_profession', priority: 6 },
+  {
+    match: ['mother_profession', 'mother_occupation', 'mothers_profession', 'mothers_occupation',
+      "mother's profession", "mother's occupation", 'mother_job', 'mother_work',
+      'mom_profession', 'mom_occupation', 'mother_employment', 'mother_business',
+      'mother profession', 'mother occupation', 'mother job',
+      // Pakistani portal variants
+      'mother_prof', 'mother_occ', 'mother_emp', 'mother_vocation'],
+    profileKey: 'mother_profession', priority: 6
+  },
 
   // ── Mother Status ─────────────────────────────────────────────
-  { match: ['mother_status', 'mother_alive', 'is_mother_alive', 'mother_living',
-    "mother's status", 'mother_vital_status', 'mother_life_status', 'mother_condition',
-    'mother status', 'mother alive', 'is mother alive', 'mother living',
-    'mother_state', 'mother_health'],
-    profileKey: 'mother_status', priority: 6 },
+  {
+    match: ['mother_status', 'mother_alive', 'is_mother_alive', 'mother_living',
+      "mother's status", 'mother_vital_status', 'mother_life_status', 'mother_condition',
+      'mother status', 'mother alive', 'is mother alive', 'mother living',
+      'mother_state', 'mother_health'],
+    profileKey: 'mother_status', priority: 6
+  },
 
   // ── Mother Income ─────────────────────────────────────────────
-  { match: ['mother_income', 'mothers_income', "mother's income", 'mother_monthly_income',
-    'mother income', 'mother_salary', 'mother_earnings', 'mother_monthly_salary',
-    'income_mother'],
-    profileKey: 'mother_income', priority: 5 },
+  {
+    match: ['mother_income', 'mothers_income', "mother's income", 'mother_monthly_income',
+      'mother income', 'mother_salary', 'mother_earnings', 'mother_monthly_salary',
+      'income_mother'],
+    profileKey: 'mother_income', priority: 5
+  },
 
   // ── Phone Country Code ────────────────────────────────────────
-  { match: ['country_code', 'phone_country', 'country_code_phone', 'country_calling_code',
-    'intl_code', 'phone_prefix', 'phone_country_code', 'calling_code',
-    'international_code', 'dial_code', 'phone_dial_code', 'country dialing code',
-    'country code', 'phone country code', 'code_phone'],
-    profileKey: 'phone_country_code', priority: 9 },
+  {
+    match: ['country_code', 'phone_country', 'country_code_phone', 'country_calling_code',
+      'intl_code', 'phone_prefix', 'phone_country_code', 'calling_code',
+      'international_code', 'dial_code', 'phone_dial_code', 'country dialing code',
+      'country code', 'phone country code', 'code_phone'],
+    profileKey: 'phone_country_code', priority: 9
+  },
 
   // ── Phone Area Code ───────────────────────────────────────────
-  { match: ['area_code', 'std_code', 'operator_code', 'network_code', 'phone_area',
-    'local_exchange', 'city_code', 'exchange_code', 'phone_area_code',
-    'area code', 'network code', 'operator code', 'mobile_code',
-    'network_prefix', 'phone_exchange'],
-    profileKey: 'phone_area_code', priority: 8 },
+  {
+    match: ['area_code', 'std_code', 'operator_code', 'network_code', 'phone_area',
+      'local_exchange', 'city_code', 'exchange_code', 'phone_area_code',
+      'area code', 'network code', 'operator code', 'mobile_code',
+      'network_prefix', 'phone_exchange'],
+    profileKey: 'phone_area_code', priority: 8
+  },
 
   // ── Phone Local Number ────────────────────────────────────────
-  { match: ['subscriber_number', 'local_number', 'phone_number_part', 'line_number',
-    'extension_number', 'phone_local', 'phone_subscriber', 'local_phone',
-    'subscriber number', 'local number', 'phone number', 'number_only',
-    'phone_no_number', 'mobile_number_only'],
-    profileKey: 'phone_local_number', priority: 7 },
+  {
+    match: ['subscriber_number', 'local_number', 'phone_number_part', 'line_number',
+      'extension_number', 'phone_local', 'phone_subscriber', 'local_phone',
+      'subscriber number', 'local number', 'phone number', 'number_only',
+      'phone_no_number', 'mobile_number_only'],
+    profileKey: 'phone_local_number', priority: 7
+  },
 
   // ── Education System / Academic Background ─────────────────────
-  { match: ['education_system', 'academic_background', 'academic_system', 'qualification_type',
-    'education_type', 'schooling_system', 'board_type', 'academic_qualification',
-    'education system', 'academic background', 'qualification type',
-    'previous_education', 'pre_education_type', 'inter_system', 'fsc_or_alevel',
-    // Pakistani portal variants
-    'edu_sys', 'academic_sys', 'study_system', 'education_category',
-    'qualification_category', 'academic_category', 'inter_type_qualification'],
-    profileKey: 'education_system', priority: 6 },
+  {
+    match: ['education_system', 'academic_background', 'academic_system', 'qualification_type',
+      'education_type', 'schooling_system', 'board_type', 'academic_qualification',
+      'education system', 'academic background', 'qualification type',
+      'previous_education', 'pre_education_type', 'inter_system', 'fsc_or_alevel',
+      // Pakistani portal variants
+      'edu_sys', 'academic_sys', 'study_system', 'education_category',
+      'qualification_category', 'academic_category', 'inter_type_qualification'],
+    profileKey: 'education_system', priority: 6
+  },
 ];
 
 // Fields that should NEVER be autofilled by heuristics
@@ -1075,7 +1205,7 @@ function matchFieldHeuristically(el) {
   })) return 'last_name';
 
   if (allSignals.some(s => /\bmiddle[_\s-]?name\b/.test(s) || s === 'mname' ||
-      s === 'middle_name' || s === 'middlename' || s === 'm_name')) return 'middle_name';
+    s === 'middle_name' || s === 'middlename' || s === 'm_name')) return 'middle_name';
 
   // ── Generic "name" → full_name (excluding first/last/middle/login/user/roll/father/mother) ──
   if (allSignals.some(s => {
@@ -1112,7 +1242,7 @@ function matchFieldHeuristically(el) {
           // Exact match (with and without separators)
           score = h.priority + 10 + bonus;
         } else if (sig.startsWith(normKw) || sig.endsWith(normKw) ||
-                   sigNoSep.endsWith(normKwNoSep)) {
+          sigNoSep.endsWith(normKwNoSep)) {
           // Prefix/suffix match
           score = h.priority + 6 + bonus;
         } else if (sig.includes(normKw) || sigNoSep.includes(normKwNoSep)) {
@@ -1138,13 +1268,13 @@ function matchFieldHeuristically(el) {
     const isInter = ctx === 'inter';
     const isMatric = ctx === 'matric';
     switch (bestKey) {
-      case 'edu_obtained_marks':  return isInter ? 'inter_obtained' : isMatric ? 'matric_obtained' : 'matric_obtained';
-      case 'edu_total_marks':     return isInter ? 'inter_total_marks' : isMatric ? 'matric_total_marks' : 'matric_total_marks';
-      case 'edu_percentage':      return isInter ? 'inter_pct' : isMatric ? 'matric_pct' : 'matric_pct';
-      case 'edu_passing_year':    return isInter ? 'inter_passing_year' : isMatric ? 'matric_passing_year' : 'matric_passing_year';
-      case 'edu_board_name':      return isInter ? 'inter_board_name' : 'matric_board_name';
-      case 'edu_school_name':     return isInter ? 'inter_school_name' : 'matric_school_name';
-      case 'edu_certificate':     return isInter ? 'inter_certificate' : 'matric_certificate';
+      case 'edu_obtained_marks': return isInter ? 'inter_obtained' : isMatric ? 'matric_obtained' : 'matric_obtained';
+      case 'edu_total_marks': return isInter ? 'inter_total_marks' : isMatric ? 'matric_total_marks' : 'matric_total_marks';
+      case 'edu_percentage': return isInter ? 'inter_pct' : isMatric ? 'matric_pct' : 'matric_pct';
+      case 'edu_passing_year': return isInter ? 'inter_passing_year' : isMatric ? 'matric_passing_year' : 'matric_passing_year';
+      case 'edu_board_name': return isInter ? 'inter_board_name' : 'matric_board_name';
+      case 'edu_school_name': return isInter ? 'inter_school_name' : 'matric_school_name';
+      case 'edu_certificate': return isInter ? 'inter_certificate' : 'matric_certificate';
       default: return bestKey;
     }
   }
@@ -1206,13 +1336,13 @@ function formatDateForInput(isoDate, el) {
   if (!isoDate) return '';
   const d = new Date(isoDate + 'T00:00:00');
   if (isNaN(d.getTime())) return isoDate;
-  const day   = d.getDate();
+  const day = d.getDate();
   const month = d.getMonth() + 1;
-  const year  = d.getFullYear();
-  const dd    = String(day).padStart(2, '0');
-  const mm    = String(month).padStart(2, '0');
-  const yyyy  = String(year);
-  const mon   = MONTH_NAMES[month - 1].charAt(0).toUpperCase() + MONTH_NAMES[month - 1].slice(1, 3); // "Jan"
+  const year = d.getFullYear();
+  const dd = String(day).padStart(2, '0');
+  const mm = String(month).padStart(2, '0');
+  const yyyy = String(year);
+  const mon = MONTH_NAMES[month - 1].charAt(0).toUpperCase() + MONTH_NAMES[month - 1].slice(1, 3); // "Jan"
   const monFull = MONTH_NAMES[month - 1].charAt(0).toUpperCase() + MONTH_NAMES[month - 1].slice(1); // "January"
 
   const ph = (el?.getAttribute('placeholder') || '').toLowerCase();
@@ -1651,8 +1781,8 @@ async function fillTypeahead(container, value) {
   // Click the best matching a.ac-result
   const options = Array.from(container.querySelectorAll('a.ac-result'));
   let best = options.find(a => a.textContent.trim().toLowerCase() === valLow) ||
-             options.find(a => a.textContent.trim().toLowerCase().includes(valLow)) ||
-             options.find(a => valLow.includes(a.textContent.trim().toLowerCase()));
+    options.find(a => a.textContent.trim().toLowerCase().includes(valLow)) ||
+    options.find(a => valLow.includes(a.textContent.trim().toLowerCase()));
 
   if (best) {
     // Vue typeaheads register selection on mousedown (before blur fires on the search input).
@@ -1698,14 +1828,14 @@ function fillSelect(el, value) {
     // Year selects — match numeric value directly
     if (!isNaN(numVal) && numVal >= 1950 && numVal <= 2100) {
       match = options.find(o => o.value === String(numVal)) ||
-              options.find(o => o.text.trim() === String(numVal));
+        options.find(o => o.text.trim() === String(numVal));
     }
   }
   // 4. Strip leading zeros and retry
   if (!match && val.startsWith('0')) {
     const stripped = val.replace(/^0+/, '');
     match = options.find(o => o.value.toLowerCase() === stripped) ||
-            options.find(o => o.text.toLowerCase().trim() === stripped);
+      options.find(o => o.text.toLowerCase().trim() === stripped);
   }
   // 5. Normalize Pakistani city/board names (e.g. "Federal Board" -> "FBISE")
   if (!match) {
@@ -1727,16 +1857,16 @@ function fillSelect(el, value) {
       'matriculation': ['matriculation', 'matric', 'ssc', 'secondary'],
       'intermediate': ['intermediate', 'inter', 'hssc', 'fsc', 'fa', 'ics', 'icom'],
       // Education: discipline/stream
-      'medical':      ['medical', 'pre-medical', 'pre medical', 'pre_medical', 'biology', 'bio'],
-      'engineering':  ['engineering', 'pre-engineering', 'pre engineering', 'pre_engineering', 'engg'],
-      'science':      ['science', 'ics', 'computer science', 'general science'],
-      'commerce':     ['commerce', 'icom', 'business'],
-      'art':          ['art', 'arts', 'humanities', 'fa'],
-      'general':      ['general', 'general studies'],
+      'medical': ['medical', 'pre-medical', 'pre medical', 'pre_medical', 'biology', 'bio'],
+      'engineering': ['engineering', 'pre-engineering', 'pre engineering', 'pre_engineering', 'engg'],
+      'science': ['science', 'ics', 'computer science', 'general science'],
+      'commerce': ['commerce', 'icom', 'business'],
+      'art': ['art', 'arts', 'humanities', 'fa'],
+      'general': ['general', 'general studies'],
       // Education: result status
       'exam given and result in hand': ['completed', 'result in hand', 'result available', 'passed'],
-      'appearing in annual exam':      ['appearing', 'will appear', 'going to appear'],
-      'as level':                      ['part1_only', 'as level', 'as-level', 'first year only', 'part 1'],
+      'appearing in annual exam': ['appearing', 'will appear', 'going to appear'],
+      'as level': ['part1_only', 'as level', 'as-level', 'first year only', 'part 1'],
       // Education: current level
       'first year intermediate/equivalent': ['appearing', 'first year', '1st year', 'part 1 only'],
       'second year intermediate/12 grade/equivalent': ['completed', 'second year', '2nd year'],
@@ -1764,7 +1894,7 @@ function fillSelect(el, value) {
   // 6. Partial text match (option text contains value or vice versa — only for longer strings)
   if (!match && val.length >= 3) {
     match = options.find(o => o.text.toLowerCase().includes(val)) ||
-            options.find(o => val.includes(o.text.toLowerCase().trim()) && o.text.trim().length >= 3);
+      options.find(o => val.includes(o.text.toLowerCase().trim()) && o.text.trim().length >= 3);
   }
   // 7. Income range matching — numeric value (e.g. 10000) matched to range option text
   // e.g. "Less than Rs. 10,000" or "10,001 - 25,000" or "Below 10000"
@@ -1855,7 +1985,7 @@ function levenshtein(a, b) {
   for (let j = 0; j <= n; j++) dp[0][j] = j;
   for (let i = 1; i <= m; i++)
     for (let j = 1; j <= n; j++)
-      dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + (a[i-1] !== b[j-1] ? 1 : 0));
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] !== b[j - 1] ? 1 : 0));
   return dp[m][n];
 }
 
@@ -1866,15 +1996,15 @@ function fillRadio(el, value) {
 
   // Alias groups — maps profile values to all the strings that might appear in form radio labels/values
   const RADIO_ALIASES = {
-    'cambridge':  ['cambridge', 'o level', 'a level', 'o_level', 'a_level', 'olevel', 'alevel',
-                   'o-level', 'a-level', 'o/a level', 'o / a level', 'o&a level', 'cambridge system'],
-    'pakistani':  ['fsc', 'matric', 'pakistani', 'fssc', 'bise', 'intermediate', 'intermediate/matric',
-                   'pak', 'pakistan', 'local', 'local board', 'sssc/hssc', 'ssc/hssc', 'matric/fsc'],
-    'male':       ['male', 'm', 'boy'],
-    'female':     ['female', 'f', 'girl', 'woman'],
-    'alive':      ['alive', 'living', 'present', 'yes', 'active'],
-    'deceased':   ['deceased', 'dead', 'passed away', 'late', 'no', 'marhoom', 'not alive'],
-    'shaheed':    ['shaheed', 'martyr', 'شہید'],
+    'cambridge': ['cambridge', 'o level', 'a level', 'o_level', 'a_level', 'olevel', 'alevel',
+      'o-level', 'a-level', 'o/a level', 'o / a level', 'o&a level', 'cambridge system'],
+    'pakistani': ['fsc', 'matric', 'pakistani', 'fssc', 'bise', 'intermediate', 'intermediate/matric',
+      'pak', 'pakistan', 'local', 'local board', 'sssc/hssc', 'ssc/hssc', 'matric/fsc'],
+    'male': ['male', 'm', 'boy'],
+    'female': ['female', 'f', 'girl', 'woman'],
+    'alive': ['alive', 'living', 'present', 'yes', 'active'],
+    'deceased': ['deceased', 'dead', 'passed away', 'late', 'no', 'marhoom', 'not alive'],
+    'shaheed': ['shaheed', 'martyr', 'شہید'],
   };
   const checkValues = [val, ...(RADIO_ALIASES[val] || [])];
 
@@ -1918,7 +2048,7 @@ function fillCheckbox(el, value) {
 let _audioCtx = null;
 function getAudioCtx() {
   if (!_audioCtx || _audioCtx.state === 'closed') {
-    try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
+    try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { }
   }
   return _audioCtx;
 }
@@ -1938,7 +2068,7 @@ function playFillTone(index = 0, total = 1) {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.12);
-  } catch {}
+  } catch { }
 }
 
 function playSuccessFanfare() {
@@ -1960,7 +2090,7 @@ function playSuccessFanfare() {
       osc.start(t);
       osc.stop(t + 0.3);
     });
-  } catch {}
+  } catch { }
 }
 
 function sparkleField(el) {
@@ -2105,10 +2235,10 @@ function isVisibleEl(el) {
 // Pikaday · Bootstrap Datepicker · React DatePicker · custom calendar widgets.
 
 const MONTH_NAMES = [
-  'january','february','march','april','may','june',
-  'july','august','september','october','november','december',
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december',
 ];
-const MONTH_SHORT = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const MONTH_SHORT = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
 /**
  * Master date-fill function. Tries every strategy in order.
@@ -2118,12 +2248,12 @@ async function fillDateAdvanced(el, isoDate) {
   const d = new Date(isoDate + 'T00:00:00'); // force local midnight
   if (isNaN(d.getTime())) return false;
 
-  const day   = d.getDate();
+  const day = d.getDate();
   const month = d.getMonth() + 1; // 1-based
-  const year  = d.getFullYear();
-  const mm    = String(month).padStart(2, '0');
-  const dd    = String(day).padStart(2, '0');
-  const yyyy  = String(year);
+  const year = d.getFullYear();
+  const mm = String(month).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  const yyyy = String(year);
 
   // ── 1. Native <input type="date"> ─────────────────────────────
   if (el.type === 'date') {
@@ -2172,7 +2302,7 @@ async function fillDateAdvanced(el, isoDate) {
   // ── 3. Three-part day/month/year select group ───────────────────
   // Look in the closest form container for three selects resembling a date
   const container = el.closest('fieldset, .form-group, .row, tr, .date-group, .dob-group') ||
-                    el.parentElement?.parentElement || el.parentElement;
+    el.parentElement?.parentElement || el.parentElement;
   if (container) {
     const filled = await tryThreePartSelects(container, day, month, year);
     if (filled) return true;
@@ -2266,10 +2396,10 @@ async function tryThreePartSelects(container, day, month, year) {
  * Fill a month <select> with every possible variant of month representation.
  */
 function fillMonthSelect(sel, month) {
-  const mn  = MONTH_NAMES[month - 1];        // 'january'
-  const ms  = MONTH_SHORT[month - 1];        // 'jan'
+  const mn = MONTH_NAMES[month - 1];        // 'january'
+  const ms = MONTH_SHORT[month - 1];        // 'jan'
   const mUp = mn.charAt(0).toUpperCase() + mn.slice(1); // 'January'
-  const mm  = String(month).padStart(2, '0'); // '05'
+  const mm = String(month).padStart(2, '0'); // '05'
   const opts = Array.from(sel.options);
 
   // Try all variants in order of specificity
@@ -2312,9 +2442,9 @@ async function tryInteractCalendar(el, date) {
   el.focus();
   await sleep(350);
 
-  const targetDay   = date.getDate();
+  const targetDay = date.getDate();
   const targetMonth = date.getMonth(); // 0-based
-  const targetYear  = date.getFullYear();
+  const targetYear = date.getFullYear();
 
   // Selectors for popular calendar containers (visible only)
   const CALENDAR_ROOTS = [
@@ -2344,10 +2474,10 @@ async function tryInteractCalendar(el, date) {
   if (!calendar) { el.blur(); return false; }
 
   // ── Try select-based month/year navigation ─────────────────────
-  const yearSel  = calendar.querySelector('select.ui-datepicker-year, [class*="year-select"], select[aria-label*="year" i]');
+  const yearSel = calendar.querySelector('select.ui-datepicker-year, [class*="year-select"], select[aria-label*="year" i]');
   const monthSel = calendar.querySelector('select.ui-datepicker-month, [class*="month-select"], select[aria-label*="month" i]');
 
-  if (yearSel)  { fillSelect(yearSel,  String(targetYear));  await sleep(80); }
+  if (yearSel) { fillSelect(yearSel, String(targetYear)); await sleep(80); }
   if (monthSel) { fillSelect(monthSel, String(targetMonth)); await sleep(80); }
 
   // ── Navigate with prev/next if no select ──────────────────────
@@ -2360,12 +2490,12 @@ async function tryInteractCalendar(el, date) {
       const headerText = (header?.textContent || '').toLowerCase();
       const curMonth = MONTH_NAMES.findIndex(m => headerText.includes(m));
       const curYearM = headerText.match(/\d{4}/);
-      const curYear  = curYearM ? parseInt(curYearM[0]) : null;
+      const curYear = curYearM ? parseInt(curYearM[0]) : null;
 
       if (curMonth === targetMonth && curYear === targetYear) break;
 
       const needNext = !curYear || curYear < targetYear ||
-                       (curYear === targetYear && curMonth < targetMonth);
+        (curYear === targetYear && curMonth < targetMonth);
       const nav = needNext
         ? calendar.querySelector('.ui-datepicker-next, [class*="next-month"], [class*="nav-next"], [aria-label*="next" i], [title*="next" i]')
         : calendar.querySelector('.ui-datepicker-prev, [class*="prev-month"], [class*="nav-prev"], [aria-label*="prev" i], [title*="prev" i]');
@@ -2382,12 +2512,12 @@ async function tryInteractCalendar(el, date) {
   );
 
   for (const cell of dayCells) {
-    const txt  = (cell.textContent || '').trim();
+    const txt = (cell.textContent || '').trim();
     const dDay = cell.getAttribute('data-day') || cell.getAttribute('data-date') ||
-                 cell.getAttribute('aria-label')?.match(/\d+/)?.[0];
+      cell.getAttribute('aria-label')?.match(/\d+/)?.[0];
 
     if (txt === String(targetDay) ||
-        (dDay && (dDay === String(targetDay) || dDay.startsWith(String(targetYear) + '-' + String(targetMonth + 1).padStart(2,'0') + '-' + String(targetDay).padStart(2,'0'))))) {
+      (dDay && (dDay === String(targetDay) || dDay.startsWith(String(targetYear) + '-' + String(targetMonth + 1).padStart(2, '0') + '-' + String(targetDay).padStart(2, '0'))))) {
       cell.click();
       await sleep(100);
       return true;
@@ -2439,7 +2569,7 @@ function showSuggestionChip(el, value, profileKey) {
     pointer-events: auto;
   `);
   chip.innerHTML = `
-    <span style="color:#4ade80;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">${profileKey.replace(/_/g,' ')}</span>
+    <span style="color:#4ade80;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">${profileKey.replace(/_/g, ' ')}</span>
     <span style="color:#e4e4e7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">${String(value).slice(0, 40)}</span>
     <span style="color:#4ade80;font-size:11px;font-weight:700;flex-shrink:0">↵ Fill</span>
   `;
@@ -2550,7 +2680,7 @@ function injectSidebar(university) {
     const isNowCollapsed = sidebar.classList.toggle('collapsed');
     toggle.classList.toggle('sidebar-open', !isNowCollapsed);
     // Persist state across page navigations
-    chrome.storage.local.set({ unimatch_sidebar_open: !isNowCollapsed }).catch(() => {});
+    chrome.storage.local.set({ unimatch_sidebar_open: !isNowCollapsed }).catch(() => { });
   });
 
   sidebarInstance = sidebar;
@@ -2561,7 +2691,7 @@ function injectSidebar(university) {
       sidebar.classList.remove('collapsed');
       toggle.classList.add('sidebar-open');
     }
-  }).catch(() => {});
+  }).catch(() => { });
 
   initSidebarState(university);
 }
@@ -2656,7 +2786,7 @@ async function initSidebarState(university) {
   document.getElementById('unimatch-close')?.addEventListener('click', () => {
     sidebarInstance?.classList.add('collapsed');
     document.getElementById('unimatch-toggle')?.classList.remove('sidebar-open');
-    chrome.storage.local.set({ unimatch_sidebar_open: false }).catch(() => {});
+    chrome.storage.local.set({ unimatch_sidebar_open: false }).catch(() => { });
   });
 
   if (!isExtensionValid()) {
@@ -2741,8 +2871,8 @@ function renderState(container, state, data = {}) {
           <div class="um-auth-icon">${onSite ? '🔗' : '🎓'}</div>
           <h3>${onSite ? 'Connect Your Profile' : 'Sign In to Autofill'}</h3>
           <p>${onSite
-            ? 'You\'re on IlmSeUrooj — tap below to sync your account with the extension.'
-            : 'Sign in with your IlmSeUrooj profile to autofill university applications instantly.'}</p>
+          ? 'You\'re on IlmSeUrooj — tap below to sync your account with the extension.'
+          : 'Sign in with your IlmSeUrooj profile to autofill university applications instantly.'}</p>
           <button class="um-btn-full um-btn-signin" id="unimatch-signin">
             ${onSite ? '🔄 Connect My Account' : '⚡ Sign In'}
           </button>
@@ -2837,14 +2967,14 @@ function renderState(container, state, data = {}) {
       const program = detectProgram();
 
       const PROFILE_ROWS = [
-        { key: 'full_name',    icon: '👤', label: 'Name' },
-        { key: 'father_name',  icon: '👨', label: 'Father' },
-        { key: 'cnic',         icon: '🪪', label: 'CNIC' },
-        { key: 'email',        icon: '✉️',  label: 'Email' },
-        { key: 'phone',        icon: '📱', label: 'Phone' },
-        { key: 'date_of_birth',icon: '🎂', label: 'DOB' },
-        { key: 'city',         icon: '📍', label: 'City' },
-        { key: 'fsc_marks',    icon: '📊', label: 'FSc marks' },
+        { key: 'full_name', icon: '👤', label: 'Name' },
+        { key: 'father_name', icon: '👨', label: 'Father' },
+        { key: 'cnic', icon: '🪪', label: 'CNIC' },
+        { key: 'email', icon: '✉️', label: 'Email' },
+        { key: 'phone', icon: '📱', label: 'Phone' },
+        { key: 'date_of_birth', icon: '🎂', label: 'DOB' },
+        { key: 'city', icon: '📍', label: 'City' },
+        { key: 'fsc_marks', icon: '📊', label: 'FSc marks' },
         { key: 'matric_marks', icon: '📊', label: 'Matric marks' },
       ];
 
@@ -2866,8 +2996,8 @@ function renderState(container, state, data = {}) {
       const marksWarning = isProjected
         ? '<div class="um-marks-note projected">⚠ Using projected marks from Part-I</div>'
         : isCambridge
-        ? '<div class="um-marks-note cambridge">ℹ Using IBCC equivalence %</div>'
-        : '';
+          ? '<div class="um-marks-note cambridge">ℹ Using IBCC equivalence %</div>'
+          : '';
 
       const portalEmail = profile?.portal_email || profile?.email || '';
       const displayName2 = profile?.full_name || portalEmail || '';
@@ -3013,7 +3143,7 @@ function renderState(container, state, data = {}) {
       const pageType = detectPageType();
       const ctx2 = window.__unimatch;
       const filledProfile = ctx2?.profile;
-      const portalEmail2   = filledProfile?.portal_email || filledProfile?.email || '';
+      const portalEmail2 = filledProfile?.portal_email || filledProfile?.email || '';
       const displayFullName2 = filledProfile?.full_name || portalEmail2 || '';
       const filledPassword = data.password || ctx2?.generatedPassword || '';
 
@@ -3039,8 +3169,8 @@ function renderState(container, state, data = {}) {
           ${isEmailSentCredFilled ? `
           <div style="margin-top:6px;padding:6px 8px;background:rgba(96,165,250,0.08);border-radius:5px;color:#60a5fa">
             📧 ${isLoginFilled
-              ? `${uniFilledName} emails your password — use the credentials from your inbox.`
-              : `Check your inbox — ${uniFilledName} will email your username &amp; password.`}
+            ? `${uniFilledName} emails your password — use the credentials from your inbox.`
+            : `Check your inbox — ${uniFilledName} will email your username &amp; password.`}
           </div>` : `
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="color:#71717a">Password:</span>
@@ -3076,11 +3206,14 @@ function renderState(container, state, data = {}) {
             </div>` : ''}
           </div>
           ${credSummary}
-          <div class="um-btn-grid">
-            <button class="btn-secondary" id="unimatch-save-progress">💾 Save</button>
-            <button class="btn-secondary" id="unimatch-refill">🔄 Re-fill</button>
+          <div style="margin-top:10px;padding:8px 10px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:7px;font-size:10px;color:#fbbf24;line-height:1.5">
+            Caution: Always recheck every filled field before submitting. The extension may make errors or fill incorrect values.
           </div>
-          <button class="btn-primary um-btn-full-row" id="unimatch-review">📋 Pre-submit Check</button>
+          <div class="um-btn-grid">
+            <button class="btn-secondary" id="unimatch-save-progress">Save</button>
+            <button class="btn-secondary" id="unimatch-refill">Re-fill</button>
+          </div>
+          <button class="btn-primary um-btn-full-row" id="unimatch-review">Pre-submit Check</button>
           <div class="um-safety-note">Alt+Shift+A to re-fill · Alt+Shift+R for review</div>
         </div>
       `;
@@ -3312,13 +3445,856 @@ function showContextInvalidatedUI(container) {
 // Skips all *_school_address fields (Google Places autocomplete — must be filled manually).
 // Ticks "Not Applicable To Me" for Undergraduate / Graduate / Other sections.
 
+// ─── IBA Candidate Registration — Demographic Step ─────────────
+// The demographic wizard step (Step 1) at onlineadmission.iba.edu.pk has no
+// id/name on any input — all fields are addressed by querySelectorAll index.
+// The generic heuristic engine cannot match them, so we handle them here.
+
+// Education wizard step — accordion toggle buttons are present in the DOM
+function isIBAEducationWizardPage() {
+  if (!window.location.hostname.includes('iba.edu.pk')) return false;
+  return !!(
+    document.querySelector('#kt_wizard_v1') &&
+    document.querySelector("[aria-controls='accordion-1']")
+  );
+}
+
+function isIBADemographicPage() {
+  if (!window.location.hostname.includes('iba.edu.pk')) return false;
+  // Demographic step: wizard present but accordion toggle buttons not yet rendered
+  return !!(
+    document.querySelector('#kt_wizard_v1') &&
+    !document.querySelector("[aria-controls='accordion-1']") &&
+    !document.querySelector('[id*="_school_address"]') &&
+    !document.querySelector('[id*="matric"]')
+  );
+}
+
+async function fillIBADemographicPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  function markGreen(el) {
+    if (!el) return;
+    el.style.outline = '2px solid #4ade80';
+    el.style.outlineOffset = '2px';
+    el.classList.add('unimatch-filled');
+    el.classList.remove('unimatch-manual');
+    onFilled(el);
+  }
+  function markAmber(el) {
+    if (!el) return;
+    el.style.outline = '2px solid #fbbf24';
+    el.style.outlineOffset = '2px';
+    el.classList.add('unimatch-manual');
+    onManual(el);
+  }
+
+  // Native setters so Vue's reactivity system picks up the change
+  const nativeInputSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+  const nativeSelectSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+
+  function doFillInput(el, value) {
+    if (!el || value == null || value === '') return false;
+    if (nativeInputSetter) nativeInputSetter.call(el, String(value));
+    else el.value = String(value);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur', { bubbles: true }));
+    markGreen(el);
+    return true;
+  }
+
+  function doFillSelect(el, value) {
+    if (!el || value == null || value === '') return false;
+    // Use existing fillSelect which already has the religion alias map
+    const ok = fillSelect(el, String(value));
+    if (ok) markGreen(el); else markAmber(el);
+    return ok;
+  }
+
+  // Typeahead fill: click trigger → wait for input → type → wait for results → click best
+  async function doTypeahead(scope, index, value) {
+    if (!value) return;
+    const val = String(value);
+    const typeaheads = document.querySelectorAll(`${scope} .typeahead`);
+    const container = typeaheads[index];
+    if (!container) { console.warn(`[IBA Demo] typeahead[${index}] not found in ${scope}`); return; }
+
+    const trigger = container.querySelector('.typeahead-selected');
+    if (!trigger) { console.warn(`[IBA Demo] .typeahead-selected not found at index ${index}`); return; }
+    trigger.click();
+    await delay(400);
+
+    // Poll for the input — Vue conditionally renders it after the click
+    let input = null;
+    for (let i = 0; i < 25; i++) {
+      input = container.querySelector('.typeahead-input');
+      if (input) break;
+      await delay(100);
+    }
+    if (!input) { console.warn(`[IBA Demo] .typeahead-input did not appear at index ${index}`); markAmber(trigger); return; }
+
+    if (nativeInputSetter) nativeInputSetter.call(input, val);
+    else input.value = val;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    await delay(900);
+
+    // Click best matching result — mousedown before click so Vue's event handler fires
+    const results = Array.from(container.querySelectorAll('ul.typeahead-list a.ac-result'));
+    if (results.length > 0) {
+      const lower = val.toLowerCase();
+      const target = results.find(a => a.textContent.trim().toLowerCase() === lower)
+        || results.find(a => a.textContent.trim().toLowerCase().includes(lower))
+        || results[0];
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+      target.click();
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+      markGreen(target);
+      // Province selection triggers async city-list reload — wait longer for cascade
+      await delay(index === 1 ? 1200 : 600);
+    } else {
+      console.warn(`[IBA Demo] no typeahead results for "${val}" at index ${index}`);
+      markAmber(input);
+    }
+  }
+
+  // Radio helper — finds the right option using partial/case-insensitive value match
+  function doRadio(options) {
+    // options: [{ value, sfb }] — sfb is a querySelectorAll('...')[N] string
+    return (rawValue) => {
+      if (!rawValue) return;
+      const strVal = String(rawValue).toLowerCase();
+      const opt = options.find(o => {
+        const ov = String(o.value).toLowerCase();
+        return ov === strVal || ov.includes(strVal) || strVal.includes(ov);
+      });
+      if (!opt) { console.warn(`[IBA Demo] no radio option for "${rawValue}"`); return; }
+      // Parse querySelectorAll('...')[N] without eval
+      const m = opt.sfb.match(/^querySelectorAll\((['"])([\s\S]*?)\1\)\[(\d+)\]$/);
+      const el = m ? document.querySelectorAll(m[2])[parseInt(m[3], 10)] : document.querySelector(opt.sfb);
+      if (!el) { console.warn(`[IBA Demo] radio element not found for "${rawValue}"`); return; }
+      el.checked = true;
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      markGreen(el);
+    };
+  }
+
+  const scope = '#kt_wizard_v1';
+  const pv = (key) => profileValueFor(key, profile);
+
+  // ── Dynamic label-based field finder ──────────────────────────
+  // Walks the DOM to find an input/select by the visible label text near it.
+  // Used as primary discovery; index-based is the fallback.
+  // This makes the handler resilient to IBA adding/removing fields that shift indices.
+  function findByLabel(labelText, type = 'input') {
+    const lower = labelText.toLowerCase();
+    const root = document.querySelector(scope);
+    if (!root) return null;
+
+    // 1. Find a <label> whose text matches, then follow its `for` attribute or
+    //    find the nearest input/select inside the same parent container.
+    const allLabels = Array.from(root.querySelectorAll('label, .col-form-label, .form-label, [class*="label"]'));
+    for (const lbl of allLabels) {
+      if (!lbl.textContent.toLowerCase().includes(lower)) continue;
+      // Try `for` attribute first
+      if (lbl.htmlFor) {
+        const el = document.getElementById(lbl.htmlFor);
+        if (el) return el;
+      }
+      // Walk up to the nearest form-group container, then find the input
+      let container = lbl.parentElement;
+      for (let i = 0; i < 4 && container; i++) {
+        const el = container.querySelector(type === 'select' ? 'select' : 'input, textarea');
+        if (el && el !== lbl) return el;
+        container = container.parentElement;
+      }
+    }
+
+    // 2. Scan placeholder attributes
+    const inputs = Array.from(root.querySelectorAll(type === 'select' ? 'select' : 'input[type="text"], input[type="number"], input[type="date"], input[type="email"]'));
+    return inputs.find(el => (el.placeholder || '').toLowerCase().includes(lower)) || null;
+  }
+
+  // Resolve a text input: try label-based first, fall back to positional index.
+  function resolveInput(labelHints, fallbackIndex) {
+    for (const hint of labelHints) {
+      const el = findByLabel(hint);
+      if (el) return el;
+    }
+    return document.querySelectorAll(`${scope} input[type="text"]`)[fallbackIndex] || null;
+  }
+
+  function resolveSelect(labelHints, fallbackIndex) {
+    for (const hint of labelHints) {
+      const el = findByLabel(hint, 'select');
+      if (el) return el;
+    }
+    return document.querySelectorAll(`${scope} select`)[fallbackIndex] || null;
+  }
+
+  // ── Text inputs (label-based with index fallback) ──────────────
+  doFillInput(resolveInput(['first name'], 0), pv('first_name'));
+  doFillInput(resolveInput(['middle name'], 1), pv('middle_name'));
+  doFillInput(resolveInput(['last name'], 2), pv('last_name'));
+  doFillInput(resolveInput(['email'], 3), pv('email'));
+
+  // CNIC with dashes
+  const cnicEl = resolveInput(['cnic', 'national id', 'identity'], 4);
+  const cnicRaw = pv('cnic');
+  if (cnicEl && cnicRaw) doFillInput(cnicEl, TRANSFORMS.cnic_dashes(String(cnicRaw)));
+
+  // ── Nationality radio ─────────────────────────────────────────
+  doRadio([
+    { value: 'Pakistan', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[0]" },
+    { value: 'Other', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[1]" },
+  ])(pv('nationality') || 'Pakistan');
+
+  // ── Religion select ────────────────────────────────────────────
+  // fillSelect already has: 'muslim' ← ['islam','islamic'], 'non-muslim' ← ['christian','hindu',...]
+  const religionEl = resolveSelect(['religion'], 0);
+  doFillSelect(religionEl, pv('religion') || profile.religion || 'Muslim');
+
+  // ── Phone (vue-tel-input — no label to discover, always positional) ──
+  const telInputs = document.querySelectorAll(`${scope} .vue-tel-input .vti__input`);
+  if (telInputs[0]) doFillInput(telInputs[0], pv('phone') || profile.phone || '');
+  if (telInputs[1]) doFillInput(telInputs[1], pv('guardian_phone') || profile.guardian_phone || '');
+
+  // ── Alternate email — skip entirely, leave for manual entry ───
+  const altEmailEl = resolveInput(['alternate email', 'alt email', 'secondary email'], 5);
+  if (altEmailEl) markAmber(altEmailEl);
+
+  // ── Date of birth ──────────────────────────────────────────────
+  const dateInputs = document.querySelectorAll(`${scope} input[type="date"]`);
+  const dobRaw = pv('date_of_birth') || pv('dob');
+  if (dateInputs[0] && dobRaw) doFillInput(dateInputs[0], TRANSFORMS.date_ymd(dobRaw));
+
+  // ── Gender radio ───────────────────────────────────────────────
+  doRadio([
+    { value: 'Male', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[2]" },
+    { value: 'Female', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[3]" },
+    { value: 'Other', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[4]" },
+  ])(pv('gender'));
+
+  // ── House number ───────────────────────────────────────────────
+  const houseEl = resolveInput(['house #', 'house no', 'house number'], 6);
+  if (houseEl) doFillInput(houseEl, profile.house_number || profile.house_no || '');
+
+  // ── Postal address same as residential (default: No) ──────────
+  doRadio([
+    { value: '1', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[5]" },
+    { value: '0', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[6]" },
+  ])('0');
+
+  // ── Country → Province → City typeaheads (cascade) ────────────
+  await doTypeahead(scope, 0, pv('country') || profile.country || 'Pakistan');
+  await doTypeahead(scope, 1, pv('province') || pv('state_province') || profile.province || '');
+  await doTypeahead(scope, 2, pv('district') || pv('city') || profile.city || '');
+
+  // ── Father info ────────────────────────────────────────────────
+  const fFnEl = resolveInput(["father's first name", 'father first'], 9);
+  if (fFnEl) doFillInput(fFnEl, pv('father_first_name'));
+
+  const fLnEl = resolveInput(["father's last name", 'father last'], 10);
+  if (fLnEl) doFillInput(fLnEl, pv('father_last_name'));
+
+  const fCnicEl = resolveInput(["father's cnic", 'father cnic'], 11);
+  const fCnic = pv('father_cnic') || profile.father_cnic;
+  if (fCnicEl && fCnic) doFillInput(fCnicEl, TRANSFORMS.cnic_dashes(String(fCnic)));
+
+  // Father NTN — explicitly block so generic tiers don't fill it
+  const fNtnEl = resolveInput(["father's ntn", 'father ntn', 'ntn no'], 12);
+  if (fNtnEl) markAmber(fNtnEl); // marks as manual + adds to alreadyHandled
+
+  // ── Mother info ────────────────────────────────────────────────
+  const mFnEl = resolveInput(["mother's first name", 'mother first'], 13);
+  if (mFnEl) doFillInput(mFnEl, pv('mother_first_name'));
+
+  const mLnEl = resolveInput(["mother's last name", 'mother last'], 14);
+  if (mLnEl) doFillInput(mLnEl, pv('mother_last_name'));
+
+  const mCnicEl = resolveInput(["mother's cnic", 'mother cnic'], 15);
+  const mCnic = pv('mother_cnic') || profile.mother_cnic;
+  if (mCnicEl && mCnic) doFillInput(mCnicEl, TRANSFORMS.cnic_dashes(String(mCnic)));
+
+  // ── Marital status ─────────────────────────────────────────────
+  const maritalEl = resolveSelect(['marital'], 1);
+  doFillSelect(maritalEl, pv('marital_status') || 'Single');
+
+  // ── IBA studied (default: No) ──────────────────────────────────
+  doRadio([
+    { value: '1', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[7]" },
+    { value: '0', sfb: "querySelectorAll('#kt_wizard_v1 input[type=\"radio\"]')[8]" },
+  ])('0');
+
+  // ── Domicile ───────────────────────────────────────────────────
+  const domicileEl = resolveSelect(['domicile'], 2);
+  doFillSelect(domicileEl, pv('domicile') || pv('province') || profile.domicile || '');
+
+  // ── Special needs (default: No) ───────────────────────────────
+  const specialEl = resolveSelect(['special', 'unique personal need'], 3);
+  doFillSelect(specialEl, 'No');
+
+  // ── Banned org declaration — answer is "No" (not affiliated) ──
+  const bannedEl = resolveSelect(['banned', 'affiliated'], 4);
+  doFillSelect(bannedEl, 'No');
+
+  console.log('[IBA Demo] Demographic fill complete');
+}
+
+async function fillIBAEducationWizardPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  function markGreen(el) {
+    if (!el) return;
+    el.style.outline = '2px solid #4ade80';
+    el.style.outlineOffset = '2px';
+    el.classList.add('unimatch-filled');
+    el.classList.remove('unimatch-manual');
+    onFilled(el);
+  }
+  function markAmber(el) {
+    if (!el) return;
+    el.style.outline = '2px solid #fbbf24';
+    el.style.outlineOffset = '2px';
+    el.classList.add('unimatch-manual');
+    onManual(el);
+  }
+
+  const nativeSelectSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+  const nativeInputSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+
+  async function doSelect(el, value) {
+    if (!el || value == null || value === '') return false;
+    const ok = fillSelect(el, String(value));
+    if (ok) {
+      if (nativeSelectSetter) nativeSelectSetter.call(el, el.value);
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      markGreen(el);
+      await delay(300);
+      return true;
+    }
+    markAmber(el);
+    return false;
+  }
+
+  async function doInput(el, value) {
+    if (!el || value == null || value === '') return false;
+    if (nativeInputSetter) nativeInputSetter.call(el, String(value));
+    else el.value = String(value);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur', { bubbles: true }));
+    markGreen(el);
+    return true;
+  }
+
+  // Shared incremental-typing typeahead for ALL Vue typeahead components in IBA.
+  // Used by both school/board (doTypeahead) and subject (doSubjectTypeahead) fields
+  // because all three are the same Vue component and require identical interaction.
+  async function typeaheadFill(container, value) {
+    if (!container || !value) return false;
+
+    // Strip parenthetical qualifiers from subject names, e.g. "Mathematics (D)" → "Mathematics".
+    // The IBA dropdown has "Mathematics" and "Additional Mathematics" — typing "Mathematics (D)"
+    // matches "Additional Mathematics" first because the extra text pushes the exact match down.
+    const val    = String(value).trim().replace(/\s*\(.*?\)\s*$/, '').trim();
+    const valLow = val.toLowerCase();
+    // Keep original for fallback matching against result text
+    const origLow = String(value).trim().toLowerCase();
+
+    const trigger = container.querySelector('.typeahead-selected');
+    if (!trigger) {
+      console.warn(`[IBA Edu] typeahead trigger not found for "${val}"`);
+      return false;
+    }
+
+    // Hard 15s overall timeout — if the component never responds, bail out rather
+    // than hanging the entire fill indefinitely.
+    let timedOut = false;
+    const timeoutId = setTimeout(() => { timedOut = true; }, 15000);
+
+    try {
+      // 1. Close any previously-open dropdown.
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await delay(200);
+      if (timedOut) return false;
+
+      // 1b. If this slot already has a selected value, clear it first.
+      //     IBA typeahead shows "Type or click to select" as placeholder text when empty.
+      //     If the trigger text differs from that placeholder, a value is already selected
+      //     and the component will block a new selection. Find and click the remove button.
+      const placeholderText = 'type or click to select';
+      const currentText = (trigger.textContent || '').trim().toLowerCase();
+      if (currentText && currentText !== placeholderText) {
+        // Look for a remove/clear button — typically an × span or a button sibling
+        const clearBtn = container.querySelector(
+          '.typeahead-clear, [data-clear], .remove-btn, button.clear, span.clear, ' +
+          'button[aria-label*="remove"], button[aria-label*="clear"], .fa-times, .fa-remove'
+        );
+        if (clearBtn) {
+          clearBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+          clearBtn.click();
+          await delay(300);
+        }
+      }
+      if (timedOut) return false;
+
+      // 2. Scroll into view — Vue's v-show/intersection guard hides the dropdown
+      //    when the trigger element is outside the viewport.
+      trigger.scrollIntoView({ behavior: 'instant', block: 'center' });
+      await delay(300);
+      if (timedOut) return false;
+
+      // 3. Open the dropdown: mousedown → click → mouseup.
+      trigger.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+      trigger.click();
+      trigger.dispatchEvent(new MouseEvent('mouseup',   { bubbles: true, cancelable: true }));
+      await delay(300);
+      if (timedOut) return false;
+
+      // 4. Poll up to 4s for the search input to appear.
+      let input = null;
+      for (let i = 0; i < 40; i++) {
+        if (timedOut) break;
+        input = container.querySelector('.typeahead-dropdown .typeahead-input')
+              || container.querySelector('.typeahead-input');
+        if (input) break;
+        await delay(100);
+      }
+      if (!input || timedOut) {
+        console.warn(`[IBA Edu] typeahead input never appeared for "${val}"`);
+        return false;
+      }
+
+      // 5. Focus so the component activates its keyboard listeners.
+      input.focus();
+      input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+      await delay(150);
+      if (timedOut) return false;
+
+      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+
+      // 6. Clear any stale value.
+      if (input.value !== '') {
+        if (nativeSetter) nativeSetter.call(input, '');
+        else input.value = '';
+        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new KeyboardEvent('keyup',   { key: 'Backspace', bubbles: true }));
+        await delay(150);
+        if (timedOut) return false;
+      }
+
+      // Helper: type a string character-by-character into `input` at 80ms/char.
+      async function typeInto(str) {
+        for (let i = 1; i <= str.length; i++) {
+          if (timedOut) return;
+          const ch      = str[i - 1];
+          const partial = str.slice(0, i);
+          input.dispatchEvent(new KeyboardEvent('keydown', { key: ch, bubbles: true, cancelable: true }));
+          if (nativeSetter) nativeSetter.call(input, partial);
+          else input.value = partial;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new KeyboardEvent('keyup', { key: ch, bubbles: true }));
+          await delay(80);
+        }
+      }
+
+      // Helper: clear the search input back to empty.
+      async function clearInput() {
+        if (nativeSetter) nativeSetter.call(input, '');
+        else input.value = '';
+        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new KeyboardEvent('keyup',   { key: 'Backspace', bubbles: true }));
+        await delay(200);
+      }
+
+      // Helper: wait for filtered results to stabilise, return them.
+      async function pollResults() {
+        await delay(200);
+        let res = [], prev2 = -1;
+        for (let i = 0; i < 30; i++) {
+          if (timedOut) break;
+          res = Array.from(container.querySelectorAll('a.ac-result'));
+          if (res.length > 0 && res.length === prev2) break;
+          prev2 = res.length;
+          await delay(100);
+        }
+        return res;
+      }
+
+      // Score-based best match: penalises extra words so "Mathematics" beats
+      // "Additional Mathematics", and shared-prefix handles "Islamiat"→"Islamiyat".
+      function scoreMatch(resultText, search) {
+        const rt = resultText.toLowerCase();
+        const s  = search.toLowerCase();
+        if (rt === s) return 1000;
+        const sw = s.split(/\s+/).filter(Boolean);
+        const rw = rt.split(/\s+/).filter(Boolean);
+        const overlap = sw.filter(w => rw.some(r => r.startsWith(w) || w.startsWith(r))).length;
+        let prefix = 0;
+        while (prefix < s.length && prefix < rt.length && s[prefix] === rt[prefix]) prefix++;
+        const extra = Math.max(0, rw.length - sw.length);
+        return overlap * 20 + prefix * 2 - extra * 10 + (rt.includes(s) ? 5 : 0);
+      }
+
+      // 7 & 8. Two-phase search:
+      //   Phase 1 — type only the first word (e.g. "Urdu" from "Urdu Language").
+      //     • If exactly 1 result → select it immediately (no ambiguity).
+      //     • If 0 or multiple results → Phase 2.
+      //   Phase 2 — clear and type the full (stripped) name, then pick by score.
+      //   This handles: "Urdu Language" (no such entry, but "Urdu" exists alone),
+      //   "Islamiat" (close to "Islamiyat"), and avoids "Additional Mathematics"
+      //   stealing the slot for "Mathematics".
+      const firstWord = val.split(/\s+/)[0];
+      const multiWord = val.split(/\s+/).length > 1;
+
+      let results = [];
+
+      if (multiWord) {
+        // Phase 1: type first word only, then wait longer for Vue to finish filtering.
+        // Standard pollResults exits when count stabilises — but on first-word searches
+        // Vue may show 6 unfiltered results that temporarily stabilise before narrowing.
+        // We wait 600ms upfront to let the full filter cycle complete, then check count.
+        await typeInto(firstWord);
+        if (timedOut) return false;
+        await delay(600); // extended wait — let Vue fully filter on first word
+        if (timedOut) return false;
+        // Now poll until stable
+        let p1res = [], p1prev = -1;
+        for (let i = 0; i < 20; i++) {
+          if (timedOut) break;
+          p1res = Array.from(container.querySelectorAll('a.ac-result'));
+          if (p1res.length > 0 && p1res.length === p1prev) break;
+          p1prev = p1res.length;
+          await delay(150);
+        }
+        results = p1res;
+        if (timedOut) return false;
+
+        if (results.length === 1) {
+          // Exactly one option after first word — unambiguous, select it
+        } else {
+          // 0 or multiple results — clear and type the full name
+          await clearInput();
+          if (timedOut) return false;
+          await typeInto(val);
+          if (timedOut) return false;
+          results = await pollResults();
+          if (timedOut) return false;
+        }
+      } else {
+        // Single-word value — type it directly
+        await typeInto(val);
+        if (timedOut) return false;
+        results = await pollResults();
+        if (timedOut) return false;
+      }
+
+      if (results.length === 0 || timedOut) {
+        console.warn(`[IBA Edu] typeahead: no results for "${val}"`);
+        return false;
+      }
+
+      const scored = results.map(a => ({ el: a, score: scoreMatch(a.textContent.trim(), val) }));
+      scored.sort((a, b) => b.score - a.score);
+      const target = scored[0].el;
+
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+      await delay(60);
+      target.dispatchEvent(new MouseEvent('click',     { bubbles: true, cancelable: true }));
+      await delay(600);
+      return true;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  // School / board typeahead wrapper.
+  async function doTypeahead(container, value) {
+    if (!container || !value) return false;
+    const ok = await typeaheadFill(container, value);
+    if (ok) { markGreen(container); return true; }
+    markAmber(container); return false;
+  }
+
+  // Subject typeahead wrapper (same Vue component as school/board).
+  async function doSubjectTypeahead(container, value) {
+    if (!container || !value) return false;
+    const ok = await typeaheadFill(container, value);
+    if (ok) { markGreen(container); return true; }
+    markAmber(container); return false;
+  }
+
+  // Clear all pre-filled subject slots in an accordion before writing new values.
+  // IBA pre-fills some rows with default subjects (e.g. Mathematics in row 2).
+  // If we try to select the same subject in another row, the component rejects it
+  // with "already selected". Clearing all subject slots first prevents that conflict.
+  async function clearSubjectRows(acc) {
+    const subjectThs = Array.from(acc.querySelectorAll('.typeahead')).slice(2);
+    for (const th of subjectThs) {
+      const placeholderText = 'type or click to select';
+      const triggerText = (th.querySelector('.typeahead-selected')?.textContent || '').trim().toLowerCase();
+      if (!triggerText || triggerText === placeholderText) continue;
+      // Found a pre-filled slot — look for a remove/clear button inside the container
+      const clearBtn = th.querySelector(
+        '.typeahead-clear, [data-clear], .remove-btn, button.clear, span.clear, ' +
+        '.fa-times, .fa-remove, [aria-label*="remove"], [aria-label*="clear"]'
+      );
+      if (clearBtn) {
+        clearBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        clearBtn.click();
+        await delay(400);
+      }
+    }
+    await delay(300);
+  }
+
+  // Parse subjects: stored as JSON array string or actual array
+  // Expected shapes:
+  //   Matric/FSc: [{name, total, obtained, percentage}, ...]
+  //   O-Level/A-Level: [{name, grade}, ...]
+  function parseSubjects(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try { return JSON.parse(raw); } catch { return []; }
+  }
+
+  // Ensure N subject rows exist in an accordion by clicking "Add New Subject" as needed.
+  // Returns the current count of rendered subject rows after any clicks.
+  async function ensureSubjectRows(acc, neededTotal) {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      // Subject typeaheads start at index 2 (0=school, 1=board)
+      const currentRows = acc.querySelectorAll('.typeahead').length - 2;
+      if (currentRows >= neededTotal) break;
+
+      // Find "Add New Subject" / "Add Subject" button
+      const addBtn = Array.from(acc.querySelectorAll('button, a[role="button"], .btn'))
+        .find(b => /add.*(new\s+)?subject/i.test(b.textContent.trim()));
+      if (!addBtn) { console.warn('[IBA Edu] "Add New Subject" button not found'); break; }
+
+      addBtn.click();
+      await delay(1000); // wait for Vue to insert and mount the new row
+    }
+    await delay(500); // final settle before caller starts filling rows
+    return acc.querySelectorAll('.typeahead').length - 2;
+  }
+
+  // Open an accordion panel, skip if already expanded
+  async function openAccordion(id, waitMs = 900) {
+    const btn = document.querySelector(`[aria-controls='${id}']`);
+    if (!btn) { console.warn(`[IBA Edu] Accordion not found: ${id}`); return false; }
+    if (btn.getAttribute('aria-expanded') === 'true') { await delay(200); return true; }
+    btn.click();
+    await delay(waitMs);
+    return true;
+  }
+
+  // Tick "Not Applicable To Me" inside a scoped accordion panel
+  async function tickNotApplicable(scope) {
+    const section = document.querySelector(scope);
+    if (!section) return;
+    const cbs = Array.from(section.querySelectorAll('input[type="checkbox"]'));
+    for (const cb of cbs) {
+      const label = cb.closest('label') ||
+        document.querySelector(`label[for="${cb.id}"]`) ||
+        cb.parentElement;
+      const text = (label?.textContent || '').toLowerCase();
+      const sibText = Array.from(cb.parentElement?.childNodes || [])
+        .map(n => n.textContent || '').join(' ').toLowerCase();
+      if (text.includes('not applicable') || sibText.includes('not applicable')) {
+        if (!cb.checked) { cb.click(); await delay(300); }
+        markGreen(cb);
+        return;
+      }
+    }
+    // Fallback: first checkbox in the accordion
+    if (cbs[0] && !cbs[0].checked) { cbs[0].click(); await delay(300); markGreen(cbs[0]); }
+  }
+
+  const isOLevel = profile.education_system === 'cambridge';
+
+  // ══════════════════════════════════════════════════
+  //  ACCORDION 1 — Matric / O-Level
+  // ══════════════════════════════════════════════════
+  await openAccordion('accordion-1', 900);
+  const acc1 = document.querySelector('#accordion-1');
+  if (acc1) {
+    let sels = () => Array.from(acc1.querySelectorAll('select'));
+    let ths = () => Array.from(acc1.querySelectorAll('.typeahead'));
+    let nums = () => Array.from(acc1.querySelectorAll('input[type="number"]'));
+
+    // 1. Certificate/Degree — must be set first; Vue re-renders subject rows based on this
+    await doSelect(sels()[0], isOLevel ? 'O-Level' : 'Matriculation');
+    await delay(700); // wait for Vue to swap the row layout
+
+    // 2. School (typeahead 0)
+    const school1 = isOLevel ? profile.olevel_school : profile.matric_school;
+    if (school1) await doTypeahead(ths()[0], school1);
+
+    // 3. Board (typeahead 1)
+    const board1 = isOLevel ? (profile.olevel_board || 'Cambridge') : profile.matric_board;
+    if (board1) await doTypeahead(ths()[1], board1);
+
+    if (isOLevel) {
+      // O-Level selects after cert: [1]=year, [2]=discipline
+      await doSelect(sels()[1], String(profile.olevel_year || profile.matric_year || ''));
+      await doSelect(sels()[2], profileValueFor('matric_discipline', profile));
+
+      const subjects = parseSubjects(profile.olevel_subjects);
+      if (subjects.length > 0) {
+        // Clear any pre-filled subject slots before writing, otherwise the component
+        // rejects a subject as "already selected" if it appears in another pre-filled row.
+        await clearSubjectRows(acc1);
+        // Ensure enough rows exist before filling (5 default; click Add for extras)
+        await ensureSubjectRows(acc1, subjects.length);
+
+        for (let i = 0; i < subjects.length; i++) {
+          const s = subjects[i];
+          if (!s) continue;
+          // Re-query live DOM each iteration — Vue may have inserted new elements
+          const freshThs = Array.from(acc1.querySelectorAll('.typeahead'));
+          const freshSels = Array.from(acc1.querySelectorAll('select'));
+          // O-Level subjects stored as {subject, grade} — NOT {name, grade}
+          const subName1 = s.subject || s.name;
+          if (subName1) await doSubjectTypeahead(freshThs[2 + i], subName1);
+          if (s.grade) await doSelect(freshSels[3 + i], s.grade);
+        }
+      }
+    } else {
+      // Matriculation selects: [1]=year, [2]=grade/CGPA, [3]=discipline
+      await doSelect(sels()[1], String(profile.matric_year || ''));
+      await doSelect(sels()[2], profileValueFor('matric_grade', profile));
+      await doSelect(sels()[3], profileValueFor('matric_discipline', profile));
+
+      // Row 1 aggregate inputs: [0]=total, [1]=obtained, [2]=percentage
+      await doInput(nums()[0], profile.matric_total || '1100');
+      await doInput(nums()[1], profile.matric_marks || profile.matric_obtained);
+      await doInput(nums()[2], profile.matric_percentage || profile.matric_percent);
+
+      const subjects = parseSubjects(profile.matric_subjects);
+      if (subjects.length > 0) {
+        await clearSubjectRows(acc1);
+        await ensureSubjectRows(acc1, subjects.length);
+
+        for (let i = 0; i < subjects.length; i++) {
+          const s = subjects[i];
+          if (!s) continue;
+          const freshThs = Array.from(acc1.querySelectorAll('.typeahead'));
+          const freshNums = Array.from(acc1.querySelectorAll('input[type="number"]'));
+          const nBase = 3 + i * 3;
+          if (s.name) await doSubjectTypeahead(freshThs[2 + i], s.name);
+          if (s.total) await doInput(freshNums[nBase], s.total);
+          if (s.obtained) await doInput(freshNums[nBase + 1], s.obtained);
+          if (s.percentage) await doInput(freshNums[nBase + 2], s.percentage);
+        }
+      }
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  //  ACCORDION 2 — Intermediate / A-Level
+  // ══════════════════════════════════════════════════
+  await openAccordion('accordion-2', 900);
+  const acc2 = document.querySelector('#accordion-2');
+  if (acc2) {
+    let sels = () => Array.from(acc2.querySelectorAll('select'));
+    let ths = () => Array.from(acc2.querySelectorAll('.typeahead'));
+    let nums = () => Array.from(acc2.querySelectorAll('input[type="number"]'));
+
+    await doSelect(sels()[0], isOLevel ? 'A-Level' : 'Intermediate');
+    await delay(700);
+
+    const school2 = isOLevel ? profile.alevel_school : profile.fsc_school;
+    if (school2) await doTypeahead(ths()[0], school2);
+
+    const board2 = isOLevel ? (profile.alevel_board || 'Cambridge') : profile.fsc_board;
+    if (board2) await doTypeahead(ths()[1], board2);
+
+    if (isOLevel) {
+      // A-Level DOM mirrors Intermediate layout — Result Status is still present even in A-Level mode.
+      // sel[0]=cert, sel[1]=result_status, sel[2]=year, sel[3]=discipline, sel[4]=current_level
+      // Grade selects begin at index 5 (not 3).
+      await doSelect(sels()[2], String(profile.alevel_year || profile.fsc_year || ''));
+      await doSelect(sels()[3], profileValueFor('inter_discipline', profile));
+
+      const subjects = parseSubjects(profile.alevel_subjects);
+      if (subjects.length > 0) {
+        await clearSubjectRows(acc2);
+        await ensureSubjectRows(acc2, subjects.length);
+
+        for (let i = 0; i < subjects.length; i++) {
+          const s = subjects[i];
+          if (!s) continue;
+          const freshThs = Array.from(acc2.querySelectorAll('.typeahead'));
+          const freshSels = Array.from(acc2.querySelectorAll('select'));
+          // A-Level subjects stored as {subject, as_grade, a2_grade} — NOT {name, grade}
+          const subName2 = s.subject || s.name;
+          const subGrade2 = s.grade || s.a2_grade || s.as_grade;
+          if (subName2) await doSubjectTypeahead(freshThs[2 + i], subName2);
+          if (subGrade2) await doSelect(freshSels[5 + i], subGrade2);
+        }
+      }
+    } else {
+      // Intermediate selects: [1]=result_status, [2]=year, [3]=discipline, [4]=current_level
+      await doSelect(sels()[1], profileValueFor('inter_result_status', profile));
+      await doSelect(sels()[2], String(profile.fsc_year || profile.inter_year || ''));
+      await doSelect(sels()[3], profileValueFor('inter_discipline', profile));
+
+      // Row 1 aggregate inputs: [0]=total, [1]=obtained, [2]=percentage
+      await doInput(nums()[0], profile.fsc_total || profile.inter_total || '1100');
+      await doInput(nums()[1], profile.fsc_marks || profile.inter_marks);
+      await doInput(nums()[2], profile.fsc_percentage || profile.inter_percent);
+
+      // Current level (index 4)
+      await doSelect(sels()[4], profileValueFor('inter_current_level', profile));
+
+      const subjects = parseSubjects(profile.fsc_subjects || profile.inter_subjects);
+      if (subjects.length > 0) {
+        await clearSubjectRows(acc2);
+        await ensureSubjectRows(acc2, subjects.length);
+
+        for (let i = 0; i < subjects.length; i++) {
+          const s = subjects[i];
+          if (!s) continue;
+          const freshThs = Array.from(acc2.querySelectorAll('.typeahead'));
+          const freshNums = Array.from(acc2.querySelectorAll('input[type="number"]'));
+          const nBase = 3 + i * 3;
+          if (s.name) await doSubjectTypeahead(freshThs[2 + i], s.name);
+          if (s.total) await doInput(freshNums[nBase], s.total);
+          if (s.obtained) await doInput(freshNums[nBase + 1], s.obtained);
+          if (s.percentage) await doInput(freshNums[nBase + 2], s.percentage);
+        }
+      }
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  //  ACCORDIONS 3-5 — tick "Not Applicable To Me"
+  // ══════════════════════════════════════════════════
+  for (const [ctrl, scope] of [
+    ['accordion-3', '#accordion-3'],
+    ['accordion-4', '#accordion-4'],
+    ['accordion-5', '#accordion-5'],
+  ]) {
+    await openAccordion(ctrl, 500);
+    await tickNotApplicable(scope);
+  }
+
+  console.log('[IBA Edu Wizard] Education fill complete');
+}
+
 function isIBAEducationPage() {
   if (!window.location.hostname.includes('iba.edu.pk')) return false;
   // Detect by presence of education-specific IDs or page text landmarks
   return !!(
     document.querySelector('[id*="_school_address"]') ||
     (document.querySelector('[id*="matric"]') &&
-     (document.querySelector('[id*="undergrad"]') || document.body.innerText.includes('Not Applicable To Me')))
+      (document.querySelector('[id*="undergrad"]') || document.body.innerText.includes('Not Applicable To Me')))
   );
 }
 
@@ -3377,8 +4353,8 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     for (const cb of allCheckboxes) {
       // Look for associated label text
       const labelEl = cb.closest('label') ||
-                      document.querySelector(`label[for="${cb.id}"]`) ||
-                      cb.parentElement;
+        document.querySelector(`label[for="${cb.id}"]`) ||
+        cb.parentElement;
       const labelText = (labelEl?.textContent || '').toLowerCase();
       // Also check sibling text nodes
       const sibText = Array.from(cb.parentElement?.childNodes || [])
@@ -3429,7 +4405,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     return Array.from(c.querySelectorAll('input[type="text"],input[type="number"],input:not([type])')).filter(i => {
       const key = (i.id + ' ' + (i.name || '')).toLowerCase();
       return !key.includes('school_address') && !key.includes('_address') &&
-             !i.classList.contains('pac-target-input'); // Google Places class
+        !i.classList.contains('pac-target-input'); // Google Places class
     });
   }
 
@@ -3446,14 +4422,14 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     console.log('[IlmSeUrooj] IBA Edu: Matric section found');
     const mc = matricSec.container;
     const sels = sectionSelects(mc);
-    const ths  = sectionTypeaheads(mc);
+    const ths = sectionTypeaheads(mc);
     const inps = sectionInputs(mc);
 
     // 1. Certificate / Degree type SELECT
     const certSel = sels.find(s => {
       const id = s.id.toLowerCase();
       return id.includes('cert') || id.includes('degree') || id.includes('type') ||
-             Array.from(s.options).some(o => ['matric','o-level','ssc','secondary'].some(v => o.text.toLowerCase().includes(v)));
+        Array.from(s.options).some(o => ['matric', 'o-level', 'ssc', 'secondary'].some(v => o.text.toLowerCase().includes(v)));
     }) || sels[0];
     const certVal = profile.education_system === 'cambridge' ? 'O-Level' : 'Matriculation';
     if (certSel) await doFillSelect(certSel, certVal);
@@ -3471,7 +4447,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     const yearSel = sels.find(s => {
       const id = s.id.toLowerCase();
       return id.includes('year') || id.includes('pass') ||
-             Array.from(s.options).some(o => /^(19|20)\d\d$/.test((o.value || o.text).trim()));
+        Array.from(s.options).some(o => /^(19|20)\d\d$/.test((o.value || o.text).trim()));
     });
     const yearVal = profile.olevel_year || profile.matric_year;
     if (yearSel && yearVal) await doFillSelect(yearSel, String(yearVal));
@@ -3502,14 +4478,14 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     console.log('[IlmSeUrooj] IBA Edu: Intermediate section found');
     const ic = interSec.container;
     const sels = sectionSelects(ic);
-    const ths  = sectionTypeaheads(ic);
+    const ths = sectionTypeaheads(ic);
     const inps = sectionInputs(ic);
 
     // 1. Certificate / Degree type SELECT
     const certSel = sels.find(s => {
       const id = s.id.toLowerCase();
       return id.includes('cert') || id.includes('degree') || id.includes('type') ||
-             Array.from(s.options).some(o => ['intermediate','a-level','hssc','fsc','fa','ics'].some(v => o.text.toLowerCase().includes(v)));
+        Array.from(s.options).some(o => ['intermediate', 'a-level', 'hssc', 'fsc', 'fa', 'ics'].some(v => o.text.toLowerCase().includes(v)));
     }) || sels[0];
     const certVal = profile.education_system === 'cambridge' ? 'A-Level' : 'Intermediate';
     if (certSel) await doFillSelect(certSel, certVal);
@@ -3527,8 +4503,8 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     const statusSel = sels.find(s => {
       const id = s.id.toLowerCase();
       return id.includes('status') || id.includes('result') ||
-             Array.from(s.options).some(o =>
-               o.text.toLowerCase().includes('appearing') || o.text.toLowerCase().includes('result in hand'));
+        Array.from(s.options).some(o =>
+          o.text.toLowerCase().includes('appearing') || o.text.toLowerCase().includes('result in hand'));
     });
     const statusVal = profileValueFor('inter_result_status', profile);
     if (statusSel && statusVal) await doFillSelect(statusSel, statusVal);
@@ -3537,7 +4513,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     const yearSel = sels.find(s => {
       const id = s.id.toLowerCase();
       return id.includes('year') || id.includes('pass') ||
-             Array.from(s.options).some(o => /^(19|20)\d\d$/.test((o.value || o.text).trim()));
+        Array.from(s.options).some(o => /^(19|20)\d\d$/.test((o.value || o.text).trim()));
     });
     const yearVal = profile.alevel_year || profile.fsc_year || profile.inter_year;
     if (yearSel && yearVal) await doFillSelect(yearSel, String(yearVal));
@@ -3546,8 +4522,8 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     const discSel = sels.find(s => {
       const id = s.id.toLowerCase();
       return id.includes('discipline') || id.includes('stream') ||
-             Array.from(s.options).some(o =>
-               ['engineering','medical','science','commerce','arts','general'].some(v => o.text.toLowerCase().includes(v)));
+        Array.from(s.options).some(o =>
+          ['engineering', 'medical', 'science', 'commerce', 'arts', 'general'].some(v => o.text.toLowerCase().includes(v)));
     });
     const discVal = profileValueFor('inter_discipline', profile);
     if (discSel && discVal) await doFillSelect(discSel, discVal);
@@ -3556,9 +4532,9 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
     const levelSel = sels.find(s => {
       const id = s.id.toLowerCase();
       return id.includes('level') || id.includes('current') ||
-             Array.from(s.options).some(o =>
-               o.text.toLowerCase().includes('first year') || o.text.toLowerCase().includes('a level') ||
-               o.text.toLowerCase().includes('second year') || o.text.toLowerCase().includes('12 grade'));
+        Array.from(s.options).some(o =>
+          o.text.toLowerCase().includes('first year') || o.text.toLowerCase().includes('a level') ||
+          o.text.toLowerCase().includes('second year') || o.text.toLowerCase().includes('12 grade'));
     });
     const levelVal = profileValueFor('inter_current_level', profile);
     if (levelSel && levelVal) await doFillSelect(levelSel, levelVal);
@@ -3648,6 +4624,42 @@ async function handleAutofill() {
       if (progressBar) progressBar.style.width = `${Math.min(100, (processedFields / totalFields) * 100)}%`;
     };
 
+    // ─── SPECIAL: IBA Candidate Registration — Education Wizard Step ─
+    // Fires when the user is on step 2 (accordion-1..5 visible). Must be checked
+    // BEFORE the demographic handler since both pages share the same URL.
+    if (isIBAEducationWizardPage()) {
+      console.log('[IlmSeUrooj] IBA Education wizard step detected — running dedicated handler');
+      // 3-minute hard cap — if the wizard hasn't finished by then, show what we have
+      const wizardTimeout = new Promise(resolve => setTimeout(() => {
+        console.warn('[IlmSeUrooj] IBA Edu Wizard: 3-minute timeout reached, forcing completion');
+        resolve();
+      }, 180000));
+      await Promise.race([
+        fillIBAEducationWizardPage(
+          ctx.profile,
+          (el) => { filledCount++; alreadyHandled.add(el); filledSelectors.push(el.id || el.name || 'iba-edu-wiz'); tickProgress(); },
+          (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+        ),
+        wizardTimeout
+      ]);
+      console.log(`[IlmSeUrooj] IBA Edu Wizard done: ${filledCount} filled, ${manualCount} manual`);
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
+      return;
+    }
+
+    // ─── SPECIAL: IBA Candidate Registration — Demographic Step ─
+    // Fires on Step 1 of the wizard. No id/name on inputs — heuristic engine
+    // cannot match them, so we fill by index before any generic tier runs.
+    if (isIBADemographicPage()) {
+      console.log('[IlmSeUrooj] IBA Demographic step detected — running dedicated handler');
+      await fillIBADemographicPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); filledSelectors.push(el.id || el.name || 'iba-demo'); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      console.log(`[IlmSeUrooj] IBA Demo handler done: ${filledCount} filled, ${manualCount} manual`);
+    }
+
     // ─── SPECIAL: IBA Education Background Page ──────────────────
     // Runs before all tiers — dedicated sequential handler for the multi-section form.
     if (isIBAEducationPage()) {
@@ -3655,7 +4667,7 @@ async function handleAutofill() {
       await fillIBAEducationPage(
         ctx.profile,
         (el) => { filledCount++; alreadyHandled.add(el); filledSelectors.push(el.id || el.name || 'iba-edu'); tickProgress(); },
-        (el) => { manualCount++;  alreadyHandled.add(el); tickProgress(); }
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
       );
       console.log(`[IlmSeUrooj] IBA Edu handler done: ${filledCount} filled, ${manualCount} manual`);
     }
@@ -3923,14 +4935,14 @@ async function handleAutofill() {
         // Compute split parts
         let countryCode = '+92', areaCode = '', localNum = '';
         if (phoneStr.startsWith('92') && phoneStr.length >= 5) {
-          areaCode  = phoneStr.slice(2, 5);
-          localNum  = phoneStr.slice(5);
+          areaCode = phoneStr.slice(2, 5);
+          localNum = phoneStr.slice(5);
         } else if (phoneStr.startsWith('0') && phoneStr.length >= 4) {
-          areaCode  = phoneStr.slice(1, 4);
-          localNum  = phoneStr.slice(4);
+          areaCode = phoneStr.slice(1, 4);
+          localNum = phoneStr.slice(4);
         } else {
-          areaCode  = phoneStr.slice(0, 3);
-          localNum  = phoneStr.slice(3);
+          areaCode = phoneStr.slice(0, 3);
+          localNum = phoneStr.slice(3);
         }
 
         const PHONE_LABEL_PATTERN = /phone|mobile|cell|تele|mob|contact.*no|موبائل|فون/i;
@@ -3959,8 +4971,8 @@ async function handleAutofill() {
           // If only 2 inputs found, treat as area + number (no country code field)
           if (tInputs.length === 2 && !numInp) {
             areaInp = tInputs[0];
-            numInp  = tInputs[1];
-            ccInp   = null;
+            numInp = tInputs[1];
+            ccInp = null;
           }
 
           let phoneSplitFilled = false;
@@ -4045,8 +5057,8 @@ async function handleAutofill() {
         const sig = buildFieldSignature(input);
         // Also apply ASP.NET prefix stripping to name/id so txtUserName, txtLoginId, etc. match
         const normName = normalizeSignal(input.name || '');
-        const normId   = normalizeSignal(input.id || '');
-        const normSig  = normName + ' ' + normId + ' ' + sig;
+        const normId = normalizeSignal(input.id || '');
+        const normSig = normName + ' ' + normId + ' ' + sig;
 
         const USERNAME_PATTERNS = [
           'username', 'user_name', 'login_id', 'user_id', 'loginid', 'userid',
@@ -4179,7 +5191,7 @@ async function handleAutofill() {
       // Track conflicts (informational only — we still fill)
       if (input.value && input.value.trim() !== '' && value != null && value !== '') {
         const existNorm = String(input.value).toLowerCase().trim();
-        const newNorm   = String(value).toLowerCase().trim();
+        const newNorm = String(value).toLowerCase().trim();
         if (existNorm !== newNorm) conflictCount++;
       }
 
@@ -4201,7 +5213,7 @@ async function handleAutofill() {
       if (input.tagName === 'SELECT') {
         filled = fillSelect(input, String(value));
       } else if (input.tagName === 'DIV' &&
-                 (input.classList.contains('typeahead') || input.getAttribute('tabindex') !== null)) {
+        (input.classList.contains('typeahead') || input.getAttribute('tabindex') !== null)) {
         filled = await fillTypeahead(input, String(value));
       } else if (resolvedKey === 'date_of_birth') {
         filled = await fillDateAdvanced(input, String(ctx.profile.date_of_birth));
@@ -4287,7 +5299,7 @@ async function handleAutofill() {
         slug: ctx.university.slug,
         fillPct,
         newStatus: 'form_filling',
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
   } catch (err) {
@@ -4356,10 +5368,10 @@ function getFormHTML() {
 // ─── Deadline / Calendar Detection ─────────────────────────────
 
 const MONTH_MAP_DETECT = {
-  january:1, jan:1, february:2, feb:2, march:3, mar:3,
-  april:4, apr:4, may:5, june:6, jun:6, july:7, jul:7,
-  august:8, aug:8, september:9, sep:9, sept:9,
-  october:10, oct:10, november:11, nov:11, december:12, dec:12,
+  january: 1, jan: 1, february: 2, feb: 2, march: 3, mar: 3,
+  april: 4, apr: 4, may: 5, june: 6, jun: 6, july: 7, jul: 7,
+  august: 8, aug: 8, september: 9, sep: 9, sept: 9,
+  october: 10, oct: 10, november: 11, nov: 11, december: 12, dec: 12,
 };
 
 function parseDetectedDate(str) {
@@ -4465,13 +5477,13 @@ function makeGCalUrl(title, date, details) {
   const pad = (n) => String(n).padStart(2, '0');
   const d1 = `${date.year}${pad(date.month)}${pad(date.day)}`;
   const next = new Date(date.year, date.month - 1, date.day + 1);
-  const d2 = `${next.getFullYear()}${pad(next.getMonth()+1)}${pad(next.getDate())}`;
+  const d2 = `${next.getFullYear()}${pad(next.getMonth() + 1)}${pad(next.getDate())}`;
   const p = new URLSearchParams({ action: 'TEMPLATE', text: title, dates: `${d1}/${d2}`, details: details || title });
   return `https://calendar.google.com/calendar/render?${p.toString()}`;
 }
 
 function formatDeadlineDate(d) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return `${d.day} ${months[d.month - 1]} ${d.year}`;
 }
 
@@ -4537,7 +5549,7 @@ function detectPageDeadlines() {
         dateCols.forEach(({ dates, header }) => {
           const colLabel = /open|start|from|begin/i.test(header) ? 'Opens'
             : /clos|end|last|due|deadline/i.test(header) ? 'Deadline'
-            : header || '';
+              : header || '';
           const label = colLabel ? `${baseLabel} – ${colLabel}` : baseLabel;
           dates.forEach(d => add(label, d, 'table'));
         });
@@ -5438,7 +6450,7 @@ function setupKeyboardShortcuts() {
         e.preventDefault();
         // Open sidebar if collapsed
         const sidebar = document.getElementById('unimatch-sidebar');
-        const toggle  = document.getElementById('unimatch-toggle');
+        const toggle = document.getElementById('unimatch-toggle');
         if (sidebar?.classList.contains('collapsed')) {
           sidebar.classList.remove('collapsed');
           toggle?.classList.add('sidebar-open');
