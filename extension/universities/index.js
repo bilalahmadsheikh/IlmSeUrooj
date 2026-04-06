@@ -239,10 +239,10 @@ ALL_UNIVERSITIES.push({
     portalDomains: ['giki.edu.pk'],
     formType: 'requires_login_first',
     fieldMap: {
-        full_name: '[name="name"], [name="full_name"], [name="applicant_name"], #name',
+        full_name: '[name="full_name"], [name="applicant_name"], #full_name, #name',
         father_name: '[name="father_name"], [name="fatherName"], #father_name',
         cnic: '[name="cnic"], [name="cnic_no"], #cnic',
-        date_of_birth: '[name="dob"], [name="date_of_birth"], #dob',
+        date_of_birth: '#date_of_birth, [name="date_of_birth"], [name="dob"], #dob',
         gender: '[name="gender"], #gender',
         email: '[name="email"], [type="email"], #email',
         phone: '[name="phone"], [name="mobile"], #phone',
@@ -256,14 +256,53 @@ ALL_UNIVERSITIES.push({
         board_name: '[name="board"], #board',
         passing_year: '[name="passing_year"], #passing_year',
         domicile_province: '[name="domicile"], #domicile',
+        district: '#domicile_id, [name="domicile_id"]',
     },
     selectOptions: {
         gender: { male: 'Male', female: 'Female' },
-        province: { punjab: 'Punjab', sindh: 'Sindh', kpk: 'Khyber Pakhtunkhwa', balochistan: 'Balochistan', islamabad: 'Islamabad' }
+        province: { punjab: 'Punjab', sindh: 'Sindh', kpk: 'Khyber Pakhtunkhwa', balochistan: 'Balochistan', islamabad: 'Islamabad' },
+        district: {
+            'attock': '700', 'bahawalnagar': '701', 'bahawalpur': '702', 'bhakkar': '703',
+            'chakwal': '704', 'chiniot': '705', 'dera ghazi khan': '706', 'd.g. khan': '706', 'dg khan': '706',
+            'faisalabad': '707', 'gujranwala': '708', 'gujrat': '709', 'hafizabad': '710',
+            'islamabad': '711', 'jhang': '712', 'jhelum': '713', 'kasur': '714',
+            'khanewal': '715', 'khushab': '716', 'lahore': '717', 'layyah': '718',
+            'lodhran': '719', 'mandi bahauddin': '720', 'mianwali': '721', 'multan': '722',
+            'muzaffargarh': '723', 'nankana sahib': '724', 'narowal': '725', 'nankana': '724',
+            'okara': '726', 'pakpattan': '727', 'rahim yar khan': '728', 'rajanpur': '729',
+            'rawalpindi': '730', 'sahiwal': '731', 'sargodha': '732', 'sheikhupura': '733',
+            'sialkot': '734', 'toba tek singh': '735', 'vehari': '736',
+            'badin': '737', 'dadu': '738', 'ghotki': '739', 'hyderabad': '740',
+            'jacobabad': '741', 'jamshoro': '742', 'karachi': '682', 'karachi central': '743',
+            'karachi east': '744', 'karachi west': '745', 'karachi south': '746', 'karachi malir': '747',
+            'kashmore': '748', 'khairpur': '749', 'larkana': '750', 'matiari': '751',
+            'mirpurkhas': '752', 'naushahro feroze': '753', 'qambar shahdadkot': '754',
+            'sanghar': '755', 'shaheed benazirabad': '756', 'shikarpur': '757',
+            'sujawal': '758', 'sukkur': '759', 'tando allahyar': '760', 'tando muhammad khan': '761',
+            'thatta': '762', 'umerkot': '763',
+            'quetta': '764', 'awaran': '765', 'barkhan': '766', 'chagai': '767',
+            'dera bugti': '768', 'gwadar': '769', 'harnai': '770', 'jafarabad': '771',
+            'jhal magsi': '772', 'kachhi': '773', 'kalat': '774', 'kech': '775',
+            'kharan': '776', 'khuzdar': '777', 'killa abdullah': '778', 'killa saifullah': '779',
+            'kohlu': '780', 'lasbela': '781', 'lehri': '782', 'loralai': '783',
+            'mastung': '784', 'musakhel': '785', 'nasirabad': '786', 'nushki': '787',
+            'panjgur': '788', 'pishin': '789', 'sherani': '790', 'sibi': '791',
+            'sohbatpur': '792', 'washuk': '793', 'zhob': '794', 'ziarat': '795',
+            'peshawar': '796', 'abbottabad': '797', 'bajaur': '798', 'bannu': '799',
+            'battagram': '800', 'buner': '801', 'charsadda': '802', 'chitral': '803',
+            'dera ismail khan': '804', 'd.i. khan': '804', 'di khan': '804',
+            'hangu': '805', 'haripur': '806', 'karak': '807', 'khyber': '808',
+            'kohat': '809', 'kohistan': '810', 'kurram': '811', 'lakki marwat': '812',
+            'lower dir': '813', 'malakand': '814', 'mansehra': '815', 'mardan': '816',
+            'mohhmand': '817', 'mohmand': '817', 'north waziristan': '818', 'nowshera': '819',
+            'orakzai': '820', 'shangla': '821', 'south waziristan': '822', 'swabi': '823',
+            'swat': '824', 'tank': '825', 'tor ghar': '826', 'upper dir': '827',
+            'other': '828',
+        }
     },
-    transforms: { cnic: 'cnic_dashes', phone: 'phone_pak', date_of_birth: 'date_dmy' },
-    verified: false, lastVerified: '2026-02-21',
-    notes: 'Info page. Application form on separate portal during season.'
+    transforms: { cnic: 'cnic_dashes', phone: 'phone_pak', date_of_birth: 'date_ymd' },
+    verified: false, lastVerified: '2026-04-06',
+    notes: 'Application portal at onlineadmissions.giki.edu.pk. DOB field uses YYYY-MM-DD (type=date). District uses numeric domicile_id.'
 });
 
 ALL_UNIVERSITIES.push({
@@ -580,8 +619,10 @@ ALL_UNIVERSITIES.push({
         province: { punjab: 'Punjab', sindh: 'Sindh', kpk: 'Khyber Pakhtunkhwa', balochistan: 'Balochistan', islamabad: 'Islamabad' }
     },
     transforms: { cnic: 'cnic_dashes', phone: 'phone_pak', date_of_birth: 'date_dmy' },
-    verified: false, lastVerified: '2026-02-21',
-    notes: 'Multiple campuses. CMS portal may be at cms.bahria.edu.pk.'
+    credentialSystem: 'email_sent',
+    registrationNote: 'Check your email — Bahria University will send a verification link. You must verify before you can log in.',
+    verified: false, lastVerified: '2026-04-06',
+    notes: 'Multiple campuses. CMS portal may be at cms.bahria.edu.pk. Email verification required after registration.'
 });
 
 ALL_UNIVERSITIES.push({

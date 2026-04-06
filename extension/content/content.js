@@ -3149,6 +3149,7 @@ function renderState(container, state, data = {}) {
 
       const uniCfgFilled = (typeof getConfigForDomain === 'function') ? getConfigForDomain(window.location.hostname) : null;
       const isEmailSentCredFilled = uniCfgFilled?.credentialSystem === 'email_sent';
+      const filledRegNote = uniCfgFilled?.registrationNote || '';
 
       const uniFilledName = uniCfgFilled?.name || 'this university';
       const isLoginFilled = pageType === 'login';
@@ -3206,12 +3207,21 @@ function renderState(container, state, data = {}) {
             </div>` : ''}
           </div>
           ${credSummary}
+          ${filledRegNote && pageType === 'register' ? `
+          <div style="margin-top:8px;padding:8px 10px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.25);border-radius:7px;font-size:10px;color:#60a5fa;line-height:1.5">
+            ${filledRegNote}
+          </div>` : ''}
           <div style="margin-top:10px;padding:8px 10px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:7px;font-size:10px;color:#fbbf24;line-height:1.5">
             Caution: Always recheck every filled field before submitting. The extension may make errors or fill incorrect values.
           </div>
+          <div class="um-btn-grid" style="margin-top:10px">
+            <button class="btn-secondary" id="unimatch-scan-remaining" title="Highlight unfilled fields on this page">Scan Remaining <span id="unimatch-scan-badge" style="background:rgba(96,165,250,0.2);color:#60a5fa;border-radius:10px;padding:1px 6px;font-size:9px;margin-left:3px"></span></button>
+            <button class="btn-secondary" id="unimatch-fill-remaining" title="Fill only the empty fields, leave already-filled ones untouched">Fill Remaining</button>
+          </div>
+          <div id="unimatch-scan-note" style="font-size:9px;color:#71717a;text-align:center;min-height:14px;margin-top:4px"></div>
           <div class="um-btn-grid">
             <button class="btn-secondary" id="unimatch-save-progress">Save</button>
-            <button class="btn-secondary" id="unimatch-refill">Re-fill</button>
+            <button class="btn-secondary" id="unimatch-refill">Re-fill All</button>
           </div>
           <button class="btn-primary um-btn-full-row" id="unimatch-review">Pre-submit Check</button>
           <div class="um-safety-note">Alt+Shift+A to re-fill · Alt+Shift+R for review</div>
@@ -3220,6 +3230,8 @@ function renderState(container, state, data = {}) {
       document.getElementById('unimatch-review')?.addEventListener('click', handlePreSubmitCheck);
       document.getElementById('unimatch-refill')?.addEventListener('click', handleAutofill);
       document.getElementById('unimatch-save-progress')?.addEventListener('click', handleSaveProgress);
+      document.getElementById('unimatch-scan-remaining')?.addEventListener('click', handleScanRemaining);
+      document.getElementById('unimatch-fill-remaining')?.addEventListener('click', handleFillRemaining);
       // Password show/copy in credential summary
       document.getElementById('pw-reveal')?.addEventListener('click', async () => {
         const pw = await getConsistentPassword();
@@ -3800,10 +3812,30 @@ async function fillIBAEducationWizardPage(profile, onFilled, onManual) {
     // Strip parenthetical qualifiers from subject names, e.g. "Mathematics (D)" → "Mathematics".
     // The IBA dropdown has "Mathematics" and "Additional Mathematics" — typing "Mathematics (D)"
     // matches "Additional Mathematics" first because the extra text pushes the exact match down.
-    const val    = String(value).trim().replace(/\s*\(.*?\)\s*$/, '').trim();
-    const valLow = val.toLowerCase();
+    let val = String(value).trim().replace(/\s*\(.*?\)\s*$/, '').trim();
     // Keep original for fallback matching against result text
     const origLow = String(value).trim().toLowerCase();
+
+    // Subject spelling alias map: profile value → shorter search term that the IBA
+    // typeahead will actually return results for. The scoreMatch function then picks
+    // the closest result (e.g. typing "islam" returns "Islamiat" which scores highest).
+    const SEARCH_ALIASES = {
+      'islamiyat': 'islam',
+      'islamiat':  'islam',
+      'islamic studies': 'islam',
+      'pak studies': 'pakistan',
+      'pakistan study': 'pakistan',
+      'urdu language': 'urdu',
+      'urdu compulsory': 'urdu',
+      'english compulsory': 'english',
+      'english (compulsory)': 'english',
+      'general mathematics': 'mathematics',
+      'additional math': 'additional math',
+    };
+    const aliasKey = val.toLowerCase();
+    if (SEARCH_ALIASES[aliasKey]) val = SEARCH_ALIASES[aliasKey];
+
+    const valLow = val.toLowerCase();
 
     const trigger = container.querySelector('.typeahead-selected');
     if (!trigger) {
@@ -4288,6 +4320,593 @@ async function fillIBAEducationWizardPage(profile, onFilled, onManual) {
   console.log('[IBA Edu Wizard] Education fill complete');
 }
 
+// ─── GIKI Education Pages — Dedicated Handlers ────────────────
+// Page 1: /student_previous_education/  (SSC / O-Level)
+// Page 2: /student_new_hssc_equ.html/   (HSSC / A-Level)
+// Both pages use AJAX to populate boards and (page 2) the dynamic form
+// container. Generic heuristics cannot handle the cascading selects.
+
+function isGIKISSCPage() {
+  return window.location.hostname.includes('admissions.giki.edu.pk') &&
+    window.location.pathname.includes('student_previous_education') &&
+    !!document.querySelector('select#name[name="name"]');
+}
+
+function isGIKIHSSCPage() {
+  return window.location.hostname.includes('admissions.giki.edu.pk') &&
+    (window.location.pathname.includes('student_new_hssc_equ') ||
+     window.location.pathname.includes('student_previous_education_hssc')) &&
+    !!document.querySelector('select#name[name="name"]');
+}
+
+// ── Subject name → GIKI option value ─────────────────────────────────────
+// Two tiers: Pakistan-specific (1001–1009) preferred for local boards,
+// International CIE (101–203) for Cambridge/Edexcel boards.
+// Match is attempted on the stripped, lowercase subject name.
+const GIKI_SUBJECT_MAP = {
+  // Pakistan-specific subjects (preferred for SSC/local)
+  'islamiyat': 1001, 'islamiat': 1001, 'islamic studies': 1001, 'islam': 1001,
+  'pakistan studies': 1002, 'pak studies': 1002,
+  'urdu': 1003, 'urdu (compulsory)': 1003,
+  'english': 1004, 'english language': 1004, 'english compulsory': 1004,
+  'mathematics': 1005, 'maths': 1005, 'math': 1005, 'mathematics (d)': 1005,
+  'physics': 1006,
+  'chemistry': 1007, 'chemistry/computer/it': 1007,
+  'biology': 1008, 'biology/computer/it': 1008,
+  'bio/cs/it': 1009,
+  // International CIE subjects
+  'accounting': 101,
+  'afrikaans': 102,
+  'agriculture': 104,
+  'arabic': 105,
+  'art & design': 107, 'art and design': 107,
+  'business studies': 115, 'business': 115,
+  'chinese': 117, 'chinese (mandarin)': 117,
+  'computer science': 123, 'computer science 1': 123,
+  'economics': 127,
+  'english as a second language': 132, 'english second language': 132, 'esl': 132,
+  'further mathematics': 148, 'further maths': 148,
+  'geography': 149,
+  'global perspectives': 152,
+  'history': 158,
+  'information & communication technology': 159, 'ict': 159, 'information technology': 159,
+  'latin': 164,
+  'media studies': 171,
+  'music': 172,
+  'physical education': 175, 'pe': 175,
+  'psychology': 180,
+  'religious studies': 181,
+  'sociology': 187,
+  'spanish': 188,
+  'statistics': 191,
+  'urdu as a second language': 199, 'urdu second language': 199,
+};
+
+// Resolve a subject name to its closest GIKI option value.
+// First tries exact/normalized match, then partial word overlap.
+function resolveGIKISubjectValue(subjectName) {
+  if (!subjectName) return null;
+  const s = String(subjectName).toLowerCase().trim().replace(/\s*\(.*?\)\s*/g, '').trim();
+  // Exact match
+  if (GIKI_SUBJECT_MAP[s] !== undefined) return String(GIKI_SUBJECT_MAP[s]);
+  // Original with parens still in
+  const orig = String(subjectName).toLowerCase().trim();
+  if (GIKI_SUBJECT_MAP[orig] !== undefined) return String(GIKI_SUBJECT_MAP[orig]);
+  // Partial: find best key overlap
+  let best = null, bestScore = 0;
+  for (const [key, val] of Object.entries(GIKI_SUBJECT_MAP)) {
+    if (s.includes(key) || key.includes(s)) {
+      const score = Math.min(s.length, key.length);
+      if (score > bestScore) { bestScore = score; best = String(val); }
+    }
+  }
+  return best;
+}
+
+// ── Board name → GIKI board ID ────────────────────────────────────────────
+const GIKI_BOARD_MAP = {
+  // Local boards
+  'bise lahore': 144, 'lahore': 144,
+  'bise bahawalpur': 146, 'bahawalpur': 146,
+  'bise rawalpindi': 147, 'rawalpindi': 147,
+  'bise dg khan': 148, 'bise dera ghazi khan': 148, 'dera ghazi khan': 148,
+  'bise faisalabad': 149, 'faisalabad': 149,
+  'bise gujranwala': 150, 'gujranwala': 150,
+  'bise multan': 151, 'multan': 151,
+  'bise sahiwal': 152, 'sahiwal': 152,
+  'bise sargodha': 153, 'sargodha': 153,
+  'bise hyderabad': 154, 'hyderabad': 154,
+  'bise karachi': 155, 'karachi': 155,
+  'bise larkana': 156, 'larkana': 156,
+  'bise mirpur khas': 157, 'mirpur khas': 157,
+  'bise sukkur': 158, 'sukkur': 158,
+  'bise peshawar': 159, 'peshawar': 159,
+  'bise abbottabad': 160, 'abbottabad': 160,
+  'bise dera ismail khan': 161, 'bise di khan': 161, 'dera ismail khan': 161,
+  'bise kohat': 162, 'kohat': 162,
+  'bise malakand': 163, 'malakand': 163,
+  'bise mardan': 164, 'mardan': 164,
+  'bise swat': 165, 'swat': 165,
+  'bise quetta': 166, 'quetta': 166,
+  'bise khuzdar': 167, 'khuzdar': 167,
+  'bise turbat': 168, 'turbat': 168,
+  'bise loralai': 169, 'loralai': 169,
+  'bise kashmir': 170, 'kashmir': 170,
+  'technical board lahore': 171,
+  'technical board karachi': 172,
+  'fbise': 176, 'fbise islamabad': 176, 'federal board': 176,
+  'bise ajk': 177, 'ajk': 177,
+  'bise shaheed benazirabad': 178,
+  'akueb': 179, 'akueb karachi': 179,
+  'bise bannu': 180, 'bannu': 180,
+  'bte peshawar': 181,
+  'karakoram': 182,
+  'bte karachi': 183,
+  'bte lahore': 184,
+  'bise islamabad': 186, 'islamabad': 186,
+  'ziauddin': 187,
+  'bise zhob': 188, 'zhob': 188,
+  // International boards
+  'cambridge': 601, 'cie': 601, 'cambridge international': 601,
+  'edexcel': 602, 'pearson edexcel': 611,
+  'ib': 600, 'international baccalaureate': 600,
+  'ap': 603, 'advanced placement': 603,
+  'ucles': 608,
+};
+
+function resolveGIKIBoardId(boardName) {
+  if (!boardName) return null;
+  const b = String(boardName).toLowerCase().trim();
+  if (GIKI_BOARD_MAP[b] !== undefined) return String(GIKI_BOARD_MAP[b]);
+  for (const [key, val] of Object.entries(GIKI_BOARD_MAP)) {
+    if (b.includes(key) || key.includes(b)) return String(val);
+  }
+  return null;
+}
+
+// ── Study group selection for HSSC/A-Level ────────────────────────────────
+// The select options are full text strings. Infer the group from profile subjects.
+function resolveGIKIStudyGroup(profile) {
+  const subjectsRaw = profile.fsc_subjects || profile.inter_subjects ||
+                      profile.alevel_subjects || profile.olevel_subjects || [];
+  const subjects = (Array.isArray(subjectsRaw)
+    ? subjectsRaw
+    : (() => { try { return JSON.parse(subjectsRaw); } catch { return []; } })()
+  ).map(s => ((s.subject || s.name || '')).toLowerCase());
+
+  const has = (kw) => subjects.some(s => s.includes(kw));
+
+  // DAE groups
+  const isDAE = profile.education_system === 'dae';
+  if (isDAE) {
+    if (has('civil')) return 'Civil';
+    if (has('electrical')) return 'Electrical';
+    if (has('mechanical')) return 'Mechanical';
+    if (has('computer') || has('cs')) return 'Computer';
+    if (has('chemical')) return 'Chemical';
+    if (has('electronics')) return 'Electronics';
+    return 'Mechanical';
+  }
+  // IBDP
+  if (profile.education_system === 'ibdp') return 'IBDP';
+
+  // HSSC / A-Level groups
+  const hasMath    = has('math');
+  const hasPhysics = has('physics');
+  const hasChem    = has('chem');
+  const hasBio     = has('bio');
+  const hasCS      = has('computer') || has('cs/it') || has('cs ') || has('information technology');
+
+  if (hasMath && hasPhysics && hasChem && !hasBio) return 'Pre Engineering';
+  if (hasBio && hasChem && hasPhysics && hasMath) return 'Pre Med with Math';
+  if (hasBio && hasChem && !hasMath) return 'Pre Medical';
+  if (hasCS && hasMath) return 'CS/IT with 3rd Sub';
+  if (hasCS) return 'Computer Science/IT';
+  // Fallback: check profile inter_discipline
+  const disc = (profile.inter_discipline || '').toLowerCase();
+  if (disc.includes('pre eng') || disc.includes('engineering')) return 'Pre Engineering';
+  if (disc.includes('pre med') || disc.includes('medical')) return 'Pre Medical';
+  if (disc.includes('computer') || disc.includes('cs')) return 'Computer Science/IT';
+  if (disc.includes('art') || disc.includes('human')) return 'Arts/Humanities';
+  return 'Pre Engineering'; // safest default for GIKI
+}
+
+// ── Trigger jQuery change + wait for AJAX ────────────────────────────────
+async function triggerJQueryChange(el, waitMs) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  // Native event
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+  el.dispatchEvent(new Event('input',  { bubbles: true }));
+  // jQuery event (if jQuery is on the page)
+  if (window.jQuery) {
+    try { window.jQuery(el).trigger('change'); } catch { /* ignore */ }
+  }
+  await delay(waitMs);
+}
+
+// ── Wait for select to be populated by AJAX ──────────────────────────────
+async function waitForSelectOptions(sel, minOptions, maxWaitMs) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    if (sel.options.length >= minOptions) return true;
+    await delay(150);
+  }
+  return false;
+}
+
+// ── Select a <select> by numeric string value or by text match ───────────
+function setSelectValue(el, value) {
+  if (!el || value == null) return false;
+  const v = String(value);
+  // Try exact value match first
+  let opt = Array.from(el.options).find(o => o.value === v);
+  // Then text match (case-insensitive substring)
+  if (!opt) opt = Array.from(el.options).find(o => o.text.toLowerCase().includes(v.toLowerCase()));
+  if (!opt) return false;
+  el.value = opt.value;
+  return true;
+}
+
+async function fillGIKISSCPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  const isOLevel = profile.education_system === 'cambridge';
+  const degreeValue = isOLevel ? 'OLV10' : 'SSC10';
+
+  function mark(el, ok) {
+    if (!el) return;
+    if (ok) {
+      el.style.outline = '2px solid #4ade80';
+      el.style.outlineOffset = '2px';
+      el.classList.add('unimatch-filled');
+      onFilled?.(el);
+    } else {
+      el.style.outline = '2px solid #fbbf24';
+      el.style.outlineOffset = '2px';
+      el.classList.add('unimatch-manual');
+      onManual?.(el);
+    }
+  }
+
+  // 1. Set degree type
+  const degSel = document.querySelector('select#name');
+  if (!degSel) { console.warn('[GIKI SSC] degree selector not found'); return; }
+  degSel.value = degreeValue;
+  mark(degSel, degSel.value === degreeValue);
+  await triggerJQueryChange(degSel, 300);
+
+  // 2. Wait for board options to load via AJAX (up to 5s)
+  const boardSel = document.querySelector('select#board_id');
+  if (boardSel) {
+    const loaded = await waitForSelectOptions(boardSel, 2, 5000);
+    if (loaded) {
+      const boardProfile = isOLevel
+        ? (profile.olevel_board || 'Cambridge')
+        : (profile.matric_board || profile.board || '');
+      const boardId = resolveGIKIBoardId(boardProfile);
+      let ok = false;
+      if (boardId) ok = setSelectValue(boardSel, boardId);
+      if (!ok && boardProfile) ok = setSelectValue(boardSel, boardProfile);
+      if (ok) {
+        boardSel.dispatchEvent(new Event('change', { bubbles: true }));
+        mark(boardSel, true);
+      } else {
+        mark(boardSel, false);
+      }
+      // Wait longer here — the board change fires AJAX that may mutate the DOM.
+      // Grades must only be set AFTER this settles, otherwise they get wiped.
+      await delay(1500);
+    }
+  }
+
+  // 3. Passing year
+  const yearEl = document.querySelector('#passing_year3, [name="passing_year3"]');
+  if (yearEl) {
+    const yr = isOLevel
+      ? (profile.olevel_year || profile.matric_year || '')
+      : (profile.matric_year || '');
+    if (yr) {
+      const ok = await fillInput(yearEl, String(yr));
+      mark(yearEl, ok);
+    }
+  }
+
+  // 4. Institute
+  const instEl = document.querySelector('#institute, [name="institute"]');
+  if (instEl) {
+    const school = isOLevel
+      ? (profile.olevel_school || '')
+      : (profile.matric_school || profile.school || '');
+    if (school) {
+      const ok = await fillInput(instEl, school);
+      mark(instEl, ok);
+    }
+  }
+
+  if (isOLevel) {
+    // ── O-Level path ──────────────────────────────────────────────────────
+    // applying_for and country_of_degree first — these may trigger their own
+    // handlers. Set them before grades so any resulting DOM changes happen first.
+    const applyEl = document.querySelector('#applying_for');
+    if (applyEl) {
+      const ok = setSelectValue(applyEl, 'All');
+      if (ok) applyEl.dispatchEvent(new Event('change', { bubbles: true }));
+      mark(applyEl, ok);
+    }
+
+    const countryEl = document.querySelector('#country_of_degree');
+    if (countryEl) {
+      const ok = setSelectValue(countryEl, 'Pakistan');
+      if (ok) countryEl.dispatchEvent(new Event('change', { bubbles: true }));
+      mark(countryEl, ok);
+    }
+
+    await delay(600); // let any handlers from applying_for/country settle
+
+    // The 8 subject selects are READ-ONLY pre-filled by the server.
+    // Do NOT set their value or dispatch any events on them — jQuery handlers
+    // on the subject selects reset the paired grade field when change fires.
+    // Strategy: read the pre-filled subject text, look up the grade from the
+    // profile, then set the grade select value ONLY using the native setter
+    // with NO events dispatched — avoids any reset handlers entirely.
+    const subjects = (() => {
+      const raw = profile.olevel_subjects;
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw;
+      try { return JSON.parse(raw); } catch { return []; }
+    })();
+
+    // Build a lookup: normalised subject name → grade
+    const gradeBySubject = {};
+    for (const s of subjects) {
+      const name = (s.subject || s.name || '').toLowerCase().trim()
+        .replace(/\s*\(.*?\)\s*/g, '').trim();
+      if (name && s.grade) gradeBySubject[name] = s.grade;
+    }
+
+    const nativeSelectSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+
+    for (let i = 0; i < 8; i++) {
+      const subSel   = document.querySelector(`#subject_${i + 1}_readonly`);
+      const gradeSel = document.querySelector(`#grade_${i + 1}`);
+      if (!subSel || !gradeSel) continue;
+
+      // Read the pre-filled subject text from the currently selected option
+      const selectedOpt = subSel.options[subSel.selectedIndex];
+      const rowSubjectRaw = (selectedOpt?.text || '').trim();
+      if (!rowSubjectRaw || rowSubjectRaw.toLowerCase().startsWith('select')) {
+        await delay(200);
+        continue;
+      }
+
+      // Normalise and look up in profile grades
+      const rowSubjectNorm = rowSubjectRaw.toLowerCase().replace(/\s*\(.*?\)\s*/g, '').trim();
+      let grade = gradeBySubject[rowSubjectNorm];
+
+      // Fuzzy fallback: partial word overlap
+      if (!grade) {
+        for (const [profSubject, profGrade] of Object.entries(gradeBySubject)) {
+          if (rowSubjectNorm.includes(profSubject) || profSubject.includes(rowSubjectNorm)) {
+            grade = profGrade;
+            break;
+          }
+        }
+      }
+
+      if (grade) {
+        // Find the matching option value
+        const targetOpt = Array.from(gradeSel.options).find(o => o.value === grade || o.text === grade);
+        if (targetOpt) {
+          // Use native setter only — no change/input events to avoid reset handlers
+          if (nativeSelectSetter) nativeSelectSetter.call(gradeSel, targetOpt.value);
+          else gradeSel.value = targetOpt.value;
+          mark(gradeSel, true);
+        } else {
+          mark(gradeSel, false);
+        }
+      }
+      mark(subSel, true); // subject is read-only, mark green to acknowledge
+      await delay(200);
+    }
+
+  } else {
+    // ── SSC/Matric path ───────────────────────────────────────────────────
+    const obtEl  = document.querySelector('#obtained_marks');
+    const totEl  = document.querySelector('#total_marks');
+    if (obtEl) mark(obtEl, await fillInput(obtEl, profile.matric_marks || profile.matric_obtained || ''));
+    if (totEl) mark(totEl, await fillInput(totEl, profile.matric_total || '1100'));
+  }
+
+  console.log('[GIKI SSC] Fill complete');
+}
+
+async function fillGIKIHSSCPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  const isOLevel = profile.education_system === 'cambridge';
+  const degreeValue = isOLevel ? 'ALV12' : 'HSSC12';
+  // Result declared = yes only when education is complete (not appearing/part1 only)
+  const pendingStatuses = ['appearing', 'part1_only', 'pending', 'awaiting', 'not_declared'];
+  const interStatus = (profile.inter_status || profile.alevel_status || '').toLowerCase();
+  const resultDeclared = pendingStatuses.includes(interStatus) ? 'no' : 'yes';
+
+  function mark(el, ok) {
+    if (!el) return;
+    if (ok) {
+      el.style.outline = '2px solid #4ade80';
+      el.style.outlineOffset = '2px';
+      el.classList.add('unimatch-filled');
+      onFilled?.(el);
+    } else {
+      el.style.outline = '2px solid #fbbf24';
+      el.style.outlineOffset = '2px';
+      el.classList.add('unimatch-manual');
+      onManual?.(el);
+    }
+  }
+
+  // 1. Set degree type → triggers AJAX for boards + study groups
+  const degSel = document.querySelector('select#name');
+  if (!degSel) { console.warn('[GIKI HSSC] degree selector not found'); return; }
+  degSel.value = degreeValue;
+  mark(degSel, degSel.value === degreeValue);
+  await triggerJQueryChange(degSel, 400);
+
+  // 2. Board — wait for AJAX (up to 5s)
+  const boardSel = document.querySelector('select#board_id');
+  if (boardSel) {
+    const loaded = await waitForSelectOptions(boardSel, 2, 5000);
+    if (loaded) {
+      const boardProfile = isOLevel
+        ? (profile.alevel_board || 'Cambridge')
+        : (profile.fsc_board || profile.inter_board || profile.board || '');
+      const boardId = resolveGIKIBoardId(boardProfile);
+      let ok = boardId ? setSelectValue(boardSel, boardId) : false;
+      if (!ok && boardProfile) ok = setSelectValue(boardSel, boardProfile);
+      if (ok) boardSel.dispatchEvent(new Event('change', { bubbles: true }));
+      mark(boardSel, ok);
+      await delay(200);
+    }
+  }
+
+  // 3. Study group — wait for AJAX (up to 4s)
+  const studyGroupSel = document.querySelector('select#study_group_id');
+  if (studyGroupSel) {
+    const loaded = await waitForSelectOptions(studyGroupSel, 2, 4000);
+    if (loaded) {
+      const groupName = resolveGIKIStudyGroup(profile);
+      // Options are full text strings — use text-includes match
+      const opt = Array.from(studyGroupSel.options)
+        .find(o => o.text.toLowerCase().includes(groupName.toLowerCase()));
+      if (opt) {
+        studyGroupSel.value = opt.value;
+        studyGroupSel.dispatchEvent(new Event('change', { bubbles: true }));
+        mark(studyGroupSel, true);
+      } else {
+        mark(studyGroupSel, false);
+      }
+      await delay(200);
+    }
+  }
+
+  // 4. Result declared → triggers AJAX to load #dynamic-form-container
+  const resultSel = document.querySelector('select#result_declared');
+  if (resultSel) {
+    resultSel.value = resultDeclared;
+    mark(resultSel, true);
+    await triggerJQueryChange(resultSel, 400);
+
+    // Wait for dynamic form container to be populated (up to 6s)
+    const dynContainer = document.querySelector('#dynamic-form-container');
+    if (dynContainer) {
+      let waited = 0;
+      while (waited < 6000) {
+        if (dynContainer.querySelector('input, select')) break;
+        await delay(200);
+        waited += 200;
+      }
+      await delay(300); // extra settle
+    }
+  }
+
+  // 5. Fill fields inside #dynamic-form-container (and page-level fields)
+  const yearEl = document.querySelector('#passing_year3');
+  if (yearEl) {
+    const yr = isOLevel
+      ? (profile.alevel_year || profile.fsc_year || profile.inter_year || '')
+      : (profile.fsc_year || profile.inter_year || '');
+    if (yr) mark(yearEl, await fillInput(yearEl, String(yr)));
+  }
+
+  const instEl = document.querySelector('#institute');
+  if (instEl) {
+    const school = isOLevel
+      ? (profile.alevel_school || '')
+      : (profile.fsc_school || profile.inter_school || profile.school || '');
+    if (school) mark(instEl, await fillInput(instEl, school));
+  }
+
+  const applyEl = document.querySelector('#applying_for');
+  if (applyEl) {
+    const ok = setSelectValue(applyEl, 'All');
+    if (ok) applyEl.dispatchEvent(new Event('change', { bubbles: true }));
+    mark(applyEl, ok);
+  }
+
+  if (isOLevel) {
+    // ── A-Level path: 3 fixed subject rows ───────────────────────────────
+    const countryEl = document.querySelector('#country_of_degree');
+    if (countryEl) {
+      const ok = setSelectValue(countryEl, 'Pakistan');
+      if (ok) countryEl.dispatchEvent(new Event('change', { bubbles: true }));
+      mark(countryEl, ok);
+    }
+
+    const subjects = (() => {
+      const raw = profile.alevel_subjects;
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw;
+      try { return JSON.parse(raw); } catch { return []; }
+    })();
+
+    for (let i = 0; i < 3; i++) {
+      const subSel   = document.querySelector(`#subject_${i + 1}_readonly`);
+      const gradeSel = document.querySelector(`#grade_${i + 1}`);
+      if (!subSel) continue;
+
+      const s = subjects[i];
+      if (!s) continue;
+
+      const subName = s.subject || s.name || '';
+      const subVal  = resolveGIKISubjectValue(subName);
+      let subOk = false;
+      if (subVal) subOk = setSelectValue(subSel, subVal);
+      if (!subOk && subName) subOk = setSelectValue(subSel, subName);
+      if (subOk) subSel.dispatchEvent(new Event('change', { bubbles: true }));
+      mark(subSel, subOk);
+
+      if (gradeSel) {
+        const grade = s.grade || s.a2_grade || s.as_grade || '';
+        if (grade) {
+          const gradeOk = setSelectValue(gradeSel, grade);
+          if (gradeOk) gradeSel.dispatchEvent(new Event('change', { bubbles: true }));
+          mark(gradeSel, gradeOk);
+        }
+      }
+      await delay(80);
+    }
+
+    const obtEl = document.querySelector('#obtained_marks');
+    const totEl = document.querySelector('#total_marks');
+    if (obtEl) mark(obtEl, await fillInput(obtEl, profile.alevel_marks || profile.fsc_marks || ''));
+    if (totEl) mark(totEl, await fillInput(totEl, profile.alevel_total || profile.fsc_total || ''));
+
+  } else {
+    // ── HSSC/FSc path ─────────────────────────────────────────────────────
+    const y1Obt = document.querySelector('#year1_obtained_marks');
+    const y1Tot = document.querySelector('#year1_total_marks');
+    const obtEl = document.querySelector('#obtained_marks');
+    const totEl = document.querySelector('#total_marks');
+    const mathObt = document.querySelector('#maths_obtained_marks');
+    const mathTot = document.querySelector('#maths_total_marks');
+    const phyObt  = document.querySelector('#phy_obtained_marks');
+    const phyTot  = document.querySelector('#phy_total_marks');
+
+    // Total marks across both years combined into fsc_marks / fsc_total
+    if (obtEl) mark(obtEl, await fillInput(obtEl, profile.fsc_marks || profile.inter_marks || ''));
+    if (totEl) mark(totEl, await fillInput(totEl, profile.fsc_total || profile.inter_total || '1100'));
+    // Part 1 marks if available
+    if (y1Obt && profile.fsc_year1_marks) mark(y1Obt, await fillInput(y1Obt, profile.fsc_year1_marks));
+    if (y1Tot && profile.fsc_year1_total) mark(y1Tot, await fillInput(y1Tot, profile.fsc_year1_total));
+    // Subject-specific marks
+    if (mathObt && profile.fsc_math_marks) mark(mathObt, await fillInput(mathObt, profile.fsc_math_marks));
+    if (mathTot && profile.fsc_math_total) mark(mathTot, await fillInput(mathTot, profile.fsc_math_total));
+    if (phyObt  && profile.fsc_physics_marks) mark(phyObt,  await fillInput(phyObt,  profile.fsc_physics_marks));
+    if (phyTot  && profile.fsc_physics_total) mark(phyTot,  await fillInput(phyTot,  profile.fsc_physics_total));
+  }
+
+  console.log('[GIKI HSSC] Fill complete');
+}
+
 function isIBAEducationPage() {
   if (!window.location.hostname.includes('iba.edu.pk')) return false;
   // Detect by presence of education-specific IDs or page text landmarks
@@ -4615,14 +5234,39 @@ async function handleAutofill() {
     const filledProfileKeyOnce = new Set(); // tracks which profileKeys have been filled once
     const masterPassword = await getConsistentPassword();
 
+    // When "Fill Remaining" is triggered, skip fields already filled this session.
+    const fillRemainingOnly = !!ctx._fillRemainingOnly;
+
     // Animated progress bar
     const progressBar = buildProgressBar(contentEl);
-    const totalFields = collectAllFields().length || 1;
+    const totalFields = (fillRemainingOnly ? collectRemainingFields() : collectAllFields()).length || 1;
     let processedFields = 0;
     const tickProgress = () => {
       processedFields++;
       if (progressBar) progressBar.style.width = `${Math.min(100, (processedFields / totalFields) * 100)}%`;
     };
+
+    // ─── SPECIAL: GIKI Education Pages ──────────────────────────────
+    if (isGIKISSCPage()) {
+      console.log('[IlmSeUrooj] GIKI SSC/O-Level page detected');
+      await fillGIKISSCPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
+      return;
+    }
+    if (isGIKIHSSCPage()) {
+      console.log('[IlmSeUrooj] GIKI HSSC/A-Level page detected');
+      await fillGIKIHSSCPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
+      return;
+    }
 
     // ─── SPECIAL: IBA Candidate Registration — Education Wizard Step ─
     // Fires when the user is on step 2 (accordion-1..5 visible). Must be checked
@@ -4828,6 +5472,7 @@ async function handleAutofill() {
       for (const field of fieldMap) {
         const el = document.querySelector(field.selector);
         if (!el || alreadyHandled.has(el)) continue;
+        if (fillRemainingOnly && el.classList.contains('unimatch-filled')) continue;
         alreadyHandled.add(el);
 
         let value = profileValueFor(field.profileKey, ctx.profile) ?? ctx.profile[field.profileKey];
@@ -5023,10 +5668,11 @@ async function handleAutofill() {
     }
 
     // ─── TIER 3: Heuristic fallback for remaining fields ───────
-    const allInputs = collectAllFields();
+    const allInputs = fillRemainingOnly ? collectRemainingFields() : collectAllFields();
 
     for (const input of allInputs) {
       if (alreadyHandled.has(input)) continue;
+      if (fillRemainingOnly && input.classList.contains('unimatch-filled')) continue;
       tickProgress();
 
       // ── Credential fields: password, confirm-password, username/login ──────────────
@@ -5703,6 +6349,57 @@ async function handleScanFields() {
 }
 
 // ─── Answer Memory (Save Progress) ────────────────────────────
+
+// Returns all fields on the current page that are considered "remaining" —
+// i.e. empty and not already auto-filled by the extension in this session.
+function collectRemainingFields() {
+  return collectAllFields().filter(el => {
+    if (el.classList.contains('unimatch-filled')) return false;
+    if (el.tagName === 'SELECT') return !el.value || el.value === '';
+    if (el.classList.contains('typeahead') || el.getAttribute('class')?.includes('typeahead')) {
+      const trigger = el.querySelector('.typeahead-selected');
+      const text = (trigger?.textContent || '').trim().toLowerCase();
+      return !text || text === 'type or click to select';
+    }
+    const val = (el.value || '').trim();
+    return val === '';
+  });
+}
+
+function handleScanRemaining() {
+  const contentEl = document.getElementById('unimatch-content');
+  if (!contentEl) return;
+  const remaining = collectRemainingFields();
+  // Highlight remaining fields with a blue outline so user can see them
+  remaining.forEach(el => {
+    el.style.outline = '2px solid #60a5fa';
+    el.style.outlineOffset = '2px';
+  });
+  // Update the scan count badge in the button
+  const badge = document.getElementById('unimatch-scan-badge');
+  if (badge) badge.textContent = remaining.length;
+  // Flash feedback in the sidebar
+  const note = document.getElementById('unimatch-scan-note');
+  if (note) {
+    note.textContent = remaining.length > 0
+      ? `${remaining.length} unfilled field${remaining.length !== 1 ? 's' : ''} highlighted in blue`
+      : 'No remaining fields found — form looks complete';
+    note.style.color = remaining.length > 0 ? '#60a5fa' : '#4ade80';
+  }
+}
+
+async function handleFillRemaining() {
+  const contentEl = document.getElementById('unimatch-content');
+  const ctx = window.__unimatch;
+  if (!contentEl || !ctx) return;
+  if (!isExtensionValid()) { showContextInvalidatedUI(contentEl); return; }
+
+  // Run the full autofill but instruct it to skip already-filled fields.
+  // We set a flag on window.__unimatch that handleAutofill checks.
+  ctx._fillRemainingOnly = true;
+  await handleAutofill();
+  ctx._fillRemainingOnly = false;
+}
 
 async function handleSaveProgress() {
   const ctx = window.__unimatch;
