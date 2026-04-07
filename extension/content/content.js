@@ -509,6 +509,9 @@ function profileValueFor(key, profile) {
     case 'disability_type':
       // Stored value if set, else default to No Disability
       return profile.disability_type || 'No Disability';
+    case 'emergency_relation':
+      // Emergency contact relation — use stored value or default to Father
+      return profile.emergency_relation || 'Father';
     default:
       return undefined;
   }
@@ -687,7 +690,10 @@ const FIELD_HEURISTICS = [
       'father_or_guardian', 'father_guardian_name', 'guardian_father_name',
       'applicant_father_name', 'student_father_name', 'father_s_name',
       "father / guardian's name", 'fathers_full_name', 'guardians_name',
-      'parent_guardian_name', 'father_name_as_cnic', 'father_name_on_cnic'],
+      'parent_guardian_name', 'father_name_as_cnic', 'father_name_on_cnic',
+      // Emergency contact name — filled with guardian/father name
+      'emergency_name', 'emergencyname', 'emergency_contact_name', 'emergency contact name',
+      'emergency_person', 'emergency_contact_person', 'emergencycontactname'],
     profileKey: 'father_name', priority: 7
   },
 
@@ -1232,6 +1238,16 @@ const FIELD_HEURISTICS = [
     profileKey: 'salutation', priority: 5
   },
 
+  // ── Emergency Contact Relation ─────────────────────────────────
+  {
+    match: ['emergency_relation', 'emergencyrelation', 'emergency_contact_relation',
+      'emergency relation', 'emergency contact relation', 'emergency_contact_type',
+      'relation_emergency', 'contact_relation', 'relation_with_student',
+      'relation_with_applicant', 'relation to applicant', 'relation to student',
+      'ddlemergencyrelation', 'emergency_relationship'],
+    profileKey: 'emergency_relation', priority: 5
+  },
+
   // ── Marital Status ─────────────────────────────────────────────
   {
     match: ['maritalstatus', 'marital_status', 'marital', 'civil_status', 'civilstatus',
@@ -1496,12 +1512,12 @@ function matchFieldHeuristically(el) {
   if (allSignals.some(s => /\bmiddle[_\s-]?name\b/.test(s) || s === 'mname' ||
     s === 'middle_name' || s === 'middlename' || s === 'm_name')) return 'middle_name';
 
-  // ── Generic "name" → full_name (excluding first/last/middle/login/user/roll/father/mother) ──
+  // ── Generic "name" → full_name (excluding first/last/middle/login/user/roll/father/mother/emergency) ──
   if (allSignals.some(s => {
     if (!/\bname\b/.test(s)) return false;
-    if (/\b(first|last|middle|login|user|sur|father|mother|roll|school|college|board|institution|guardian|parent)\b/.test(s)) return false;
-    // Also exclude if signal itself contains 'mother' or 'father' substring
-    if (s.includes('mother') || s.includes('father') || s.includes('guardian') || s.includes('parent')) return false;
+    if (/\b(first|last|middle|login|user|sur|father|mother|roll|school|college|board|institution|guardian|parent|emergency)\b/.test(s)) return false;
+    // Also exclude if signal itself contains these substrings
+    if (s.includes('mother') || s.includes('father') || s.includes('guardian') || s.includes('parent') || s.includes('emergency')) return false;
     return true;
   })) return 'full_name';
 
@@ -2617,11 +2633,17 @@ function fillSelect(el, value) {
   if (match) {
     // Use native setter so Vue/React reactivity proxies intercept the assignment.
     // Direct el.value = x bypasses the proxy and Vue re-renders revert the value.
+    const prevSelectValue = el.value;
     const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
     if (nativeSetter) nativeSetter.call(el, match.value);
     else el.value = match.value;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    el.dispatchEvent(new Event('input', { bubbles: true }));
+    // Only fire change/input when the value actually changed. Firing unconditionally
+    // triggers ASP.NET AutoPostBack selects (nationality, country, etc.) even when
+    // the desired value is already selected — causing a full page reload mid-fill.
+    if (el.value !== prevSelectValue) {
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     return true;
   }
   return false;
@@ -7276,6 +7298,46 @@ async function handleAutofill() {
           sparkleField(radios[0]);
           filledCount++;
           console.log(`[IlmSeUrooj] TIER 2.7 edu radio: ${eduVal}`);
+        }
+      }
+    }
+
+    // ─── TIER 2.8: Split CNIC/NIC group scan ──────────────────────
+    // Detects table rows / containers where a CNIC label is adjacent to 2-3 short
+    // inputs matching the 5+7+1 pattern used by ASP.NET portals (SZABIST, etc.).
+    // Works for both student NIC and father NIC sections.
+    if (ctx.profile.cnic) {
+      const cnicParts = String(ctx.profile.cnic).split('-');
+      if (cnicParts.length === 3) {
+        const [cp1, cp2, cp3] = cnicParts;
+        const CNIC_LABEL_PAT = /\bnic\b|cnic|national[\s_-]?id|identity[\s_-]?card|identity[\s_-]?no/i;
+        for (const row of document.querySelectorAll('tr')) {
+          const rowInputs = Array.from(row.querySelectorAll('input[type="text"], input:not([type])'))
+            .filter(i => !alreadyHandled.has(i));
+          if (rowInputs.length < 2 || rowInputs.length > 4) continue;
+          const hasCNICLabel = CNIC_LABEL_PAT.test(row.textContent || '');
+          if (!hasCNICLabel) continue;
+          const inp5 = rowInputs.find(i => i.maxLength === 5);
+          const inp7 = rowInputs.find(i => i.maxLength === 7);
+          const inp1 = rowInputs.find(i => i.maxLength === 1);
+          if (!inp5 || !inp7) continue; // Not a 5+7+1 pattern
+          const isFatherRow = /father|guardian|parent/i.test(row.textContent || '');
+          const fillVal1 = isFatherRow ? (ctx.profile.father_cnic || '').split('-')[0] || cp1 : cp1;
+          const fillVal2 = isFatherRow ? (ctx.profile.father_cnic || '').split('-')[1] || cp2 : cp2;
+          const fillVal3 = isFatherRow ? (ctx.profile.father_cnic || '').split('-')[2] || cp3 : cp3;
+          if (!fillVal1 || !fillVal2) continue;
+          for (const [inp, val] of [[inp5, fillVal1], [inp7, fillVal2], [inp1, fillVal3]]) {
+            if (!inp || !val) continue;
+            const ok = await fillInput(inp, val);
+            if (ok) {
+              inp.style.outline = '2px solid #4ade80';
+              inp.style.outlineOffset = '2px';
+              inp.classList.add('unimatch-filled');
+              sparkleField(inp);
+              filledCount++;
+            }
+            alreadyHandled.add(inp);
+          }
         }
       }
     }
