@@ -656,9 +656,10 @@ ALL_UNIVERSITIES.push({
 ALL_UNIVERSITIES.push({
     slug: 'uet-taxila', name: 'UET Taxila',
     fullName: 'University of Engineering & Technology Taxila',
-    registrationUrl: 'https://admission.uettaxila.edu.pk',
-    loginUrl: 'https://admission.uettaxila.edu.pk',
-    portalDomains: ['admissions.uettaxila.edu.pk', 'admission.uettaxila.edu.pk', 'uettaxila.edu.pk'],
+    registrationUrl: 'https://entrytest.uettaxila.edu.pk/register',
+    loginUrl: 'https://entrytest.uettaxila.edu.pk',
+    portalDomains: ['entrytest.uettaxila.edu.pk', 'admissions.uettaxila.edu.pk', 'admission.uettaxila.edu.pk', 'uettaxila.edu.pk'],
+    credentialSystem: 'email_sent',
     formType: 'requires_login_first',
     fieldMap: {
         full_name: '[name="name"], [name="full_name"], [name="applicant_name"], #name',

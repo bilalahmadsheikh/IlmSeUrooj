@@ -57,8 +57,19 @@ const TRANSFORMS = {
     return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
   },
   phone_pak: (v) => {
-    const str = String(v ?? '');
-    return str && str.startsWith('0') ? str : '0' + str;
+    const str = String(v ?? '').replace(/\D/g, '');
+    if (!str) return '';
+    if (str.startsWith('92') && str.length >= 11) return '0' + str.slice(2); // 923xx → 03xx
+    return str.startsWith('0') ? str : '0' + str;
+  },
+  // International Pakistani format: 923XXXXXXXXX (12 digits, no +, no 0)
+  phone_92: (v) => {
+    const str = String(v ?? '').replace(/\D/g, '');
+    if (!str) return '';
+    if (str.startsWith('92') && str.length >= 11) return str.slice(0, 12);
+    if (str.startsWith('0') && str.length >= 11) return '92' + str.slice(1);
+    if (str.length === 10 && str.startsWith('3')) return '92' + str;
+    return '92' + str.replace(/^0+/, '');
   },
   cnic_dashes: (v) => {
     const str = String(v ?? '');
@@ -81,6 +92,125 @@ const TRANSFORMS = {
     return parts.length > 2 ? parts.slice(1, -1).join(' ') : '';
   },
 };
+
+// ─── Field Format Inference ────────────────────────────────────
+// Read every available signal on an element to determine the exact
+// format a specific field requires, without any university hardcoding.
+
+/**
+ * Returns a helper that gets the combined hint text for a field:
+ * placeholder + title + pattern + label[for] text + wrapping label text.
+ */
+function getFieldHintText(el) {
+  const parts = [
+    el.getAttribute('placeholder') || '',
+    el.getAttribute('title') || '',
+    el.getAttribute('pattern') || '',
+    el.getAttribute('data-placeholder') || '',
+  ];
+  // label[for=id] or label[for=formcontrolname]
+  const ids = [el.id, el.getAttribute('formcontrolname')].filter(Boolean);
+  for (const id of ids) {
+    try {
+      const lbl = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+      if (lbl) { parts.push(lbl.textContent || ''); break; }
+    } catch (_) {}
+  }
+  // Wrapping label
+  const wrap = el.closest('label');
+  if (wrap) parts.push(wrap.textContent || '');
+  // Adjacent sibling label (previous element)
+  const prev = el.previousElementSibling;
+  if (prev && prev.tagName === 'LABEL') parts.push(prev.textContent || '');
+  return parts.join(' ').toLowerCase();
+}
+
+/**
+ * Infer CNIC format from field signals.
+ * Returns 'dashes' (XXXXX-XXXXXXX-X) or 'no_dashes' (XXXXXXXXXXXXX).
+ */
+function inferCNICFormat(el) {
+  // type="number" can never accept dashes
+  if (el.type === 'number') return 'no_dashes';
+
+  // maxLength is the most reliable signal
+  const ml = el.maxLength;
+  if (ml === 13) return 'no_dashes';
+  if (ml === 15) return 'dashes';
+
+  const hint = getFieldHintText(el);
+
+  // Explicit no-dashes signals
+  if (/no[\s\-]?dash|without[\s\-]?dash|13[\s\-]?digit|nodash|nondash|without[\s\-]?[\-]|digits only/.test(hint)) return 'no_dashes';
+  // Explicit dashes signals — placeholder shows "XXXXX-XXXXXXX-X" style
+  if (/\d{5}-\d{7}-\d|\bxxxxx-xxxxxxx|\bwith[\s\-]?dash/.test(hint)) return 'dashes';
+
+  // Name/id contains no-dash hint
+  const sig = ((el.name || '') + ' ' + (el.id || '') + ' ' + (el.getAttribute('formcontrolname') || '') + ' ' + (el.className || '')).toLowerCase();
+  if (/nodash|no_dash|nondash|without_dash|cnic13|digits/.test(sig)) return 'no_dashes';
+
+  // Default: dashes (most Pakistani portals show dashed CNIC)
+  return 'dashes';
+}
+
+/**
+ * Infer phone format from field signals.
+ * Returns 'local' (03xxxxxxxxx), 'intl_92' (923xxxxxxxxx), or 'intl_plus' (+923xxxxxxxxx).
+ */
+function inferPhoneFormat(el) {
+  const ml = el.maxLength;
+
+  // maxLength is the strongest signal for phone format
+  if (ml === 11) return 'local';   // 03xxxxxxxxx = 11 chars
+  if (ml === 12) return 'intl_92'; // 923xxxxxxxxx = 12 chars
+  if (ml === 13) return 'intl_plus'; // +923xxxxxxxxx = 13 chars
+  if (ml === 14) return 'intl_92';  // some portals allow 14 (923xxxxxxxxx + 2 extras)
+
+  const hint = getFieldHintText(el);
+
+  // Explicit +92 / international with plus
+  if (/\+92|\+923|with\s*\+|plus.*92/.test(hint)) return 'intl_plus';
+  // 923 format without plus
+  if (/923|format.*92[^+]|92\s*3|country\s*code.*92|with\s*92|92\s*followed/.test(hint)) return 'intl_92';
+  // Explicit local/03 format
+  if (/\b03[0-9]|\bformat.*03|03xx|0[3-9]\d{9}/.test(hint)) return 'local';
+
+  // Name/id/formcontrolname signals
+  const sig = ((el.name || '') + ' ' + (el.id || '') + ' ' + (el.getAttribute('formcontrolname') || '')).toLowerCase();
+  if (/intl|international|country_code|with_code/.test(sig)) return 'intl_92';
+
+  // Default: local Pakistani format
+  return 'local';
+}
+
+/**
+ * Apply the correct phone transform based on inferred format.
+ */
+function applyPhoneTransform(value, format) {
+  if (format === 'intl_92') return TRANSFORMS.phone_92(value);
+  if (format === 'intl_plus') {
+    const base = TRANSFORMS.phone_92(value);
+    return base ? '+' + base : base;
+  }
+  return TRANSFORMS.phone_pak(value);
+}
+
+/**
+ * Apply CNIC / phone format transforms to a value based on what the field signals
+ * it requires. Safe to call for any profileKey — no-ops for non-CNIC/phone keys.
+ */
+function applyFieldTransform(el, profileKey, value) {
+  if (!value) return value;
+  if (profileKey === 'cnic' || profileKey === 'father_cnic' || profileKey === 'mother_cnic') {
+    return inferCNICFormat(el) === 'no_dashes'
+      ? TRANSFORMS.cnic_no_dashes(value)
+      : TRANSFORMS.cnic_dashes(value);
+  }
+  if (profileKey === 'phone' || profileKey === 'guardian_phone' || profileKey === 'whatsapp') {
+    return applyPhoneTransform(value, inferPhoneFormat(el));
+  }
+  return value;
+}
 
 // ─── Profile Value Resolver ─────────────────────────────────────
 // Maps profileKey strings to actual profile data, supporting nested / computed keys
@@ -173,6 +303,11 @@ function profileValueFor(key, profile) {
       return profile.province || profile.domicile_province;
     case 'district':
       return profile.district || profile.domicile_district;
+    // Domicile field that could show provinces OR districts depending on portal —
+    // try district first (most specific), fall back to city, then province.
+    case 'domicile_location':
+      return profile.district || profile.domicile_district || profile.city
+          || profile.domicile || profile.province || profile.domicile_province;
     // ── Father / Mother status, income, profession ─────────────
     case 'father_first_name': {
       const n = (profile.father_name || '').trim();
@@ -312,6 +447,22 @@ function profileValueFor(key, profile) {
     case 'portal_password':
       // Resolved separately via getConsistentPassword() — return stored value if present
       return profile.portal_password || undefined;
+    // ── Derived / default fields ───────────────────────────────
+    case 'salutation': {
+      // Derive title from gender: Male → Mr., Female → Mrs., Transgender → M/S
+      if (profile.salutation) return profile.salutation;
+      const g = (profile.gender || '').toLowerCase().trim();
+      if (g === 'male' || g === 'm') return 'Mr.';
+      if (g === 'female' || g === 'f') return 'Mrs.';
+      if (g === 'transgender') return 'M/S';
+      return undefined;
+    }
+    case 'marital_status':
+      // Stored value if set, else default to Single
+      return profile.marital_status || 'Single';
+    case 'disability_type':
+      // Stored value if set, else default to No Disability
+      return profile.disability_type || 'No Disability';
     default:
       return undefined;
   }
@@ -546,8 +697,9 @@ const FIELD_HEURISTICS = [
 
   // ── Blood Group ────────────────────────────────────────────────
   {
-    match: ['blood_group', 'bloodgroup', 'blood_type', 'bloodtype', 'blood group', 'blood type',
-      'blood_grp', 'bg', 'blood_group_type', 'applicant_blood_group', 'student_blood_group'],
+    match: ['blood_group', 'bloodgroup', 'bloodgroupid', 'blood_group_id', 'blood_type', 'bloodtype',
+      'blood group', 'blood type', 'blood_grp', 'bg', 'blood_group_type',
+      'applicant_blood_group', 'student_blood_group'],
     profileKey: 'blood_group', priority: 4
   },
 
@@ -581,7 +733,9 @@ const FIELD_HEURISTICS = [
   {
     match: ['district', 'district_name', 'domicile_district', 'home_district', 'tehsil',
       'zila', 'district_of_domicile', 'dist',
-      'district_id', 'domicile_district_name', 'perm_district', 'district_code'],
+      'district_id', 'domicile_district_name', 'perm_district', 'district_code',
+      // Angular camelCase: domicileId on portals with full district lists (e.g. UET Taxila)
+      'domicileid'],
     profileKey: 'district', priority: 4
   },
 
@@ -614,12 +768,15 @@ const FIELD_HEURISTICS = [
   {
     match: ['nationality', 'citizenship', 'country_of_citizenship', 'country', 'citizen',
       'applicant_nationality', 'national_status', 'nationality_id', 'citizenship_status',
-      'country_of_origin', 'national_origin'],
+      'country_of_origin', 'national_origin',
+      // Angular/PrimeNG residency dropdowns (e.g. UET Taxila formcontrolname="resident")
+      'resident', 'residency', 'residency_status', 'residency_type', 'resident_type',
+      'residency_category', 'applicant_residency'],
     profileKey: 'nationality', priority: 3
   },
   {
     match: ['religion', 'faith', 'religion_name', 'mazhab', 'deen', 'religious_affiliation',
-      'religion_id', 'religion_code', 'applicant_religion', 'student_religion'],
+      'religion_id', 'religionid', 'religion_code', 'applicant_religion', 'student_religion'],
     profileKey: 'religion', priority: 3
   },
 
@@ -963,6 +1120,40 @@ const FIELD_HEURISTICS = [
       'qualification_category', 'academic_category', 'inter_type_qualification'],
     profileKey: 'education_system', priority: 6
   },
+
+  // ── Domicile location (camelCase Angular formcontrolname) ────────
+  // 'domicileId' normalizes to 'domicileid'. The province heuristic's 'domicile_id'
+  // keyword also normalizes to 'domicileid' when separators are stripped, giving it
+  // a score of 20 (priority 5 + exact 10 + primary bonus 5). This entry at priority 10
+  // ensures district-first matching wins for camelCase domicile fields on Angular portals.
+  {
+    match: ['domicileid'],
+    profileKey: 'domicile_location', priority: 10
+  },
+
+  // ── Salutation / Title ─────────────────────────────────────────
+  // Derived from gender: Male → Mr., Female → Mrs., Transgender → M/S
+  {
+    match: ['salutation', 'salutationtypeid', 'salutation_type', 'salutation_type_id',
+      'salutation_id', 'title', 'name_title', 'title_name', 'prefix', 'name_prefix',
+      'honorific', 'mr_mrs', 'mr_ms', 'mr_dr'],
+    profileKey: 'salutation', priority: 5
+  },
+
+  // ── Marital Status ─────────────────────────────────────────────
+  {
+    match: ['maritalstatus', 'marital_status', 'marital', 'civil_status', 'civilstatus',
+      'relationship_status', 'marital status', 'marital_state', 'married_status'],
+    profileKey: 'marital_status', priority: 3
+  },
+
+  // ── Disability Type ────────────────────────────────────────────
+  {
+    match: ['disabilitytypeid', 'disability_type', 'disability_type_id', 'disability',
+      'disability_status', 'handicap', 'handicap_type', 'physical_disability',
+      'disability type', 'disability_category', 'special_need', 'special_needs'],
+    profileKey: 'disability_type', priority: 3
+  },
 ];
 
 // Fields that should NEVER be autofilled by heuristics
@@ -1118,6 +1309,9 @@ function matchFieldHeuristically(el) {
   // Build normalized signals (name/id get extra weight as primary identifiers)
   const normName = normalizeSignal(rawName);
   const normId = normalizeSignal(rawId);
+  // Angular formcontrolname attribute — treated as primary signal (equivalent to name/id)
+  const rawFormControl = el.getAttribute('formcontrolname') || '';
+  const normFormControl = normalizeSignal(rawFormControl);
   const normPlaceholder = (rawPlaceholder).toLowerCase().trim();
   const normAriaLabel = (rawAriaLabel).toLowerCase().trim();
   const normLabel = (labelText).toLowerCase().trim().replace(/[*:]+$/, '').trim();
@@ -1125,7 +1319,7 @@ function matchFieldHeuristically(el) {
   const normAC = (rawAutocomplete).toLowerCase().trim();
 
   // All signals as array (primary ones first for priority ordering)
-  const primarySignals = [normName, normId].filter(Boolean);
+  const primarySignals = [normName, normId, normFormControl].filter(Boolean);
   const normTitle = rawTitle.toLowerCase().trim();
   const secondarySignals = [normLabel, normAriaLabel, normPlaceholder, normData, normAC, normTitle].filter(Boolean);
   const allSignals = [...primarySignals, ...secondarySignals];
@@ -1307,7 +1501,7 @@ async function getSiteUrl() {
  */
 function collectAllFields(root = document) {
   const results = [];
-  const SELECTOR = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]), select, textarea, div.typeahead, [class*="typeahead"][tabindex]';
+  const SELECTOR = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]), select, textarea, div.typeahead, [class*="typeahead"][tabindex], p-dropdown, p-calendar';
 
   try {
     results.push(...root.querySelectorAll(SELECTOR));
@@ -1649,6 +1843,17 @@ async function fillInput(el, value) {
   const tagName = el.tagName.toLowerCase();
   const inputType = el.type?.toLowerCase();
 
+  // Handle PrimeNG <p-dropdown> custom components (Angular portals)
+  // The inner <input> is readonly — must interact via DOM clicks
+  if (tagName === 'p-dropdown') {
+    return fillPrimeNGDropdown(el, value);
+  }
+
+  // Handle PrimeNG <p-calendar> date picker — native setter + input event
+  if (tagName === 'p-calendar') {
+    return fillPrimeNGCalendar(el, value);
+  }
+
   // Handle <select> elements
   if (tagName === 'select') {
     return fillSelect(el, value);
@@ -1804,6 +2009,243 @@ async function fillTypeahead(container, value) {
   return false;
 }
 
+/**
+ * Fill a PrimeNG <p-dropdown> by clicking the trigger and selecting the matching item.
+ * Required for Angular Reactive Forms where the inner <input> is readonly — direct value
+ * assignment has no effect. Used for fields like Gender and Residency on Angular portals.
+ *
+ * Matching order (case-insensitive):
+ *   1. Exact text match
+ *   2. Option text starts with value (covers "Pakistan" → "Pakistani")
+ *   3. Value starts with option text (covers "Pakistani" stored value → "Pakistani" option)
+ *   4. Option text contains value (≥3 chars)
+ *   5. Alias lookup for known value→option mismatches (e.g. "other" → "Transgender")
+ */
+async function fillPrimeNGDropdown(el, value) {
+  if (!value) return false;
+  const val = String(value).toLowerCase().trim();
+
+  // Semantic alias table: maps profile-stored values → possible option texts on portals.
+  // Used when direct string matching fails. Keys and values are all lowercase.
+  const PRIMENG_ALIASES = {
+    // Gender
+    'male':        ['male', 'm', 'boy', 'mr.'],
+    'female':      ['female', 'f', 'girl', 'woman', 'mrs.'],
+    'other':       ['transgender', 'others', 'other gender', 'other'],
+    'transgender': ['transgender', 'other'],
+    // Nationality / residency
+    'pakistan':    ['pakistan', 'pakistani', 'pk'],
+    'foreign':     ['foreign student', 'foreigner', 'foreign national', 'foreign'],
+    'non-pakistani': ['foreign student', 'foreign', 'non-pakistani'],
+    // Religion — Islam and Muslim are used interchangeably across portals
+    'islam':       ['muslim', 'islam', 'islamic', 'muslims'],
+    'muslim':      ['muslim', 'islam', 'islamic'],
+    'christian':   ['christian', 'christianity', 'christ'],
+    'hindu':       ['hindu', 'hinduism'],
+    'ahmadi':      ['ahmadi', 'ahmadiyya', 'qadiani'],
+    // Salutation
+    'mr.':         ['mr.', 'mr'],
+    'mrs.':        ['mrs.', 'mrs', 'ms.', 'ms'],
+    'mr':          ['mr.', 'mr'],
+    'mrs':         ['mrs.', 'mrs', 'ms.', 'ms'],
+    'm/s':         ['m/s', 'ms', 'transgender'],
+    // Marital status
+    'single':      ['single', 'unmarried', 'bachelor', 'spinster'],
+    'married':     ['married', 'wed', 'wedded'],
+    'divorced':    ['divorced', 'divorcee', 'separated'],
+    // Disability
+    'no disability': ['no disability', 'none', 'n/a', 'not applicable', 'no', 'normal', 'no handicap'],
+    // Blood group
+    'a+': ['a+', 'a positive', 'a pos'],
+    'a-': ['a-', 'a negative', 'a neg'],
+    'b+': ['b+', 'b positive', 'b pos'],
+    'b-': ['b-', 'b negative', 'b neg'],
+    'o+': ['o+', 'o positive', 'o pos'],
+    'o-': ['o-', 'o negative', 'o neg'],
+    'ab+': ['ab+', 'ab positive', 'ab pos'],
+    'ab-': ['ab-', 'ab negative', 'ab neg'],
+  };
+
+  const trigger = el.querySelector('.p-dropdown-trigger');
+  if (!trigger) return false;
+  trigger.click();
+
+  // Wait for Angular change detection to render the overlay panel
+  await new Promise(r => setTimeout(r, 200));
+
+  // PrimeNG overlays are appended to <body> as CDK portals — check document first
+  const panel = document.querySelector('.p-dropdown-panel:not(.p-hidden)')
+             || document.querySelector('.p-dropdown-panel')
+             || el.querySelector('.p-dropdown-panel');
+  if (!panel) return false;
+
+  // Query ALL items FIRST — before any filtering. This is critical: if we type into
+  // the filter first and the search term doesn't match the actual option text (e.g.
+  // "islam" typed → "Muslim" hidden), all subsequent matching fails on an empty list.
+  let items = Array.from(panel.querySelectorAll('.p-dropdown-item, [role="option"]'));
+  if (!items.length) return false;
+
+  const findInList = (list, searchVal) => {
+    if (!searchVal) return null;
+    const sv = String(searchVal).toLowerCase().trim();
+    return (
+      list.find(o => o.textContent.trim().toLowerCase() === sv) ||
+      list.find(o => o.textContent.trim().toLowerCase().startsWith(sv)) ||
+      list.find(o => sv.startsWith(o.textContent.trim().toLowerCase()) && o.textContent.trim().length >= 3) ||
+      (sv.length >= 3 ? list.find(o => o.textContent.trim().toLowerCase().includes(sv)) : null)
+    );
+  };
+  const findItem = (sv) => findInList(items, sv);
+
+  // 1. Direct match
+  let target = findItem(val);
+
+  // 2. Alias fallback — handles semantic equivalences (Islam↔Muslim, Mr↔Mr., etc.)
+  if (!target) {
+    for (const [aliasKey, aliasVals] of Object.entries(PRIMENG_ALIASES)) {
+      if (val === aliasKey || aliasKey.startsWith(val) || val.startsWith(aliasKey)) {
+        for (const av of aliasVals) {
+          target = findItem(av);
+          if (target) break;
+        }
+        if (target) break;
+      }
+    }
+  }
+
+  // 3. Dynamic profile-value fallback — tries all categorical profile values against
+  // the full (unfiltered) items list. Handles location dropdowns that may show
+  // provinces, districts, or cities interchangeably.
+  if (!target) {
+    const profile = window.__unimatch?.profile;
+    if (profile) {
+      const candidates = [
+        profile.district, profile.domicile_district, profile.tehsil,
+        profile.city, profile.domicile,
+        profile.province, profile.domicile_province,
+        profile.religion, profile.nationality, profile.blood_group,
+        profile.marital_status, profile.disability_type,
+      ].filter(v => v && typeof v === 'string' && v.toLowerCase().trim() !== val);
+
+      for (const cv of candidates) {
+        target = findItem(cv);
+        if (target) break;
+      }
+    }
+  }
+
+  // 4. Filter-based last resort — only for large virtual-scrolled lists where not all
+  // items are rendered in the DOM at once (e.g. 500+ option dropdowns).
+  // Use the best matching candidate we found (or the original val) as the search term.
+  if (!target) {
+    const filterInput = panel.querySelector('.p-dropdown-filter');
+    if (filterInput && items.length >= 30) {
+      // Pick the best search term: first alias candidate that makes sense, else val
+      const searchTerm = (() => {
+        const a = PRIMENG_ALIASES[val];
+        return (a && a[0]) ? a[0] : val;
+      })();
+      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      if (nativeSetter) nativeSetter.call(filterInput, searchTerm);
+      filterInput.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise(r => setTimeout(r, 300));
+      // Re-query the now-filtered list
+      items = Array.from(panel.querySelectorAll('.p-dropdown-item, [role="option"]'));
+      target = findInList(items, val) || findInList(items, searchTerm);
+      // Try profile candidates on filtered list too
+      if (!target) {
+        const profile = window.__unimatch?.profile;
+        if (profile) {
+          const candidates = [
+            profile.district, profile.domicile_district, profile.city,
+            profile.domicile, profile.province, profile.domicile_province,
+          ].filter(v => v && typeof v === 'string');
+          for (const cv of candidates) {
+            target = findInList(items, cv);
+            if (target) break;
+          }
+        }
+      }
+    }
+  }
+
+  if (!target) {
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return false;
+  }
+
+  target.click();
+  await new Promise(r => setTimeout(r, 50));
+  return true;
+}
+
+/**
+ * Fill a PrimeNG <p-calendar> date picker by typing into its inner input.
+ * PrimeNG Calendar's onUserInput handler parses the typed value using its
+ * dateFormat (default: mm/dd/yy where yy = 4-digit year in PrimeNG).
+ * Direct .value assignment fails — must use native setter + fire input event.
+ */
+async function fillPrimeNGCalendar(el, value) {
+  if (!value) return false;
+
+  // Parse value to a Date object. Handles ISO (YYYY-MM-DD) and DD/MM/YYYY.
+  let date;
+  const isoMatch = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const dmyMatch = String(value).match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if (isoMatch) {
+    date = new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
+  } else if (dmyMatch) {
+    const a = parseInt(dmyMatch[1]), b = parseInt(dmyMatch[2]), y = parseInt(dmyMatch[3]);
+    date = a > 12 ? new Date(y, b - 1, a) : new Date(y, a - 1, b);
+  }
+  if (!date || isNaN(date.getTime())) return false;
+
+  const input = el.querySelector('input');
+  if (!input) return false;
+
+  // Detect PrimeNG dateFormat from the element attribute.
+  // PrimeNG default: 'mm/dd/yy' where 'yy' = 2-digit year, 'yyyy' = 4-digit.
+  // The parser reads exactly 2 chars for 'yy' — typing 4 digits with 'yy' format
+  // causes a parse error, so we MUST match the format token exactly.
+  const rawFmt = (el.getAttribute('dateformat') || el.getAttribute('ng-reflect-date-format') || 'mm/dd/yy').toLowerCase();
+  const useFullYear = rawFmt.includes('yyyy');
+
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const yr = useFullYear
+    ? String(date.getFullYear())                          // 4-digit
+    : String(date.getFullYear()).slice(-2).padStart(2, '0'); // 2-digit
+
+  // Build the formatted string by replacing tokens in the detected format pattern.
+  // Replace longest token first (yyyy before yy) to avoid double-replacement.
+  const formatted = rawFmt
+    .replace('dd',   dd)
+    .replace('mm',   mm)
+    .replace('yyyy', String(date.getFullYear()))
+    .replace('yy',   yr);
+
+  // Method 1: document.execCommand('insertText') — fires a real InputEvent that
+  // Angular/PrimeNG treats identically to user typing. Most reliable for Ivy apps.
+  input.focus();
+  input.select();
+  const inserted = document.execCommand('insertText', false, formatted);
+  if (inserted) {
+    await new Promise(r => setTimeout(r, 80));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    input.dispatchEvent(new Event('blur',   { bubbles: true }));
+    return true;
+  }
+
+  // Method 2: Native setter + synthetic input event (fallback for stricter CSP)
+  const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+  if (nativeSetter) nativeSetter.call(input, formatted); else input.value = formatted;
+  input.dispatchEvent(new Event('input',  { bubbles: true }));
+  await new Promise(r => setTimeout(r, 80));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+  input.dispatchEvent(new Event('blur',   { bubbles: true }));
+  return true;
+}
+
 
 function fillSelect(el, value) {
   if (!value && value !== 0) return false;
@@ -1882,6 +2324,14 @@ function fillSelect(el, value) {
       'alive': ['alive', 'living', 'present', 'yes'],
       'deceased': ['deceased', 'dead', 'passed', 'no', 'late', 'marhoom'],
       'shaheed': ['shaheed', 'martyr'],
+      // Salutation
+      'mr.': ['mr', 'mr.'],
+      'mrs.': ['mrs', 'mrs.', 'ms', 'ms.'],
+      'm/s': ['m/s', 'ms', 'transgender'],
+      // Marital status defaults
+      'single': ['single', 'unmarried', 'bachelor', 'spinster'],
+      // Disability defaults
+      'no disability': ['no disability', 'none', 'n/a', 'not applicable', 'no', 'normal'],
     };
     for (const [key, alts] of Object.entries(aliases)) {
       if (val === key || alts.some(a => val.includes(a))) {
@@ -1962,6 +2412,28 @@ function fillSelect(el, value) {
       if (dist <= 2 && dist < bestDist) {
         bestDist = dist;
         match = o;
+      }
+    }
+  }
+  // 9. Dynamic profile-value fallback — when the primary value doesn't match any option,
+  // try other categorical profile fields. Handles cases like "province" dropdown that
+  // actually shows districts, or religion field that uses "Muslim" vs "Islam".
+  if (!match) {
+    const _p = window.__unimatch?.profile;
+    if (_p) {
+      const _candidates = [
+        _p.district, _p.domicile_district, _p.tehsil,
+        _p.city, _p.domicile,
+        _p.province, _p.domicile_province,
+        _p.religion, _p.nationality, _p.blood_group,
+        _p.marital_status, _p.disability_type,
+      ].filter(v => v && typeof v === 'string' && v.toLowerCase().trim() !== val);
+      for (const cv of _candidates) {
+        const cvl = cv.toLowerCase().trim();
+        match = options.find(o => o.text.toLowerCase().trim() === cvl) ||
+                options.find(o => o.text.toLowerCase().trim().startsWith(cvl)) ||
+                (cvl.length >= 3 ? options.find(o => o.text.toLowerCase().includes(cvl)) : null);
+        if (match) break;
       }
     }
   }
@@ -2595,7 +3067,7 @@ function showSuggestionChip(el, value, profileKey) {
     if (profileKey === 'date_of_birth') {
       await fillDateAdvanced(el, value);
     } else {
-      await fillInput(el, String(value));
+      await fillInput(el, String(applyFieldTransform(el, profileKey, value)));
     }
     el.style.outline = '2px solid #4ade80';
     el.style.outlineOffset = '2px';
@@ -2843,9 +3315,18 @@ async function initSidebarState(university) {
   renderState(contentEl, 'ready', { profile, university });
 
   // Auto-resume Bahria multi-phase fill after a postback reload.
-  // 1500ms gives ASP.NET time to finish rendering the page before we interact.
+  // Polls until window.__unimatch.profile is ready (chrome.storage.local may be
+  // slightly behind on slow connections), then fires handleAutofill.
   if (isBahriaProfilePage() && sessionStorage.getItem(BAHRIA_FILL_KEY)) {
-    setTimeout(handleAutofill, 1500);
+    const tryResume = (attempt) => {
+      if (attempt >= 10) return; // give up after ~6.5 s total
+      if (window.__unimatch?.profile) {
+        handleAutofill();
+      } else {
+        setTimeout(() => tryResume(attempt + 1), attempt === 0 ? 1500 : 500);
+      }
+    };
+    tryResume(0);
   }
 }
 
@@ -3664,10 +4145,13 @@ async function fillIBADemographicPage(profile, onFilled, onManual) {
   doFillInput(resolveInput(['last name'], 2), pv('last_name'));
   doFillInput(resolveInput(['email'], 3), pv('email'));
 
-  // CNIC with dashes
+  // CNIC — format inferred from field signals (dashes vs no-dashes)
   const cnicEl = resolveInput(['cnic', 'national id', 'identity'], 4);
   const cnicRaw = pv('cnic');
-  if (cnicEl && cnicRaw) doFillInput(cnicEl, TRANSFORMS.cnic_dashes(String(cnicRaw)));
+  if (cnicEl && cnicRaw) {
+    const fmt = inferCNICFormat(cnicEl) === 'no_dashes' ? TRANSFORMS.cnic_no_dashes : TRANSFORMS.cnic_dashes;
+    doFillInput(cnicEl, fmt(String(cnicRaw)));
+  }
 
   // ── Nationality radio ─────────────────────────────────────────
   doRadio([
@@ -3725,7 +4209,10 @@ async function fillIBADemographicPage(profile, onFilled, onManual) {
 
   const fCnicEl = resolveInput(["father's cnic", 'father cnic'], 11);
   const fCnic = pv('father_cnic') || profile.father_cnic;
-  if (fCnicEl && fCnic) doFillInput(fCnicEl, TRANSFORMS.cnic_dashes(String(fCnic)));
+  if (fCnicEl && fCnic) {
+    const fmt = inferCNICFormat(fCnicEl) === 'no_dashes' ? TRANSFORMS.cnic_no_dashes : TRANSFORMS.cnic_dashes;
+    doFillInput(fCnicEl, fmt(String(fCnic)));
+  }
 
   // Father NTN — explicitly block so generic tiers don't fill it
   const fNtnEl = resolveInput(["father's ntn", 'father ntn', 'ntn no'], 12);
@@ -3740,7 +4227,10 @@ async function fillIBADemographicPage(profile, onFilled, onManual) {
 
   const mCnicEl = resolveInput(["mother's cnic", 'mother cnic'], 15);
   const mCnic = pv('mother_cnic') || profile.mother_cnic;
-  if (mCnicEl && mCnic) doFillInput(mCnicEl, TRANSFORMS.cnic_dashes(String(mCnic)));
+  if (mCnicEl && mCnic) {
+    const fmt = inferCNICFormat(mCnicEl) === 'no_dashes' ? TRANSFORMS.cnic_no_dashes : TRANSFORMS.cnic_dashes;
+    doFillInput(mCnicEl, fmt(String(mCnic)));
+  }
 
   // ── Marital status ─────────────────────────────────────────────
   const maritalEl = resolveSelect(['marital'], 1);
@@ -5079,14 +5569,10 @@ async function fillBahriaProfilePage(profile, onFilled, onManual) {
     return '1'; // alive or not set → Yes
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PHASE 0 — Fill all static fields + set Father Alive radio (no postback) +
-  //           select Province, then trigger Province postback. ASP.NET receives
-  //           the Father Alive radio value in that same POST submission and
-  //           renders the father details section in its response — saving one
-  //           extra page reload vs triggering Father Alive postback separately.
-  // ──────────────────────────────────────────────────────────────────────────
-  if (phase === 0) {
+  // ── fillStaticFields — fills all non-cascade fields ─────────────────────
+  // Called at the start of EVERY phase because ASP.NET may reload field values
+  // from the database on each postback, wiping whatever JS set before the submit.
+  async function fillStaticFields() {
     fillInput('tbName', profile.full_name);
     fillInput('tbCNIC', formatCNIC(profile.cnic));
     fillInput('tbDOB', formatDOB(profile.date_of_birth));
@@ -5132,17 +5618,36 @@ async function fillBahriaProfilePage(profile, onFilled, onManual) {
     fillSelect('ddlNTNOrCNIC', 'CNIC');
     await delay(100);
     fillInput('tbNTNOrCNIC', formatCNIC(profile.father_cnic));
-    fillInput('tbTaxPayerName', profile.father_name || '');
-    fillInput('tbTaxPayerRelationship', 'Father');
+    fillInput('tbTaxPayerName', profile.father_name || profile.guardian_name || '');
+    fillInput('tbTaxPayerRelationship', profile.father_name ? 'Father' : 'Guardian');
 
     fillInput('tbFatherName', profile.father_name || '');
 
-    // Set Father Alive radio — uses fillRadio which sets .checked without firing events.
-    // Value is submitted as part of the Province postback POST, so ASP.NET renders
-    // father detail section correctly in its response.
+    // Father details section (only visible after Province postback renders it,
+    // but safe to call here on every phase — fillInput no-ops if field absent)
+    fillInput('tbFatherCNIC', formatCNIC(profile.father_cnic));
+    fillInput('tbFatherDesignation', profile.father_profession || profile.father_designation || '');
+    fillInput('tbFatherMobile', profile.guardian_phone || '');
+    fillSelectByValue('ddlSponsoredBy', '1');
+    if (profile.annual_income) fillInput('tbAnnualIncome', String(profile.annual_income));
+
+    // Father Alive radio — set .checked without firing events (no premature postback)
+    const faVal = fatherAliveValue();
+    fillRadio('rblFatherAlive', faVal);
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PHASE 0 — Fill all static fields + set Father Alive radio (no postback) +
+  //           select Province, then trigger Province postback. ASP.NET receives
+  //           the Father Alive radio value in that same POST submission and
+  //           renders the father details section in its response — saving one
+  //           extra page reload vs triggering Father Alive postback separately.
+  // ──────────────────────────────────────────────────────────────────────────
+  if (phase === 0) {
+    await fillStaticFields();
+
     const faVal = fatherAliveValue();
     console.log(`[Bahria Profile] father_status="${profile.father_status}" → rblFatherAlive value=${faVal} (1=Yes, 2=No)`);
-    fillRadio('rblFatherAlive', faVal);
 
     await delay(150);
 
@@ -5179,18 +5684,13 @@ async function fillBahriaProfilePage(profile, onFilled, onManual) {
   } else if (phase === 1) {
     const { district, tehsil, domicile } = state;
 
-    // Father details — now visible because server rendered them from FA radio value
-    fillInput('tbFatherCNIC', formatCNIC(profile.father_cnic));
-    fillInput('tbFatherDesignation', profile.father_profession || profile.father_designation || '');
-    fillInput('tbFatherMobile', profile.guardian_phone || '');
-    fillSelectByValue('ddlSponsoredBy', '1');
-    if (profile.annual_income) fillInput('tbAnnualIncome', String(profile.annual_income));
-
+    // Re-fill all static fields (ASP.NET may have reloaded them from DB after postback)
+    await fillStaticFields();
     await delay(200);
 
     // Wait for District options to be populated (server fills them after Province postback)
-    const dEl = await waitForOptions('ddlDistrict', 1, 4000);
-    if (dEl && district) {
+    const dEl = await waitForOptions('ddlDistrict', 1, 8000);
+    if (dEl && district && dEl.options.length > 1) {
       const opt = bestOption(dEl, district);
       if (opt) {
         dEl.value = opt.value;
@@ -5200,7 +5700,11 @@ async function fillBahriaProfilePage(profile, onFilled, onManual) {
         await aspnetPostback('ctl00$BodyPH$CandidateProfile$ddlDistrict');
         return;
       }
+      console.warn(`[Bahria Profile] District "${district}" not found in options`);
       onManual(dEl);
+    } else if (dEl && dEl.options.length <= 1) {
+      console.warn('[Bahria Profile] District options never loaded — skipping District postback');
+      if (dEl) onManual(dEl);
     }
     if (domicile) fillSelect('ddlDomicile', domicile);
     sessionStorage.removeItem(BAHRIA_FILL_KEY);
@@ -5210,7 +5714,9 @@ async function fillBahriaProfilePage(profile, onFilled, onManual) {
   // ──────────────────────────────────────────────────────────────────────────
   } else if (phase === 2) {
     const { tehsil, domicile } = state;
-    const tEl = await waitForOptions('ddlTehsil', 1, 4000);
+    // Re-fill all static fields (ASP.NET may have reloaded them from DB after postback)
+    await fillStaticFields();
+    const tEl = await waitForOptions('ddlTehsil', 1, 8000);
     if (tEl && tehsil) {
       const opt = bestOption(tEl, tehsil);
       if (opt) {
@@ -5236,6 +5742,8 @@ async function fillBahriaProfilePage(profile, onFilled, onManual) {
   // ──────────────────────────────────────────────────────────────────────────
   } else if (phase === 3) {
     const { domicile } = state;
+    // Re-fill all static fields (ASP.NET may have reloaded them from DB after postback)
+    await fillStaticFields();
     if (domicile) fillSelect('ddlDomicile', domicile);
     sessionStorage.removeItem(BAHRIA_FILL_KEY);
   }
@@ -6178,24 +6686,8 @@ async function handleAutofill() {
       // Resolve value using profileValueFor helper
       let value = profileValueFor(resolvedKey, ctx.profile) ?? ctx.profile[resolvedKey];
 
-      // Smart transforms
-      if (profileKey === 'cnic' && value) {
-        const cnicSig = ((input.name || '') + ' ' + (input.id || '') + ' ' + (input.className || '')).toLowerCase();
-        const noDash = (input.maxLength === 13 ||
-          cnicSig.includes('nodash') || cnicSig.includes('no_dash') ||
-          cnicSig.includes('nondash') || cnicSig.includes('without_dash') ||
-          cnicSig.includes('digits') || cnicSig.includes('cnic13'));
-        value = noDash ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
-      }
-      if ((resolvedKey === 'phone' || resolvedKey === 'whatsapp' || resolvedKey === 'guardian_phone') && value) {
-        value = TRANSFORMS.phone_pak(value);
-      }
-      if ((resolvedKey === 'father_cnic' || resolvedKey === 'mother_cnic') && value) {
-        const cnicSig = ((input.name || '') + ' ' + (input.id || '') + ' ' + (input.className || '')).toLowerCase();
-        const noDash = (input.maxLength === 13 ||
-          cnicSig.includes('nodash') || cnicSig.includes('no_dash') || cnicSig.includes('digits'));
-        value = noDash ? TRANSFORMS.cnic_no_dashes(value) : TRANSFORMS.cnic_dashes(value);
-      }
+      // Smart transforms — read field signals to determine exact format required
+      value = applyFieldTransform(input, resolvedKey, value);
       if (profileKey === 'province' && (!value || value === '') && ctx.profile?.city) {
         value = CITY_TO_PROVINCE[String(ctx.profile.city).toLowerCase()] || '';
       }
@@ -6281,6 +6773,59 @@ async function handleAutofill() {
             filledCount++;
             console.log(`[IlmSeUrooj] TIER 4 district fill: ${distVal}`);
           }
+        }
+      }
+    }
+
+    // ─── TIER 5: Newly rendered fields (Angular *ngIf / Vue v-if) ────────────
+    // After p-dropdown / select fills, frameworks re-render and may add fields
+    // that weren't in the DOM when collectAllFields() ran (e.g. UET Taxila shows
+    // CNIC + Mobile only after Gender and Residency are chosen).
+    // One re-scan with a settle delay handles these without any university-specific code.
+    {
+      await new Promise(r => setTimeout(r, 400)); // let framework finish rendering
+      const allInputsT5 = collectAllFields();
+      const newInputs = allInputsT5.filter(el => !alreadyHandled.has(el));
+      if (newInputs.length > 0) {
+        console.log(`[IlmSeUrooj] TIER 5: ${newInputs.length} newly rendered field(s) found`);
+        for (const input of newInputs) {
+          if (input.type === 'password') continue;
+          if (input.tagName === 'P-DROPDOWN') {
+            // p-dropdown that appeared late (rare) — handled same as Tier 3
+            const profileKey = matchFieldHeuristically(input);
+            if (!profileKey) continue;
+            const val = profileValueFor(profileKey, ctx.profile) ?? ctx.profile[profileKey];
+            if (!val) continue;
+            const ok = await fillPrimeNGDropdown(input, String(val));
+            if (ok) { input.style.outline = '2px solid #4ade80'; input.classList.add('unimatch-filled'); sparkleField(input); filledCount++; alreadyHandled.add(input); }
+            continue;
+          }
+          const profileKey = matchFieldHeuristically(input);
+          if (!profileKey) continue;
+          let val = profileValueFor(profileKey, ctx.profile) ?? ctx.profile[profileKey];
+          if (val == null || val === '') continue;
+          // Apply field-level format transforms
+          val = applyFieldTransform(input, profileKey, String(val));
+          let ok = false;
+          if (input.tagName === 'SELECT') {
+            ok = fillSelect(input, val);
+          } else if (profileKey === 'date_of_birth') {
+            ok = await fillDateAdvanced(input, String(ctx.profile.date_of_birth));
+          } else {
+            ok = await fillInput(input, val);
+          }
+          if (ok) {
+            input.style.outline = '2px solid #4ade80';
+            input.style.outlineOffset = '2px';
+            input.classList.add('unimatch-filled');
+            sparkleField(input);
+            filledCount++;
+          } else if (input.required) {
+            input.style.outline = '2px solid #fbbf24';
+            input.classList.add('unimatch-manual');
+            manualCount++;
+          }
+          alreadyHandled.add(input);
         }
       }
     }
@@ -7515,7 +8060,17 @@ function setupKeyboardShortcuts() {
     const el = e.target;
     if (!el) return;
     const tag = el.tagName;
-    if ((tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') &&
+    // Track p-dropdown by its inner combobox input — resolve to the p-dropdown element itself
+    if (tag === 'INPUT' && el.getAttribute('role') === 'combobox') {
+      const pd = el.closest('p-dropdown');
+      if (pd && !pd.closest('#unimatch-sidebar')) { _lastFocusedField = pd; return; }
+    }
+    // Track p-calendar by its inner text input — resolve to the p-calendar element itself
+    if (tag === 'INPUT') {
+      const pc = el.closest('p-calendar');
+      if (pc && !pc.closest('#unimatch-sidebar')) { _lastFocusedField = pc; return; }
+    }
+    if ((tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'P-DROPDOWN' || tag === 'P-CALENDAR') &&
         el.type !== 'password' && el.type !== 'hidden' &&
         !el.closest('#unimatch-sidebar')) {
       _lastFocusedField = el;
@@ -7570,7 +8125,7 @@ async function handleFillFocusedField() {
   const focused = _lastFocusedField || document.activeElement;
   if (!focused) return;
   const tag = focused.tagName;
-  if (tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') return;
+  if (tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA' && tag !== 'P-DROPDOWN' && tag !== 'P-CALENDAR') return;
   if (focused.type === 'password' || focused.type === 'hidden') return;
 
   // Match this field to a profile key
@@ -7595,6 +8150,9 @@ async function handleFillFocusedField() {
   if (transformKey && TRANSFORMS[transformKey] && !['first_name','last_name','middle_name'].includes(transformKey)) {
     try { value = TRANSFORMS[transformKey](value); } catch(e) { /* ignore transform error */ }
   }
+
+  // Smart format inference — same logic as Tier 3 fill
+  value = applyFieldTransform(focused, profileKey, value);
 
   // Fill
   let filled = false;
