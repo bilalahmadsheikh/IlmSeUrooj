@@ -255,8 +255,10 @@ function profileValueFor(key, profile) {
         : profile.inter_percent;
     case 'matric_marks':
       return profile.matric_marks || profile.matric_obtained;
-    case 'matric_total':
-      return profile.matric_total || '1100';
+    case 'matric_total': {
+      const mt = profile.ibcc_olevel_total ?? profile.matric_total;
+      return mt != null ? String(mt) : '1100';
+    }
     case 'fsc_marks':
     case 'inter_marks':
     case 'hssc_marks':
@@ -264,9 +266,12 @@ function profileValueFor(key, profile) {
       return profile.fsc_marks || profile.inter_marks || profile.inter_obtained;
     case 'fsc_total':
     case 'inter_total':
-    case 'hssc_total':
+    case 'hssc_total': {
+      const ft = profile.ibcc_alevel_total ?? profile.fsc_total ?? profile.inter_total;
+      if (ft != null) return String(ft);
       if (typeof getInterTotal === 'function') return getInterTotal(profile);
-      return profile.fsc_total || profile.inter_total || '1100';
+      return '1100';
+    }
     case 'fsc_percentage':
     case 'inter_percentage':
     case 'hssc_percentage':
@@ -425,7 +430,10 @@ function profileValueFor(key, profile) {
     }
     case 'matric_total_marks': {
       const v = profile.ibcc_olevel_total ?? profile.matric_total;
-      return v != null ? String(v) : undefined;
+      if (v != null) return String(v);
+      // Fallback: Pakistani SSC standard total
+      if ((profile.education_system || '').toLowerCase() !== 'cambridge') return '1100';
+      return undefined;
     }
     case 'matric_pct': {
       if (profile.ibcc_olevel_marks && profile.ibcc_olevel_total)
@@ -875,7 +883,9 @@ const FIELD_HEURISTICS = [
     profileKey: 'roll_number', priority: 5
   },
 
-  // ── FSc Marks (obtained) ───────────────────────────────────────
+  // ── FSc / A-Level Marks (obtained) ────────────────────────────
+  // profileKey 'inter_obtained' uses ibcc_alevel_marks for Cambridge students,
+  // falling back to fsc_marks for Pakistani students.
   {
     match: ['fsc_marks', 'fscmarks', 'hssc_marks', 'inter_marks', 'intermediate_marks',
       'fsc_obtained', 'inter_obtained', 'hssc_obtained', 'inter_obt_marks',
@@ -889,10 +899,11 @@ const FIELD_HEURISTICS = [
       'class_12_marks', 'grade_12_marks', 'pre_engineering_marks',
       'pre_medical_marks', 'fa_marks', 'fsc_part_1_2_marks',
       'inter_part1_part2_marks', 'combined_inter_marks'],
-    profileKey: 'fsc_marks', priority: 6
+    profileKey: 'inter_obtained', priority: 6
   },
 
-  // ── FSc Total ──────────────────────────────────────────────────
+  // ── FSc / A-Level Total Marks ──────────────────────────────────
+  // profileKey 'inter_total_marks' uses ibcc_alevel_total for Cambridge students.
   {
     match: ['fsc_total', 'fsctotal', 'hssc_total', 'inter_total', 'total_marks_fsc',
       'total_fsc', 'fsc_max', 'inter_max', 'hssc_max', 'total_inter',
@@ -900,7 +911,7 @@ const FIELD_HEURISTICS = [
       'hssc_total_marks', 'fsc_total_marks',
       'inter_total_marks', 'fsc_max_marks', 'inter_max_marks', 'hssc_max_marks',
       'class_12_total', 'grade_12_total', 'fsc_full_marks'],
-    profileKey: 'fsc_total', priority: 5
+    profileKey: 'inter_total_marks', priority: 5
   },
 
   // ── FSc Percentage ─────────────────────────────────────────────
@@ -921,7 +932,9 @@ const FIELD_HEURISTICS = [
     profileKey: 'fsc_part1_marks', priority: 6
   },
 
-  // ── Matric Marks ───────────────────────────────────────────────
+  // ── Matric / O-Level Marks (obtained) ─────────────────────────
+  // profileKey 'matric_obtained' uses ibcc_olevel_marks for Cambridge students,
+  // falling back to matric_marks for Pakistani students.
   {
     match: ['matric_marks', 'matricmarks', 'ssc_marks', 'matric_obtained', 'ssc_obtained',
       'matric_obt', 'ssc_obt', 'marks_obtained_matric', 'marks_matric',
@@ -931,18 +944,23 @@ const FIELD_HEURISTICS = [
       // Pakistani portal variants
       'matric_obt_marks', 'ssc_obtained_marks', 'matric_marks_obtained',
       'ssc_marks_obt', 'matriculation_obtained', 'class_9_10_marks',
-      'secondary_school_marks', 'matric_score'],
-    profileKey: 'matric_marks', priority: 6
+      'secondary_school_marks', 'matric_score',
+      // Generic Angular/PrimeNG formcontrolname used on qualification tables
+      'obtainmarks'],
+    profileKey: 'matric_obtained', priority: 6
   },
 
-  // ── Matric Total ───────────────────────────────────────────────
+  // ── Matric / O-Level Total Marks ───────────────────────────────
+  // profileKey 'matric_total_marks' uses ibcc_olevel_total for Cambridge students.
   {
     match: ['matric_total', 'matrictotal', 'ssc_total', 'total_marks_matric',
       'total_matric', 'matric_max', 'ssc_max', 'total_ssc', 'matriculation_total',
       'matric total', 'ssc total marks', 'secondary_total', 'class_10_total',
       'matric_total_marks', 'ssc_total_marks', 'matric_max_marks', 'ssc_max_marks',
-      'matric_full_marks', 'class_10_total_marks'],
-    profileKey: 'matric_total', priority: 5
+      'matric_full_marks', 'class_10_total_marks',
+      // Generic Angular/PrimeNG formcontrolname
+      'totalmarks'],
+    profileKey: 'matric_total_marks', priority: 5
   },
 
   // ── Matric Percentage ──────────────────────────────────────────
@@ -5569,6 +5587,243 @@ async function fillGIKIHSSCPage(profile, onFilled, onManual) {
   console.log('[GIKI HSSC] Fill complete');
 }
 
+// ─── SPECIAL: UET Taxila — Qualification Section ─────────────────────────────
+// Angular PrimeNG repeating table. Each row holds 17 fields sharing the same
+// formcontrolname values; rows are targeted by DOM index.
+
+function isUETTaxilaQualificationPage() {
+  return window.location.hostname.includes('entrytest.uettaxila.edu.pk') &&
+    (window.location.pathname.includes('/home/qualification') ||
+     !!document.querySelector('[formcontrolname="qualificationTypeId"]'));
+}
+
+async function fillUETTaxilaQualificationPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  const isOLevel   = (profile.education_system || '').toLowerCase() === 'cambridge';
+  // Intermediate/A-Level row: only add when the result is fully declared
+  const addInterRow = isOLevel
+    ? (profile.alevel_status === 'complete')
+    : (profile.inter_status  === 'complete');
+
+  // ── Row data ────────────────────────────────────────────────────
+  // Row 0 (Matric / O-Level): use IBCC O-Level marks for Cambridge students
+  const r0Marks = profile.ibcc_olevel_marks ?? profile.matric_marks;
+  const r0Total = profile.ibcc_olevel_total ?? profile.matric_total;
+  const r0Pct   = (r0Marks && r0Total)
+    ? parseFloat(((r0Marks / r0Total) * 100).toFixed(2))
+    : (profile.ibcc_equivalent_matric ?? profile.matric_percentage);
+  const r0Year  = profile.olevel_year  ?? profile.matric_year;
+  const r0Board = isOLevel
+    ? (profile.olevel_board  ?? profile.board_name ?? 'Cambridge')
+    : (profile.matric_board  ?? profile.board_name ?? 'FBISE');
+  const r0School = isOLevel
+    ? (profile.olevel_school ?? profile.school_name ?? '')
+    : (profile.matric_school ?? profile.school_name ?? '');
+  const r0Roll  = profile.matric_roll_no ?? profile.roll_number ?? '';
+
+  // Row 1 (Intermediate / A-Level): use IBCC A-Level marks for Cambridge students
+  const r1Marks = profile.ibcc_alevel_marks ?? profile.fsc_marks;
+  const r1Total = profile.ibcc_alevel_total ?? profile.fsc_total;
+  const r1Pct   = (r1Marks && r1Total)
+    ? parseFloat(((r1Marks / r1Total) * 100).toFixed(2))
+    : (profile.ibcc_equivalent_inter ?? profile.fsc_percentage);
+  const r1Year  = isOLevel ? profile.alevel_year : (profile.fsc_year ?? profile.inter_year);
+  const r1Board = isOLevel
+    ? (profile.alevel_board ?? profile.board_name ?? 'Cambridge')
+    : (profile.fsc_board    ?? profile.board_name ?? 'FBISE');
+  const r1School = isOLevel
+    ? (profile.alevel_school ?? profile.school_name ?? '')
+    : (profile.fsc_school   ?? profile.school_name ?? '');
+  const r1Roll  = profile.fsc_roll_no ?? profile.inter_roll_no ?? profile.roll_number ?? '';
+
+  function calcDivision(pct) {
+    const p = parseFloat(pct);
+    if (!p) return null;
+    if (p >= 60) return '1st';
+    if (p >= 45) return '2nd';
+    if (p >= 33) return '3rd';
+    return null;
+  }
+
+  function areaOfStudy(isInterRow) {
+    const stream = ((isInterRow ? profile.fsc_stream : profile.matric_stream) || profile.fsc_stream || '').toLowerCase();
+    if (stream.includes('computer') || stream.includes('ics'))                     return 'Science(Computer)';
+    if (stream.includes('medical') || stream.includes('bio') || stream.includes('pre-medical')) return 'Science(Biology)';
+    if (stream.includes('arts')    || stream.includes('humanities'))               return 'Arts';
+    if (stream.includes('commerce'))                                               return 'Arts';
+    // Default: Science(Biology) for inter (pre-medical most common), General Sciences for matric
+    return isInterRow ? 'Science(Biology)' : 'General Sciences';
+  }
+
+  // ── DOM helpers ─────────────────────────────────────────────────
+  function mark(el, ok) {
+    if (!el) return;
+    el.style.outline = ok ? '2px solid #4ade80' : '2px solid #fbbf24';
+    el.style.outlineOffset = '2px';
+    if (ok) onFilled?.(el); else onManual?.(el);
+  }
+
+  const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+
+  function fillInputNumber(scope, fcName, value) {
+    if (value == null || value === '') return false;
+    const input = scope.querySelector(`p-inputnumber[formcontrolname="${fcName}"] input`);
+    if (!input) return false;
+    input.focus();
+    if (nativeSetter) nativeSetter.call(input, '');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    if (nativeSetter) nativeSetter.call(input, String(value));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur',  { bubbles: true }));
+    mark(input, true);
+    return true;
+  }
+
+  function fillPlainInput(scope, fcName, value) {
+    if (value == null || value === '') return false;
+    const input = scope.querySelector(`input[formcontrolname="${fcName}"]`);
+    if (!input) return false;
+    if (nativeSetter) nativeSetter.call(input, String(value));
+    input.dispatchEvent(new Event('input',  { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    mark(input, true);
+    return true;
+  }
+
+  // Open a PrimeNG dropdown scoped to a row, find and click the matching item.
+  // Large lists (countries, boards) use the filter box first.
+  async function fillDropdown(scope, fcName, value) {
+    if (!value) return false;
+    const pDrop = scope.querySelector(`p-dropdown[formcontrolname="${fcName}"]`)
+               || scope.querySelector(`[formcontrolname="${fcName}"]`);
+    const trigger = pDrop?.querySelector('.p-dropdown-trigger') || pDrop?.querySelector('.p-dropdown');
+    if (!trigger) return false;
+    trigger.click();
+    await delay(250);
+
+    const panel = document.querySelector('.p-dropdown-panel:not([style*="display: none"])')
+               || document.querySelector('.p-dropdown-panel');
+    if (!panel) return false;
+
+    const val = String(value).toLowerCase().trim();
+    let items = Array.from(panel.querySelectorAll('.p-dropdown-item, [role="option"]'));
+
+    // Use filter box for large lists (countries, boards have 100+ options)
+    const filterEl = panel.querySelector('.p-dropdown-filter');
+    if (filterEl && items.length >= 30) {
+      if (nativeSetter) nativeSetter.call(filterEl, value);
+      filterEl.dispatchEvent(new Event('input', { bubbles: true }));
+      await delay(350);
+      items = Array.from(panel.querySelectorAll('.p-dropdown-item, [role="option"]'));
+    }
+
+    const target = items.find(o => o.textContent.trim().toLowerCase() === val)
+                || items.find(o => o.textContent.trim().toLowerCase().startsWith(val))
+                || items.find(o => val.length >= 3 && o.textContent.trim().toLowerCase().includes(val))
+                || items.find(o => val.length >= 3 && val.includes(o.textContent.trim().toLowerCase()) && o.textContent.trim().length >= 3);
+
+    if (!target) {
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      mark(pDrop, false);
+      return false;
+    }
+    target.click();
+    await delay(150);
+    mark(pDrop || trigger, true);
+    return true;
+  }
+
+  // ── Row management ───────────────────────────────────────────────
+  function getQualRows() {
+    // Primary: <tr> elements that contain a qualificationTypeId dropdown
+    const rows = Array.from(document.querySelectorAll('tr'))
+      .filter(tr => tr.querySelector('[formcontrolname="qualificationTypeId"]'));
+    if (rows.length > 0) return rows;
+    // Fallback: any container element with qualificationTypeId
+    return Array.from(document.querySelectorAll('[formcontrolname="qualificationTypeId"]'))
+      .map(el => el.closest('[formgroupname], [ng-reflect-form-group-name], tr, div.row, li') || el.parentElement)
+      .filter((el, i, arr) => el && arr.indexOf(el) === i);
+  }
+
+  async function ensureRows(needed) {
+    let rows = getQualRows();
+    while (rows.length < needed) {
+      const addBtn = document.querySelector('.pi-plus')?.closest('button')
+                  || document.querySelector('button[title*="add" i], button[title*="new" i]');
+      if (!addBtn) break;
+      addBtn.click();
+      await delay(450);
+      const next = getQualRows();
+      if (next.length <= rows.length) break; // nothing added
+      rows = next;
+    }
+    return getQualRows();
+  }
+
+  // ── Fill a single row ────────────────────────────────────────────
+  async function fillRow(row, qualType, marks, total, pct, year, board, school, roll, isInter) {
+    // 1. Qualification type (Matric / Intermediate) — may change dependent fields
+    const qualOk = await fillDropdown(row, 'qualificationTypeId', qualType);
+    if (qualOk) await delay(350); // wait for areaOfStudyId options to update
+
+    // 2. Area of study
+    await fillDropdown(row, 'areaOfStudyId', areaOfStudy(isInter));
+
+    // 3. Mode of study — Regular Full Time
+    await fillDropdown(row, 'modeOfStudyId', 'Regular Full Time');
+
+    // 4. Marks
+    fillInputNumber(row, 'totalMarks', total);
+    fillInputNumber(row, 'obtainMarks', marks);
+
+    // 5. Division (calculated from percentage)
+    const div = calcDivision(pct);
+    if (div) await fillDropdown(row, 'division', div);
+
+    // 6. Roll number
+    fillPlainInput(row, 'rollNumber', roll);
+
+    // 7. Result pending — No (result is complete/declared)
+    await fillDropdown(row, 'resultPending', 'No');
+
+    // 8. Country — Pakistan (triggers instituteId reload)
+    const countryOk = await fillDropdown(row, 'countryId', 'Pakistan');
+    if (countryOk) await delay(500); // wait for board list to load
+
+    // 9. Board / University
+    await fillDropdown(row, 'instituteId', board);
+
+    // 10. School / Campus
+    fillPlainInput(row, 'institute', school);
+
+    // 11. Year of completion
+    fillInputNumber(row, 'yearOfCompletion', year);
+
+    console.log(`[UET Taxila Qual] Filled ${qualType} row`);
+  }
+
+  // ── Execute ──────────────────────────────────────────────────────
+  const needed = addInterRow ? 2 : 1;
+  const rows = await ensureRows(needed);
+  if (rows.length === 0) {
+    console.warn('[UET Taxila Qual] No qualification rows found');
+    return;
+  }
+
+  // Row 0: Matric / O-Level
+  await fillRow(rows[0], 'Matric', r0Marks, r0Total, r0Pct, r0Year, r0Board, r0School, r0Roll, false);
+
+  // Row 1: Intermediate / A-Level (only if complete)
+  if (addInterRow && rows.length >= 2) {
+    await fillRow(rows[1], 'Intermediate', r1Marks, r1Total, r1Pct, r1Year, r1Board, r1School, r1Roll, true);
+  } else if (addInterRow) {
+    console.warn('[UET Taxila Qual] Intermediate row needed but could not be added');
+  }
+
+  console.log('[UET Taxila Qual] Qualification section fill complete');
+}
+
 // ─── SPECIAL: Bahria University CMS Profile.aspx ─────────────────────────────
 // Profile.aspx uses ASP.NET WebForms with full-page postbacks for Province →
 // District → Tehsil cascade. We persist fill state in sessionStorage across
@@ -6577,6 +6832,18 @@ async function handleAutofill() {
       if (!sessionStorage.getItem(BAHRIA_FILL_KEY)) {
         renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
       }
+      return;
+    }
+
+    // ─── SPECIAL: UET Taxila — Qualification Table ───────────────────────────
+    if (isUETTaxilaQualificationPage()) {
+      console.log('[IlmSeUrooj] UET Taxila qualification page detected');
+      await fillUETTaxilaQualificationPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
       return;
     }
 
