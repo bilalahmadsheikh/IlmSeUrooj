@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
-import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
+import { createAuthClient, unauthorizedResponse, supabaseUnavailableResponse, getUser, SUPABASE_UNAVAILABLE } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
     const supabase = createAuthClient(req);
     if (!supabase) return unauthorizedResponse();
     const user = await getUser(supabase);
+    if (user === SUPABASE_UNAVAILABLE) return supabaseUnavailableResponse();
     if (!user) return unauthorizedResponse();
 
     const { data, error } = await supabase
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
     const supabase = createAuthClient(req);
     if (!supabase) return unauthorizedResponse();
     const user = await getUser(supabase);
+    if (user === SUPABASE_UNAVAILABLE) return supabaseUnavailableResponse();
     if (!user) return unauthorizedResponse();
 
     const body = await req.json();
@@ -39,6 +41,7 @@ export async function DELETE(req: NextRequest) {
     const supabase = createAuthClient(req);
     if (!supabase) return unauthorizedResponse();
     const user = await getUser(supabase);
+    if (user === SUPABASE_UNAVAILABLE) return supabaseUnavailableResponse();
     if (!user) return unauthorizedResponse();
 
     const { searchParams } = new URL(req.url);

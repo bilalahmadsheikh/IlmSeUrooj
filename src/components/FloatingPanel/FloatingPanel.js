@@ -3,15 +3,12 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { getBrowserClient } from '@/lib/supabase-browser';
 import styles from './FloatingPanel.module.css';
 import { loadSavedFromStorage } from '@/utils/savedStorage';
 import { upcomingDeadlines } from '@/data/universities';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getBrowserClient();
 
 const HIDDEN_PATHS = ['/profile', '/applications', '/extension', '/timeline'];
 

@@ -19,8 +19,9 @@ export function useProfile() {
 
         async function load() {
             try {
-                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
                 if (authError) throw authError;
+                const user = session?.user;
                 if (!user) { if (!cancelled) setLoading(false); return; }
 
                 const { data, error: profileError } = await supabase
@@ -54,7 +55,8 @@ export function useProfile() {
     const updateProfile = async (updates) => {
         const supabase = getBrowserClient();
         try {
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            const { data: { session }, error: authError } = await supabase.auth.getSession();
+            const user = session?.user;
             if (authError || !user) return;
             const { error: upsertError } = await supabase
                 .from('profiles')

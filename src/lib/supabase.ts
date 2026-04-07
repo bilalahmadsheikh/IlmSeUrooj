@@ -10,11 +10,30 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 }
 
+// ── Network-error sentinel ──────────────────────────────────────
+// Returned by getUser() when Supabase is unreachable (DNS failure, timeout, etc.)
+// so route handlers can return 503 instead of the misleading 401.
+export const SUPABASE_UNAVAILABLE = Symbol('SUPABASE_UNAVAILABLE');
+type UserResult = Awaited<ReturnType<SupabaseClient['auth']['getUser']>>['data']['user'];
+
+// 5-second timeout fetch wrapper — prevents a single DNS failure from blocking
+// the route handler for 7+ seconds while the OS exhausts its resolver retry budget.
+// Uses AbortController instead of AbortSignal.timeout() to avoid Node.js logging
+// a verbose DOMException dump for every timeout.
+function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new Error('Request timeout after 5s')), 5000);
+    return fetch(input, { ...init, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+}
+
 /**
  * Creates a Supabase client for public/anonymous access (server-side).
  */
 export function createPublicClient() {
-    return createClient(supabaseUrl!, supabaseAnonKey!);
+    return createClient(supabaseUrl!, supabaseAnonKey!, {
+        global: { fetch: fetchWithTimeout },
+    });
 }
 
 /**
@@ -46,9 +65,8 @@ export function createAuthClient(req: NextRequest) {
 
     return createClient(supabaseUrl!, supabaseAnonKey!, {
         global: {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            fetch: fetchWithTimeout,
+            headers: { Authorization: `Bearer ${token}` },
         },
     });
 }
@@ -64,12 +82,39 @@ export function unauthorizedResponse() {
 }
 
 /**
+ * Helper to return a 503 JSON response when Supabase itself is unreachable.
+ */
+export function supabaseUnavailableResponse() {
+    return Response.json(
+        { error: 'Auth service temporarily unavailable — try again in a moment' },
+        { status: 503 }
+    );
+}
+
+/**
  * Gets the authenticated user from a Supabase client.
- * Returns null if no valid session.
+ * Returns the user on success, null on auth failure, or SUPABASE_UNAVAILABLE
+ * when the Supabase host cannot be reached (DNS failure, timeout, etc.).
+ *
+ * Route handlers should check for SUPABASE_UNAVAILABLE and return 503 so callers
+ * receive a meaningful error instead of a misleading 401.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getUser(client: SupabaseClient<any, any, any>) {
-    const { data: { user }, error } = await client.auth.getUser();
-    if (error || !user) return null;
-    return user;
+export async function getUser(client: SupabaseClient<any, any, any>): Promise<UserResult | null | typeof SUPABASE_UNAVAILABLE> {
+    try {
+        const { data: { user }, error } = await client.auth.getUser();
+        if (error) {
+            // A missing/malformed status (0 or undefined) indicates a network-level failure.
+            // Supabase wraps DNS and fetch errors inside AuthError with status 0.
+            const isNetworkErr = !error.status
+                || (error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND'
+                || (error as { cause?: { code?: string } }).cause?.code === 'ECONNREFUSED';
+            if (isNetworkErr) return SUPABASE_UNAVAILABLE;
+            return null;
+        }
+        return user ?? null;
+    } catch {
+        // Thrown when fetch itself fails (timeout, abort, DNS) before Supabase can respond.
+        return SUPABASE_UNAVAILABLE;
+    }
 }

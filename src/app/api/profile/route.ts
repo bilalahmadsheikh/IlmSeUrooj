@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
+import { createAuthClient, unauthorizedResponse, supabaseUnavailableResponse, getUser, SUPABASE_UNAVAILABLE } from '@/lib/supabase';
 import { encryptPassword, decryptPassword } from '@/lib/encryption';
 import { rateLimit } from '@/lib/rateLimit';
 
@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
     if (!supabase) return unauthorizedResponse();
 
     const user = await getUser(supabase);
+    if (user === SUPABASE_UNAVAILABLE) return supabaseUnavailableResponse();
     if (!user) return unauthorizedResponse();
 
     // 30 reads per minute per user — well above any legitimate use
@@ -51,6 +52,7 @@ export async function PUT(req: NextRequest) {
     if (!supabase) return unauthorizedResponse();
 
     const user = await getUser(supabase);
+    if (user === SUPABASE_UNAVAILABLE) return supabaseUnavailableResponse();
     if (!user) return unauthorizedResponse();
 
     // 10 writes per minute per user

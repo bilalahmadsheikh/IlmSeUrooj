@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
+import { createAuthClient, unauthorizedResponse, supabaseUnavailableResponse, getUser, SUPABASE_UNAVAILABLE } from '@/lib/supabase';
 import { rateLimit } from '@/lib/rateLimit';
 
 // ---------------------------------------------------------------------------
@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
     if (!supabase) return unauthorizedResponse();
 
     const user = await getUser(supabase);
+    if (user === SUPABASE_UNAVAILABLE) return supabaseUnavailableResponse();
     if (!user) return unauthorizedResponse();
 
     if (rateLimit(user.id, 'applications:get', 60, 60_000))
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
     if (!supabase) return unauthorizedResponse();
 
     const user = await getUser(supabase);
+    if (user === SUPABASE_UNAVAILABLE) return supabaseUnavailableResponse();
     if (!user) return unauthorizedResponse();
 
     if (rateLimit(user.id, 'applications:post', 20, 60_000))
