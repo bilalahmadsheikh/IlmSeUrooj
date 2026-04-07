@@ -14,6 +14,9 @@ window.addEventListener('unhandledrejection', (e) => {
   }
 });
 
+// ─── Global constants ──────────────────────────────────────────
+const BAHRIA_FILL_KEY = '__unimatch_bahria_fill'; // sessionStorage key for Bahria multi-phase postback fill
+
 // ─── University Domain Registry ────────────────────────────────
 // Built dynamically from ALL_UNIVERSITIES (universities/index.js loaded first)
 
@@ -2838,6 +2841,12 @@ async function initSidebarState(university) {
   };
 
   renderState(contentEl, 'ready', { profile, university });
+
+  // Auto-resume Bahria multi-phase fill after a postback reload.
+  // 1500ms gives ASP.NET time to finish rendering the page before we interact.
+  if (isBahriaProfilePage() && sessionStorage.getItem(BAHRIA_FILL_KEY)) {
+    setTimeout(handleAutofill, 1500);
+  }
 }
 
 // ─── Progress Bar Helper ───────────────────────────────────────
@@ -3076,6 +3085,9 @@ function renderState(container, state, data = {}) {
           <button class="btn-primary btn-autofill" id="unimatch-autofill">
             ⚡ Autofill Now <span style="font-size:9px;opacity:0.5;margin-left:6px">Alt+Shift+A</span>
           </button>
+          <div style="font-size:9px;color:#52525b;text-align:center;margin:3px 0 1px">
+            Focus any field and press <span style="color:#4ade80;font-family:monospace">Ctrl+Shift+4</span> to fill it instantly
+          </div>
           <div class="um-btn-grid">
             <button class="btn-secondary" id="unimatch-refresh-profile">🔄 Refresh</button>
             <button class="btn-secondary" id="unimatch-scan">🔍 Scan Fields</button>
@@ -3224,7 +3236,7 @@ function renderState(container, state, data = {}) {
             <button class="btn-secondary" id="unimatch-refill">Re-fill All</button>
           </div>
           <button class="btn-primary um-btn-full-row" id="unimatch-review">Pre-submit Check</button>
-          <div class="um-safety-note">Alt+Shift+A to re-fill · Alt+Shift+R for review</div>
+          <div class="um-safety-note">Alt+Shift+A re-fill · Ctrl+Shift+4 fill focused field · Alt+Shift+R review</div>
         </div>
       `;
       document.getElementById('unimatch-review')?.addEventListener('click', handlePreSubmitCheck);
@@ -4907,6 +4919,330 @@ async function fillGIKIHSSCPage(profile, onFilled, onManual) {
   console.log('[GIKI HSSC] Fill complete');
 }
 
+// ─── SPECIAL: Bahria University CMS Profile.aspx ─────────────────────────────
+// Profile.aspx uses ASP.NET WebForms with full-page postbacks for Province →
+// District → Tehsil cascade. We persist fill state in sessionStorage across
+// page reloads so the fill continues automatically each postback phase.
+
+function isBahriaProfilePage() {
+  return window.location.hostname.includes('cms.bahria.edu.pk') &&
+    /profile\.aspx/i.test(window.location.pathname);
+}
+
+function bahriaProvinceText(province) {
+  const p = (province || '').toLowerCase().trim();
+  if (p.includes('punjab')) return 'PUNJAB';
+  if (p.includes('sindh')) return 'SINDH';
+  if (p.includes('baloch')) return 'BALOCHISTAN';
+  if (p.includes('kpk') || p.includes('khyber') || p.includes('pakhtun') || p.includes('pukhtun') || p.includes('nwfp')) return 'KHYBER-PAKHTUNKHWA';
+  if (p.includes('islamabad') || p.includes('ict') || p.includes('federal')) return 'ISLAMABAD';
+  if (p.includes('gilgit') || p.includes('gb') || p.includes('baltistan')) return 'GILGIT-BALTISTAN';
+  if (p.includes('azad') || p.includes('kashmir') || p.includes('ajk')) return 'AZAD KASHMIR';
+  if (p.includes('fata')) return 'FATA';
+  return null;
+}
+
+async function fillBahriaProfilePage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  const PREFIX = 'BodyPH_CandidateProfile_';
+
+  function el(suffix) { return document.getElementById(PREFIX + suffix); }
+
+  function setInputValue(input, value) {
+    // Use the matching prototype setter — textarea and input have separate prototypes.
+    // Calling HTMLInputElement.prototype.value.set on a textarea throws "Illegal invocation".
+    const proto = input.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(input, value); else input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+  }
+
+  function fillInput(suffix, value) {
+    const inp = el(suffix);
+    if (!inp || value == null || value === '') return false;
+    if (inp.readOnly) return false;
+    setInputValue(inp, String(value));
+    onFilled(inp);
+    return true;
+  }
+
+  function bestOption(sel, text) {
+    if (!text) return null;
+    const t = String(text).trim().toLowerCase();
+    let opt = Array.from(sel.options).find(o => o.value === text);
+    if (!opt) opt = Array.from(sel.options).find(o => o.text.trim().toLowerCase() === t);
+    if (!opt) opt = Array.from(sel.options).find(o => o.text.trim().toLowerCase().includes(t) && t.length >= 3);
+    if (!opt) opt = Array.from(sel.options).find(o => t.includes(o.text.trim().toLowerCase()) && o.text.trim().length >= 3);
+    return opt || null;
+  }
+
+  function fillSelect(suffix, value) {
+    const sel = el(suffix);
+    if (!sel || value == null || value === '') return false;
+    const opt = bestOption(sel, value);
+    if (!opt) { onManual(sel); return false; }
+    sel.value = opt.value;
+    // Do NOT fire onchange/dispatchEvent — ASP.NET AutoPostBack selects have
+    // onchange set to __doPostBack which would prematurely submit the form.
+    // Postbacks are triggered explicitly via aspnetPostback() only.
+    onFilled(sel);
+    return true;
+  }
+
+  function fillSelectByValue(suffix, numericValue) {
+    const sel = el(suffix);
+    if (!sel) return false;
+    const opt = Array.from(sel.options).find(o => o.value === String(numericValue));
+    if (!opt) { onManual(sel); return false; }
+    sel.value = opt.value;
+    onFilled(sel);
+    return true;
+  }
+
+  function fillRadio(groupSuffix, value) {
+    // Bahria radio IDs: BodyPH_CandidateProfile_rblGender_0, _1, _2 ...
+    // Do NOT fire change/click events — ASP.NET AutoPostBack radios have
+    // onclick="__doPostBack(...)" which would prematurely reload the page.
+    // Setting .checked = true is sufficient; the value is submitted with the
+    // next intentional form.submit() call (the Province postback).
+    const radios = Array.from(document.querySelectorAll('input[type="radio"]'))
+      .filter(r => r.id.includes(PREFIX + groupSuffix) || r.name.includes('$' + groupSuffix));
+    const target = radios.find(r => r.value === String(value));
+    if (!target) { if (radios[0]) onManual(radios[0]); return false; }
+    target.checked = true;
+    onFilled(target);
+    return true;
+  }
+
+  function formatCNIC(raw) {
+    const digits = (raw || '').replace(/[^0-9]/g, '');
+    if (digits.length === 13) return `${digits.slice(0,5)}-${digits.slice(5,12)}-${digits.slice(12)}`;
+    return raw || '';
+  }
+
+  function formatDOB(raw) {
+    if (!raw) return '';
+    // Handle YYYY-MM-DD or DD/MM/YYYY or MM/DD/YYYY — output MM/DD/YYYY
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) return `${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`;
+    const dmyMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dmyMatch) {
+      // Could be DD/MM or MM/DD — if first part > 12, it's DD/MM
+      const a = parseInt(dmyMatch[1]), b = parseInt(dmyMatch[2]);
+      if (a > 12) return `${String(b).padStart(2,'0')}/${String(a).padStart(2,'0')}/${dmyMatch[3]}`;
+      return raw; // already MM/DD/YYYY or ambiguous, keep as-is
+    }
+    return raw;
+  }
+
+  // ── Read pending postback phase from sessionStorage ──────────────────────
+  let state = null;
+  try { state = JSON.parse(sessionStorage.getItem(BAHRIA_FILL_KEY) || 'null'); } catch(e) {}
+  const phase = state?.phase ?? 0;
+  console.log(`[Bahria Profile] Phase ${phase}`);
+
+  // ── Reliable ASP.NET postback from content script ────────────────────────
+  // Content scripts run in an isolated JS world — calling page-registered
+  // sel.onchange() or radio.onclick() can silently fail. The only guaranteed
+  // path is to set the hidden __EVENTTARGET/__EVENTARGUMENT fields and call
+  // form.submit() directly — pure DOM manipulation, always works.
+  async function aspnetPostback(controlName) {
+    await delay(200);
+    const evTarget = document.getElementById('__EVENTTARGET');
+    const evArg    = document.getElementById('__EVENTARGUMENT');
+    const form     = document.forms[0];
+    if (!form) { console.warn('[Bahria] No form found for postback'); return; }
+    if (evTarget) evTarget.value = controlName;
+    if (evArg)    evArg.value = '';
+    console.log(`[Bahria Profile] Submitting form for control: ${controlName}`);
+    form.submit();
+  }
+
+  // ── Poll until a select has > minCount options (server populated it) ─────
+  async function waitForOptions(suffix, minCount, maxWaitMs) {
+    const end = Date.now() + maxWaitMs;
+    while (Date.now() < end) {
+      const s = el(suffix);
+      if (s && s.options.length > minCount) return s;
+      await delay(300);
+    }
+    return el(suffix);
+  }
+
+  // ── Father Alive value from profile.father_status ────────────────────────
+  // DB column: father_status TEXT CHECK IN ('alive', 'deceased', 'shaheed')
+  function fatherAliveValue() {
+    const fs = (profile.father_status || '').toLowerCase().trim();
+    if (fs === 'deceased' || fs === 'shaheed') return '2'; // No
+    return '1'; // alive or not set → Yes
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PHASE 0 — Fill all static fields + set Father Alive radio (no postback) +
+  //           select Province, then trigger Province postback. ASP.NET receives
+  //           the Father Alive radio value in that same POST submission and
+  //           renders the father details section in its response — saving one
+  //           extra page reload vs triggering Father Alive postback separately.
+  // ──────────────────────────────────────────────────────────────────────────
+  if (phase === 0) {
+    fillInput('tbName', profile.full_name);
+    fillInput('tbCNIC', formatCNIC(profile.cnic));
+    fillInput('tbDOB', formatDOB(profile.date_of_birth));
+    fillInput('tbMobile', profile.mobile || profile.phone);
+    fillInput('tbPhoneHome', profile.phone || profile.mobile);
+
+    const gdr = (profile.gender || '').toLowerCase();
+    if (gdr === 'male' || gdr === 'm') fillRadio('rblGender', '1');
+    else if (gdr === 'female' || gdr === 'f') fillRadio('rblGender', '2');
+
+    fillRadio('rblCategory', '4'); // Others (civilian default)
+
+    const bgMap = { 'AB-':'1','AB+':'2','A-':'3','A+':'4','B-':'5','B+':'6','O-':'7','O+':'8' };
+    const bgKey = (profile.blood_group || '').trim().toUpperCase();
+    if (bgMap[bgKey]) fillSelectByValue('ddlBloodGroup', bgMap[bgKey]);
+
+    const rel = (profile.religion || 'Islam').toLowerCase();
+    if (rel.includes('islam') || rel.includes('muslim')) fillSelect('ddlReligion', 'Islam');
+    else if (rel.includes('christ')) fillSelect('ddlReligion', 'Christian');
+    else if (rel.includes('hindu')) fillSelect('ddlReligion', 'Hindu');
+    else fillSelect('ddlReligion', 'Islam');
+
+    fillSelectByValue('ddlPhysicalDisability', '0');
+    fillSelectByValue('ddlPakistanBarCouncilNo', '0');
+
+    const area = (profile.area_type || '').toLowerCase();
+    fillRadio('rblAreaType', area === 'rural' ? '2' : '1');
+
+    const addr = profile.address || profile.current_address || '';
+    fillInput('tbCurrentAddress', addr);
+    const sameCb = el('cbSameAsCurrentAddress');
+    if (sameCb && addr && !sameCb.checked) { sameCb.click(); await delay(100); }
+
+    fillSelectByValue('ddlSourceOfInformation', '5');
+
+    fillInput('tbNextOfKin', profile.father_name || profile.guardian_name || '');
+    fillInput('tbNextOfKinRelationship', profile.father_name ? 'Father' : 'Guardian');
+
+    fillInput('tbEmergencyContactName', profile.father_name || profile.guardian_name || '');
+    fillInput('tbEmergencyMobile', profile.guardian_phone || profile.mobile || '');
+    fillInput('tbEmergencyPhone', profile.guardian_phone || profile.phone || '');
+
+    fillSelect('ddlNTNOrCNIC', 'CNIC');
+    await delay(100);
+    fillInput('tbNTNOrCNIC', formatCNIC(profile.father_cnic));
+    fillInput('tbTaxPayerName', profile.father_name || '');
+    fillInput('tbTaxPayerRelationship', 'Father');
+
+    fillInput('tbFatherName', profile.father_name || '');
+
+    // Set Father Alive radio — uses fillRadio which sets .checked without firing events.
+    // Value is submitted as part of the Province postback POST, so ASP.NET renders
+    // father detail section correctly in its response.
+    const faVal = fatherAliveValue();
+    console.log(`[Bahria Profile] father_status="${profile.father_status}" → rblFatherAlive value=${faVal} (1=Yes, 2=No)`);
+    fillRadio('rblFatherAlive', faVal);
+
+    await delay(150);
+
+    // Province — set value only, trigger postback via form.submit()
+    const provinceText = bahriaProvinceText(profile.province || profile.domicile_province || '');
+    const districtVal  = profile.district || profile.domicile_district || profile.city || '';
+    const tehsilVal    = profile.tehsil || '';
+    const domicileVal  = profile.domicile || profile.domicile_district || profile.district || '';
+
+    const pEl = el('ddlProvince');
+    const pOpt = pEl && provinceText ? bestOption(pEl, provinceText) : null;
+    if (pOpt) {
+      pEl.value = pOpt.value;
+      onFilled(pEl);
+      sessionStorage.setItem(BAHRIA_FILL_KEY, JSON.stringify({
+        phase: 1, district: districtVal, tehsil: tehsilVal, domicile: domicileVal
+      }));
+      console.log(`[Bahria Profile] Phase 0 → Province postback (${provinceText})`);
+      await aspnetPostback('ctl00$BodyPH$CandidateProfile$ddlProvince');
+      return;
+    }
+
+    // No province match — skip cascade, fill domicile and done
+    if (pEl) onManual(pEl);
+    if (domicileVal) fillSelect('ddlDomicile', domicileVal);
+    sessionStorage.removeItem(BAHRIA_FILL_KEY);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PHASE 1 — After Province postback. District options are now server-populated.
+  //           Father details section is rendered (ASP.NET saw FA radio in POST).
+  //           Fill father details + Sponsor + Income, then select District and
+  //           trigger District postback.
+  // ──────────────────────────────────────────────────────────────────────────
+  } else if (phase === 1) {
+    const { district, tehsil, domicile } = state;
+
+    // Father details — now visible because server rendered them from FA radio value
+    fillInput('tbFatherCNIC', formatCNIC(profile.father_cnic));
+    fillInput('tbFatherDesignation', profile.father_profession || profile.father_designation || '');
+    fillInput('tbFatherMobile', profile.guardian_phone || '');
+    fillSelectByValue('ddlSponsoredBy', '1');
+    if (profile.annual_income) fillInput('tbAnnualIncome', String(profile.annual_income));
+
+    await delay(200);
+
+    // Wait for District options to be populated (server fills them after Province postback)
+    const dEl = await waitForOptions('ddlDistrict', 1, 4000);
+    if (dEl && district) {
+      const opt = bestOption(dEl, district);
+      if (opt) {
+        dEl.value = opt.value;
+        onFilled(dEl);
+        sessionStorage.setItem(BAHRIA_FILL_KEY, JSON.stringify({ phase: 2, tehsil, domicile }));
+        console.log(`[Bahria Profile] Phase 1 → District postback (${district})`);
+        await aspnetPostback('ctl00$BodyPH$CandidateProfile$ddlDistrict');
+        return;
+      }
+      onManual(dEl);
+    }
+    if (domicile) fillSelect('ddlDomicile', domicile);
+    sessionStorage.removeItem(BAHRIA_FILL_KEY);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PHASE 2 — After District postback. Tehsil options now populated.
+  // ──────────────────────────────────────────────────────────────────────────
+  } else if (phase === 2) {
+    const { tehsil, domicile } = state;
+    const tEl = await waitForOptions('ddlTehsil', 1, 4000);
+    if (tEl && tehsil) {
+      const opt = bestOption(tEl, tehsil);
+      if (opt) {
+        tEl.value = opt.value;
+        onFilled(tEl);
+        // Check if Tehsil also has AutoPostBack (onchange attribute contains doPostBack)
+        const tehsilHasPostback = (tEl.getAttribute('onchange') || '').includes('doPostBack');
+        if (tehsilHasPostback) {
+          sessionStorage.setItem(BAHRIA_FILL_KEY, JSON.stringify({ phase: 3, domicile }));
+          console.log(`[Bahria Profile] Phase 2 → Tehsil postback (${tehsil})`);
+          await aspnetPostback('ctl00$BodyPH$CandidateProfile$ddlTehsil');
+          return;
+        }
+      } else {
+        onManual(tEl);
+      }
+    }
+    if (domicile) fillSelect('ddlDomicile', domicile);
+    sessionStorage.removeItem(BAHRIA_FILL_KEY);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PHASE 3 — After Tehsil postback (only if Tehsil had AutoPostBack). Domicile.
+  // ──────────────────────────────────────────────────────────────────────────
+  } else if (phase === 3) {
+    const { domicile } = state;
+    if (domicile) fillSelect('ddlDomicile', domicile);
+    sessionStorage.removeItem(BAHRIA_FILL_KEY);
+  }
+
+  console.log(`[Bahria Profile] Phase ${phase} complete`);
+}
+
 function isIBAEducationPage() {
   if (!window.location.hostname.includes('iba.edu.pk')) return false;
   // Detect by presence of education-specific IDs or page text landmarks
@@ -5245,6 +5581,36 @@ async function handleAutofill() {
       processedFields++;
       if (progressBar) progressBar.style.width = `${Math.min(100, (processedFields / totalFields) * 100)}%`;
     };
+
+    // ─── SPECIAL: Bahria University Profile.aspx ────────────────────────────
+    // Multi-phase handler: Province → District → Tehsil use ASP.NET full-page
+    // postbacks. Phase state is stored in sessionStorage and auto-resumed.
+    if (isBahriaProfilePage()) {
+      console.log('[IlmSeUrooj] Bahria Profile.aspx detected');
+      // Phase 0 only: force a fresh profile fetch so sensitive fields like
+      // father_status are never read from a stale 30-min cache.
+      const pendingPhase = (() => { try { return JSON.parse(sessionStorage.getItem(BAHRIA_FILL_KEY) || 'null')?.phase ?? 0; } catch(e) { return 0; } })();
+      if (pendingPhase === 0) {
+        try {
+          const fresh = await chrome.runtime.sendMessage({ action: 'REFRESH_PROFILE' });
+          if (fresh?.profile) {
+            ctx.profile = fresh.profile;
+            window.__unimatch.profile = fresh.profile;
+            console.log('[IlmSeUrooj] Bahria: fresh profile loaded, father_status =', fresh.profile.father_status);
+          }
+        } catch(e) { console.warn('[IlmSeUrooj] Bahria: profile refresh failed, using cached', e); }
+      }
+      await fillBahriaProfilePage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      // Only render filled state if we're not mid-postback (sessionStorage cleared = done)
+      if (!sessionStorage.getItem(BAHRIA_FILL_KEY)) {
+        renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
+      }
+      return;
+    }
 
     // ─── SPECIAL: GIKI Education Pages ──────────────────────────────
     if (isGIKISSCPage()) {
@@ -7135,17 +7501,41 @@ function setupMutationObserver() {
 })();
 
 // ─── Keyboard Shortcuts ────────────────────────────────────────
-// Alt+Shift+A → Autofill | Alt+Shift+R → Pre-submit review
-// Alt+Shift+S → Open/close sidebar
+// Alt+Shift+A   → Autofill entire form
+// Alt+Shift+R   → Pre-submit review
+// Alt+Shift+S   → Open/close sidebar
+// Ctrl+Shift+4  → Fill the currently focused field only
+
+// Track the last focused form field so Ctrl+Shift+4 knows what to fill
+// even if focus briefly shifts when modifier keys are pressed.
+let _lastFocusedField = null;
 
 function setupKeyboardShortcuts() {
+  document.addEventListener('focusin', (e) => {
+    const el = e.target;
+    if (!el) return;
+    const tag = el.tagName;
+    if ((tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') &&
+        el.type !== 'password' && el.type !== 'hidden' &&
+        !el.closest('#unimatch-sidebar')) {
+      _lastFocusedField = el;
+    }
+  }, true);
+
   document.addEventListener('keydown', (e) => {
+    // ── Ctrl+Shift+4 — Fill focused field ──────────────────────
+    // Use e.code ('Digit4') not e.key ('4'/'$') — Shift changes e.key on most keyboards.
+    if (e.ctrlKey && e.shiftKey && e.code === 'Digit4') {
+      e.preventDefault();
+      handleFillFocusedField();
+      return;
+    }
+
     if (!e.altKey || !e.shiftKey) return;
 
     switch (e.key.toUpperCase()) {
       case 'A': {
         e.preventDefault();
-        // Open sidebar if collapsed
         const sidebar = document.getElementById('unimatch-sidebar');
         const toggle = document.getElementById('unimatch-toggle');
         if (sidebar?.classList.contains('collapsed')) {
@@ -7168,3 +7558,96 @@ function setupKeyboardShortcuts() {
     }
   });
 }
+
+// ─── Fill Focused Field (Ctrl+Shift+4) ────────────────────────
+// Fills only the field the user is currently focused/typing in.
+async function handleFillFocusedField() {
+  const ctx = window.__unimatch;
+  if (!ctx?.profile) return;
+
+  // Prefer _lastFocusedField — document.activeElement may have shifted when
+  // Ctrl+Shift were pressed before the 4 key.
+  const focused = _lastFocusedField || document.activeElement;
+  if (!focused) return;
+  const tag = focused.tagName;
+  if (tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') return;
+  if (focused.type === 'password' || focused.type === 'hidden') return;
+
+  // Match this field to a profile key
+  const profileKey = matchFieldHeuristically(focused);
+  if (!profileKey) {
+    showFieldShortcutFeedback(focused, 'No match found', '#fbbf24');
+    return;
+  }
+
+  const uniConfig = (typeof getConfigForDomain === 'function')
+    ? getConfigForDomain(window.location.hostname) : null;
+
+  // Resolve value
+  let value = profileValueFor(profileKey, ctx.profile) ?? ctx.profile?.[profileKey];
+  if (value == null || value === '') {
+    showFieldShortcutFeedback(focused, 'No data in profile', '#fbbf24');
+    return;
+  }
+
+  // Apply transform if university config has one for this key
+  const transformKey = uniConfig?.transforms?.[profileKey];
+  if (transformKey && TRANSFORMS[transformKey] && !['first_name','last_name','middle_name'].includes(transformKey)) {
+    try { value = TRANSFORMS[transformKey](value); } catch(e) { /* ignore transform error */ }
+  }
+
+  // Fill
+  let filled = false;
+  if (tag === 'SELECT') {
+    filled = fillSelectWithMapping(focused, String(value), uniConfig?.selectOptions?.[profileKey]);
+  } else if (focused.type === 'radio') {
+    filled = fillRadio(focused, String(value));
+  } else if (profileKey === 'date_of_birth') {
+    filled = await fillDateAdvanced(focused, String(value));
+  } else {
+    filled = await fillInput(focused, String(value));
+  }
+
+  if (filled) {
+    focused.style.outline = '2px solid #4ade80';
+    focused.style.outlineOffset = '2px';
+    focused.classList.add('unimatch-filled');
+    focused.classList.remove('unimatch-manual');
+    showFieldShortcutFeedback(focused, String(value), '#4ade80');
+  } else {
+    showFieldShortcutFeedback(focused, 'Could not fill', '#fbbf24');
+  }
+}
+
+// ─── Inline tooltip shown after Ctrl+Shift+4 fill ─────────────
+function showFieldShortcutFeedback(el, text, color) {
+  const existing = document.getElementById('um-field-shortcut-toast');
+  if (existing) existing.remove();
+
+  const rect = el.getBoundingClientRect();
+  const toast = document.createElement('div');
+  toast.id = 'um-field-shortcut-toast';
+  toast.textContent = text;
+  Object.assign(toast.style, {
+    position: 'fixed',
+    top: `${Math.max(4, rect.top - 32)}px`,
+    left: `${rect.left}px`,
+    background: '#18181b',
+    color,
+    border: `1px solid ${color}`,
+    borderRadius: '6px',
+    padding: '3px 10px',
+    fontSize: '11px',
+    fontFamily: 'monospace',
+    zIndex: '2147483647',
+    pointerEvents: 'none',
+    maxWidth: '240px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+  });
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+

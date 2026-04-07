@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
 import { encryptPassword, decryptPassword } from '@/lib/encryption';
+import { rateLimit } from '@/lib/rateLimit';
 
 /**
  * GET /api/profile
@@ -12,6 +13,10 @@ export async function GET(req: NextRequest) {
 
     const user = await getUser(supabase);
     if (!user) return unauthorizedResponse();
+
+    // 30 reads per minute per user — well above any legitimate use
+    if (rateLimit(user.id, 'profile:get', 30, 60_000))
+        return Response.json({ error: 'Too many requests' }, { status: 429 });
 
     const { data, error } = await supabase
         .from('profiles')
@@ -47,6 +52,10 @@ export async function PUT(req: NextRequest) {
 
     const user = await getUser(supabase);
     if (!user) return unauthorizedResponse();
+
+    // 10 writes per minute per user
+    if (rateLimit(user.id, 'profile:put', 10, 60_000))
+        return Response.json({ error: 'Too many requests' }, { status: 429 });
 
     const body = await req.json();
 

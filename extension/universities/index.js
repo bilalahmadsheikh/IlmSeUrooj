@@ -592,37 +592,28 @@ ALL_UNIVERSITIES.push({
     slug: 'bahria', name: 'Bahria University',
     fullName: 'Bahria University',
     registrationUrl: 'https://www.bahria.edu.pk/admissions',
-    loginUrl: null,
+    loginUrl: 'https://cms.bahria.edu.pk/',
     portalDomains: ['bahria.edu.pk', 'www.bahria.edu.pk', 'cms.bahria.edu.pk'],
     formType: 'requires_login_first',
+    // Profile.aspx uses ASP.NET WebForms with full-page postbacks for Province → District → Tehsil.
+    // The dedicated fillBahriaProfilePage() handler in content.js manages all field IDs directly
+    // using the pattern BodyPH_CandidateProfile_<suffix>. Generic fieldMap is kept here for
+    // non-profile pages only (e.g. registration, apply-for-program).
     fieldMap: {
-        full_name: '[name="name"], [name="fullName"], [name="ApplicantName"], #name',
-        father_name: '[name="fatherName"], [name="father_name"], #fatherName',
-        cnic: '[name="cnic"], [name="CNIC"], #cnic',
-        date_of_birth: '[name="dob"], [name="DOB"], #dob',
-        gender: '[name="gender"], [name="Gender"], #gender',
-        email: '[name="email"], [type="email"], #email',
-        phone: '[name="phone"], [name="mobile"], #phone',
-        address: '[name="address"], #address',
-        city: '[name="city"], #city',
-        province: '[name="province"], #province',
-        fsc_marks: '[name="fscMarks"], [name="hscMarks"], #fscMarks',
-        fsc_total: '[name="fscTotal"], #fscTotal',
-        matric_marks: '[name="sscMarks"], [name="matricMarks"], #sscMarks',
-        matric_total: '[name="sscTotal"], #sscTotal',
-        board_name: '[name="board"], #board',
-        passing_year: '[name="passingYear"], #passingYear',
-        domicile_province: '[name="domicile"], #domicile',
+        full_name: '#BodyPH_CandidateProfile_tbName, [name="ctl00$BodyPH$CandidateProfile$tbName"]',
+        email:     '#BodyPH_CandidateProfile_tbEmail, [name="ctl00$BodyPH$CandidateProfile$tbEmail"]',
+        cnic:      '#BodyPH_CandidateProfile_tbCNIC, [name="ctl00$BodyPH$CandidateProfile$tbCNIC"]',
+        date_of_birth: '#BodyPH_CandidateProfile_tbDOB, [name="ctl00$BodyPH$CandidateProfile$tbDOB"]',
+        phone:     '#BodyPH_CandidateProfile_tbMobile, [name="ctl00$BodyPH$CandidateProfile$tbMobile"]',
+        address:   '#BodyPH_CandidateProfile_tbCurrentAddress',
+        father_name: '#BodyPH_CandidateProfile_tbFatherName',
     },
-    selectOptions: {
-        gender: { male: 'Male', female: 'Female' },
-        province: { punjab: 'Punjab', sindh: 'Sindh', kpk: 'Khyber Pakhtunkhwa', balochistan: 'Balochistan', islamabad: 'Islamabad' }
-    },
-    transforms: { cnic: 'cnic_dashes', phone: 'phone_pak', date_of_birth: 'date_dmy' },
+    selectOptions: {},
+    transforms: { date_of_birth: 'date_mdy' },
     credentialSystem: 'email_sent',
     registrationNote: 'Check your email — Bahria University will send a verification link. You must verify before you can log in.',
-    verified: false, lastVerified: '2026-04-06',
-    notes: 'Multiple campuses. CMS portal may be at cms.bahria.edu.pk. Email verification required after registration.'
+    verified: true, lastVerified: '2026-04-06',
+    notes: 'Profile.aspx (step 3 of 7) handled by dedicated fillBahriaProfilePage(). Province/District/Tehsil cascade via ASP.NET full-page postbacks — fill state persisted in sessionStorage across reloads.'
 });
 
 ALL_UNIVERSITIES.push({

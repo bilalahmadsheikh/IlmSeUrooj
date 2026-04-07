@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createAuthClient, unauthorizedResponse, getUser } from '@/lib/supabase';
+import { rateLimit } from '@/lib/rateLimit';
 
 // ---------------------------------------------------------------------------
 // Domain validation — prevents phishing via stored portal_domain injection.
@@ -39,6 +40,9 @@ export async function GET(req: NextRequest) {
     const user = await getUser(supabase);
     if (!user) return unauthorizedResponse();
 
+    if (rateLimit(user.id, 'applications:get', 60, 60_000))
+        return Response.json({ error: 'Too many requests' }, { status: 429 });
+
     const { data, error } = await supabase
         .from('applications')
         .select('*')
@@ -63,6 +67,9 @@ export async function POST(req: NextRequest) {
 
     const user = await getUser(supabase);
     if (!user) return unauthorizedResponse();
+
+    if (rateLimit(user.id, 'applications:post', 20, 60_000))
+        return Response.json({ error: 'Too many requests' }, { status: 429 });
 
     let body: Record<string, unknown>;
     try {
