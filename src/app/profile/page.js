@@ -287,6 +287,8 @@ export default function ProfilePage() {
                 'fsc_part1_marks', 'fsc_part1_total', 'fsc_projected_marks',
                 'sat_score', 'sat_subject_score', 'profile_completion',
                 'father_income', 'mother_income',
+                'ibcc_olevel_marks', 'ibcc_olevel_total',
+                'ibcc_alevel_marks', 'ibcc_alevel_total',
             ];
             for (const key of numericFields) {
                 if (payload[key] !== undefined && payload[key] !== null && payload[key] !== '') {
@@ -679,10 +681,59 @@ export default function ProfilePage() {
                     {/* IBCC Equivalence — Critical */}
                     <SectionCard title="IBCC Equivalence Certificate" icon="!"
                         note="Pakistani universities require an IBCC equivalence certificate to convert your A-Level grades to a Pakistani percentage.">
+
+                        <h3 className="sub-section-title">A-Level (Inter) Equivalence</h3>
                         <div className="field-grid">
-                            <Field label="IBCC Equivalent % (Inter)" type="number" value={profile.ibcc_equivalent_inter} onChange={v => updateField('ibcc_equivalent_inter', v)} placeholder="85.5" hint="The percentage IBCC issues as equivalent to FSc" />
-                            <Field label="IBCC Equivalent % (Matric)" type="number" value={profile.ibcc_equivalent_matric} onChange={v => updateField('ibcc_equivalent_matric', v)} placeholder="92.0" hint="The percentage IBCC issues as equivalent to Matric" />
+                            <Field label="Marks Obtained" type="number" value={profile.ibcc_alevel_marks}
+                                onChange={v => {
+                                    const marks = parseInt(v) || null;
+                                    const total = parseInt(profile.ibcc_alevel_total) || null;
+                                    const pct = marks && total ? parseFloat(((marks / total) * 100).toFixed(2)) : null;
+                                    updateField('ibcc_alevel_marks', v);
+                                    if (pct !== null) updateField('ibcc_equivalent_inter', pct);
+                                }}
+                                placeholder="900" hint="Total marks obtained on IBCC certificate" />
+                            <Field label="Total Marks" type="number" value={profile.ibcc_alevel_total}
+                                onChange={v => {
+                                    const total = parseInt(v) || null;
+                                    const marks = parseInt(profile.ibcc_alevel_marks) || null;
+                                    const pct = marks && total ? parseFloat(((marks / total) * 100).toFixed(2)) : null;
+                                    updateField('ibcc_alevel_total', v);
+                                    if (pct !== null) updateField('ibcc_equivalent_inter', pct);
+                                }}
+                                placeholder="1100" />
+                            <Field label="IBCC Equivalent % (Inter)" type="number" value={profile.ibcc_equivalent_inter}
+                                onChange={v => updateField('ibcc_equivalent_inter', v)}
+                                placeholder="Auto-calculated"
+                                hint="Auto-calculated from marks above, or enter manually" />
                         </div>
+
+                        <h3 className="sub-section-title" style={{ marginTop: '16px' }}>O-Level (Matric) Equivalence</h3>
+                        <div className="field-grid">
+                            <Field label="Marks Obtained" type="number" value={profile.ibcc_olevel_marks}
+                                onChange={v => {
+                                    const marks = parseInt(v) || null;
+                                    const total = parseInt(profile.ibcc_olevel_total) || null;
+                                    const pct = marks && total ? parseFloat(((marks / total) * 100).toFixed(2)) : null;
+                                    updateField('ibcc_olevel_marks', v);
+                                    if (pct !== null) updateField('ibcc_equivalent_matric', pct);
+                                }}
+                                placeholder="900" hint="Total marks obtained on IBCC certificate" />
+                            <Field label="Total Marks" type="number" value={profile.ibcc_olevel_total}
+                                onChange={v => {
+                                    const total = parseInt(v) || null;
+                                    const marks = parseInt(profile.ibcc_olevel_marks) || null;
+                                    const pct = marks && total ? parseFloat(((marks / total) * 100).toFixed(2)) : null;
+                                    updateField('ibcc_olevel_total', v);
+                                    if (pct !== null) updateField('ibcc_equivalent_matric', pct);
+                                }}
+                                placeholder="1100" />
+                            <Field label="IBCC Equivalent % (Matric)" type="number" value={profile.ibcc_equivalent_matric}
+                                onChange={v => updateField('ibcc_equivalent_matric', v)}
+                                placeholder="Auto-calculated"
+                                hint="Auto-calculated from marks above, or enter manually" />
+                        </div>
+
                         {!profile.ibcc_equivalent_inter && (
                             <WarningBox>You need an IBCC equivalence certificate before applying to Pakistani universities. Apply at: <a href="https://ibcc.edu.pk" target="_blank" rel="noreferrer" style={{ color: '#4ade80' }}>ibcc.edu.pk</a></WarningBox>
                         )}

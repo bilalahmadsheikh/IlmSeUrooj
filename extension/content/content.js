@@ -15,7 +15,8 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 
 // ─── Global constants ──────────────────────────────────────────
-const BAHRIA_FILL_KEY = '__unimatch_bahria_fill'; // sessionStorage key for Bahria multi-phase postback fill
+const BAHRIA_FILL_KEY       = '__unimatch_bahria_fill';       // sessionStorage key for Bahria Profile.aspx multi-phase fill
+const BAHRIA_APPLY_FILL_KEY = '__unimatch_bahria_apply_fill'; // sessionStorage key for Bahria ApplyProgram.aspx multi-phase fill
 
 // ─── University Domain Registry ────────────────────────────────
 // Built dynamically from ALL_UNIVERSITIES (universities/index.js loaded first)
@@ -308,6 +309,25 @@ function profileValueFor(key, profile) {
     case 'domicile_location':
       return profile.district || profile.domicile_district || profile.city
           || profile.domicile || profile.province || profile.domicile_province;
+    // ── IBCC: auto-calculate percentage from marks if not stored directly ──
+    case 'ibcc_equivalent_inter':
+      if (profile.ibcc_equivalent_inter != null) return profile.ibcc_equivalent_inter;
+      if (profile.ibcc_alevel_marks && profile.ibcc_alevel_total)
+        return parseFloat(((profile.ibcc_alevel_marks / profile.ibcc_alevel_total) * 100).toFixed(2));
+      return undefined;
+    case 'ibcc_equivalent_matric':
+      if (profile.ibcc_equivalent_matric != null) return profile.ibcc_equivalent_matric;
+      if (profile.ibcc_olevel_marks && profile.ibcc_olevel_total)
+        return parseFloat(((profile.ibcc_olevel_marks / profile.ibcc_olevel_total) * 100).toFixed(2));
+      return undefined;
+    case 'ibcc_alevel_marks':
+      return profile.ibcc_alevel_marks != null ? String(profile.ibcc_alevel_marks) : undefined;
+    case 'ibcc_alevel_total':
+      return profile.ibcc_alevel_total != null ? String(profile.ibcc_alevel_total) : undefined;
+    case 'ibcc_olevel_marks':
+      return profile.ibcc_olevel_marks != null ? String(profile.ibcc_olevel_marks) : undefined;
+    case 'ibcc_olevel_total':
+      return profile.ibcc_olevel_total != null ? String(profile.ibcc_olevel_total) : undefined;
     // ── Father / Mother status, income, profession ─────────────
     case 'father_first_name': {
       const n = (profile.father_name || '').trim();
@@ -398,20 +418,38 @@ function profileValueFor(key, profile) {
       return levelMap[profile.inter_status] || undefined;
     }
     // ── Education page: marks/year per section ──────────────────
-    case 'matric_obtained':
-      return profile.matric_marks != null ? String(profile.matric_marks) : undefined;
-    case 'matric_total_marks':
-      return profile.matric_total != null ? String(profile.matric_total) : undefined;
-    case 'matric_pct':
-      return profile.matric_percentage != null ? String(profile.matric_percentage) : undefined;
+    case 'matric_obtained': {
+      // For Cambridge students, IBCC O-Level marks are the authoritative matric marks
+      const v = profile.ibcc_olevel_marks ?? profile.matric_marks;
+      return v != null ? String(v) : undefined;
+    }
+    case 'matric_total_marks': {
+      const v = profile.ibcc_olevel_total ?? profile.matric_total;
+      return v != null ? String(v) : undefined;
+    }
+    case 'matric_pct': {
+      if (profile.ibcc_olevel_marks && profile.ibcc_olevel_total)
+        return String(parseFloat(((profile.ibcc_olevel_marks / profile.ibcc_olevel_total) * 100).toFixed(2)));
+      const v = profile.ibcc_equivalent_matric ?? profile.matric_percentage;
+      return v != null ? String(v) : undefined;
+    }
     case 'matric_passing_year':
       return profile.matric_year != null ? String(profile.matric_year) : undefined;
-    case 'inter_obtained':
-      return profile.fsc_marks != null ? String(profile.fsc_marks) : undefined;
-    case 'inter_total_marks':
-      return profile.fsc_total != null ? String(profile.fsc_total) : undefined;
-    case 'inter_pct':
-      return profile.fsc_percentage != null ? String(profile.fsc_percentage) : undefined;
+    case 'inter_obtained': {
+      // For Cambridge students, IBCC A-Level marks are the authoritative inter marks
+      const v = profile.ibcc_alevel_marks ?? profile.fsc_marks;
+      return v != null ? String(v) : undefined;
+    }
+    case 'inter_total_marks': {
+      const v = profile.ibcc_alevel_total ?? profile.fsc_total;
+      return v != null ? String(v) : undefined;
+    }
+    case 'inter_pct': {
+      if (profile.ibcc_alevel_marks && profile.ibcc_alevel_total)
+        return String(parseFloat(((profile.ibcc_alevel_marks / profile.ibcc_alevel_total) * 100).toFixed(2)));
+      const v = profile.ibcc_equivalent_inter ?? profile.fsc_percentage;
+      return v != null ? String(v) : undefined;
+    }
     case 'inter_passing_year':
       return profile.fsc_year != null ? String(profile.fsc_year) : undefined;
     case 'matric_board_name':
@@ -914,6 +952,42 @@ const FIELD_HEURISTICS = [
       'class_10_percentage', 'grade_10_percentage', 'matric_score_pct',
       'ssc_pct_age', 'matric_pct_age'],
     profileKey: 'matric_percentage', priority: 5
+  },
+
+  // ── IBCC Equivalence ───────────────────────────────────────────
+  {
+    match: ['ibcc_equivalent_inter', 'ibcc_inter', 'ibcc_alevel', 'ibcc_alevel_percentage',
+      'ibcc equivalent inter', 'ibcc inter percentage', 'ibcc percentage inter',
+      'alevel_ibcc', 'a_level_ibcc', 'ibcc_fsc', 'ibcc fsc percentage',
+      'inter ibcc', 'alevel ibcc percentage', 'ibcc equivalent percentage inter'],
+    profileKey: 'ibcc_equivalent_inter', priority: 7
+  },
+  {
+    match: ['ibcc_equivalent_matric', 'ibcc_matric', 'ibcc_olevel', 'ibcc_olevel_percentage',
+      'ibcc equivalent matric', 'ibcc matric percentage', 'ibcc percentage matric',
+      'olevel_ibcc', 'o_level_ibcc', 'ibcc_ssc', 'ibcc ssc percentage',
+      'matric ibcc', 'olevel ibcc percentage', 'ibcc equivalent percentage matric'],
+    profileKey: 'ibcc_equivalent_matric', priority: 7
+  },
+  {
+    match: ['ibcc_alevel_marks', 'ibcc alevel marks', 'ibcc alevel obtained',
+      'ibcc_alevel_obtained', 'ibcc inter marks', 'ibcc_inter_marks'],
+    profileKey: 'ibcc_alevel_marks', priority: 7
+  },
+  {
+    match: ['ibcc_alevel_total', 'ibcc alevel total', 'ibcc inter total',
+      'ibcc_inter_total', 'ibcc_alevel_max', 'ibcc inter max marks'],
+    profileKey: 'ibcc_alevel_total', priority: 7
+  },
+  {
+    match: ['ibcc_olevel_marks', 'ibcc olevel marks', 'ibcc olevel obtained',
+      'ibcc_olevel_obtained', 'ibcc matric marks', 'ibcc_matric_marks'],
+    profileKey: 'ibcc_olevel_marks', priority: 7
+  },
+  {
+    match: ['ibcc_olevel_total', 'ibcc olevel total', 'ibcc matric total',
+      'ibcc_matric_total', 'ibcc_olevel_max', 'ibcc matric max marks'],
+    profileKey: 'ibcc_olevel_total', priority: 7
   },
 
   // ── Education form: section-context-aware generic labels ──────
@@ -2247,6 +2321,90 @@ async function fillPrimeNGCalendar(el, value) {
 }
 
 
+/**
+ * verifyFilledField — post-fill double-check.
+ *
+ * Called ~150 ms after a successful fill to confirm the value actually landed
+ * and wasn't silently reset by the framework (Angular OnChanges, Vue watchers,
+ * ASP.NET UpdatePanel, etc.).
+ *
+ * Returns true  → fill confirmed, keep green highlight.
+ * Returns false → fill was rejected/reset, caller should re-mark amber.
+ *
+ * Design rules:
+ *  - Fails OPEN: any uncertainty returns true (no false negatives).
+ *  - Never re-fills — read-only, no side effects.
+ *  - Shape validators only run for fields where the value shape is unambiguous.
+ *  - For p-dropdown / p-calendar the displayed label is the ground truth.
+ */
+function verifyFilledField(el, intendedValue, profileKey) {
+  try {
+    const tag = el.tagName;
+
+    // ── PrimeNG p-dropdown: check the displayed label text ─────────────────
+    if (tag === 'P-DROPDOWN') {
+      const label = (el.querySelector('.p-dropdown-label')?.textContent || '').trim().toLowerCase();
+      // Empty label strings that mean "nothing selected"
+      if (!label || label === 'select' || label === '--' || label === 'none' || label === 'choose') return false;
+      // If we can compare directly, do so — otherwise presence of any label is enough
+      const intended = String(intendedValue).toLowerCase().trim();
+      if (intended && label !== intended) {
+        // Accept if label starts with intended, or intended starts with label (partial match)
+        // This handles "Mr." vs "mr", "Muslim" vs "islam" (alias-filled), etc.
+        if (!label.startsWith(intended) && !intended.startsWith(label) && !label.includes(intended)) {
+          // Last-resort: if label is non-empty and non-placeholder, trust it (alias match)
+          return label.length >= 1 && label !== 'select' && label !== '--';
+        }
+      }
+      return true;
+    }
+
+    // ── PrimeNG p-calendar: check the inner input is non-empty ────────────
+    if (tag === 'P-CALENDAR') {
+      const input = el.querySelector('input');
+      return !!(input?.value?.trim());
+    }
+
+    // ── <select>: a selected index > 0 with a non-empty value ─────────────
+    if (tag === 'SELECT') {
+      return el.selectedIndex > 0 && el.value !== '' && el.value != null;
+    }
+
+    // ── <input> / <textarea>: non-empty value present ─────────────────────
+    if (tag === 'INPUT' || tag === 'TEXTAREA') {
+      const v = el.value?.trim();
+      if (!v) return false;
+
+      // Shape validators — only for keys where the expected shape is unambiguous.
+      // All validators fail open: if the value parses at all, it passes.
+      const SHAPE = {
+        cnic:          s => /^\d{5}-\d{7}-\d$/.test(s) || /^\d{13}$/.test(s),
+        father_cnic:   s => /^\d{5}-\d{7}-\d$/.test(s) || /^\d{13}$/.test(s),
+        mother_cnic:   s => /^\d{5}-\d{7}-\d$/.test(s) || /^\d{13}$/.test(s),
+        email:         s => s.includes('@') && s.includes('.'),
+        date_of_birth: s => {
+          // Accept any parseable date or common format strings
+          if (/\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/.test(s)) return true;
+          const d = new Date(s); return !isNaN(d.getTime()) && d.getFullYear() > 1900;
+        },
+        phone:         s => s.replace(/\D/g, '').length >= 10,
+        guardian_phone:s => s.replace(/\D/g, '').length >= 10,
+      };
+      const validator = SHAPE[profileKey];
+      // If validator exists and explicitly fails → reject; if no validator → pass
+      if (validator && !validator(v)) return false;
+
+      return true;
+    }
+
+    // Typeahead div and other exotic tags — presence of any value is enough
+    return true;
+  } catch {
+    // Never crash the fill loop — fail open
+    return true;
+  }
+}
+
 function fillSelect(el, value) {
   if (!value && value !== 0) return false;
   const val = String(value).toLowerCase().trim();
@@ -3317,7 +3475,9 @@ async function initSidebarState(university) {
   // Auto-resume Bahria multi-phase fill after a postback reload.
   // Polls until window.__unimatch.profile is ready (chrome.storage.local may be
   // slightly behind on slow connections), then fires handleAutofill.
-  if (isBahriaProfilePage() && sessionStorage.getItem(BAHRIA_FILL_KEY)) {
+  const needsResume = (isBahriaProfilePage()       && sessionStorage.getItem(BAHRIA_FILL_KEY))
+                   || (isBahriaApplyProgramPage()   && sessionStorage.getItem(BAHRIA_APPLY_FILL_KEY));
+  if (needsResume) {
     const tryResume = (attempt) => {
       if (attempt >= 10) return; // give up after ~6.5 s total
       if (window.__unimatch?.profile) {
@@ -5419,6 +5579,292 @@ function isBahriaProfilePage() {
     /profile\.aspx/i.test(window.location.pathname);
 }
 
+function isBahriaApplyProgramPage() {
+  return window.location.hostname.includes('cms.bahria.edu.pk') &&
+    /ApplyProgram\.aspx/i.test(window.location.pathname);
+}
+
+/**
+ * fillBahriaApplyProgramPage — fills the Pre-Requisite Qualification section
+ * on cms.bahria.edu.pk/Sys/Candidate/ApplyProgram.aspx.
+ *
+ * All three postbacks on this page are UpdatePanel AJAX (no full page reload).
+ * We hook into Sys.WebForms.PageRequestManager.add_endRequest so every DOM
+ * update is fully settled before we touch the next dependent field.
+ *
+ * Postback sequence:
+ *  1. Select Pre-Req Qualification  → Status dropdown appears
+ *  2. Select Result Status          → Academic Record table renders
+ *  3. Select Row 0 Degree           → Subjects field type changes (select ↔ input)
+ *  4. Fill all remaining text fields
+ */
+/**
+ * fillBahriaApplyProgramPage — multi-phase fill for ApplyProgram.aspx.
+ *
+ * The Row 0 Degree dropdown fires a full ASP.NET __doPostBack (page reload),
+ * wiping all in-memory state. We use sessionStorage to survive the reload:
+ *
+ *   Phase 0  Fresh run: Steps 1-2 (UpdatePanel safe), save state, fire degree
+ *            change (may reload).
+ *   Phase 1  First resume after reload: redo Steps 1-2, try degree change again
+ *            (saves phase 2 in case it also reloads).
+ *   Phase 2  Second resume: redo Steps 1-2, set degree VALUE ONLY (no event —
+ *            prevents infinite reload loop), fill all text fields.
+ *
+ * If Step 3 uses UpdatePanel (not full postback), we never leave Phase 0 and
+ * sessionStorage is cleared immediately after the await resolves.
+ */
+async function fillBahriaApplyProgramPage(profile, onFilled, onManual) {
+  // Guard: MutationObserver suppressed for entire fill sequence
+  window.__unimatch = window.__unimatch || {};
+  window.__unimatch._bahriaApplyFilling = true;
+
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  const PREFIX = 'BodyPH_repeaterAcademicRecords_ucAcademicRecord_';
+
+  // ── Helpers ────────────────────────────────────────────────────
+  function byId(id) { return document.getElementById(id); }
+
+  function setNativeValue(el, value) {
+    const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(el, value); else el.value = value;
+    el.dispatchEvent(new Event('input',  { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur',   { bubbles: true }));
+  }
+
+  function fillText(id, value) {
+    const el = byId(id);
+    if (!el || value == null || value === '') return false;
+    setNativeValue(el, String(value));
+    onFilled(el);
+    return true;
+  }
+
+  function bestSelectOption(sel, text) {
+    if (!text) return null;
+    const t = String(text).trim().toLowerCase();
+    return Array.from(sel.options).find(o => o.value.toLowerCase() === t)
+        || Array.from(sel.options).find(o => o.text.trim().toLowerCase() === t)
+        || Array.from(sel.options).find(o => o.text.trim().toLowerCase().includes(t) && t.length >= 3)
+        || Array.from(sel.options).find(o => t.includes(o.text.trim().toLowerCase()) && o.text.trim().length >= 3)
+        || null;
+  }
+
+  function waitForUpdatePanel(maxWaitMs = 5000) {
+    return new Promise(resolve => {
+      let done = false;
+      const timeout = setTimeout(() => { if (!done) { done = true; resolve(); } }, maxWaitMs);
+      try {
+        const prm = window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
+        if (!prm) { clearTimeout(timeout); resolve(); return; }
+        const handler = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timeout);
+          prm.remove_endRequest(handler);
+          resolve();
+        };
+        prm.add_endRequest(handler);
+      } catch {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+  }
+
+  async function setSelectAndWait(id, value, maxWaitMs = 6000) {
+    const sel = byId(id);
+    if (!sel) return false;
+    const opt = bestSelectOption(sel, value);
+    if (!opt) return false;
+    const waitPromise = waitForUpdatePanel(maxWaitMs);
+    sel.value = opt.value;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    onFilled(sel);
+    await waitPromise;
+    await delay(200);
+    return true;
+  }
+
+  // Fill all text/dropdown fields for both rows from a state object.
+  function fillAllRows(s) {
+    // Row 0 subjects: O-Level = free-text input, SSC = dropdown
+    if (s.row0IsOLevel) {
+      fillText(`${PREFIX}0_tbSubjects_0`, s.row0Subjects);
+    } else {
+      const subSel = byId(`${PREFIX}0_ddlSubjects_0`);
+      if (subSel) {
+        const subOpt = bestSelectOption(subSel, s.row0Subjects) || bestSelectOption(subSel, 'SCIENCE');
+        if (subOpt) { subSel.value = subOpt.value; onFilled(subSel); }
+      }
+    }
+    fillText(`${PREFIX}0_tbObtainedMarks_0`, s.row0Marks);
+    fillText(`${PREFIX}0_tbTotalMarks_0`,    s.row0Total);
+    fillText(`${PREFIX}0_tbPercentage_0`,    s.row0Pct);
+    fillText(`${PREFIX}0_tbInstitute_0`,     s.row0School);
+    fillText(`${PREFIX}0_tbBoardUniversity_0`, s.row0Board);
+    fillText(`${PREFIX}0_tbPassingYear_0`,   s.row0Year);
+
+    // Row 1 degree (no postback — just set value)
+    const row1DegreeSel = byId(`${PREFIX}1_ddlDegreeType_1`);
+    if (row1DegreeSel) {
+      const dOpt = Array.from(row1DegreeSel.options).find(o => o.value === s.row1DegreeVal)
+                || Array.from(row1DegreeSel.options).find(o => o.value !== '');
+      if (dOpt) { row1DegreeSel.value = dOpt.value; onFilled(row1DegreeSel); }
+    }
+    fillText(`${PREFIX}1_tbSubjects_1`,        s.row1Subjects);
+    fillText(`${PREFIX}1_tbObtainedMarks_1`,   s.row1Marks);
+    fillText(`${PREFIX}1_tbTotalMarks_1`,      s.row1Total);
+    fillText(`${PREFIX}1_tbPercentage_1`,      s.row1Pct);
+    fillText(`${PREFIX}1_tbInstitute_1`,       s.row1School);
+    fillText(`${PREFIX}1_tbBoardUniversity_1`, s.row1Board);
+    fillText(`${PREFIX}1_tbPassingYear_1`,     s.row1Year);
+
+    console.log('[Bahria ApplyProgram] All rows filled');
+  }
+
+  // ── Phase resume: reloaded after degree postback ────────────────
+  const resumeState = (() => {
+    try { return JSON.parse(sessionStorage.getItem(BAHRIA_APPLY_FILL_KEY) || 'null'); }
+    catch { return null; }
+  })();
+
+  if (resumeState) {
+    sessionStorage.removeItem(BAHRIA_APPLY_FILL_KEY);
+    console.log(`[Bahria ApplyProgram] Resume phase ${resumeState.phase}`);
+    try {
+      // Full postback wiped Steps 1-2 — redo them (UpdatePanel, safe)
+      await setSelectAndWait('BodyPH_ddlPreReqQualification', resumeState.preReqQual);
+      await setSelectAndWait('BodyPH_ddlAdmissionCriteriaPreReqID', resumeState.resultStatusValue);
+
+      if (resumeState.phase < 2) {
+        // Phase 1: attempt degree change again; save phase 2 guard in case it reloads
+        sessionStorage.setItem(BAHRIA_APPLY_FILL_KEY, JSON.stringify({ ...resumeState, phase: 2 }));
+        const degOk = await setSelectAndWait(`${PREFIX}0_ddlDegreeType_0`, resumeState.row0DegreeVal);
+        // If we reach this line: no full postback happened — clear guard and fill
+        sessionStorage.removeItem(BAHRIA_APPLY_FILL_KEY);
+        if (!degOk) console.warn('[Bahria ApplyProgram] Phase 1: Row 0 degree not found, filling anyway');
+        fillAllRows(resumeState);
+      } else {
+        // Phase 2: degree change keeps reloading — set value only, no event
+        console.log('[Bahria ApplyProgram] Phase 2: setting degree value without postback');
+        const degSel = byId(`${PREFIX}0_ddlDegreeType_0`);
+        if (degSel) {
+          const dOpt = Array.from(degSel.options).find(o => o.value === resumeState.row0DegreeVal)
+                    || Array.from(degSel.options).find(o => o.value !== '');
+          if (dOpt) { degSel.value = dOpt.value; onFilled(degSel); }
+        }
+        fillAllRows(resumeState);
+      }
+    } finally {
+      window.__unimatch._bahriaApplyFilling = false;
+    }
+    return;
+  }
+
+  // ── Phase 0: fresh start ────────────────────────────────────────
+  try {
+    const eduSystem = (profile.education_system || '').toLowerCase();
+    const preReqQual = (eduSystem === 'cambridge') ? 'A-LEVEL' : 'HSSC';
+
+    const alevelComplete = (profile.alevel_status === 'complete') || (profile.inter_status === 'complete');
+    const currentYear = new Date().getFullYear();
+    const interYear   = parseInt(profile.fsc_year || profile.alevel_year || 0);
+    const hsscPartial = profile.inter_status === 'appearing' || (interYear > currentYear);
+    const isPartial   = preReqQual === 'A-LEVEL' ? !alevelComplete : hsscPartial;
+
+    const resultStatusValue = preReqQual === 'A-LEVEL'
+      ? (alevelComplete ? '1089' : '1090')   // COMPLETE AVAILABLE : NOT AVAILABLE
+      : (hsscPartial    ? '1094' : '1093');   // PARTIAL : COMPLETE AVAILABLE
+
+    const row0IsOLevel = (eduSystem === 'cambridge');
+
+    function getRow0DegreeValue() {
+      if (preReqQual === 'A-LEVEL')
+        return row0IsOLevel ? (isPartial ? '3801' : '3799') : (isPartial ? '3800' : '3798');
+      if (isPartial) return row0IsOLevel ? '3814' : '3813';
+      return row0IsOLevel ? '3811' : '3810';
+    }
+
+    // Snapshot all fill data before any postback — these survive in sessionStorage
+    const fillState = {
+      preReqQual,
+      resultStatusValue,
+      row0DegreeVal : getRow0DegreeValue(),
+      row0IsOLevel,
+      // Row 0: O-Level / SSC data — use IBCC O-Level marks for Cambridge students
+      row0Marks   : profile.ibcc_olevel_marks ?? profile.matric_marks,
+      row0Total   : profile.ibcc_olevel_total ?? profile.matric_total,
+      row0Pct     : (() => {
+        const m = profile.ibcc_olevel_marks ?? profile.matric_marks;
+        const t = profile.ibcc_olevel_total ?? profile.matric_total;
+        if (m && t) return parseFloat(((m / t) * 100).toFixed(2));
+        return profile.ibcc_equivalent_matric ?? profile.matric_percentage;
+      })(),
+      row0Year    : profile.olevel_year    ?? profile.matric_year,
+      row0Board   : profile.olevel_board   ?? profile.matric_board  ?? profile.board_name ?? '',
+      row0School  : profile.olevel_school  ?? profile.matric_school ?? profile.school_name ?? '',
+      row0Subjects: row0IsOLevel
+        ? (Array.isArray(profile.olevel_subjects)
+            ? profile.olevel_subjects.map(s => `${s.subject} (${s.grade})`).join(', ')
+            : (profile.olevel_subjects || ''))
+        : 'SCIENCE',
+      // Row 1: A-Level / HSSC data — use IBCC A-Level marks for Cambridge students
+      row1DegreeVal: preReqQual === 'A-LEVEL'
+        ? '3802'
+        : (isPartial ? '3815' : '3812'),
+      row1Marks   : profile.ibcc_alevel_marks ?? profile.fsc_marks,
+      row1Total   : profile.ibcc_alevel_total ?? profile.fsc_total,
+      row1Pct     : (() => {
+        const m = profile.ibcc_alevel_marks ?? profile.fsc_marks;
+        const t = profile.ibcc_alevel_total ?? profile.fsc_total;
+        if (m && t) return parseFloat(((m / t) * 100).toFixed(2));
+        return profile.ibcc_equivalent_inter ?? profile.fsc_percentage;
+      })(),
+      row1Year    : profile.alevel_year  ?? profile.fsc_year,
+      row1Board   : profile.alevel_board ?? profile.fsc_board  ?? profile.board_name ?? '',
+      row1School  : profile.alevel_school ?? profile.fsc_school ?? profile.school_name ?? '',
+      row1Subjects: preReqQual === 'A-LEVEL'
+        ? (Array.isArray(profile.alevel_subjects)
+            ? profile.alevel_subjects.map(s => `${s.subject} (${s.grade})`).join(', ')
+            : (profile.alevel_subjects || ''))
+        : (profile.fsc_stream || ''),
+    };
+
+    // Step 1: Pre-Req Qualification (UpdatePanel)
+    console.log(`[Bahria ApplyProgram] Phase 0 Step 1: Pre-Req Qualification = ${preReqQual}`);
+    const step1ok = await setSelectAndWait('BodyPH_ddlPreReqQualification', preReqQual);
+    if (!step1ok) {
+      console.warn('[Bahria ApplyProgram] Pre-Req Qualification select failed');
+      return;
+    }
+
+    // Step 2: Result Status (UpdatePanel)
+    console.log(`[Bahria ApplyProgram] Phase 0 Step 2: Result Status = ${resultStatusValue}`);
+    const step2ok = await setSelectAndWait('BodyPH_ddlAdmissionCriteriaPreReqID', resultStatusValue);
+    if (!step2ok) {
+      console.warn('[Bahria ApplyProgram] Result Status select failed');
+      return;
+    }
+
+    // Step 3: Row 0 Degree — may fire __doPostBack (full reload).
+    // Save state BEFORE firing so Phase 1 can resume from sessionStorage.
+    sessionStorage.setItem(BAHRIA_APPLY_FILL_KEY, JSON.stringify({ phase: 1, ...fillState }));
+    console.log(`[Bahria ApplyProgram] Phase 0 Step 3: Row 0 Degree = ${fillState.row0DegreeVal}`);
+    const step3ok = await setSelectAndWait(`${PREFIX}0_ddlDegreeType_0`, fillState.row0DegreeVal);
+
+    // If we reach here: UpdatePanel fired (no full postback) — clear state, fill normally
+    sessionStorage.removeItem(BAHRIA_APPLY_FILL_KEY);
+    if (!step3ok) console.warn('[Bahria ApplyProgram] Row 0 Degree not found, filling anyway');
+    fillAllRows(fillState);
+
+  } finally {
+    window.__unimatch._bahriaApplyFilling = false;
+  }
+}
+
 function bahriaProvinceText(province) {
   const p = (province || '').toLowerCase().trim();
   if (p.includes('punjab')) return 'PUNJAB';
@@ -6090,6 +6536,20 @@ async function handleAutofill() {
       if (progressBar) progressBar.style.width = `${Math.min(100, (processedFields / totalFields) * 100)}%`;
     };
 
+    // ─── SPECIAL: Bahria University ApplyProgram.aspx ───────────────────────
+    // UpdatePanel AJAX page — all postbacks are partial (no page reload).
+    // Fills Pre-Requisite Qualification section with cascading dropdown sequence.
+    if (isBahriaApplyProgramPage()) {
+      console.log('[IlmSeUrooj] Bahria ApplyProgram.aspx detected');
+      await fillBahriaApplyProgramPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
+      return;
+    }
+
     // ─── SPECIAL: Bahria University Profile.aspx ────────────────────────────
     // Multi-phase handler: Province → District → Tehsil use ASP.NET full-page
     // postbacks. Phase state is stored in sessionStorage and auto-resumed.
@@ -6281,13 +6741,25 @@ async function handleAutofill() {
           }
 
           if (filled) {
-            el.style.outline = '2px solid #4ade80';
-            el.style.outlineOffset = '2px';
-            el.classList.add('unimatch-filled');
-            el.classList.remove('unimatch-manual');
-            filledCount++;
-            filledProfileKeyOnce.add(effectiveKey);
-            filledSelectors.push(selectorString);
+            await new Promise(r => setTimeout(r, 150));
+            const verified = verifyFilledField(el, value, effectiveKey);
+            if (verified) {
+              el.style.outline = '2px solid #4ade80';
+              el.style.outlineOffset = '2px';
+              el.classList.add('unimatch-filled');
+              el.classList.remove('unimatch-manual');
+              filledCount++;
+              filledProfileKeyOnce.add(effectiveKey);
+              filledSelectors.push(selectorString);
+            } else {
+              el.style.outline = '2px solid #fbbf24';
+              el.style.outlineOffset = '2px';
+              el.classList.remove('unimatch-filled');
+              el.classList.add('unimatch-manual');
+              manualCount++;
+              manualSelectors.push(selectorString);
+              console.warn(`[IlmSeUrooj] TIER 1 verify failed: "${effectiveKey}" on ${el.id || el.name || el.tagName}`);
+            }
           } else {
             el.style.outline = '2px solid #fbbf24';
             el.style.outlineOffset = '2px';
@@ -6726,14 +7198,32 @@ async function handleAutofill() {
       }
 
       if (filled) {
-        input.style.outline = '2px solid #4ade80';
-        input.style.outlineOffset = '2px';
-        input.classList.add('unimatch-filled');
-        input.classList.remove('unimatch-conflict', 'unimatch-manual');
-        sparkleField(input);
-        playFillTone(filledCount, allInputs.length);
-        filledCount++;
-        filledProfileKeyOnce.add(resolvedKey);
+        // ── Post-fill verification ──────────────────────────────────────────
+        // Wait for Angular/Vue/React to run their change detection cycle before
+        // reading back. 150 ms covers debounceTime(100) validators and one
+        // Angular tick. Slow AsyncValidators (network) are not waited for —
+        // we only check presence/shape, not server-side validity.
+        await new Promise(r => setTimeout(r, 150));
+        const verified = verifyFilledField(input, value, resolvedKey);
+        if (verified) {
+          input.style.outline = '2px solid #4ade80';
+          input.style.outlineOffset = '2px';
+          input.classList.add('unimatch-filled');
+          input.classList.remove('unimatch-conflict', 'unimatch-manual');
+          sparkleField(input);
+          playFillTone(filledCount, allInputs.length);
+          filledCount++;
+          filledProfileKeyOnce.add(resolvedKey);
+          console.debug(`[IlmSeUrooj] ✓ verified: "${resolvedKey}" on ${input.id || input.name || input.tagName}`);
+        } else {
+          // Fill reported success but value didn't stick — mark amber
+          input.style.outline = '2px solid #fbbf24';
+          input.style.outlineOffset = '2px';
+          input.classList.remove('unimatch-filled');
+          input.classList.add('unimatch-manual');
+          manualCount++;
+          console.warn(`[IlmSeUrooj] ✗ verify failed: "${resolvedKey}" on ${input.id || input.name || input.tagName} — value may have been reset by framework`);
+        }
       } else if (input.required && !input.value) {
         input.style.outline = '2px solid #fbbf24';
         input.style.outlineOffset = '2px';
@@ -6766,12 +7256,21 @@ async function handleAutofill() {
           if (!distVal) continue;
           const ok = fillSelect(input, distVal);
           if (ok) {
-            alreadyHandled.add(input);
-            input.style.outline = '2px solid #4ade80';
-            input.classList.add('unimatch-filled');
-            sparkleField(input);
-            filledCount++;
-            console.log(`[IlmSeUrooj] TIER 4 district fill: ${distVal}`);
+            await new Promise(r => setTimeout(r, 150));
+            const verified = verifyFilledField(input, distVal, profileKey || 'district');
+            if (verified) {
+              alreadyHandled.add(input);
+              input.style.outline = '2px solid #4ade80';
+              input.classList.add('unimatch-filled');
+              sparkleField(input);
+              filledCount++;
+              console.log(`[IlmSeUrooj] TIER 4 district fill verified: ${distVal}`);
+            } else {
+              input.style.outline = '2px solid #fbbf24';
+              input.classList.add('unimatch-manual');
+              manualCount++;
+              console.warn(`[IlmSeUrooj] TIER 4 district verify failed: ${distVal}`);
+            }
           }
         }
       }
@@ -6791,20 +7290,27 @@ async function handleAutofill() {
         for (const input of newInputs) {
           if (input.type === 'password') continue;
           if (input.tagName === 'P-DROPDOWN') {
-            // p-dropdown that appeared late (rare) — handled same as Tier 3
             const profileKey = matchFieldHeuristically(input);
             if (!profileKey) continue;
             const val = profileValueFor(profileKey, ctx.profile) ?? ctx.profile[profileKey];
             if (!val) continue;
             const ok = await fillPrimeNGDropdown(input, String(val));
-            if (ok) { input.style.outline = '2px solid #4ade80'; input.classList.add('unimatch-filled'); sparkleField(input); filledCount++; alreadyHandled.add(input); }
+            if (ok) {
+              await new Promise(r => setTimeout(r, 150));
+              const verified = verifyFilledField(input, val, profileKey);
+              if (verified) {
+                input.style.outline = '2px solid #4ade80'; input.classList.add('unimatch-filled'); sparkleField(input); filledCount++;
+              } else {
+                input.style.outline = '2px solid #fbbf24'; input.classList.add('unimatch-manual'); manualCount++;
+              }
+            }
+            alreadyHandled.add(input);
             continue;
           }
           const profileKey = matchFieldHeuristically(input);
           if (!profileKey) continue;
           let val = profileValueFor(profileKey, ctx.profile) ?? ctx.profile[profileKey];
           if (val == null || val === '') continue;
-          // Apply field-level format transforms
           val = applyFieldTransform(input, profileKey, String(val));
           let ok = false;
           if (input.tagName === 'SELECT') {
@@ -6815,11 +7321,20 @@ async function handleAutofill() {
             ok = await fillInput(input, val);
           }
           if (ok) {
-            input.style.outline = '2px solid #4ade80';
-            input.style.outlineOffset = '2px';
-            input.classList.add('unimatch-filled');
-            sparkleField(input);
-            filledCount++;
+            await new Promise(r => setTimeout(r, 150));
+            const verified = verifyFilledField(input, val, profileKey);
+            if (verified) {
+              input.style.outline = '2px solid #4ade80';
+              input.style.outlineOffset = '2px';
+              input.classList.add('unimatch-filled');
+              sparkleField(input);
+              filledCount++;
+            } else {
+              input.style.outline = '2px solid #fbbf24';
+              input.style.outlineOffset = '2px';
+              input.classList.add('unimatch-manual');
+              manualCount++;
+            }
           } else if (input.required) {
             input.style.outline = '2px solid #fbbf24';
             input.classList.add('unimatch-manual');
@@ -7993,6 +8508,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
 
 let _reinitTimer = null;
 function debounceReinit() {
+  // Suppress reinit while Bahria ApplyProgram fill is in progress (AJAX race condition)
+  if (window.__unimatch?._bahriaApplyFilling) return;
   clearTimeout(_reinitTimer);
   _reinitTimer = setTimeout(() => {
     const university = detectUniversity();
@@ -8009,6 +8526,8 @@ function debounceReinit() {
 function setupMutationObserver() {
   if (typeof MutationObserver === 'undefined') return;
   const observer = new MutationObserver((mutations) => {
+    // Don't react to DOM mutations caused by our own AJAX fill sequence
+    if (window.__unimatch?._bahriaApplyFilling) return;
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (node.nodeType !== 1) continue;
@@ -8167,11 +8686,22 @@ async function handleFillFocusedField() {
   }
 
   if (filled) {
-    focused.style.outline = '2px solid #4ade80';
-    focused.style.outlineOffset = '2px';
-    focused.classList.add('unimatch-filled');
-    focused.classList.remove('unimatch-manual');
-    showFieldShortcutFeedback(focused, String(value), '#4ade80');
+    await new Promise(r => setTimeout(r, 150));
+    const verified = verifyFilledField(focused, value, profileKey);
+    if (verified) {
+      focused.style.outline = '2px solid #4ade80';
+      focused.style.outlineOffset = '2px';
+      focused.classList.add('unimatch-filled');
+      focused.classList.remove('unimatch-manual');
+      showFieldShortcutFeedback(focused, String(value), '#4ade80');
+    } else {
+      // Fill reported success but framework reset the value
+      focused.style.outline = '2px solid #fbbf24';
+      focused.style.outlineOffset = '2px';
+      focused.classList.remove('unimatch-filled');
+      focused.classList.add('unimatch-manual');
+      showFieldShortcutFeedback(focused, 'Filled but reset by page — try again', '#fbbf24');
+    }
   } else {
     showFieldShortcutFeedback(focused, 'Could not fill', '#fbbf24');
   }
