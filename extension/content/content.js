@@ -1378,8 +1378,10 @@ function matchFieldHeuristically(el) {
   } else {
     // Search nearby label by for= attribute
     if (rawId) {
-      const lbl = document.querySelector(`label[for="${rawId}"]`);
-      if (lbl) labelText = lbl.textContent || '';
+      try {
+        const lbl = document.querySelector(`label[for="${rawId}"]`);
+        if (lbl) labelText = lbl.textContent || '';
+      } catch { /* rawId contains CSS-special chars — skip label lookup */ }
     }
     // Or a wrapping label
     if (!labelText) {
@@ -2399,9 +2401,13 @@ function verifyFilledField(el, intendedValue, profileKey) {
       return !!(input?.value?.trim());
     }
 
-    // ── <select>: a selected index > 0 with a non-empty value ─────────────
+    // ── <select>: non-empty value; if intended value given, match wins ───────
     if (tag === 'SELECT') {
-      return el.selectedIndex > 0 && el.value !== '' && el.value != null;
+      if (el.value === '' || el.value == null) return false;
+      // Value matches what we intended → verified regardless of index position
+      // (covers no-placeholder selects where the correct option is at index 0)
+      if (intendedValue != null && el.value === String(intendedValue)) return true;
+      return el.selectedIndex > 0;
     }
 
     // ── <input> / <textarea>: non-empty value present ─────────────────────
@@ -6789,11 +6795,11 @@ async function handleAutofill() {
   showScanLine(1500);
   const _fillStart = Date.now();
 
+  let filledCount = 0;
+  let manualCount = 0;
+  let skippedCount = 0;
+  let conflictCount = 0;
   try {
-    let filledCount = 0;
-    let manualCount = 0;
-    let skippedCount = 0;
-    let conflictCount = 0;
     const filledSelectors = [];
     const manualSelectors = [];
     const conflictList = [];
@@ -7708,7 +7714,7 @@ async function handleAutofill() {
     if (err.message?.includes('Extension context invalidated') || !isExtensionValid()) {
       showRefreshNeeded(contentEl);
     } else {
-      renderState(contentEl, 'filled', { filled: 0, manual: 0 });
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount });
     }
   }
 }
