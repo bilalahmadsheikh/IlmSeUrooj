@@ -385,13 +385,6 @@ export default function Home() {
 
 
 
-      {/* Social proof for non-logged-in users */}
-      {!isLoggedIn && !isSwipeMode && (
-        <div className={styles.socialProof}>
-          Used by students applying to NUST, LUMS, FAST and 23 more universities
-        </div>
-      )}
-
       <FilterSection
         filters={filters}
         setFilters={setFilters}

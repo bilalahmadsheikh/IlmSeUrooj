@@ -111,7 +111,7 @@ export default function ReferralSystem({ apiFetch, userId }) {
 
                 {referrals.length === 0 ? (
                     <div className="dash-empty">
-                        No referrals yet. Invite a sibling or friend to use IlmSeUrooj and earn points!
+                        No referrals yet. Invite a sibling or friend to use Anqa and earn points!
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

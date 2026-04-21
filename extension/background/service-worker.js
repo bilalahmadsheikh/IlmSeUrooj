@@ -1,9 +1,9 @@
 /**
- * Ilm Se Urooj — Service Worker v2.0
+ * Anqa — Service Worker v2.0
  * Handles auth token storage, message routing, and API communication.
  *
  * CONFIGURABLE: API base URL is read from chrome.storage.local.
- * Default: https://ilmseurooj.com/api
+ * Default: https://anqa.pk/api
  * Override: set { unimatch_api_base: 'http://localhost:3000/api' } in storage.
  */
 
@@ -136,7 +136,7 @@ async function storeToken(token) {
     unimatch_token: token,
     token_expiry: expiry,
   });
-  console.log('[IlmSeUrooj] Auth token stored, expires:', new Date(expiry).toISOString());
+  console.log('[Anqa] Auth token stored, expires:', new Date(expiry).toISOString());
 }
 
 async function getToken() {
@@ -145,7 +145,7 @@ async function getToken() {
 
   const FAKE_TOKENS = ['demo_token', 'real_token', 'test_token', 'fake_token'];
   if (FAKE_TOKENS.includes(result.unimatch_token)) {
-    console.log('[IlmSeUrooj] Rejecting fake/demo token, clearing auth data');
+    console.log('[Anqa] Rejecting fake/demo token, clearing auth data');
     await chrome.storage.local.remove(['unimatch_token', 'token_expiry', 'unimatch_profile']);
     return null;
   }
@@ -153,7 +153,7 @@ async function getToken() {
   // Check expiry — allow 5 min buffer before actual expiry
   const BUFFER_MS = 5 * 60 * 1000;
   if (result.token_expiry && Date.now() > result.token_expiry - BUFFER_MS) {
-    console.log('[IlmSeUrooj] Token expired or near expiry, clearing');
+    console.log('[Anqa] Token expired or near expiry, clearing');
     await chrome.storage.local.remove(['unimatch_token', 'token_expiry', 'unimatch_profile']);
     return null;
   }
@@ -166,7 +166,7 @@ async function clearToken() {
     'unimatch_token', 'token_expiry', 'unimatch_profile',
     'profile_cached_at', 'unimatch_master_password',
   ]);
-  console.log('[IlmSeUrooj] Auth data cleared');
+  console.log('[Anqa] Auth data cleared');
 }
 
 // ─── API Helpers ───────────────────────────────────────────────
@@ -202,7 +202,7 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
 
     return { ...data, status: res.status };
   } catch (err) {
-    console.error('[IlmSeUrooj] API error:', err);
+    console.error('[Anqa] API error:', err);
     return { error: err.message, status: 0 };
   }
 }
@@ -217,7 +217,7 @@ async function fetchProfile(forceRefresh = false) {
     if (cached.unimatch_profile && cached.profile_cached_at) {
       const age = Date.now() - cached.profile_cached_at;
       if (age < PROFILE_CACHE_TTL_MS) {
-        console.log(`[IlmSeUrooj] Profile served from cache (${Math.round(age / 1000)}s old)`);
+        console.log(`[Anqa] Profile served from cache (${Math.round(age / 1000)}s old)`);
         return { profile: cached.unimatch_profile };
       }
     }
@@ -236,7 +236,7 @@ async function fetchProfile(forceRefresh = false) {
       update.unimatch_master_password = result.profile.portal_password;
     }
     await chrome.storage.local.set(update);
-    console.log('[IlmSeUrooj] Profile fetched and cached');
+    console.log('[Anqa] Profile fetched and cached');
   }
   return result;
 }
@@ -245,7 +245,7 @@ async function fetchProfile(forceRefresh = false) {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   handleMessage(message, sender).then(sendResponse).catch(err => {
-    console.error('[IlmSeUrooj] Message handler error:', err);
+    console.error('[Anqa] Message handler error:', err);
     sendResponse({ error: err.message });
   });
   return true; // Keep message channel open for async response
@@ -343,7 +343,7 @@ async function handleMessage(message, sender) {
           }
         }
       } catch (e) {
-        console.warn('[IlmSeUrooj] fill progress report failed:', e.message);
+        console.warn('[Anqa] fill progress report failed:', e.message);
       }
       return { ok: true };
     }
@@ -408,7 +408,7 @@ async function handleMessage(message, sender) {
       // Developer override to point at localhost during dev
       if (message.url) {
         await chrome.storage.local.set({ unimatch_api_base: message.url });
-        console.log('[IlmSeUrooj] API base set to:', message.url);
+        console.log('[Anqa] API base set to:', message.url);
       }
       return { ok: true };
     }
@@ -427,7 +427,7 @@ async function handleMessage(message, sender) {
   }
 }
 
-// ─── External Messages (from IlmSeUrooj website) ───────────────
+// ─── External Messages (from Anqa website) ───────────────
 
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
   if (message.type === 'AUTH_TOKEN' && message.token) {
@@ -458,7 +458,7 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
 // ─── Installation ──────────────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log('[IlmSeUrooj] Extension installed/updated:', details.reason);
+  console.log('[Anqa] Extension installed/updated:', details.reason);
   // On first install, open the local app so the user can sign in
   if (details.reason === 'install') {
     getSiteBase().then(base => {

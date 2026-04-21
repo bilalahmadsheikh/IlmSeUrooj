@@ -874,8 +874,8 @@ function Nav({ user, onSignOut }) {
                     <path d="M6 12v5c6 3 10 3 16 0v-5" />
                 </svg>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span>Ilm Se Urooj</span>
-                    <span style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif", fontSize: 13, color: '#a1a1aa', lineHeight: 1, marginTop: -2 }}>علم سے عروج</span>
+                    <span>Anqa</span>
+                    <span style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif", fontSize: 13, color: '#a1a1aa', lineHeight: 1, marginTop: -2 }}>عنقا</span>
                 </div>
             </Link>
             <div className="pf-nav-links">

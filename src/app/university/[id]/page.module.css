@@ -2528,4 +2528,121 @@
     flex-direction: column;
     text-align: center;
   }
+
+  .pageWrap {
+    padding: var(--space-2) var(--space-3) var(--space-12);
+  }
+
+  .hero {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-xl);
+  }
+
+  .heroTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .heroSubtitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .logoBox {
+    width: 56px;
+    height: 56px;
+  }
+
+  .logoLetter {
+    font-size: var(--font-size-2xl);
+  }
+
+  .logoImgWrap {
+    width: 72px;
+    height: 72px;
+  }
+
+  .breadcrumb {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-4);
+  }
+
+  .quickNav {
+    top: 48px;
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+    border-radius: var(--radius-xl);
+  }
+
+  .quickNav a {
+    padding: var(--space-1) var(--space-2);
+    font-size: 10px;
+  }
+
+  .card {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+  }
+
+  .statsRow {
+    gap: var(--space-1);
+  }
+
+  .statCard {
+    padding: var(--space-2);
+    min-width: 50px;
+    border-radius: var(--radius-lg);
+  }
+
+  .statValue {
+    font-size: var(--font-size-sm);
+  }
+
+  .statLabel {
+    font-size: 8px;
+  }
+
+  .statCard .statLabel {
+    font-size: 8px;
+    max-width: 70px;
+  }
+
+  .fieldPill {
+    font-size: 10px;
+    padding: 2px var(--space-2);
+  }
+
+  .heroTop {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .heroActions {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .shareBtn,
+  .saveBtn {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .detailsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .factsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stickyBar {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .footerMain {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
 }

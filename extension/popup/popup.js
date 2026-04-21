@@ -1,5 +1,5 @@
 /**
- * Ilm Se Urooj — Popup Script v2.0
+ * Anqa — Popup Script v2.0
  * Modern dashboard with portal detection, autofill trigger, timeline preview.
  */
 
@@ -39,7 +39,7 @@ function showSignedOut() {
   contentEl.innerHTML = `
     <div class="auth-card fade-in">
       <div class="auth-icon">🎓</div>
-      <h3>Welcome to Ilm Se Urooj</h3>
+      <h3>Welcome to Anqa</h3>
       <p>Sign in to autofill university application forms with one click.</p>
       <button class="btn-signin" id="btn-signin">Sign In to Your Profile</button>
       <button class="btn-create" id="btn-create">Create Free Profile →</button>

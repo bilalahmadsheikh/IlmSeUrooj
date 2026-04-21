@@ -1,7 +1,10 @@
 /* ========================================
-   Ilm Se Urooj Design System v2.0
+   Anqa Design System v2.0
    Student-Focused Theme with Light/Dark Mode
    ======================================== */
+
+/* Urdu / Arabic Display Font */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
 
 /* ========================================
    DARK MODE (Default) - Forest Green Theme
@@ -427,6 +430,46 @@ button {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+
+/* ========================================
+   MOBILE BASE OVERRIDES
+   ======================================== */
+@media (max-width: 768px) {
+  :root {
+    --font-size-5xl: 2.25rem;
+    --font-size-6xl: 2.75rem;
+    --font-size-4xl: 2rem;
+    --font-size-3xl: 1.5rem;
+  }
+
+  .container {
+    padding: 0 var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-size-5xl: 1.75rem;
+    --font-size-6xl: 2rem;
+    --font-size-4xl: 1.5rem;
+    --font-size-3xl: 1.25rem;
+    --font-size-2xl: 1.25rem;
+  }
+
+  .container {
+    padding: 0 var(--space-3);
+  }
+
+  .btn {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-sm);
+  }
+
+  .card {
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+  }
 }
 
 /* ========================================

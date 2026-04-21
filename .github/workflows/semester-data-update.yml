@@ -97,9 +97,9 @@ jobs:
           server_port: 587
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: '📚 IlmSeUrooj - Semester Data Update PR Created'
+          subject: '📚 Anqa - Semester Data Update PR Created'
           to: ba8516127@gmail.com
-          from: IlmSeUrooj Bot
+          from: Anqa Bot
           body: |
             A new Pull Request has been created with semester data updates.
             
@@ -125,9 +125,9 @@ jobs:
           server_port: 587
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: '❌ IlmSeUrooj Semester Data Update Failed'
+          subject: '❌ Anqa Semester Data Update Failed'
           to: ba8516127@gmail.com
-          from: IlmSeUrooj Bot
+          from: Anqa Bot
           body: |
             The semester data update workflow has failed.
             

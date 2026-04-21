@@ -2855,7 +2855,7 @@ function showAchievementToast(filled, manual, timeSaved) {
       <span style="font-size:22px">&#9889;</span>
       <div>
         <div style="font-size:13px;font-weight:700;color:#4ade80">Form Blasted!</div>
-        <div style="font-size:10px;color:#71717a">Ilm Se Urooj</div>
+        <div style="font-size:10px;color:#71717a">Anqa</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
@@ -3383,7 +3383,7 @@ function buildSidebarHTML(university) {
           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
           <path d="M6 12v5c6 3 10 3 16 0v-5"/>
         </svg>
-        <span>Ilm Se Urooj</span>
+        <span>Anqa</span>
       </div>
       <button id="unimatch-close" title="Close">✕</button>
     </div>
@@ -3423,14 +3423,14 @@ function showRefreshNeeded(contentEl) {
 
 // ─── Sidebar State Management ──────────────────────────────────
 
-// ─── Auto-Connect from IlmSeUrooj site ────────────────────────
+// ─── Auto-Connect from Anqa site ────────────────────────
 // Supabase v2 stores the session in localStorage under this key.
 const SUPABASE_LS_KEY = 'sb-nqmvfierglxgjgqjmxmp-auth-token';
 
-function isOnIlmSeUroojSite() {
+function isOnAnqaSite() {
   const h = window.location.hostname;
   return h === 'localhost' || h === '127.0.0.1' ||
-    h === 'ilmseurooj.com' || h.endsWith('.ilmseurooj.com') ||
+    h === 'anqa.pk' || h.endsWith('.anqa.pk') ||
     h.endsWith('.vercel.app');
 }
 
@@ -3441,19 +3441,19 @@ async function tryAutoConnectFromSite() {
     const session = JSON.parse(raw);
     const token = session?.access_token;
     if (!token) return false;
-    console.log('[IlmSeUrooj] 🔑 Supabase session found — auto-connecting…');
+    console.log('[Anqa] 🔑 Supabase session found — auto-connecting…');
     const result = await chrome.runtime.sendMessage({
       type: 'AUTH_TOKEN',
       token,
       siteUrl: window.location.origin,
     });
     if (result?.profile) {
-      console.log('[IlmSeUrooj] ✅ Auto-connected as:', result.profile.full_name);
+      console.log('[Anqa] ✅ Auto-connected as:', result.profile.full_name);
       return true;
     }
     return false;
   } catch (e) {
-    console.warn('[IlmSeUrooj] Auto-connect error:', e.message);
+    console.warn('[Anqa] Auto-connect error:', e.message);
     return false;
   }
 }
@@ -3473,10 +3473,10 @@ async function initSidebarState(university) {
     return;
   }
 
-  // On the IlmSeUrooj site itself, silently pull the real Supabase session
+  // On the Anqa site itself, silently pull the real Supabase session
   // from localStorage and send it to the background — zero manual steps.
   // Skip if we already have a fresh cached token+profile (< 30 min old).
-  if (isOnIlmSeUroojSite()) {
+  if (isOnAnqaSite()) {
     const cached = await chrome.storage.local.get(['unimatch_token', 'unimatch_profile', 'profile_cached_at']);
     const isFresh = cached.unimatch_token && cached.unimatch_profile && cached.profile_cached_at
       && (Date.now() - cached.profile_cached_at < 30 * 60 * 1000);
@@ -3555,20 +3555,20 @@ function renderState(container, state, data = {}) {
         <div class="state-card">
           <div class="state-icon">⟡</div>
           <h3>This portal isn't mapped yet.</h3>
-          <a class="btn-secondary" href="mailto:support@ilmseurooj.com?subject=Portal+Request:+${encodeURIComponent(window.location.hostname)}" target="_blank">Request Support</a>
+          <a class="btn-secondary" href="mailto:support@anqa.pk.pk?subject=Portal+Request:+${encodeURIComponent(window.location.hostname)}" target="_blank">Request Support</a>
         </div>
       `;
       break;
 
     case 'not_logged_in': {
-      const onSite = isOnIlmSeUroojSite();
+      const onSite = isOnAnqaSite();
       container.innerHTML = `
         <div class="state-card um-auth-card">
           <div class="um-auth-icon">${onSite ? '🔗' : '🎓'}</div>
           <h3>${onSite ? 'Connect Your Profile' : 'Sign In to Autofill'}</h3>
           <p>${onSite
-          ? 'You\'re on IlmSeUrooj — tap below to sync your account with the extension.'
-          : 'Sign in with your IlmSeUrooj profile to autofill university applications instantly.'}</p>
+          ? 'You\'re on Anqa — tap below to sync your account with the extension.'
+          : 'Sign in with your Anqa profile to autofill university applications instantly.'}</p>
           <button class="um-btn-full um-btn-signin" id="unimatch-signin">
             ${onSite ? '🔄 Connect My Account' : '⚡ Sign In'}
           </button>
@@ -3580,7 +3580,7 @@ function renderState(container, state, data = {}) {
       document.getElementById('unimatch-signin')?.addEventListener('click', async () => {
         try {
           if (!isExtensionValid()) { showRefreshNeeded(container); return; }
-          if (isOnIlmSeUroojSite()) {
+          if (isOnAnqaSite()) {
             renderState(container, 'loading');
             const ok = await tryAutoConnectFromSite();
             if (ok) {
@@ -3813,7 +3813,7 @@ function renderState(container, state, data = {}) {
       document.getElementById('unimatch-refresh-profile')?.addEventListener('click', async () => {
         renderState(container, 'loading');
         // Try auto-connect from site first (picks up latest Supabase session)
-        if (isOnIlmSeUroojSite()) await tryAutoConnectFromSite();
+        if (isOnAnqaSite()) await tryAutoConnectFromSite();
         // Then refresh from API
         const result = await chrome.runtime.sendMessage({ type: 'REFRESH_PROFILE' });
         if (result?.profile) {
@@ -6611,7 +6611,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
   // ═══════════════════════════════════════════════════
   const matricSec = findSection(['matric', 'secondary', 'o-level', 'o level', 'ssc']);
   if (matricSec) {
-    console.log('[IlmSeUrooj] IBA Edu: Matric section found');
+    console.log('[Anqa] IBA Edu: Matric section found');
     const mc = matricSec.container;
     const sels = sectionSelects(mc);
     const ths = sectionTypeaheads(mc);
@@ -6667,7 +6667,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
   // ═══════════════════════════════════════════════════
   const interSec = findSection(['intermediate', 'a-level', 'a level', 'hssc', 'higher secondary']);
   if (interSec) {
-    console.log('[IlmSeUrooj] IBA Edu: Intermediate section found');
+    console.log('[Anqa] IBA Edu: Intermediate section found');
     const ic = interSec.container;
     const sels = sectionSelects(ic);
     const ths = sectionTypeaheads(ic);
@@ -6755,7 +6755,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
   // ═══════════════════════════════════════════════════
   const ugSec = findSection(['undergraduate', 'bachelor', "bachelor's", 'b.s program', 'bs program', 'bachelors']);
   if (ugSec) {
-    console.log('[IlmSeUrooj] IBA Edu: ticking Not Applicable for Undergraduate');
+    console.log('[Anqa] IBA Edu: ticking Not Applicable for Undergraduate');
     await tickNotApplicable(ugSec.container);
   }
 
@@ -6764,7 +6764,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
   // ═══════════════════════════════════════════════════
   const gradSec = findSection(['graduate', "master's", 'masters', 'm.s program', 'ms program', 'mba', 'post-graduate', 'postgraduate', 'phd', 'mphil']);
   if (gradSec && gradSec.container !== ugSec?.container) {
-    console.log('[IlmSeUrooj] IBA Edu: ticking Not Applicable for Graduate');
+    console.log('[Anqa] IBA Edu: ticking Not Applicable for Graduate');
     await tickNotApplicable(gradSec.container);
   }
 
@@ -6773,7 +6773,7 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
   // ═══════════════════════════════════════════════════
   const otherSec = findSection(['other qualification', 'other education', 'other degree', 'other academic', 'any other', 'other (specify)']);
   if (otherSec && otherSec.container !== ugSec?.container && otherSec.container !== gradSec?.container) {
-    console.log('[IlmSeUrooj] IBA Edu: ticking Not Applicable for Other');
+    console.log('[Anqa] IBA Edu: ticking Not Applicable for Other');
     await tickNotApplicable(otherSec.container);
   }
 }
@@ -6823,7 +6823,7 @@ async function handleAutofill() {
     // UpdatePanel AJAX page — all postbacks are partial (no page reload).
     // Fills Pre-Requisite Qualification section with cascading dropdown sequence.
     if (isBahriaApplyProgramPage()) {
-      console.log('[IlmSeUrooj] Bahria ApplyProgram.aspx detected');
+      console.log('[Anqa] Bahria ApplyProgram.aspx detected');
       await fillBahriaApplyProgramPage(
         ctx.profile,
         (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
@@ -6837,7 +6837,7 @@ async function handleAutofill() {
     // Multi-phase handler: Province → District → Tehsil use ASP.NET full-page
     // postbacks. Phase state is stored in sessionStorage and auto-resumed.
     if (isBahriaProfilePage()) {
-      console.log('[IlmSeUrooj] Bahria Profile.aspx detected');
+      console.log('[Anqa] Bahria Profile.aspx detected');
       // Phase 0 only: force a fresh profile fetch so sensitive fields like
       // father_status are never read from a stale 30-min cache.
       const pendingPhase = (() => { try { return JSON.parse(sessionStorage.getItem(BAHRIA_FILL_KEY) || 'null')?.phase ?? 0; } catch(e) { return 0; } })();
@@ -6847,9 +6847,9 @@ async function handleAutofill() {
           if (fresh?.profile) {
             ctx.profile = fresh.profile;
             window.__unimatch.profile = fresh.profile;
-            console.log('[IlmSeUrooj] Bahria: fresh profile loaded, father_status =', fresh.profile.father_status);
+            console.log('[Anqa] Bahria: fresh profile loaded, father_status =', fresh.profile.father_status);
           }
-        } catch(e) { console.warn('[IlmSeUrooj] Bahria: profile refresh failed, using cached', e); }
+        } catch(e) { console.warn('[Anqa] Bahria: profile refresh failed, using cached', e); }
       }
       await fillBahriaProfilePage(
         ctx.profile,
@@ -6865,7 +6865,7 @@ async function handleAutofill() {
 
     // ─── SPECIAL: UET Taxila — Qualification Table ───────────────────────────
     if (isUETTaxilaQualificationPage()) {
-      console.log('[IlmSeUrooj] UET Taxila qualification page detected');
+      console.log('[Anqa] UET Taxila qualification page detected');
       await fillUETTaxilaQualificationPage(
         ctx.profile,
         (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
@@ -6877,7 +6877,7 @@ async function handleAutofill() {
 
     // ─── SPECIAL: GIKI Education Pages ──────────────────────────────
     if (isGIKISSCPage()) {
-      console.log('[IlmSeUrooj] GIKI SSC/O-Level page detected');
+      console.log('[Anqa] GIKI SSC/O-Level page detected');
       await fillGIKISSCPage(
         ctx.profile,
         (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
@@ -6887,7 +6887,7 @@ async function handleAutofill() {
       return;
     }
     if (isGIKIHSSCPage()) {
-      console.log('[IlmSeUrooj] GIKI HSSC/A-Level page detected');
+      console.log('[Anqa] GIKI HSSC/A-Level page detected');
       await fillGIKIHSSCPage(
         ctx.profile,
         (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
@@ -6901,10 +6901,10 @@ async function handleAutofill() {
     // Fires when the user is on step 2 (accordion-1..5 visible). Must be checked
     // BEFORE the demographic handler since both pages share the same URL.
     if (isIBAEducationWizardPage()) {
-      console.log('[IlmSeUrooj] IBA Education wizard step detected — running dedicated handler');
+      console.log('[Anqa] IBA Education wizard step detected — running dedicated handler');
       // 3-minute hard cap — if the wizard hasn't finished by then, show what we have
       const wizardTimeout = new Promise(resolve => setTimeout(() => {
-        console.warn('[IlmSeUrooj] IBA Edu Wizard: 3-minute timeout reached, forcing completion');
+        console.warn('[Anqa] IBA Edu Wizard: 3-minute timeout reached, forcing completion');
         resolve();
       }, 180000));
       await Promise.race([
@@ -6915,7 +6915,7 @@ async function handleAutofill() {
         ),
         wizardTimeout
       ]);
-      console.log(`[IlmSeUrooj] IBA Edu Wizard done: ${filledCount} filled, ${manualCount} manual`);
+      console.log(`[Anqa] IBA Edu Wizard done: ${filledCount} filled, ${manualCount} manual`);
       renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
       return;
     }
@@ -6924,25 +6924,25 @@ async function handleAutofill() {
     // Fires on Step 1 of the wizard. No id/name on inputs — heuristic engine
     // cannot match them, so we fill by index before any generic tier runs.
     if (isIBADemographicPage()) {
-      console.log('[IlmSeUrooj] IBA Demographic step detected — running dedicated handler');
+      console.log('[Anqa] IBA Demographic step detected — running dedicated handler');
       await fillIBADemographicPage(
         ctx.profile,
         (el) => { filledCount++; alreadyHandled.add(el); filledSelectors.push(el.id || el.name || 'iba-demo'); tickProgress(); },
         (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
       );
-      console.log(`[IlmSeUrooj] IBA Demo handler done: ${filledCount} filled, ${manualCount} manual`);
+      console.log(`[Anqa] IBA Demo handler done: ${filledCount} filled, ${manualCount} manual`);
     }
 
     // ─── SPECIAL: IBA Education Background Page ──────────────────
     // Runs before all tiers — dedicated sequential handler for the multi-section form.
     if (isIBAEducationPage()) {
-      console.log('[IlmSeUrooj] IBA Education page detected — running dedicated handler');
+      console.log('[Anqa] IBA Education page detected — running dedicated handler');
       await fillIBAEducationPage(
         ctx.profile,
         (el) => { filledCount++; alreadyHandled.add(el); filledSelectors.push(el.id || el.name || 'iba-edu'); tickProgress(); },
         (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
       );
-      console.log(`[IlmSeUrooj] IBA Edu handler done: ${filledCount} filled, ${manualCount} manual`);
+      console.log(`[Anqa] IBA Edu handler done: ${filledCount} filled, ${manualCount} manual`);
     }
 
     // ─── TIER 1: Deterministic per-university config ───────────
@@ -6959,15 +6959,15 @@ async function handleAutofill() {
     }
 
     if (uniConfig && tier1FieldMap) {
-      console.log(`[IlmSeUrooj] ✅ Found config for ${uniConfig.name} (${uniConfig.slug})`);
-      console.log(`[IlmSeUrooj] Form type: ${uniConfig.formType}, Verified: ${uniConfig.verified}`);
+      console.log(`[Anqa] ✅ Found config for ${uniConfig.name} (${uniConfig.slug})`);
+      console.log(`[Anqa] Form type: ${uniConfig.formType}, Verified: ${uniConfig.verified}`);
 
       for (const [profileKey, selectorString] of Object.entries(tier1FieldMap)) {
         const els = tryMultiSelectorAll(selectorString);
 
         if (els.length === 0) {
           skippedCount++;
-          console.log(`[IlmSeUrooj] ⏭ Skipped ${profileKey}: no element matched`);
+          console.log(`[Anqa] ⏭ Skipped ${profileKey}: no element matched`);
           continue;
         }
 
@@ -7053,7 +7053,7 @@ async function handleAutofill() {
               el.classList.add('unimatch-manual');
               manualCount++;
               manualSelectors.push(selectorString);
-              console.warn(`[IlmSeUrooj] TIER 1 verify failed: "${effectiveKey}" on ${el.id || el.name || el.tagName}`);
+              console.warn(`[Anqa] TIER 1 verify failed: "${effectiveKey}" on ${el.id || el.name || el.tagName}`);
             }
           } else {
             el.style.outline = '2px solid #fbbf24';
@@ -7065,9 +7065,9 @@ async function handleAutofill() {
         }
       }
 
-      console.log(`[IlmSeUrooj] Config fill: ${filledCount} filled, ${manualCount} manual, ${skippedCount} skipped`);
+      console.log(`[Anqa] Config fill: ${filledCount} filled, ${manualCount} manual, ${skippedCount} skipped`);
     } else {
-      console.log(`[IlmSeUrooj] No deterministic config for ${hostname} — using AI/heuristic fallback`);
+      console.log(`[Anqa] No deterministic config for ${hostname} — using AI/heuristic fallback`);
     }
 
     // ─── TIER 2: AI-generated field map (fallback) ─────────────
@@ -7091,7 +7091,7 @@ async function handleAutofill() {
           }
         }
       } catch (tier2Err) {
-        console.warn('[IlmSeUrooj] Tier 2 AI field map failed, falling through to heuristics:', tier2Err.message);
+        console.warn('[Anqa] Tier 2 AI field map failed, falling through to heuristics:', tier2Err.message);
       }
       ctx.fieldMap = fieldMap;
     }
@@ -7107,7 +7107,7 @@ async function handleAutofill() {
           }
         }
       } catch (e) {
-        console.log('[IlmSeUrooj] No remembered answers available');
+        console.log('[Anqa] No remembered answers available');
       }
 
       for (const field of fieldMap) {
@@ -7303,7 +7303,7 @@ async function handleAutofill() {
           });
           sparkleField(radios[0]);
           filledCount++;
-          console.log(`[IlmSeUrooj] TIER 2.7 edu radio: ${eduVal}`);
+          console.log(`[Anqa] TIER 2.7 edu radio: ${eduVal}`);
         }
       }
     }
@@ -7508,7 +7508,7 @@ async function handleAutofill() {
 
       if (value == null || value === '') {
         // Debug: field was detected but profile has no value for it
-        console.debug(`[IlmSeUrooj] Detected field "${profileKey}" (id="${input.id || ''}", name="${input.name || ''}") but profile.${profileKey} is empty — skipping.`);
+        console.debug(`[Anqa] Detected field "${profileKey}" (id="${input.id || ''}", name="${input.name || ''}") but profile.${profileKey} is empty — skipping.`);
         if (input.required && !input.value) {
           input.style.outline = '2px solid #fbbf24';
           input.style.outlineOffset = '2px';
@@ -7549,7 +7549,7 @@ async function handleAutofill() {
           playFillTone(filledCount, allInputs.length);
           filledCount++;
           filledProfileKeyOnce.add(resolvedKey);
-          console.debug(`[IlmSeUrooj] ✓ verified: "${resolvedKey}" on ${input.id || input.name || input.tagName}`);
+          console.debug(`[Anqa] ✓ verified: "${resolvedKey}" on ${input.id || input.name || input.tagName}`);
         } else {
           // Fill reported success but value didn't stick — mark amber
           input.style.outline = '2px solid #fbbf24';
@@ -7557,7 +7557,7 @@ async function handleAutofill() {
           input.classList.remove('unimatch-filled');
           input.classList.add('unimatch-manual');
           manualCount++;
-          console.warn(`[IlmSeUrooj] ✗ verify failed: "${resolvedKey}" on ${input.id || input.name || input.tagName} — value may have been reset by framework`);
+          console.warn(`[Anqa] ✗ verify failed: "${resolvedKey}" on ${input.id || input.name || input.tagName} — value may have been reset by framework`);
         }
       } else if (input.required && !input.value) {
         input.style.outline = '2px solid #fbbf24';
@@ -7599,12 +7599,12 @@ async function handleAutofill() {
               input.classList.add('unimatch-filled');
               sparkleField(input);
               filledCount++;
-              console.log(`[IlmSeUrooj] TIER 4 district fill verified: ${distVal}`);
+              console.log(`[Anqa] TIER 4 district fill verified: ${distVal}`);
             } else {
               input.style.outline = '2px solid #fbbf24';
               input.classList.add('unimatch-manual');
               manualCount++;
-              console.warn(`[IlmSeUrooj] TIER 4 district verify failed: ${distVal}`);
+              console.warn(`[Anqa] TIER 4 district verify failed: ${distVal}`);
             }
           }
         }
@@ -7621,7 +7621,7 @@ async function handleAutofill() {
       const allInputsT5 = collectAllFields();
       const newInputs = allInputsT5.filter(el => !alreadyHandled.has(el));
       if (newInputs.length > 0) {
-        console.log(`[IlmSeUrooj] TIER 5: ${newInputs.length} newly rendered field(s) found`);
+        console.log(`[Anqa] TIER 5: ${newInputs.length} newly rendered field(s) found`);
         for (const input of newInputs) {
           if (input.type === 'password') continue;
           if (input.tagName === 'P-DROPDOWN') {
@@ -7696,7 +7696,7 @@ async function handleAutofill() {
       showAchievementToast(filledCount, manualCount, _timeSaved);
     }
     renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
-    console.log(`[IlmSeUrooj] ✅ Autofill complete: ${filledCount} filled, ${manualCount} need input, ${conflictCount} conflicts`);
+    console.log(`[Anqa] ✅ Autofill complete: ${filledCount} filled, ${manualCount} need input, ${conflictCount} conflicts`);
 
     // Report fill progress to dashboard (fire-and-forget)
     if (filledCount > 0 && ctx.university?.slug) {
@@ -7710,7 +7710,7 @@ async function handleAutofill() {
     }
 
   } catch (err) {
-    console.error('[IlmSeUrooj] Autofill error:', err);
+    console.error('[Anqa] Autofill error:', err);
     if (err.message?.includes('Extension context invalidated') || !isExtensionValid()) {
       showRefreshNeeded(contentEl);
     } else {
@@ -8885,7 +8885,7 @@ function setupMutationObserver() {
   const university = detectUniversity();
   if (!university) return;
 
-  console.log(`[IlmSeUrooj] Detected: ${university.name} (${university.slug})`);
+  console.log(`[Anqa] Detected: ${university.name} (${university.slug})`);
   injectSidebar(university);
   setupSubmissionDetection();
   setupMutationObserver();

@@ -588,7 +588,7 @@ function AppNav() {
           <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
           <path d="M6 12v5c6 3 10 3 16 0v-5" />
         </svg>
-        Ilm Se Urooj
+        Anqa
       </Link>
       <div style={s.navLinks}>
         <Link href="/" style={s.navLink}>Explore</Link>

@@ -247,14 +247,65 @@
 
 @media (max-width: 640px) {
   .section {
-    padding: var(--space-8) var(--space-4);
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-sm);
   }
 
   .tips {
     padding: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
   .card {
     padding: var(--space-4);
+    border-radius: var(--radius-xl);
+  }
+
+  .filterSelect {
+    min-width: 140px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .title {
+    font-size: var(--font-size-lg);
+  }
+
+  .header {
+    margin-bottom: var(--space-4);
+  }
+
+  .card {
+    padding: var(--space-3);
+  }
+
+  .name {
+    font-size: var(--font-size-base);
+  }
+
+  .tipsList {
+    font-size: var(--font-size-xs);
+    padding-left: var(--space-4);
+  }
+
+  .filterSelect {
+    min-width: 100%;
+    font-size: var(--font-size-sm);
+  }
+
+  .disclaimer {
+    margin-top: var(--space-4);
   }
 }

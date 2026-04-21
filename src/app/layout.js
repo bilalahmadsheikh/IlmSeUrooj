@@ -12,21 +12,27 @@ const outfit = Outfit({
   variable: "--font-outfit",
 });
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata = {
-  title: "Ilm Se Urooj - Find Your Perfect University in Pakistan",
-  description: "Discover universities across Pakistan with our smart matching system. Compare NUST, LUMS, FAST, COMSATS and 24 more. Swipe right on your favorites!",
-  keywords: "university Pakistan admission NUST LUMS FAST COMSATS GIKI engineering computer science medical business",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmseurooj.com'),
+  title: "Anqa — Find Your Perfect University in Pakistan",
+  description: "Discover universities across Pakistan with Anqa's smart matching system. Compare NUST, LUMS, FAST, COMSATS and 24 more. Swipe right on your favorites!",
+  keywords: "Anqa, university Pakistan admission NUST LUMS FAST COMSATS GIKI engineering computer science medical business",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://anqa.pk'),
   openGraph: {
     type: 'website',
     locale: 'en_PK',
-    siteName: 'Ilm Se Urooj',
-    title: 'Ilm Se Urooj — Find Your Perfect University in Pakistan',
+    siteName: 'Anqa',
+    title: 'Anqa — Find Your Perfect University in Pakistan',
     description: 'Smart university matching for Pakistani students. Compare NUST, LUMS, FAST, COMSATS and 24 more. Deadlines, merit calculators, scholarships — all in one place.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Ilm Se Urooj — Find Your Perfect University in Pakistan',
+    title: 'Anqa — Find Your Perfect University in Pakistan',
     description: 'Smart university matching for Pakistani students. Compare 28 universities, track deadlines, calculate merit.',
   },
   robots: {

@@ -195,7 +195,7 @@ export default function TimelinePage() {
                     <div className={styles.headerLeft}>
                         <Link href="/" className={styles.logoLink}>
                             <span className={styles.logoIcon}>&#x1F393;</span>
-                            <span className={styles.logoText}>Ilm Se Urooj</span>
+                            <span className={styles.logoText}>Anqa</span>
                         </Link>
                         <div className={styles.headerDivider} />
                         <h1 className={styles.pageTitle}>Application Timeline</h1>

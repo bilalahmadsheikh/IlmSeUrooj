@@ -116,9 +116,9 @@ jobs:
           server_port: 587
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: '⚠️ IlmSeUrooj - Website Health Check Failed'
+          subject: '⚠️ Anqa - Website Health Check Failed'
           to: ba8516127@gmail.com
-          from: IlmSeUrooj Bot
+          from: Anqa Bot
           body: |
             The daily website health check has detected issues.
             

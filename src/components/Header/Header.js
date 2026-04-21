@@ -82,23 +82,32 @@ export default function Header({ savedCount = 0, onShowSaved, onShowScholarships
             <div className={styles.container}>
                 <Link href="/" className={styles.logo}>
                     <div className={styles.logoIcon}>
-                        <svg viewBox="0 0 40 40" fill="none" className={styles.capSvg}>
+                        <svg viewBox="0 0 36 36" fill="none" className={styles.capSvg} aria-hidden="true">
                             <defs>
-                                <linearGradient id="capGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="var(--color-primary)" />
-                                    <stop offset="100%" stopColor="var(--color-secondary)" />
+                                <linearGradient id="anqaHdrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#10B981" />
+                                    <stop offset="60%" stopColor="#34D399" />
+                                    <stop offset="100%" stopColor="#D4A574" />
                                 </linearGradient>
+                                <radialGradient id="anqaGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stopColor="rgba(16,185,129,0.2)" />
+                                    <stop offset="100%" stopColor="transparent" />
+                                </radialGradient>
                             </defs>
-                            <path d="M20 8L4 16L20 24L36 16L20 8Z" fill="url(#capGradient)" className={styles.capTop} />
-                            <path d="M8 18V26C8 26 14 32 20 32C26 32 32 26 32 26V18" stroke="url(#capGradient)" strokeWidth="2" fill="none" className={styles.capBottom} />
-                            <path d="M32 16V22M32 22L34 28M32 22L30 28" stroke="var(--color-accent-2)" strokeWidth="2" strokeLinecap="round" className={styles.tassel} />
+                            <circle cx="18" cy="18" r="17" fill="url(#anqaGlow)" />
+                            <circle cx="18" cy="18" r="15" stroke="url(#anqaHdrGrad)" strokeWidth="1" fill="none" opacity="0.4" className={styles.compassRing} />
+                            <circle cx="18" cy="18" r="12" stroke="url(#anqaHdrGrad)" strokeWidth="0.4" fill="none" opacity="0.2" className={styles.compassRing} />
+                            <path d="M18 4 L20.5 13.5 L18 15.5 L15.5 13.5 Z" fill="url(#anqaHdrGrad)" className={styles.compassN} />
+                            <path d="M18 32 L20.5 22.5 L18 20.5 L15.5 22.5 Z" fill="url(#anqaHdrGrad)" opacity="0.4" />
+                            <path d="M4 18 L13.5 15.5 L15.5 18 L13.5 20.5 Z" fill="url(#anqaHdrGrad)" opacity="0.4" />
+                            <path d="M32 18 L22.5 15.5 L20.5 18 L22.5 20.5 Z" fill="url(#anqaHdrGrad)" opacity="0.4" />
+                            <circle cx="18" cy="18" r="2.5" fill="url(#anqaHdrGrad)" />
+                            <circle cx="18" cy="18" r="1" fill="white" opacity="0.6" />
                         </svg>
                     </div>
                     <div className={styles.logoTextWrapper}>
-                        <span className={styles.logoText}>
-                            Ilm Se <span className={styles.highlight}>Urooj</span>
-                        </span>
-                        <span className={styles.urduText}>علم سے عروج</span>
+                        <span className={styles.logoUrdu}>عنقا</span>
+                        <span className={styles.logoPk}>ANQA.PK</span>
                     </div>
                 </Link>
 
@@ -173,7 +182,10 @@ export default function Header({ savedCount = 0, onShowSaved, onShowScholarships
                     {authChecked && !user && (
                         <>
                             <Link href="/profile" className={styles.ghostBtn}>Sign In</Link>
-                            <Link href="/profile" className={styles.primaryBtn}>Create Profile →</Link>
+                            <Link href="/profile" className={styles.primaryBtn}>
+                                <span className={styles.primaryBtnFull}>Create Profile →</span>
+                                <span className={styles.primaryBtnShort}>Sign Up</span>
+                            </Link>
                         </>
                     )}
 

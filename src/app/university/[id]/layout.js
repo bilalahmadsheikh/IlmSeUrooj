@@ -10,12 +10,12 @@ export async function generateMetadata({ params }) {
   const uni = id ? universities.find((u) => u.id === id) : null;
   if (!uni) {
     return {
-      title: 'University Not Found | Ilm Se Urooj',
+      title: 'University Not Found | Anqa',
       robots: { index: false },
     };
   }
 
-  const title = `${uni.shortName} — ${uni.city} | Admissions, Programs & Deadlines | Ilm Se Urooj`;
+  const title = `${uni.shortName} — ${uni.city} | Admissions, Programs & Deadlines | Anqa`;
 
   // Build a rich description from available data
   const topFields = Object.entries(uni.fieldRankings || {})
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       type: 'website',
       locale: 'en_PK',
-      siteName: 'Ilm Se Urooj',
+      siteName: 'Anqa',
       title,
       description,
     },

@@ -18,13 +18,11 @@ export function ThemeProvider({ children }) {
     // Load theme from localStorage on mount
     useEffect(() => {
         setMounted(true);
-        const savedTheme = localStorage.getItem('unimatch-theme');
+        const savedTheme = localStorage.getItem('anqa-theme');
         if (savedTheme && THEMES.includes(savedTheme)) {
             setTheme(savedTheme);
         } else {
-            // Check system preference
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            setTheme(prefersDark ? 'dark' : 'light');
+            setTheme('dark');
         }
     }, []);
 
@@ -32,7 +30,7 @@ export function ThemeProvider({ children }) {
     useEffect(() => {
         if (mounted) {
             document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('unimatch-theme', theme);
+            localStorage.setItem('anqa-theme', theme);
         }
     }, [theme, mounted]);
 

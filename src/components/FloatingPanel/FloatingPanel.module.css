@@ -165,3 +165,50 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
 }
+
+/* ── Mobile Responsive ─────────────────────────────────── */
+@media (max-width: 640px) {
+    .floatingBtn {
+        width: 42px;
+        height: 42px;
+        bottom: 16px;
+        right: 16px;
+        font-size: 20px;
+    }
+
+    .panel {
+        bottom: 68px;
+        right: 16px;
+        width: calc(100vw - 32px);
+        max-width: 280px;
+    }
+
+    .closeBtn {
+        width: 42px;
+        height: 42px;
+        bottom: 16px;
+        right: 16px;
+    }
+
+    .panelRow {
+        padding: 10px 14px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .panel {
+        right: 8px;
+        width: calc(100vw - 16px);
+    }
+
+    .floatingBtn {
+        bottom: 12px;
+        right: 12px;
+    }
+
+    .closeBtn {
+        bottom: 12px;
+        right: 12px;
+    }
+}

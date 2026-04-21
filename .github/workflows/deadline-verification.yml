@@ -148,7 +148,7 @@ jobs:
       - name: Commit and push changes
         if: steps.scrape.outcome == 'success' && steps.check.outputs.has_changes == 'true' && !inputs.dry_run
         run: |
-          git config user.name "IlmSeUrooj Bot"
+          git config user.name "Anqa Bot"
           git config user.email "${{ env.NOTIFICATION_EMAIL }}"
           git add src/data/universities.js
           git commit -m "chore: Update admission deadlines [automated]
@@ -182,7 +182,7 @@ jobs:
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: '❌ Deadline Verification Failed'
           to: ${{ env.NOTIFICATION_EMAIL }}
-          from: IlmSeUrooj Bot
+          from: Anqa Bot
           body: |
             The deadline verification workflow has failed.
             Old data has been preserved (automatic rollback).

@@ -462,7 +462,38 @@
     background: var(--glass-bg-light);
 }
 
-/* Responsive Styles */
+/* Responsive - Tablet */
+@media (max-width: 640px) {
+    .cardInner {
+        padding: var(--space-4);
+    }
+
+    .header {
+        gap: var(--space-3);
+        margin-bottom: var(--space-3);
+    }
+
+    .logoContainer {
+        width: 48px;
+        height: 48px;
+    }
+
+    .name {
+        font-size: var(--font-size-lg);
+    }
+
+    .actionBtn {
+        width: 52px;
+        height: 52px;
+    }
+
+    .actionBtn svg {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+/* Responsive - Mobile */
 @media (max-width: 480px) {
     .card {
         max-width: 100%;
@@ -492,7 +523,7 @@
     }
 
     .fullName {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
     }
 
     .matchBadge {
@@ -504,7 +535,7 @@
     }
 
     .matchLabel {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
     }
 
     .tags {
@@ -514,15 +545,15 @@
 
     .tag {
         padding: 2px var(--space-2);
-        font-size: 10px;
+        font-size: var(--font-size-xs);
     }
 
     .tagIcon {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
     }
 
     .sectionTitle {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
         margin-bottom: var(--space-1);
     }
 
@@ -537,12 +568,12 @@
     }
 
     .programTag {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
         padding: 2px var(--space-2);
     }
 
     .highlightTag {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
     }
 
     .details {
@@ -551,12 +582,12 @@
     }
 
     .description {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
         margin-bottom: var(--space-2);
     }
 
     .detailRow {
-        font-size: 10px;
+        font-size: var(--font-size-xs);
         padding: var(--space-1) 0;
     }
 
@@ -567,13 +598,18 @@
     }
 
     .actions {
-        gap: var(--space-4);
+        gap: var(--space-3);
     }
 
     .actionBtn {
         width: 44px;
         height: 44px;
         font-size: var(--font-size-base);
+    }
+
+    .actionBtn svg {
+        width: 20px;
+        height: 20px;
     }
 
     .fullDetailsBtn {
@@ -586,6 +622,11 @@
         font-size: var(--font-size-base);
         padding: var(--space-2) var(--space-3);
         top: var(--space-3);
+    }
+
+    .applyBtn {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--font-size-xs);
     }
 }
 

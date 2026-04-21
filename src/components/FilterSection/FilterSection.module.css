@@ -2,6 +2,18 @@
     padding: var(--space-20) 0 var(--space-8);
 }
 
+@media (max-width: 640px) {
+    .filterSection {
+        padding: var(--space-8) 0 var(--space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .filterSection {
+        padding: var(--space-6) 0 var(--space-3);
+    }
+}
+
 .container {
     max-width: 1400px;
     margin: 0 auto;
@@ -45,6 +57,40 @@
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+    .hero {
+        margin-bottom: var(--space-6);
+    }
+    .title {
+        font-size: var(--font-size-2xl);
+        margin-bottom: var(--space-3);
+    }
+    .subtitle {
+        font-size: var(--font-size-base);
+        line-height: 1.5;
+    }
+    .container {
+        padding: 0 var(--space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        margin-bottom: var(--space-4);
+    }
+    .title {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--space-2);
+    }
+    .subtitle {
+        font-size: var(--font-size-sm);
+        line-height: 1.4;
+    }
+    .container {
+        padding: 0 var(--space-3);
+    }
 }
 
 /* Filters Wrapper */

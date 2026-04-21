@@ -740,3 +740,102 @@
     background: var(--glass-bg-light);
     color: var(--color-primary);
 }
+
+/* ── Mobile Responsive ─────────────────────────────────── */
+@media (max-width: 640px) {
+    .panel {
+        max-width: 100%;
+    }
+
+    .header {
+        padding: var(--space-4) var(--space-4);
+    }
+
+    .title {
+        font-size: var(--font-size-base);
+    }
+
+    .closeBtn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .toolbar {
+        padding: var(--space-2) var(--space-3);
+        gap: var(--space-2);
+    }
+
+    .list {
+        padding: var(--space-3);
+    }
+
+    .item {
+        padding: var(--space-3);
+        gap: var(--space-2);
+        margin-bottom: var(--space-2);
+    }
+
+    .itemLogo {
+        width: 36px;
+        height: 36px;
+        font-size: var(--font-size-sm);
+        border-radius: var(--radius-md);
+    }
+
+    .itemName {
+        font-size: var(--font-size-sm);
+    }
+
+    .itemDetails {
+        font-size: var(--font-size-xs);
+    }
+
+    .itemActions {
+        gap: var(--space-1);
+    }
+
+    .reorderBtn {
+        width: 26px;
+        height: 24px;
+        font-size: 10px;
+    }
+
+    .removeBtn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .compareCheck {
+        width: 24px;
+        height: 24px;
+    }
+
+    .footer {
+        padding: var(--space-3) var(--space-4);
+    }
+
+    .applyBtn {
+        padding: var(--space-3);
+        font-size: var(--font-size-sm);
+    }
+}
+
+@media (max-width: 380px) {
+    .item {
+        flex-wrap: wrap;
+    }
+
+    .itemMain {
+        width: 100%;
+    }
+
+    .itemActions {
+        flex-direction: row;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .reorderBtns {
+        flex-direction: row;
+    }
+}

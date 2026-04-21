@@ -130,8 +130,8 @@ export default function ExtensionAuthPage() {
                         <path d="M6 12v5c6 3 10 3 16 0v-5" />
                     </svg>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <h1 style={styles.title}>Ilm Se Urooj</h1>
-                        <span style={styles.urduText}>علم سے عروج</span>
+                        <h1 style={styles.title}>Anqa</h1>
+                        <span style={styles.urduText}>عنقا</span>
                     </div>
                 </div>
 

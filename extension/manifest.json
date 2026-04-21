@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Ilm Se Urooj — Pakistan University Bridge",
+    "name": "Anqa — Pakistan University Platform",
     "description": "Autofill Pakistani university application forms from a single student profile.",
     "version": "2.0.0",
     "permissions": [
@@ -74,8 +74,8 @@
     },
     "externally_connectable": {
         "matches": [
-            "https://ilmseurooj.com/*",
-            "https://www.ilmseurooj.com/*",
+            "https://anqa.pk/*",
+            "https://www.anqa.pk/*",
             "https://*.vercel.app/*"
         ]
     }

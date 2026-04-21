@@ -1,5 +1,5 @@
 -- ============================================================
--- IlmSeUrooj Feature Foundation Migration
+-- Anqa Feature Foundation Migration
 -- Run this in Supabase SQL Editor
 -- ============================================================
 

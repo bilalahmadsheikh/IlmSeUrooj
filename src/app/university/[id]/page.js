@@ -11,6 +11,8 @@ import { getAlumniPulse, COUNTRY_COORDS } from '@/data/alumniPulseData';
 import Header from '@/components/Header/Header';
 import AnimatedBackground from '@/components/Background/AnimatedBackground';
 import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
+import UniversityReviews from '@/components/UniversityReviews/UniversityReviews';
+import AlumniConnect from '@/components/AlumniConnect/AlumniConnect';
 import { IconArrowLeft, IconExternalLink, IconCalendar, IconBookmark, IconCheck, IconShield, IconLinkedIn } from '@/components/Icons/Icons';
 import { loadSavedFromStorage, saveToStorage } from '@/utils/savedStorage';
 import { useProfile } from '@/hooks/useProfile';
@@ -164,7 +166,7 @@ export default function UniversityDetailPage() {
 
   const handleShare = useCallback(async () => {
     if (!uni) return;
-    const title = `${uni.shortName} - Ilm Se Urooj`;
+    const title = `${uni.shortName} - Anqa`;
     const url = typeof window !== 'undefined' ? window.location.href : '';
     try {
       if (navigator.share) {
@@ -234,6 +236,7 @@ export default function UniversityDetailPage() {
         {details?.placementRate && <a href="#careers">Careers</a>}
         {details?.researchCenters && <a href="#research">Research</a>}
         <a href="#alumni">Alumni</a>
+        <a href="#reviews">Reviews</a>
         <a href="#similar">Similar</a>
       </nav>
 
@@ -1027,6 +1030,21 @@ export default function UniversityDetailPage() {
               </section>
             );
           })()}
+
+          {/* Reviews & Alumni Connect */}
+          <section id="reviews" className={styles.card} aria-labelledby="reviews-heading">
+            <UniversityReviews
+              universityId={String(uni.id)}
+              universityName={uni.shortName || uni.name}
+            />
+          </section>
+
+          <section className={styles.card} aria-labelledby="alumni-connect-heading">
+            <AlumniConnect
+              universityId={String(uni.id)}
+              universityName={uni.shortName || uni.name}
+            />
+          </section>
 
           {/* Similar Universities */}
           <section id="similar" className={styles.card} aria-labelledby="similar-heading">

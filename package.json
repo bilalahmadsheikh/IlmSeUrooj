@@ -1,5 +1,5 @@
 {
-  "name": "ilmseurroj",
+  "name": "anqa",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,6 +14,7 @@
     "@supabase/postgrest-js": "^2.99.1",
     "@supabase/supabase-js": "^2.99.1",
     "next": "^15.5.14",
+    "nodemailer": "^8.0.5",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
@@ -22,6 +23,7 @@
     "@babel/parser": "^7.23.0",
     "@babel/traverse": "^7.23.0",
     "@types/node": "^25.3.0",
+    "@types/nodemailer": "^8.0.0",
     "@types/react": "^19.2.14",
     "axios": "^1.6.0",
     "cheerio": "^1.2.0",

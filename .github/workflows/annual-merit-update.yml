@@ -109,9 +109,9 @@ jobs:
           server_port: 587
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: '📊 IlmSeUrooj - Annual Merit Update Review Required'
+          subject: '📊 Anqa - Annual Merit Update Review Required'
           to: ba8516127@gmail.com
-          from: IlmSeUrooj Bot
+          from: Anqa Bot
           body: |
             The annual merit list update workflow has completed.
             

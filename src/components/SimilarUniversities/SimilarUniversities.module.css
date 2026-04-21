@@ -172,3 +172,66 @@
   width: 1rem;
   height: 1rem;
 }
+
+/* ── Mobile Responsive ─────────────────────────────────── */
+@media (max-width: 640px) {
+  .section {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .title {
+    font-size: var(--font-size-lg);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  .card {
+    padding: var(--space-3);
+  }
+
+  .cardHeader {
+    gap: var(--space-2);
+  }
+
+  .logo {
+    width: 34px;
+    height: 34px;
+    font-size: var(--font-size-sm);
+  }
+
+  .name {
+    font-size: var(--font-size-sm);
+  }
+
+  .meta {
+    font-size: var(--font-size-xs);
+  }
+
+  .matchPercent {
+    font-size: var(--font-size-base);
+  }
+
+  .cardActions {
+    gap: var(--space-1);
+  }
+
+  .detailsLink,
+  .saveBtn {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .match {
+    align-items: flex-start;
+    margin-top: var(--space-1);
+    width: auto;
+  }
+}

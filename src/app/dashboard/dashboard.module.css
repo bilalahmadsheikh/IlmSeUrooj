@@ -293,4 +293,25 @@
     .main { padding: 16px; }
     .tabs { padding: 0 16px; }
     .page :global(.dash-grid-2), .page :global(.dash-grid-3) { grid-template-columns: 1fr; }
+    .page :global(.dash-section) { padding: 16px; margin-bottom: 12px; border-radius: 12px; }
+    .page :global(.dash-section-title) { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+    .headerInner { padding: 10px 12px; gap: 8px; }
+    .main { padding: 12px; }
+    .tabs { padding: 0 12px; }
+    .tab { padding: 10px 12px; font-size: 12px; gap: 4px; }
+    .tabIcon { font-size: 14px; }
+    .title { font-size: 16px; gap: 6px; }
+    .backLink { font-size: 12px; }
+    .userEmail { font-size: 11px; padding: 3px 8px; display: none; }
+    .page :global(.dash-section) { padding: 12px; border-radius: 10px; }
+    .page :global(.dash-section-title) { font-size: 14px; gap: 6px; margin-bottom: 12px; }
+    .page :global(.dash-stat-value) { font-size: 22px; }
+    .page :global(.dash-stat-label) { font-size: 11px; }
+    .page :global(.dash-stat-card) { padding: 12px; border-radius: 10px; }
+    .page :global(.dash-btn) { padding: 7px 12px; font-size: 12px; }
+    .page :global(.dash-empty) { padding: 24px 12px; font-size: 12px; }
+    .logo { gap: 8px; }
 }

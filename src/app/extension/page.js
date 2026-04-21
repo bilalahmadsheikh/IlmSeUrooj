@@ -32,7 +32,7 @@ export default function ExtensionPage() {
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                         <path d="M6 12v5c6 3 10 3 16 0v-5" />
                     </svg>
-                    <span>Ilm Se Urooj</span>
+                    <span>Anqa</span>
                 </Link>
                 <div className="ext-nav-links">
                     <Link href="/">Explore</Link>
@@ -46,7 +46,7 @@ export default function ExtensionPage() {
             <section className="ext-hero">
                 <h1>Fill any university form<br /><span className="green">in 3 seconds.</span></h1>
                 <p className="hero-sub">
-                    Ilm Se Urooj autofills your name, CNIC, marks, and contact info
+                    Anqa autofills your name, CNIC, marks, and contact info
                     on <strong>17 verified</strong> Pakistani university portals.<br />
                     You review. You submit. We just save you the typing.
                 </p>
@@ -145,7 +145,7 @@ export default function ExtensionPage() {
             <section className="ext-section ext-cta">
                 {installed ? (
                     <div className="installed-badge">
-                        <span style={{ color: '#4ade80', fontSize: 18 }}>✓ Ilm Se Urooj Extension is installed</span>
+                        <span style={{ color: '#4ade80', fontSize: 18 }}>✓ Anqa Extension is installed</span>
                         <Link href="/applications" className="btn-primary-ext" style={{ marginTop: 12 }}>Open Dashboard →</Link>
                     </div>
                 ) : (

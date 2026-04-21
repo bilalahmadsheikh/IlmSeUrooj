@@ -1,5 +1,5 @@
 /**
- * Ilm Se Urooj — University Config Registry
+ * Anqa — University Config Registry
  * 
  * Imports all per-university configs and provides domain-based lookup.
  * Note: Using plain objects (not ES modules) since Chrome MV3 content scripts
