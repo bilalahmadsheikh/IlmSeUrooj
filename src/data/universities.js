@@ -41,7 +41,7 @@ export const universities = [
       testDate: "2026-04-04",
       testSeries: [
         { series: "Series II",   deadline: "2026-02-25", testDate: "2026-01-31" },
-        { series: "Series III",   deadline: "2026-03-30", testDate: "2026-04-04" },
+        { series: "Series III",   deadline: "2026-04-05", testDate: "2026-04-04" },
         { series: "Series I",   deadline: null, testDate: "2025-10-05" },
         { series: "Series IV",   deadline: null, testDate: null }
       ],
@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2026-04-11" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-03-25"
+      lastVerified: "2026-04-21"
     }
   },
 
@@ -128,7 +128,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-07-07",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
   {
@@ -162,7 +162,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-07-07",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
   {
@@ -196,7 +196,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-07-07",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
   {
@@ -228,7 +228,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-07-07",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
   {
@@ -264,7 +264,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-07-07",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
 
@@ -590,9 +590,9 @@ export const universities = [
     avgFee: "PKR 441,000 - 500,000 per semester (Rs. 29,400/CH)",
     facilities: ["IBA Library", "Sports Complex", "Student Hostel", "Multiple Cafés", "Prayer Area", "Auditorium", "Center for Entrepreneurial Development", "IBA City Campus (separate)"],
     admissions: {
-      deadline: "2026-03-25",
+      deadline: "2026-06-10",
       testName: "IBA Aptitude Test",
-      testDate: "2026-04-05",
+      testDate: "2026-06-21",
       testSeries: [
         { series: "BBA",   deadline: "2026-01-21", testDate: "2026-02-01" },
         { series: "BS",   deadline: "2026-02-18", testDate: "2026-03-01" },
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
 
@@ -633,11 +633,11 @@ export const universities = [
     avgFee: "PKR 150,000 - 250,000 per year (subsidized)",
     facilities: ["Main Library", "Sports Complex", "8 Student Hostels (Boys)", "Girls Hostel", "Swimming Pool", "Medical Center", "Cafeterias", "Prayer Area", "Auditorium"],
     admissions: {
-      deadline: "2026-03-25",
+      deadline: "2026-06-09",
       testName: "ECAT",
-      testDate: "2026-03-30",
+      testDate: "2026-06-16",
       applyUrl: "https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
   {
@@ -708,7 +708,7 @@ export const universities = [
       testName: "GIKI Entry Test",
       testDate: "2026-07-06",
       applyUrl: "https://giki.edu.pk/admissions/admissions-undergraduates/",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
 
@@ -741,16 +741,16 @@ export const universities = [
     avgFee: "PKR 63,000 - 100,000 per semester (heavily subsidized)",
     facilities: ["Research Library", "Sports Facilities", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Center", "Nuclear Research Labs", "High Security Campus"],
     admissions: {
-      deadline: "2026-03-26",
+      deadline: "2026-05-11",
       testName: "PIEAS Written Test",
-      testDate: "2026-04-12",
+      testDate: "2026-06-14",
       testSeries: [
-        { series: "Test I",   deadline: "2026-03-26", testDate: "2026-04-12" },
+        { series: "Test I",   deadline: "2026-03-05", testDate: "2026-04-24" },
         { series: "Test II",   deadline: "2026-05-11", testDate: "2026-06-14" },
         { series: "Test III",   deadline: "2026-06-26", testDate: "2026-07-12" }
       ],
       applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
 
@@ -793,7 +793,7 @@ export const universities = [
         { series: "BUET II",   deadline: null, testDate: "2026-07-25" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-03-25"
+      lastVerified: "2026-04-21"
     }
   },
   {
@@ -830,7 +830,7 @@ export const universities = [
         { series: "BUET",   deadline: null, testDate: "2026-06-20" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-03-25"
+      lastVerified: "2026-04-21"
     }
   },
   {
@@ -869,7 +869,7 @@ export const universities = [
         { series: "BUET",   deadline: null, testDate: "2026-06-04" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-03-25"
+      lastVerified: "2026-04-21"
     }
   },
 
@@ -903,9 +903,9 @@ export const universities = [
     avgFee: "PKR 335,000 - 395,000 per semester (Engineering)",
     facilities: ["Habib University Library", "Innovation Labs", "Cafeteria", "Prayer Area", "Sports Area", "Maker Space", "Seminar Halls"],
     admissions: {
-      deadline: "2026-03-31",
+      deadline: "2026-02-20",
       testName: "Habib Entrance Exam",
-      testDate: "2026-04-03",
+      testDate: "2026-02-27",
       testSeries: [
         { series: "Nov",   deadline: "2025-10-21", testDate: "2025-10-28" },
         { series: "Dec",   deadline: "2025-11-20", testDate: "2025-11-27" },
@@ -914,7 +914,7 @@ export const universities = [
         { series: "Mar",   deadline: "2026-02-20", testDate: "2026-02-27" }
       ],
       applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
-      lastVerified: "2026-03-25"
+      lastVerified: "2026-04-21"
     }
   },
   {
@@ -951,7 +951,7 @@ export const universities = [
         { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2026-07-04" }
       ],
       applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   },
   {
@@ -1064,7 +1064,7 @@ export const universities = [
         { series: "Fall 2026 R1 LLB",   deadline: "2026-02-12", testDate: "2026-02-14" }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
-      lastVerified: "2026-03-25"
+      lastVerified: "2026-04-21"
     }
   },
   {
@@ -1096,15 +1096,15 @@ export const universities = [
     avgFee: "PKR 80,000 - 175,000 per semester (Rs. 6,000/CH)",
     facilities: ["Digital Library", "Innovation Hub", "Computer Labs", "Cafeteria", "Prayer Area", "Startup Incubator", "Seminar Halls"],
     admissions: {
-      deadline: "2026-06-24",
+      deadline: "2026-06-23",
       testName: "ITU Admission Test",
-      testDate: "2026-06-28",
+      testDate: "2026-07-04",
       testSeries: [
-        { series: "BSEDS/BSM&T",   deadline: null, testDate: "2026-06-28" },
-        { series: "BSCS/BSAI/BSSE/BSCE/BSEE",   deadline: null, testDate: "2026-06-29" }
+        { series: "BSEDS/BSM&T/BS FinTech",   deadline: null, testDate: "2026-07-04" },
+        { series: "BSCS/BSAI/BSSE/BSCE/BSEE",   deadline: null, testDate: "2026-07-05" }
       ],
       applyUrl: "https://itu.edu.pk/admissions",
-    lastVerified: "2026-03-25"
+    lastVerified: "2026-04-21"
   }
   }
 ];
@@ -1269,4 +1269,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-03-25";
+export const lastScraperRun = "2026-04-21";
