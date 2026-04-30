@@ -69,6 +69,15 @@ function generatePortalPassword(fullName, cnic) {
     return `${first}${suffix}${sym}${year}`;
 }
 
+// ─── CNIC formatter ───────────────────────────────────────────
+// Keeps only digits, caps at 13, inserts dashes: XXXXX-XXXXXXX-X
+function formatCnic(raw) {
+    const d = String(raw || '').replace(/\D/g, '').slice(0, 13);
+    if (d.length <= 5) return d;
+    if (d.length <= 12) return `${d.slice(0, 5)}-${d.slice(5)}`;
+    return `${d.slice(0, 5)}-${d.slice(5, 12)}-${d.slice(12)}`;
+}
+
 // ─── Components ───────────────────────────────────────────────
 
 function SectionCard({ title, icon, children, note }) {
@@ -81,12 +90,16 @@ function SectionCard({ title, icon, children, note }) {
     );
 }
 
-function Field({ label, type = 'text', value, onChange, placeholder, required, options, disabled, hint, className }) {
+function Field({ label, type = 'text', value, onChange, placeholder, required, options, disabled, hint, className, format }) {
+    const handleChange = (raw) => {
+        if (format === 'cnic') onChange(formatCnic(raw));
+        else onChange(raw);
+    };
     return (
         <div className={`field-group ${className || ''}`}>
             <label>{label}{required && <span className="req">*</span>}</label>
             {type === 'select' ? (
-                <select value={value || ''} onChange={e => onChange(e.target.value)} disabled={disabled}>
+                <select value={value || ''} onChange={e => handleChange(e.target.value)} disabled={disabled}>
                     <option value="">Select...</option>
                     {options?.map(o => (
                         <option key={typeof o === 'string' ? o : o.value} value={typeof o === 'string' ? o : o.value}>
@@ -95,10 +108,10 @@ function Field({ label, type = 'text', value, onChange, placeholder, required, o
                     ))}
                 </select>
             ) : type === 'textarea' ? (
-                <textarea value={value || ''} onChange={e => onChange(e.target.value)}
+                <textarea value={value || ''} onChange={e => handleChange(e.target.value)}
                     placeholder={placeholder || ''} disabled={disabled} rows={3} />
             ) : (
-                <input type={type} value={value || ''} onChange={e => onChange(e.target.value)}
+                <input type={type} value={value || ''} onChange={e => handleChange(e.target.value)}
                     placeholder={placeholder || ''} disabled={disabled} />
             )}
             {hint && <span className="field-hint">{hint}</span>}
@@ -481,7 +494,7 @@ export default function ProfilePage() {
                     <Field label="Full Name" value={profile.full_name} onChange={v => updateField('full_name', v)} placeholder="Muhammad Ahmed Khan" required />
                     <Field label="Father's Name" value={profile.father_name} onChange={v => updateField('father_name', v)} placeholder="Muhammad Khan" required />
                     <Field label="Mother's Name" value={profile.mother_name} onChange={v => updateField('mother_name', v)} placeholder="Fatima Khan" />
-                    <Field label="CNIC / B-Form" value={profile.cnic} onChange={v => updateField('cnic', v)} placeholder="35201-1234567-1" required hint="Format: XXXXX-XXXXXXX-X" />
+                    <Field label="CNIC / B-Form" value={profile.cnic} onChange={v => updateField('cnic', v)} placeholder="35201-1234567-1" required hint="Format: XXXXX-XXXXXXX-X" format="cnic" />
                     <Field label="Date of Birth" type="date" value={profile.date_of_birth} onChange={v => updateField('date_of_birth', v)} required />
                     <Field label="Gender" type="select" value={profile.gender} onChange={v => updateField('gender', v)} required
                         options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'other', label: 'Other' }]} />
@@ -802,8 +815,8 @@ export default function ProfilePage() {
             {/* ─── SECTION 6: Family Information ───────────────── */}
             <SectionCard title="Family Information" icon="">
                 <div className="field-grid">
-                    <Field label="Father's CNIC" value={profile.father_cnic} onChange={v => updateField('father_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" />
-                    <Field label="Mother's CNIC" value={profile.mother_cnic} onChange={v => updateField('mother_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" />
+                    <Field label="Father's CNIC" value={profile.father_cnic} onChange={v => updateField('father_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" format="cnic" />
+                    <Field label="Mother's CNIC" value={profile.mother_cnic} onChange={v => updateField('mother_cnic', v)} placeholder="35201-1234567-1" hint="Format: XXXXX-XXXXXXX-X" format="cnic" />
                     <Field label="Father's Occupation / Profession" value={profile.father_occupation} onChange={v => updateField('father_occupation', v)} placeholder="Doctor, Engineer, Government Officer…" />
                     <Field label="Father's Status" type="select" value={profile.father_status} onChange={v => updateField('father_status', v)}
                         options={[{ value: 'alive', label: 'Alive' }, { value: 'deceased', label: 'Deceased' }, { value: 'shaheed', label: 'Shaheed' }]} />

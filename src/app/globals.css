@@ -135,6 +135,14 @@
   --transition-slow: 350ms ease;
   --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
   --transition-bounce: 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Logo gradient — dark (current green) */
+  --logo-grad-start: #10B981;
+  --logo-grad-mid: #34D399;
+  --logo-grad-end: #D4A574;
+  --logo-glow-bg: rgba(16, 185, 129, 0.18);
+  --logo-glow-radial: rgba(16, 185, 129, 0.2);
+  --logo-glow-text: rgba(16, 185, 129, 0.35);
 }
 
 /* ========================================
@@ -220,6 +228,14 @@
   /* Shadow colors - Warm amber glow */
   --shadow-color: rgba(74, 55, 40, 0.1);
   --glow-color: rgba(218, 165, 32, 0.3);
+
+  /* Logo gradient — light (warm map amber) */
+  --logo-grad-start: #B8860B;
+  --logo-grad-mid: #DAA520;
+  --logo-grad-end: #996600;
+  --logo-glow-bg: rgba(184, 134, 11, 0.15);
+  --logo-glow-radial: rgba(184, 134, 11, 0.18);
+  --logo-glow-text: rgba(184, 134, 11, 0.3);
 }
 
 /* ========================================
@@ -307,6 +323,14 @@
   /* Shadow colors - Aged paper shadows */
   --shadow-color: rgba(61, 41, 20, 0.15);
   --glow-color: rgba(184, 134, 11, 0.3);
+
+  /* Logo gradient — treasure (leather & aged gold) */
+  --logo-grad-start: #8B4513;
+  --logo-grad-mid: #A0522D;
+  --logo-grad-end: #B8860B;
+  --logo-glow-bg: rgba(139, 69, 19, 0.15);
+  --logo-glow-radial: rgba(139, 69, 19, 0.18);
+  --logo-glow-text: rgba(139, 69, 19, 0.3);
 }
 
 /* ========================================

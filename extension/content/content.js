@@ -67,9 +67,19 @@ const TRANSFORMS = {
   phone_92: (v) => {
     const str = String(v ?? '').replace(/\D/g, '');
     if (!str) return '';
-    if (str.startsWith('92') && str.length >= 11) return str.slice(0, 12);
-    if (str.startsWith('0') && str.length >= 11) return '92' + str.slice(1);
-    if (str.length === 10 && str.startsWith('3')) return '92' + str;
+    // Already correct 12-digit international mobile: 923XXXXXXXXX
+    if (str.startsWith('923') && str.length === 12) return str;
+    // 12-digit starting with 92 (other operator prefix): use as-is
+    if (str.startsWith('92') && str.length === 12) return str;
+    // Local format 03XXXXXXXXX (11 digits): strip 0, prepend 92 → 923XXXXXXXXX
+    if (str.startsWith('03') && str.length === 11) return '92' + str.slice(1);
+    // 10-digit starting with 3 (mobile without leading 0): prepend 92
+    if (str.startsWith('3') && str.length === 10) return '92' + str;
+    // 11-digit starting with 0 but not 03 (e.g. landline 0523...): strip 0, prepend 92
+    if (str.startsWith('0') && str.length === 11) return '92' + str.slice(1);
+    // Longer with 92 prefix: take 12 digits
+    if (str.startsWith('92') && str.length > 12) return str.slice(0, 12);
+    // Fallback: strip leading zeros, prepend 92
     return '92' + str.replace(/^0+/, '');
   },
   cnic_dashes: (v) => {
@@ -1060,6 +1070,34 @@ const FIELD_HEURISTICS = [
       'field of study', 'field_of_study'],
     profileKey: 'inter_discipline', priority: 6
   },
+
+  // ── Education form: grade / division / CGPA ───────────────────
+  // Appears on Pakistani education forms as "Division/Grade/CGPA".
+  // Resolved via getEduSectionContext in matchFieldHeuristically.
+  {
+    match: ['division', 'grade', 'cgpa', 'division/grade', 'division/grade/cgpa',
+      'grade/cgpa', 'grade_cgpa', 'division_grade', 'letter_grade', 'letter grade',
+      'result grade', 'result_grade', 'exam_grade', 'exam grade'],
+    profileKey: 'edu_grade', priority: 6
+  },
+
+  // ── Education form: major subject / area of study ─────────────
+  {
+    match: ['major subject', 'major_subject', 'subject area', 'subject_area',
+      'area of study', 'area_of_study', 'main subject', 'main_subject',
+      'specialization', 'specialisation', 'major field', 'major_field',
+      'subjects', 'subject_combination', 'subject combination'],
+    profileKey: 'edu_major_subject', priority: 6
+  },
+
+  // ── Education form: degree / program title ────────────────────
+  {
+    match: ['degree title', 'degree_title', 'program title', 'program_title',
+      'programme title', 'programme_title', 'degree name', 'degree_name',
+      'qualification title', 'qualification_title', 'certificate title',
+      'diploma title', 'degree_program'],
+    profileKey: 'edu_degree_title', priority: 7
+  },
   {
     match: ['current level', 'current_level', 'education level', 'education_level',
       'class level', 'class_level', 'level of education'],
@@ -1581,7 +1619,10 @@ function matchFieldHeuristically(el) {
       case 'edu_passing_year': return isInter ? 'inter_passing_year' : isMatric ? 'matric_passing_year' : 'matric_passing_year';
       case 'edu_board_name': return isInter ? 'inter_board_name' : 'matric_board_name';
       case 'edu_school_name': return isInter ? 'inter_school_name' : 'matric_school_name';
-      case 'edu_certificate': return isInter ? 'inter_certificate' : 'matric_certificate';
+      case 'edu_certificate':    return isInter ? 'inter_certificate' : 'matric_certificate';
+      case 'edu_grade':          return isInter ? 'inter_grade' : 'matric_grade';
+      case 'edu_major_subject':  return 'inter_discipline';
+      case 'edu_degree_title':   return isInter ? 'inter_certificate' : 'matric_certificate';
       default: return bestKey;
     }
   }
@@ -1611,7 +1652,7 @@ async function getSiteUrl() {
  */
 function collectAllFields(root = document) {
   const results = [];
-  const SELECTOR = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]), select, textarea, div.typeahead, [class*="typeahead"][tabindex], p-dropdown, p-calendar';
+  const SELECTOR = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]):not([type=file]), select, textarea, div.typeahead, [class*="typeahead"][tabindex], p-dropdown, p-calendar';
 
   try {
     results.push(...root.querySelectorAll(SELECTOR));
@@ -2970,12 +3011,21 @@ async function fillDateAdvanced(el, isoDate) {
     } catch { /* continue */ }
   }
 
-  // React-DatePicker / date-fns based pickers — try via data attribute
+  // Flatpickr (class-based detection) — also handles case where _flatpickr is not yet
+  // attached at call time (extension runs before flatpickr.min.js finishes init).
   if (el.getAttribute('data-input') !== null || el.classList.contains('flatpickr-input')) {
-    try {
-      el._flatpickr?.setDate(d, true);
-      return true;
-    } catch { /* continue */ }
+    let fp = el._flatpickr;
+    if (!fp) {
+      for (let _i = 0; _i < 15; _i++) {
+        await new Promise(r => setTimeout(r, 200));
+        fp = el._flatpickr;
+        if (fp) break;
+      }
+    }
+    if (fp) {
+      try { fp.setDate(d, true); return true; } catch { /* fall through to text fill */ }
+    }
+    // Flatpickr not available — fall through to text-format fill below
   }
 
   // ── 3. Three-part day/month/year select group ───────────────────
@@ -5852,6 +5902,886 @@ async function fillUETTaxilaQualificationPage(profile, onFilled, onManual) {
   console.log('[UET Taxila Qual] Qualification section fill complete');
 }
 
+// ─── SPECIAL: SZABIST Step1BasicInfo.aspx ────────────────────────────────────
+// ASP.NET WebForms + Bootstrap grid. All field lookups are label-based — zero
+// hardcoded IDs. Each section is found fresh immediately before its fills because
+// every UpdatePanel postback replaces the entire inner DOM, making cached element
+// references stale. Postbacks: Nationality, Permanent Country, Current Country,
+// Marital Status (Yes). Profile fields used match confirmed Supabase schema only.
+
+function isSzabistBasicInfoPage() {
+  return (
+    window.location.hostname.includes('szabist') ||
+    window.location.hostname.includes('szabist-isb')
+  ) && /Step1BasicInfo/i.test(window.location.pathname);
+}
+
+async function fillSzabistBasicInfoPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  // Wait for UpdatePanel partial postback to complete.
+  // Falls back to a fixed delay when PageRequestManager is unavailable.
+  function waitForPRM(maxMs, fallbackMs) {
+    maxMs      = maxMs      || 5000;
+    fallbackMs = fallbackMs || 1500;
+    return new Promise(resolve => {
+      let done = false;
+      const finish = () => { if (!done) { done = true; resolve(); } };
+      try {
+        const prm = window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
+        if (!prm) { setTimeout(finish, fallbackMs); return; }
+        const t = setTimeout(finish, maxMs);
+        const h = () => { clearTimeout(t); finish(); prm.remove_endRequest(h); };
+        prm.add_endRequest(h);
+      } catch (e) { setTimeout(finish, fallbackMs); }
+    });
+  }
+
+  function setNative(el, value) {
+    if (!el || value == null || value === '') return false;
+    const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(el, String(value)); else el.value = String(value);
+    el.dispatchEvent(new Event('input',  { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur',   { bubbles: true }));
+    return true;
+  }
+
+  // ── DOM finders — zero hardcoded IDs ──────────────────────────────────────
+
+  // Return the .container div whose <strong> heading matches headingText.
+  function findSection(headingText) {
+    const pat = new RegExp(headingText.replace(/[*()?]/g, '').trim(), 'i');
+    for (const strong of document.querySelectorAll('strong')) {
+      if (pat.test(strong.textContent.trim())) {
+        return strong.closest('.container') || strong.closest('div');
+      }
+    }
+    return null;
+  }
+
+  // Find input/select/textarea by adjacent visible label text.
+  // scope restricts the search to a section container (defaults to document).
+  // Three strategies:
+  //   A) <label for="id"> — standard HTML association
+  //   B) <span>label</span> then forward sibling walk — Bootstrap + ASP.NET pattern
+  //   C) Table <td>label</td><td><input></td> — legacy layout
+  function fieldByLabel(labelText, tags, scope) {
+    tags  = tags  || ['input', 'select', 'textarea'];
+    scope = scope || document;
+    const pat = new RegExp(labelText.replace(/[*()/]/g, '').trim(), 'i');
+    const inputSel = tags.map(t =>
+      `${t}:not([type="hidden"]):not([type="file"]):not([type="submit"])` +
+      `:not([type="button"]):not([type="checkbox"]):not([type="radio"])`
+    ).join(',');
+
+    // A. <label for="...">
+    for (const lbl of scope.querySelectorAll('label')) {
+      if (!pat.test(lbl.textContent.trim())) continue;
+      if (lbl.htmlFor) {
+        const el = document.getElementById(lbl.htmlFor);
+        if (el) return el;
+      }
+      const el = lbl.querySelector(inputSel);
+      if (el) return el;
+    }
+
+    // B. <span>label</span> — walk forward siblings for an input
+    for (const span of scope.querySelectorAll('span')) {
+      if (!pat.test(span.textContent.trim())) continue;
+      let sib = span.nextElementSibling;
+      while (sib) {
+        if (sib.matches && sib.matches(inputSel)) return sib;
+        const inner = sib.querySelector(inputSel);
+        if (inner) return inner;
+        sib = sib.nextElementSibling;
+      }
+    }
+
+    // C. Table row
+    for (const row of scope.querySelectorAll('tr')) {
+      const cells = Array.from(row.querySelectorAll('td, th'));
+      const hasLabel = cells.some(c => !c.querySelector(inputSel) && pat.test(c.textContent.trim()));
+      if (!hasLabel) continue;
+      const el = row.querySelector(inputSel);
+      if (el) return el;
+    }
+
+    return null;
+  }
+
+  // Find all radios in the group whose label <span> matches labelText.
+  // The radio group renders as an ASP.NET RadioButtonList <table> directly
+  // after the <span> label in the same Bootstrap col div.
+  function findRadioGroupByLabel(labelText, scope) {
+    scope = scope || document;
+    const pat = new RegExp(labelText.replace(/[*()/]/g, '').trim(), 'i');
+    for (const span of scope.querySelectorAll('span')) {
+      if (!pat.test(span.textContent.trim())) continue;
+      let sib = span.nextElementSibling;
+      while (sib) {
+        const radios = Array.from(sib.querySelectorAll('input[type="radio"]'));
+        if (radios.length >= 2) return radios;
+        sib = sib.nextElementSibling;
+      }
+    }
+    return [];
+  }
+
+  // Select a radio by value (or label[for] text) within the group found by label.
+  // firePostback: set true when the radio triggers an UpdatePanel postback.
+  async function fillRadioByLabel(labelText, value, firePostback, scope) {
+    const v = String(value).trim().toLowerCase();
+    const radios = findRadioGroupByLabel(labelText, scope);
+    for (const r of radios) {
+      const rVal = r.value.trim().toLowerCase();
+      const rLbl = (document.querySelector(`label[for="${r.id}"]`)?.textContent || '').trim().toLowerCase();
+      if (rVal === v || rLbl === v || rLbl.startsWith(v)) {
+        const waitPromise = firePostback ? waitForPRM(5000) : null;
+        r.checked = true;
+        r.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(r);
+        if (firePostback && waitPromise) { await waitPromise; await delay(300); }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Fill a CNIC three-input split. Finds inputs by the parent label span, then
+  // collects the three text inputs inside the nested col div.
+  // cnicStr: "12345-1234567-1" (dashed) or 13-digit raw string.
+  function fillCNICByLabel(labelText, cnicStr, scope) {
+    if (!cnicStr) return;
+    scope = scope || document;
+    const clean = String(cnicStr).replace(/-/g, '');
+    if (clean.length < 13) return;
+    const p1 = clean.slice(0, 5), p2 = clean.slice(5, 12), p3 = clean.slice(12, 13);
+    const pat = new RegExp(labelText.replace(/[*()/]/g, '').trim(), 'i');
+    for (const span of scope.querySelectorAll('span')) {
+      if (!pat.test(span.textContent.trim())) continue;
+      const col = span.closest('[class*="col-"]') || span.parentElement;
+      if (!col) continue;
+      const inputs = Array.from(col.querySelectorAll('input[type="text"]'));
+      if (inputs.length >= 3) {
+        [p1, p2, p3].forEach((val, i) => { setNative(inputs[i], val); onFilled(inputs[i]); });
+        return;
+      }
+    }
+  }
+
+  // Fill a <select> found by label text.
+  function fillSelectByLabel(labelText, value, scope) {
+    const el = fieldByLabel(labelText, ['select'], scope);
+    if (!el || !value) return false;
+    const v = String(value).trim().toLowerCase();
+    const opt = Array.from(el.options).find(o =>
+      o.value.trim().toLowerCase() === v ||
+      o.text.trim().toLowerCase()  === v ||
+      o.text.trim().toLowerCase().includes(v) ||
+      v.includes(o.text.trim().toLowerCase())
+    );
+    if (!opt) return false;
+    el.value = opt.value;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    onFilled(el);
+    return true;
+  }
+
+  // Fill a <select> by label and wait for the resulting UpdatePanel postback.
+  async function fillSelectByLabelWithPostback(labelText, value, scope, maxWaitMs) {
+    maxWaitMs = maxWaitMs || 5000;
+    const el  = fieldByLabel(labelText, ['select'], scope);
+    if (!el || !value) return false;
+    const v = String(value).trim().toLowerCase();
+    const opt = Array.from(el.options).find(o =>
+      o.value.trim().toLowerCase() === v ||
+      o.text.trim().toLowerCase()  === v ||
+      o.text.trim().toLowerCase().includes(v) ||
+      v.includes(o.text.trim().toLowerCase())
+    );
+    if (!opt) return false;
+    const waitPromise = waitForPRM(maxWaitMs);
+    el.value = opt.value;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    onFilled(el);
+    await waitPromise;
+    await delay(300);
+    return true;
+  }
+
+  // Fill a text/textarea element found by label.
+  function fillByLabel(labelText, value, scope) {
+    if (value == null || String(value).trim() === '') return false;
+    const el = fieldByLabel(labelText, ['input', 'textarea'], scope);
+    if (!el) return false;
+    const ok = setNative(el, value);
+    if (ok) onFilled(el); else onManual(el);
+    return ok;
+  }
+
+  // ── CRITICAL: sections are never cached across awaits ────────────────────
+  // Each ASP.NET UpdatePanel postback replaces the entire inner DOM of the
+  // panel. Any element reference held before a postback becomes a stale
+  // detached node — querySelectorAll on it returns nothing. findSection() is
+  // therefore called fresh immediately before each section's fills.
+
+  // ── SECTION: Personal Information ────────────────────────────────────────
+
+  let sec = findSection('Personal Information');
+
+  fillSelectByLabel('Prefix', profile.salutation || 'Mr', sec);
+
+  const fullName   = profile.full_name || '';
+  const nameParts  = fullName.trim().split(/\s+/);
+  const firstName  = profile.first_name  || nameParts[0] || '';
+  const lastName   = profile.last_name   || (nameParts.length > 1 ? nameParts[nameParts.length - 1] : '');
+  const middleName = profile.middle_name || (nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '');
+
+  fillByLabel('First Name',  firstName,  sec);
+  if (middleName) fillByLabel('Middle Name', middleName, sec);
+  fillByLabel('Last Name',   lastName,   sec);
+
+  if (profile.date_of_birth) {
+    let dobVal = String(profile.date_of_birth);
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dobVal)) {
+      const [mm, dd, yyyy] = dobVal.split('/');
+      dobVal = `${yyyy}-${mm}-${dd}`;
+    }
+    fillByLabel('Date of Birth', dobVal, sec);
+  }
+
+  await fillRadioByLabel('Gender', profile.gender || 'Male', false, sec);
+  fillSelectByLabel('Religion', profile.religion || 'Islam', sec);
+
+  // Nationality postback — entire UpdatePanel DOM is replaced after this.
+  const nationality = profile.nationality || 'Pakistan';
+  await fillSelectByLabelWithPostback('Nationality', nationality, sec, 6000);
+  await delay(500); // extra settle for NIC section re-render
+
+  // Re-find — previous sec is now a stale detached node.
+  sec = findSection('Personal Information');
+  fillCNICByLabel('NIC', profile.cnic, sec);
+  if (profile.blood_group) fillSelectByLabel('Blood Group', profile.blood_group, sec);
+
+  const medCond = (profile.medical_condition || 'No').toLowerCase().startsWith('y') ? 'Yes' : 'No';
+  await fillRadioByLabel('Medical Condition', medCond, false, sec);
+
+  const hasDisability = (profile.disability_type &&
+    profile.disability_type.toLowerCase() !== 'no disability') ? 'Yes' : 'No';
+  await fillRadioByLabel('Disability', hasDisability, false, sec);
+  if (hasDisability === 'Yes') {
+    fillByLabel('Disability Type', profile.disability_type, sec) ||
+    fillByLabel('Specify',         profile.disability_type, sec);
+  }
+
+  // Marital status — "Yes" fires postback; "No" does not.
+  const married = (profile.marital_status || 'No').toLowerCase().startsWith('y') ? 'Yes' : 'No';
+  if (married === 'Yes') {
+    await fillRadioByLabel('Married', 'Yes', true);
+    await delay(400);
+    const secSpouse = findSection('Spouse') || findSection('Married');
+    if (secSpouse) {
+      fillByLabel('Spouse Name',       profile.spouse_name       || '', secSpouse);
+      fillByLabel('Spouse Occupation', profile.spouse_occupation || '', secSpouse);
+    }
+  } else {
+    await fillRadioByLabel('Married', 'No', false);
+  }
+
+  // ── SECTION: Father Information ───────────────────────────────────────────
+  // Found fresh here — after all personal-section postbacks.
+  // Profile fields available: father_name, father_cnic, father_occupation,
+  // guardian_phone. Organization, email, office phone are NOT in profile schema
+  // and are intentionally left blank for manual entry.
+
+  sec = findSection('Father');
+
+  fillSelectByLabel('Prefix', 'Mr', sec); // no father prefix in profile; Mr is correct default
+
+  const fatherName = profile.father_name || '';
+  // The label in this section is just "Name" (a single full-name field, not split).
+  fillByLabel('Name', fatherName, sec);
+
+  fillCNICByLabel('NIC', profile.father_cnic, sec);
+
+  if (profile.father_occupation)
+    fillByLabel('Occupation', profile.father_occupation, sec);
+
+  // guardian_phone is the only father/guardian phone in the profile schema.
+  if (profile.guardian_phone)
+    fillByLabel('Cell Phone', profile.guardian_phone, sec) ||
+    fillByLabel('Mobile',     profile.guardian_phone, sec) ||
+    fillByLabel('Phone',      profile.guardian_phone, sec);
+
+  // Block fields not in profile schema from Tier 3's wrong fills.
+  // txtFatherOrganization has "father" in its ID — Tier 3 matches it to
+  // father_name heuristic. Email inputs trigger el.type==="email" shortcut
+  // in Tier 3 which always returns profile.email (student's email).
+  // Marking these onManual adds them to alreadyHandled so Tier 3 skips them.
+  ['Organization', 'Email', 'Email Address', 'Office Phone', 'Work Phone'].forEach(lbl => {
+    const el = fieldByLabel(lbl, ['input', 'textarea', 'select'], sec);
+    if (el) onManual(el);
+  });
+
+  // ── SECTION: Permanent Address Information ────────────────────────────────
+  // Profile has one address/city used for both permanent and current.
+  // No separate permanent_country field — derive from nationality or default Pakistan.
+
+  sec = findSection('Permanent Address');
+
+  if (profile.address) fillByLabel('Address', profile.address, sec);
+
+  const country = profile.nationality || 'Pakistan';
+  await fillSelectByLabelWithPostback('Country', country, sec, 5000);
+  // UpdatePanel re-renders again — re-find.
+
+  sec = findSection('Permanent Address');
+  if (profile.city) fillSelectByLabel('City', profile.city, sec);
+  if (profile.phone)
+    fillByLabel('Cell Phone', profile.phone, sec) ||
+    fillByLabel('Phone',      profile.phone, sec);
+
+  // ── SECTION: Current Address Information ─────────────────────────────────
+  // Do NOT tick "Same as Permanent Address" — its postback re-renders the panel
+  // and wipes the emergency section filled below. Fill directly instead.
+
+  sec = findSection('Current Address');
+
+  if (profile.address) fillByLabel('Address', profile.address, sec);
+
+  // Current Country — only fire the postback if the selection needs to change.
+  const currCountryEl = fieldByLabel('Country', ['select'], sec);
+  if (currCountryEl) {
+    const cv = country.trim().toLowerCase();
+    const targetOpt = Array.from(currCountryEl.options).find(o =>
+      o.value.trim().toLowerCase() === cv || o.text.trim().toLowerCase().includes(cv));
+    if (targetOpt && targetOpt.value !== currCountryEl.value) {
+      const waitPromise = waitForPRM(5000);
+      currCountryEl.value = targetOpt.value;
+      currCountryEl.dispatchEvent(new Event('change', { bubbles: true }));
+      onFilled(currCountryEl);
+      await waitPromise;
+      await delay(300);
+      sec = findSection('Current Address'); // re-find after postback
+    } else if (targetOpt) {
+      onFilled(currCountryEl); // already correct
+    }
+  }
+
+  if (profile.city) fillByLabel('City', profile.city, sec);
+
+  // Final settle — let all UpdatePanel activity complete before writing
+  // the emergency section (same panel; filled last so no postback can wipe it).
+  await delay(700);
+
+  // ── SECTION: Emergency Contact Information ────────────────────────────────
+  // Found freshest — guaranteed live DOM node after all postbacks.
+  // Derived from father/guardian data; no dedicated emergency fields in profile.
+
+  sec = findSection('Emergency Contact');
+
+  fillByLabel('Contact Name', fatherName || profile.full_name || '', sec);
+
+  // Emergency number is always guardian/father phone — never student's own number.
+  // Label is "Contact Number* 1" — the asterisk between "Number" and "1" breaks an
+  // exact "Contact Number 1" substring search, so we search for "Contact Number"
+  // (without the "1"). Span iteration hits this span before "Contact Number 2" in
+  // document order, so the correct input is returned.
+  const emergPhone = profile.guardian_phone || '';
+  if (emergPhone) {
+    fillByLabel('Contact Number', emergPhone, sec);
+  } else {
+    // No guardian phone in profile — mark as manual so Tier 3 cannot substitute
+    // the student's own phone number for an emergency contact field.
+    const elNum1 = fieldByLabel('Contact Number', ['input'], sec);
+    if (elNum1) onManual(elNum1);
+  }
+
+  // Contact Number 2 has no data in profile — block Tier 3 from filling it.
+  const el2 = fieldByLabel('Contact Number 2', ['input'], sec);
+  if (el2) onManual(el2);
+
+  fillSelectByLabel('Relationship', 'Father', sec);
+
+  console.log('[SZABIST BasicInfo] Fill complete');
+}
+
+// ─── SPECIAL: SZABIST Education.aspx ────────────────────────────────────────
+// Education Level dropdown fires a full UpdatePanel postback on change.
+// After the postback the form layout changes completely (Standard / O Levels / A Levels).
+// Handler detects which mode appeared and fills accordingly.
+
+function isSzabistEducationPage() {
+  return (
+    window.location.hostname.includes('szabist') ||
+    window.location.hostname.includes('szabist-isb')
+  ) && /Education/i.test(window.location.pathname);
+}
+
+async function fillSzabistEducationPage(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  function waitForPRM(maxMs = 5000, fallbackMs = 1500) {
+    return new Promise(resolve => {
+      let done = false;
+      const finish = () => { if (!done) { done = true; resolve(); } };
+      try {
+        const prm = window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
+        if (!prm) { setTimeout(finish, fallbackMs); return; }
+        const t = setTimeout(finish, maxMs);
+        const h = () => { clearTimeout(t); finish(); prm.remove_endRequest(h); };
+        prm.add_endRequest(h);
+      } catch { setTimeout(finish, fallbackMs); }
+    });
+  }
+
+  function setNative(el, value) {
+    if (!el || value == null || value === '') return false;
+    const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(el, String(value)); else el.value = String(value);
+    el.dispatchEvent(new Event('input',  { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur',   { bubbles: true }));
+    return true;
+  }
+
+  // ── Label-relative DOM finders — no hardcoded IDs ─────────────────────────
+
+  // Find input/select/textarea by adjacent visible label text.
+  // Handles three layouts:
+  //   A) <label for="id">                   — standard HTML
+  //   B) Bootstrap col: <span>label</span>  — ASP.NET + Bootstrap, span and input are
+  //         <input>                            direct siblings inside the same div.col-*
+  //   C) Table: <td>label</td><td><input>   — legacy ASP.NET table layout
+  function fieldByLabel(labelText, tags = ['input', 'select', 'textarea']) {
+    const pat = new RegExp(labelText.replace(/[*()/]/g, '').trim(), 'i');
+    const inputSel = tags.map(t =>
+      `${t}:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"])`
+    ).join(',');
+
+    // A. <label for="...">
+    for (const lbl of document.querySelectorAll('label')) {
+      if (!pat.test(lbl.textContent.trim())) continue;
+      if (lbl.htmlFor) {
+        const el = document.getElementById(lbl.htmlFor);
+        if (el && tags.includes(el.tagName.toLowerCase())) return el;
+      }
+      const el = lbl.querySelector(inputSel);
+      if (el) return el;
+    }
+
+    // B. Bootstrap col — <span>label</span> followed by <input> as siblings in same div
+    for (const span of document.querySelectorAll('span')) {
+      if (!pat.test(span.textContent.trim())) continue;
+      // Walk forward through siblings looking for an input
+      let sib = span.nextElementSibling;
+      while (sib) {
+        if (sib.matches(inputSel)) return sib;
+        const inner = sib.querySelector(inputSel);
+        if (inner) return inner;
+        sib = sib.nextElementSibling;
+      }
+    }
+
+    // C. Table — <td>/<th> whose text matches, input in the same or next cell
+    for (const row of document.querySelectorAll('tr')) {
+      const cells = Array.from(row.querySelectorAll('td, th'));
+      const hasLabel = cells.some(c => !c.querySelector(inputSel) && pat.test(c.textContent.trim()));
+      if (!hasLabel) continue;
+      const el = row.querySelector(inputSel);
+      if (el) return el;
+    }
+
+    return null;
+  }
+
+  // Find checkbox by adjacent label text
+  function checkboxByLabel(labelText) {
+    const pat = new RegExp(labelText.replace(/[*()/]/g, '').trim(), 'i');
+    // A. <label for="..."> or <label> wrapping checkbox
+    for (const lbl of document.querySelectorAll('label')) {
+      if (!pat.test(lbl.textContent.trim())) continue;
+      const cb = lbl.htmlFor
+        ? document.getElementById(lbl.htmlFor)
+        : lbl.querySelector('input[type="checkbox"]');
+      if (cb?.type === 'checkbox') return cb;
+    }
+    // B. Bootstrap — <span> or text node with label, checkbox is a sibling
+    for (const span of document.querySelectorAll('span')) {
+      if (!pat.test(span.textContent.trim())) continue;
+      const parent = span.parentElement;
+      if (!parent) continue;
+      const cb = parent.querySelector('input[type="checkbox"]');
+      if (cb) return cb;
+    }
+    // C. Table row
+    for (const td of document.querySelectorAll('td, th')) {
+      if (!pat.test(td.textContent.trim())) continue;
+      const cb = td.closest('tr')?.querySelector('input[type="checkbox"]');
+      if (cb) return cb;
+    }
+    return null;
+  }
+
+  // Find input by placeholder text
+  function fieldByPlaceholder(text) {
+    const pat = new RegExp(text.replace(/[*()/]/g, '').trim(), 'i');
+    return Array.from(document.querySelectorAll('input, textarea'))
+      .find(el => pat.test(el.placeholder || '')) || null;
+  }
+
+  const TEXT_INPUT_SEL = 'input[type="text"], input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]):not([type="image"])';
+
+  // Get the NEXT text input after el in the same table row
+  function nextInputInRow(el) {
+    const row = el?.closest('tr');
+    if (!row) return null;
+    const allInputs = Array.from(row.querySelectorAll(TEXT_INPUT_SEL));
+    const idx = allInputs.indexOf(el);
+    return idx >= 0 && idx + 1 < allInputs.length ? allInputs[idx + 1] : null;
+  }
+
+  // Get the FIRST text input in a table row (for compulsory subject grade)
+  function firstInputInRow(el) {
+    const row = el?.closest('tr');
+    if (!row) return null;
+    return row.querySelector(TEXT_INPUT_SEL) || null;
+  }
+
+  // Identify the Education Level dropdown by its option content, not its ID
+  function findEducationLevelDropdown() {
+    for (const sel of document.querySelectorAll('select')) {
+      const texts = Array.from(sel.options).map(o => o.text.trim().toLowerCase());
+      if (texts.includes('intermediate') && texts.includes('matric') && texts.some(t => t.includes('level'))) {
+        return sel;
+      }
+    }
+    return null;
+  }
+
+  // Find IBCC equivalency radios by nearby label text (no name attribute hardcoding)
+  function findIBCCRadios() {
+    const pat = /ibcc|equivalen|attest/i;
+    for (const el of document.querySelectorAll('td, span, label, th, p')) {
+      if (!pat.test(el.textContent)) continue;
+      const container = el.closest('tr, fieldset, .form-group, div');
+      if (container) {
+        const radios = Array.from(container.querySelectorAll('input[type="radio"]'));
+        if (radios.length >= 2) return radios;
+      }
+    }
+    // Fallback: radio group name contains a hint
+    const groups = {};
+    for (const r of document.querySelectorAll('input[type="radio"]')) {
+      if (!groups[r.name]) groups[r.name] = [];
+      groups[r.name].push(r);
+    }
+    for (const [name, radios] of Object.entries(groups)) {
+      if (/attest|equiv|ibcc/i.test(name) && radios.length >= 2) return radios;
+    }
+    return [];
+  }
+
+  // ── Fill helpers ──────────────────────────────────────────────────────────
+
+  function fillEl(el, value) {
+    if (!el || value == null || String(value).trim() === '') return false;
+    const ok = setNative(el, value);
+    if (ok) onFilled(el); else onManual(el);
+    return ok;
+  }
+
+  function fillSelectEl(el, value) {
+    if (!el || !value) return false;
+    const v = String(value).trim().toLowerCase();
+    const opt = Array.from(el.options).find(o =>
+      o.value.trim().toLowerCase() === v ||
+      o.text.trim().toLowerCase()  === v ||
+      o.text.trim().toLowerCase().includes(v) ||
+      v.includes(o.text.trim().toLowerCase())
+    );
+    if (!opt) return false;
+    el.value = opt.value;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    onFilled(el);
+    return true;
+  }
+
+  // Select Education Level dropdown, fire postback, wait for DOM to settle
+  async function setEducationLevel(levelText) {
+    const el = findEducationLevelDropdown();
+    if (!el) return false;
+    const v = String(levelText).trim().toLowerCase();
+    const opt = Array.from(el.options).find(o =>
+      o.value.trim().toLowerCase() === v ||
+      o.text.trim().toLowerCase()  === v
+    );
+    if (!opt) return false;
+    const waitPromise = waitForPRM(6000);
+    el.value = opt.value;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    onFilled(el);
+    await waitPromise;
+    await delay(400);
+    return true;
+  }
+
+  // Format Date → MM/YYYY
+  function toMMYYYY(yearVal, monthVal) {
+    if (!yearVal) return '';
+    return `${String(monthVal || '01').padStart(2, '0')}/${yearVal}`;
+  }
+
+  // ── Fill Standard Mode fields (Matric / Intermediate) ─────────────────────
+  // Uses label-relative lookups — survives any ID rename.
+  async function fillStandardFields(opts) {
+    fillEl(fieldByLabel('Degree Title'),                                     opts.degreeTitle  || '');
+    fillEl(fieldByLabel('School') || fieldByLabel('University') || fieldByLabel('College'), opts.school || '');
+    fillEl(fieldByLabel('Board'),                                            opts.board        || '');
+    fillEl(fieldByLabel('End Date'),                                         opts.endMMYYYY    || '');
+    fillEl(fieldByLabel('Grade') || fieldByLabel('Division') || fieldByLabel('CGPA'),       opts.grade  || '');
+    fillEl(fieldByLabel('Percentage'),                                       opts.percentage   || '');
+    fillEl(fieldByLabel('Major Subject') || fieldByLabel('Subject'),         opts.majorSubject || '');
+
+    // Intermediate-only: "second year result awaited" checkbox — fires its own postback
+    if (opts.isIntermediate && (profile.inter_status === 'appearing' || profile.inter_status === 'part1_only')) {
+      const cbEl = checkboxByLabel('second year') || checkboxByLabel('waiting');
+      if (cbEl && !cbEl.checked) {
+        const waitPromise = waitForPRM(4000);
+        cbEl.checked = true;
+        cbEl.dispatchEvent(new Event('click',  { bubbles: true }));
+        cbEl.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(cbEl);
+        await waitPromise;
+        await delay(300);
+        // Re-fill percentage — field may have been re-rendered by postback
+        fillEl(fieldByLabel('Percentage'), opts.percentage || '');
+      }
+    }
+  }
+
+  // ── O Levels fill ─────────────────────────────────────────────────────────
+  function fillOLevels() {
+    const oSubs = Array.isArray(profile.olevel_subjects) ? profile.olevel_subjects : [];
+
+    // Compulsory subjects — keyword list handles spelling variants (Islamiat vs Islamiyat)
+    const COMPULSORY = [
+      { label: 'Islamiat',         keywords: ['islamia', 'islamiy'] },
+      { label: 'Urdu',             keywords: ['urdu'] },
+      { label: 'English',          keywords: ['english'] },
+      { label: 'Math',             keywords: ['math', 'mathemat'] },
+      { label: 'Pakistan Studies', keywords: ['pakistan', 'pak stud'] },
+    ];
+
+    // Spelling normaliser: treats variant spellings as the same subject
+    const normaliseSubject = s => s.toLowerCase()
+      .replace(/islamiyat/g, 'islamiat')   // Islamiyat = Islamiat
+      .replace(/quran/g,    'islamiat')    // Quran studies often filed same
+      .replace(/maths/g,    'math')        // Maths = Math
+      .replace(/mathematics/g, 'math');
+
+    for (const { label, keywords } of COMPULSORY) {
+      // Try canonical label first, then each keyword variant — handles Islamiat vs Islamiyat etc.
+      const cb = checkboxByLabel(label)
+               || keywords.reduce((found, kw) => found || checkboxByLabel(kw), null);
+      if (!cb) continue;
+      const profileSub = oSubs.find(s =>
+        s.subject && keywords.some(kw => normaliseSubject(s.subject).includes(kw))
+      );
+      if (profileSub) {
+        if (!cb.checked) {
+          cb.checked = true;
+          cb.dispatchEvent(new Event('change', { bubbles: true }));
+          onFilled(cb);
+        }
+        if (profileSub.grade) {
+          // Grade input is the FIRST text input in the same row as the checkbox
+          const gradeEl = firstInputInRow(cb);
+          fillEl(gradeEl, profileSub.grade);
+        }
+      }
+    }
+
+    // Optional subject slots: find name input by placeholder "Optional 1"…"5",
+    // grade input is the NEXT text input after the name input in the same row
+    const compKeywords = COMPULSORY.flatMap(c => c.keywords);
+    const optSubs = oSubs.filter(s =>
+      s.subject && !compKeywords.some(kw => s.subject.toLowerCase().includes(kw))
+    );
+    for (let i = 0; i < Math.min(optSubs.length, 5); i++) {
+      const nameEl = fieldByPlaceholder(`Optional ${i + 1}`);
+      if (!nameEl) continue;
+      fillEl(nameEl, optSubs[i].subject || '');
+      const gradeEl = nextInputInRow(nameEl);
+      if (gradeEl) fillEl(gradeEl, optSubs[i].grade || '');
+    }
+
+    // ── Fields below the subject table ────────────────────────────────────
+    const board = profile.olevel_board === 'cambridge' ? 'Cambridge'
+                : profile.olevel_board === 'edexcel'   ? 'Edexcel'
+                : profile.olevel_board || '';
+
+    fillEl(fieldByLabel('School') || fieldByLabel('University') || fieldByLabel('College'),
+           profile.olevel_school || '');
+    fillEl(fieldByLabel('Board'), board);
+    fillEl(fieldByLabel('Degree Title'), 'O Levels');
+
+    // End Date — label says "End Date* O Levels" or just "End Date"
+    const endEl = fieldByLabel('End Date') || fieldByPlaceholder('MM/YYYY');
+    if (profile.olevel_year && endEl) fillEl(endEl, toMMYYYY(profile.olevel_year, '06'));
+
+    // IBCC equivalency radio — find by label text, not hardcoded name attribute
+    const hasIBCC = !!(profile.ibcc_equivalent_matric || profile.ibcc_olevel_marks);
+    for (const r of findIBCCRadios()) {
+      const rLabel = (r.labels?.[0]?.textContent || r.value || '').trim().toLowerCase();
+      if ((hasIBCC && (rLabel === 'yes' || r.value.toLowerCase() === 'yes')) ||
+          (!hasIBCC && (rLabel === 'no'  || r.value.toLowerCase() === 'no'))) {
+        r.checked = true;
+        r.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(r);
+        break;
+      }
+    }
+
+    // O Levels is always complete — do not tick Waiting Results
+  }
+
+  // ── A Levels fill ─────────────────────────────────────────────────────────
+  function fillALevels() {
+    const aSubs = Array.isArray(profile.alevel_subjects) ? profile.alevel_subjects : [];
+    const aIncomplete = profile.inter_status === 'appearing' || profile.inter_status === 'part1_only';
+
+    // Compulsory A-Level course slots: find by placeholder "Compulsory Course 1" … "4"
+    for (let i = 0; i < Math.min(aSubs.length, 4); i++) {
+      const nameEl = fieldByPlaceholder(`Compulsory Course ${i + 1}`);
+      if (!nameEl) continue;
+      fillEl(nameEl, aSubs[i].subject || '');
+      const gradeEl = nextInputInRow(nameEl);
+      if (gradeEl) fillEl(gradeEl, aIncomplete ? 'Pending' : (aSubs[i].a2_grade || aSubs[i].as_grade || ''));
+    }
+
+    // AS (subsidiary) slots: find by placeholder "AS 1" … "AS 5"
+    const asSubjects = aSubs.slice(4);
+    for (let i = 0; i < Math.min(asSubjects.length, 5); i++) {
+      const nameEl = fieldByPlaceholder(`AS ${i + 1}`);
+      if (!nameEl) continue;
+      fillEl(nameEl, asSubjects[i].subject || '');
+      const gradeEl = nextInputInRow(nameEl);
+      if (gradeEl) fillEl(gradeEl, aIncomplete ? 'Pending' : (asSubjects[i].as_grade || asSubjects[i].a2_grade || ''));
+    }
+
+    // School, Board, End Date, Degree Title
+    const board = profile.alevel_board === 'cambridge' ? 'Cambridge'
+                : profile.alevel_board === 'edexcel'   ? 'Edexcel'
+                : profile.alevel_board || '';
+    fillEl(fieldByLabel('School') || fieldByLabel('University') || fieldByLabel('College'), profile.alevel_school || '');
+    fillEl(fieldByLabel('Board'),        board);
+    fillEl(fieldByLabel('Degree Title'), 'A Levels');
+    if (profile.alevel_year) fillEl(fieldByLabel('End Date'), toMMYYYY(profile.alevel_year, '06'));
+
+    // IBCC equivalency radio
+    const hasIBCC = !!(profile.ibcc_equivalent_inter || profile.ibcc_alevel_marks);
+    for (const r of findIBCCRadios()) {
+      const rLabel = (r.labels?.[0]?.textContent || r.value || '').trim().toLowerCase();
+      if ((hasIBCC && (rLabel === 'yes' || r.value.toLowerCase() === 'yes')) ||
+          (!hasIBCC && (rLabel === 'no'  || r.value.toLowerCase() === 'no'))) {
+        r.checked = true;
+        r.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(r);
+        break;
+      }
+    }
+
+    // Waiting Results — only tick when A Levels result is not yet complete
+    if (aIncomplete) {
+      const waitCb = checkboxByLabel('Waiting');
+      if (waitCb && !waitCb.checked) {
+        waitCb.checked = true;
+        waitCb.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(waitCb);
+      }
+    }
+  }
+
+  // ── MAIN FLOW ──────────────────────────────────────────────────────────────
+
+  const isCambridge   = (profile.education_system || 'pakistani').toLowerCase() === 'cambridge';
+  const interStatus   = profile.inter_status || 'complete';
+  const isInterPartial = interStatus === 'appearing' || interStatus === 'part1_only';
+
+  // Read current Education Level from whatever dropdown is on the page
+  const levelDdl   = findEducationLevelDropdown();
+  const currentVal = levelDdl?.value?.trim().toLowerCase() || '';
+
+  if (isCambridge) {
+    if (!currentVal || currentVal === 'none') {
+      const ok = await setEducationLevel('O Levels');
+      if (!ok) { console.warn('[SZABIST Edu] Could not set O Levels'); return; }
+      fillOLevels();
+    } else if (currentVal.includes('o level')) {
+      fillOLevels();
+    } else if (currentVal.includes('a level')) {
+      fillALevels();
+    }
+
+  } else {
+    // Pakistani system — pick target level from page state or profile
+    let targetLevel = currentVal && currentVal !== 'none'
+      ? currentVal
+      : interStatus === 'not_started' ? 'matric' : 'intermediate';
+
+    const streamMap = {
+      pre_engineering: 'Science', pre_medical: 'Science',
+      computer_science: 'Computer Science', ics: 'Computer Science',
+      commerce: 'Commerce', icom: 'Commerce',
+      arts: 'Arts', fa: 'Arts', general: 'Science',
+    };
+
+    if (targetLevel.includes('matric')) {
+      await setEducationLevel('Matric');
+      const pct = profile.matric_percentage
+               || (profile.matric_marks && profile.matric_total
+                   ? ((profile.matric_marks / profile.matric_total) * 100).toFixed(1) : '');
+      await fillStandardFields({
+        degreeTitle:    'SSC',
+        school:         profile.matric_school || '',
+        board:          profile.matric_board  || '',
+        endMMYYYY:      profile.matric_year   ? toMMYYYY(profile.matric_year, '05') : '',
+        grade:          profileValueFor('matric_grade', profile) || '',
+        percentage:     pct,
+        majorSubject:   streamMap[(profile.fsc_stream || '').toLowerCase()] || 'Science',
+        isIntermediate: false,
+      });
+
+    } else {
+      await setEducationLevel('Intermediate');
+      let marks = profile.fsc_marks;
+      let total = profile.fsc_total || 1100;
+      let pct   = profile.fsc_percentage;
+      if (isInterPartial) {
+        marks = profile.fsc_projected_marks || profile.fsc_part1_marks || marks;
+        total = profile.fsc_total || profile.fsc_part1_total || 1100;
+        pct   = profile.fsc_projected_percentage || profile.fsc_part1_percentage || pct;
+      }
+      await fillStandardFields({
+        degreeTitle:    'HSC',
+        school:         profile.fsc_school || '',
+        board:          profile.fsc_board  || '',
+        endMMYYYY:      profile.fsc_year   ? toMMYYYY(profile.fsc_year, '05') : '',
+        grade:          isInterPartial ? 'Pending' : (profileValueFor('inter_grade', profile) || ''),
+        percentage:     pct ? String(pct) : '',
+        majorSubject:   streamMap[(profile.fsc_stream || '').toLowerCase()] || 'Science',
+        isIntermediate: true,
+      });
+    }
+  }
+
+  console.log('[SZABIST Edu] Fill complete');
+}
+
 // ─── SPECIAL: Bahria University CMS Profile.aspx ─────────────────────────────
 // Profile.aspx uses ASP.NET WebForms with full-page postbacks for Province →
 // District → Tehsil cascade. We persist fill state in sessionStorage across
@@ -6341,8 +7271,8 @@ async function fillBahriaProfilePage(profile, onFilled, onManual) {
     fillInput('tbNextOfKinRelationship', profile.father_name ? 'Father' : 'Guardian');
 
     fillInput('tbEmergencyContactName', profile.father_name || profile.guardian_name || '');
-    fillInput('tbEmergencyMobile', profile.guardian_phone || profile.mobile || '');
-    fillInput('tbEmergencyPhone', profile.guardian_phone || profile.phone || '');
+    fillInput('tbEmergencyMobile', profile.guardian_phone || profile.father_phone || '');
+    fillInput('tbEmergencyPhone', profile.guardian_phone || profile.father_phone || '');
 
     fillSelect('ddlNTNOrCNIC', 'CNIC');
     await delay(100);
@@ -6803,7 +7733,16 @@ async function handleAutofill() {
     const filledSelectors = [];
     const manualSelectors = [];
     const conflictList = [];
-    const alreadyHandled = new Set();
+    // alreadyHandled tracks by both DOM reference AND element ID.
+    // After an UpdatePanel postback the browser replaces DOM nodes with new
+    // instances that have the same id but a different JS object reference —
+    // a pure Set<Element> would miss them and Tier 3 would re-fill (override).
+    const alreadyHandled = {
+      _els: new Set(),
+      _ids: new Set(),
+      add(el) { this._els.add(el); if (el && el.id) this._ids.add(el.id); },
+      has(el) { return this._els.has(el) || !!(el && el.id && this._ids.has(el.id)); },
+    };
     const filledProfileKeyOnce = new Set(); // tracks which profileKeys have been filled once
     const masterPassword = await getConsistentPassword();
 
@@ -6860,6 +7799,32 @@ async function handleAutofill() {
       if (!sessionStorage.getItem(BAHRIA_FILL_KEY)) {
         renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
       }
+      return;
+    }
+
+    // ─── SPECIAL: SZABIST Step1BasicInfo.aspx ────────────────────────────────
+    // Handles postback ordering, CNIC split, and father/student context.
+    // Every filled element is added to alreadyHandled via onFilled, so the
+    // generic Tier 3 below automatically skips those and fills any gaps
+    // (e.g. fields whose IDs changed or new sections added by SZABIST).
+    if (isSzabistBasicInfoPage()) {
+      console.log('[IlmSeUrooj] SZABIST BasicInfo page detected');
+      await fillSzabistBasicInfoPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      // intentionally no return — Tier 3 runs as fallback for any missed fields
+    }
+
+    if (isSzabistEducationPage()) {
+      console.log('[IlmSeUrooj] SZABIST Education page detected');
+      await fillSzabistEducationPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
       return;
     }
 
@@ -7323,10 +8288,14 @@ async function handleAutofill() {
           if (rowInputs.length < 2 || rowInputs.length > 4) continue;
           const hasCNICLabel = CNIC_LABEL_PAT.test(row.textContent || '');
           if (!hasCNICLabel) continue;
-          const inp5 = rowInputs.find(i => i.maxLength === 5);
-          const inp7 = rowInputs.find(i => i.maxLength === 7);
-          const inp1 = rowInputs.find(i => i.maxLength === 1);
-          if (!inp5 || !inp7) continue; // Not a 5+7+1 pattern
+          let inp5 = rowInputs.find(i => i.maxLength === 5);
+          let inp7 = rowInputs.find(i => i.maxLength === 7);
+          let inp1 = rowInputs.find(i => i.maxLength === 1);
+          // Positional fallback: maxLength not set on inputs — use DOM order
+          if (!inp5 && !inp7 && rowInputs.length >= 2 && rowInputs.length <= 3) {
+            [inp5, inp7, inp1] = rowInputs;
+          }
+          if (!inp5 || !inp7) continue; // Not a recognisable CNIC split pattern
           const isFatherRow = /father|guardian|parent/i.test(row.textContent || '');
           const fillVal1 = isFatherRow ? (ctx.profile.father_cnic || '').split('-')[0] || cp1 : cp1;
           const fillVal2 = isFatherRow ? (ctx.profile.father_cnic || '').split('-')[1] || cp2 : cp2;
@@ -7344,6 +8313,61 @@ async function handleAutofill() {
             }
             alreadyHandled.add(inp);
           }
+        }
+      }
+    }
+
+    // ─── TIER 2.9: National / International radio group scan ─────────────────
+    // Detects radio groups asking "is the applicant national or international?".
+    // Pakistani portals (e.g. Air University) show two radio options labelled
+    // "National" and "International" that control conditional field visibility.
+    // We map profile.nationality = Pakistan/Pakistani → National; else → International.
+    {
+      const radioGroups = new Map();
+      for (const el of document.querySelectorAll('input[type="radio"]')) {
+        if (alreadyHandled.has(el)) continue;
+        const grpKey = el.name || ('__id_' + el.id);
+        if (!radioGroups.has(grpKey)) radioGroups.set(grpKey, []);
+        radioGroups.get(grpKey).push(el);
+      }
+      for (const [, radios] of radioGroups) {
+        if (radios.length < 2) continue;
+        const getLabel = (r) => {
+          if (r.labels?.length) return r.labels[0].textContent.trim().toLowerCase();
+          if (r.id) {
+            try {
+              const lf = document.querySelector(`label[for="${CSS.escape(r.id)}"]`);
+              if (lf) return lf.textContent.trim().toLowerCase();
+            } catch {}
+          }
+          const cell = r.closest('td, li, .form-check, span, div');
+          return (cell ? cell.textContent : '').trim().toLowerCase();
+        };
+        const labels = radios.map(getLabel);
+        const hasNational = labels.some(l => /\bnational\b/.test(l) && !/\binternational\b/.test(l));
+        const hasIntl = labels.some(l => /\binternational\b/.test(l));
+        if (!hasNational || !hasIntl) continue;
+
+        const nat = String(ctx.profile?.nationality || '').toLowerCase().trim();
+        const isPakistani = !nat || nat === 'pakistan' || nat === 'pakistani' || nat === 'pk';
+
+        const targetRadio = radios.find((r, i) => {
+          const lbl = labels[i];
+          const isNationalOption = /\bnational\b/.test(lbl) && !/\binternational\b/.test(lbl);
+          return isPakistani ? isNationalOption : /\binternational\b/.test(lbl);
+        }) || radios.find(r => r.value?.toLowerCase() === (isPakistani ? 'n' : 'y'));
+
+        if (targetRadio) {
+          targetRadio.click();
+          targetRadio.checked = true;
+          targetRadio.dispatchEvent(new Event('change', { bubbles: true }));
+          radios.forEach(r => alreadyHandled.add(r));
+          targetRadio.style.outline = '2px solid #4ade80';
+          targetRadio.style.outlineOffset = '2px';
+          targetRadio.classList.add('unimatch-filled');
+          sparkleField(targetRadio);
+          filledCount++;
+          console.log(`[IlmSeUrooj] TIER 2.9 national/intl radio: ${isPakistani ? 'National' : 'International'}`);
         }
       }
     }
@@ -7515,6 +8539,15 @@ async function handleAutofill() {
           input.classList.add('unimatch-manual');
           manualCount++;
         }
+        alreadyHandled.add(input);
+        continue;
+      }
+
+      // disability_type ("No Disability") is only meaningful in SELECT / radio contexts.
+      // Avoid writing it as literal text into a description/notes text input.
+      if (resolvedKey === 'disability_type' &&
+          input.tagName === 'INPUT' &&
+          (input.type === 'text' || input.type === '' || !input.type)) {
         alreadyHandled.add(input);
         continue;
       }

@@ -85,12 +85,12 @@ export default function Header({ savedCount = 0, onShowSaved, onShowScholarships
                         <svg viewBox="0 0 36 36" fill="none" className={styles.capSvg} aria-hidden="true">
                             <defs>
                                 <linearGradient id="anqaHdrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#10B981" />
-                                    <stop offset="60%" stopColor="#34D399" />
-                                    <stop offset="100%" stopColor="#D4A574" />
+                                    <stop offset="0%" style={{ stopColor: 'var(--logo-grad-start)' }} />
+                                    <stop offset="60%" style={{ stopColor: 'var(--logo-grad-mid)' }} />
+                                    <stop offset="100%" style={{ stopColor: 'var(--logo-grad-end)' }} />
                                 </linearGradient>
                                 <radialGradient id="anqaGlow" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stopColor="rgba(16,185,129,0.2)" />
+                                    <stop offset="0%" style={{ stopColor: 'var(--logo-glow-radial)' }} />
                                     <stop offset="100%" stopColor="transparent" />
                                 </radialGradient>
                             </defs>

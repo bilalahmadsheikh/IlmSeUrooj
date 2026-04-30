@@ -49,7 +49,7 @@
     position: absolute;
     inset: -6px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--logo-glow-bg) 0%, transparent 70%);
     pointer-events: none;
 }
 
@@ -115,14 +115,15 @@
     font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Scheherazade New', 'Traditional Arabic', serif;
     font-size: 1.85rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #D4A574 100%);
+    background: linear-gradient(135deg, var(--logo-grad-start) 0%, var(--logo-grad-mid) 50%, var(--logo-grad-end) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: 0.01em;
     line-height: 1.05;
     direction: rtl;
-    filter: drop-shadow(0 0 10px rgba(16,185,129,0.35));
+    filter: drop-shadow(0 0 10px var(--logo-glow-text));
+    transition: filter var(--transition-base), background var(--transition-base);
 }
 
 .logoDot {
