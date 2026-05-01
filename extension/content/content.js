@@ -701,6 +701,8 @@ const FIELD_HEURISTICS = [
       'applicant_father_name', 'student_father_name', 'father_s_name',
       "father / guardian's name", 'fathers_full_name', 'guardians_name',
       'parent_guardian_name', 'father_name_as_cnic', 'father_name_on_cnic',
+      // AIR University ASP.NET abbreviation: FathGard = Father/Guardian
+      'fathgard', 'fathgardname', 'fath_gard', 'fath_gard_name',
       // Emergency contact name — filled with guardian/father name
       'emergency_name', 'emergencyname', 'emergency_contact_name', 'emergency contact name',
       'emergency_person', 'emergency_contact_person', 'emergencycontactname'],
@@ -711,7 +713,11 @@ const FIELD_HEURISTICS = [
   {
     match: ['father_cnic', 'fathercnic', 'guardian_cnic', 'parent_cnic', 'father_nic',
       'father_id', 'father_id_card', 'father cnic', "father's cnic", 'dad_cnic', 'fcnic',
-      'father_cnic_no', 'guardian_nic', 'wali_cnic', 'father_nadra', 'parent_nic'],
+      'father_cnic_no', 'guardian_nic', 'wali_cnic', 'father_nadra', 'parent_nic',
+      // AIR University ASP.NET abbreviations
+      'fathgardcnic', 'fath_gard_cnic', 'fathgard_cnic',
+      // Single-letter guardian prefix: G = Guardian, F = Father
+      'gcnic', 'g_cnic', 'gnic', 'g_nic', 'fcnic', 'f_cnic'],
     profileKey: 'father_cnic', priority: 6
   },
 
@@ -801,6 +807,24 @@ const FIELD_HEURISTICS = [
     profileKey: 'district', priority: 4
   },
 
+  // ── Address sub-components (house/flat/street/plot number) ────────
+  // These are individual address parts — the profile only stores the full address
+  // string, so filling a house-number-only field with the full address is wrong.
+  // Priority 6 > address (4) ensures this always wins over the address heuristic.
+  {
+    match: ['house_no', 'house_number', 'house #', 'house#', 'house no', 'house number',
+      'house_num', 'houseno', 'housenum', 'house_num',
+      'flat_no', 'flat_number', 'flatno', 'flat_num', 'flat no', 'flat number',
+      'building_no', 'buildingno', 'building_number', 'building no',
+      'street_no', 'streetno', 'street_number', 'street_num', 'street no',
+      'plot_no', 'plotno', 'plot_number', 'plot no',
+      'block_no', 'blockno', 'block_number', 'block no',
+      'unit_no', 'unitno', 'unit_number',
+      'sector_no', 'sectorno', 'sector number',
+      'hno', 'h_no'],
+    profileKey: 'house_number', priority: 6
+  },
+
   // ── Address ────────────────────────────────────────────────────
   {
     match: ['address', 'postal_address', 'mailing_address', 'residential_address',
@@ -812,9 +836,7 @@ const FIELD_HEURISTICS = [
       'address1', 'address_line1', 'address_line_1', 'address_line2',
       'permanent_addr', 'perm_addr', 'home_addr', 'local_addr', 'curr_address',
       'applicant_addr', 'student_address', 'correspondence_addr', 'corr_address',
-      'contact_address', 'resident_address', 'house_address', 'house_no_street',
-      'house_no', 'house_number', 'house #', 'house#', 'house no', 'house number',
-      'house_num', 'hno', 'h_no', 'flat_no', 'flat_number', 'building_no'],
+      'contact_address', 'resident_address', 'house_address', 'house_no_street'],
     profileKey: 'address', priority: 4
   },
 
@@ -882,7 +904,9 @@ const FIELD_HEURISTICS = [
       // Pakistani portal variants
       'year_of_pass', 'exam_passing_year', 'fsc_passing_year', 'inter_passing_year',
       'matric_passing_year', 'ssc_passing_year', 'hssc_passing_year',
-      'year_exam', 'pass_yr', 'year_completion', 'graduation_yr', 'exam_yr'],
+      'year_exam', 'pass_yr', 'year_completion', 'graduation_yr', 'exam_yr',
+      // ASP.NET "Year To" selects (e.g. AIR, COMSATS portals)
+      'todate_year_only', 'year_to', 'year_end', 'end_year'],
     profileKey: 'passing_year', priority: 4
   },
 
@@ -1024,6 +1048,23 @@ const FIELD_HEURISTICS = [
     profileKey: 'ibcc_olevel_total', priority: 7
   },
 
+  // ── HSSC / Inter Discipline / Stream / Group ──────────────────
+  // Matches the Pre-Medical / Pre-Engineering / ICS / ICom / FA group SELECT.
+  // resolveProfileValue('inter_discipline') maps profile.fsc_stream enum to
+  // the human-readable label ('Medical', 'Engineering', 'Science', etc.)
+  // which fillSelect then matches against dropdown options.
+  {
+    match: ['inter_group', 'hssc_group', 'fsc_group', 'inter_stream', 'fsc_stream',
+      'inter_discipline', 'fsc_discipline', 'hssc_discipline',
+      'specialization', 'discipline', 'subject_group', 'group',
+      'intermediate group', 'fsc group', 'inter group', 'hssc group',
+      'stream', 'inter_subject_group', 'fsc_subject_group',
+      // Pakistani portal variants
+      'inter_major', 'fsc_major', 'hssc_major', 'pre_medical', 'pre_engineering',
+      'inter_specialization', 'fsc_specialization', 'subject_stream'],
+    profileKey: 'inter_discipline', priority: 5
+  },
+
   // ── Education form: section-context-aware generic labels ──────
   // IBA and similar portals repeat generic labels ("Obtained Marks", "Total Marks",
   // "Year of Passing", "Name of Board") in each education section.
@@ -1161,6 +1202,8 @@ const FIELD_HEURISTICS = [
       "father's profession", "father's occupation", 'father_job', 'father_work',
       'dad_profession', 'dad_occupation', 'father_employment', 'father_business',
       'guardian_occupation', 'guardian_profession', 'parent_occupation',
+      // No-separator and portal-typo variants (e.g. AIR: Guardianocccupation with triple-c)
+      'guardianoccupation', 'guardianprofession', 'guardianocccupation',
       'father profession', 'father occupation', 'father job',
       'fathers_employment', 'father_vocation', 'father_trade',
       // Pakistani portal variants
@@ -1186,7 +1229,10 @@ const FIELD_HEURISTICS = [
       'family_income', 'household_income', 'monthly_income', 'annual_income',
       // Pakistani portal variants
       'father_earn', 'wali_income', 'father_earnings', 'guardian_salary',
-      'father_monthly_salary', 'income_father'],
+      'father_monthly_salary', 'income_father',
+      // AIR University: Guardianmonthlyincome — explicit alias so it beats the 'guardian'
+      // keyword in father_name heuristic (which scores higher via contains match otherwise)
+      'guardianmonthlyincome', 'guardian_monthly_income'],
     profileKey: 'father_income', priority: 5
   },
 
@@ -1475,12 +1521,22 @@ function matchFieldHeuristically(el) {
   // ── HTML type shortcuts (checked before signal-based logic) ─────
   // These widgets have no name/id/placeholder, so they must be identified
   // by type or class before the allSignals empty-check.
-  if (el.type === 'email') return 'email';
+  if (el.type === 'email') {
+    // Don't assume student email — father/guardian email fields have no profile key and should be skipped
+    const emailCtx = [rawName, rawId, normLabel, normAriaLabel, normPlaceholder].join(' ').toLowerCase();
+    if (/father|guardian|parent|gard/.test(emailCtx)) return null;
+    return 'email';
+  }
   if (el.type === 'tel' || el.classList.contains('vti__input') || el.closest('.vue-tel-input')) {
-    // Check parent container text for alternate/guardian context so the
-    // second phone field on a form (e.g. IBA alternate number) maps to guardian_phone.
+    // Landline fields must not be filled with the mobile number — intercept before
+    // any phone mapping, checking both the element's own name/id and container label.
+    const telSig = (el.name || el.id || '').toLowerCase();
+    if (telSig.includes('landline') || telSig.includes('land_line')) return 'landline_phone';
     const container = el.closest('tr, .form-group, .field-group, [class*="form"], [class*="field"], [class*="row"]');
     const ctxText = (container?.textContent || el.parentElement?.textContent || '').toLowerCase();
+    if (/\blandline\b|land.?line|fixed.?line|fixed\s*phone/.test(ctxText)) return 'landline_phone';
+    // Check parent container text for alternate/guardian context so the
+    // second phone field on a form (e.g. IBA alternate number) maps to guardian_phone.
     if (/alternate|alt\b|guardian|parent\b|emergency|secondary|other\s*(?:phone|mobile|number)/.test(ctxText)) {
       return 'guardian_phone';
     }
@@ -1555,11 +1611,50 @@ function matchFieldHeuristically(el) {
   // ── Generic "name" → full_name (excluding first/last/middle/login/user/roll/father/mother/emergency) ──
   if (allSignals.some(s => {
     if (!/\bname\b/.test(s)) return false;
-    if (/\b(first|last|middle|login|user|sur|father|mother|roll|school|college|board|institution|guardian|parent|emergency)\b/.test(s)) return false;
+    if (/\b(first|last|middle|login|user|sur|father|mother|roll|school|college|board|institution|guardian|parent|emergency|organization|org|company|employer)\b/.test(s)) return false;
     // Also exclude if signal itself contains these substrings
-    if (s.includes('mother') || s.includes('father') || s.includes('guardian') || s.includes('parent') || s.includes('emergency')) return false;
+    if (s.includes('mother') || s.includes('father') || s.includes('guardian') || s.includes('parent') || s.includes('emergency') || s.includes('kin') || s.includes('organization') || s.includes('employer') || s.includes('company')) return false;
     return true;
   })) return 'full_name';
+
+  // ── Primary-signal fast paths ───────────────────────────────────────────
+  // Run before the heuristic table. Primary signals (name/id/formcontrolname)
+  // are authoritative — a misleading label cannot override them here.
+
+  // 'nic' is a valid CNIC keyword but 'nic' as a substring causes false positives
+  // in words like 'alumni' (alum-nic-heck) or 'technician'. Exclude those patterns
+  // before the heuristic table runs on the primary signal.
+
+  // Alumni / membership check fields: contain 'alumni' → no profile key → skip.
+  if (primarySignals.some(s => s.includes('alumni'))) return 'alumni_status';
+
+  // NIC/CNIC expiry or issue date: primary contains a nic-family token AND
+  // an expiry/validity token → it's a date field, not a CNIC string field.
+  if (primarySignals.some(s => /(?:nic|cnic)/.test(s) && /(?:expiry|expire|expdate|validity|issued|issue_date)/.test(s))) return null;
+
+  // Landline: no profile data → skip. Prevents mobile number filling landline slots.
+  // Also catches "phonehome", "homephone", "phoneresidence", "fixedphone" patterns.
+  if (primarySignals.some(s =>
+      s.includes('landline') || s.includes('land_line') ||
+      (s.includes('phone') && (s.includes('home') || s.includes('res') || s.includes('fixed') || s.includes('residence'))) ||
+      (s.includes('home') && s.includes('phone'))
+  )) return 'landline_phone';
+
+  // Next of kin: no profile key. Full_name path already blocked via 'kin' exclusion above.
+  if (primarySignals.some(s => s.includes('nextofkin') || s.includes('next_of_kin'))) return 'next_of_kin_name';
+
+  // Father/guardian CNIC: beats student CNIC when primary signal contains
+  // both a father/guardian token and a CNIC/NIC token.
+  if (primarySignals.some(s => /(?:fath|guardian|wali|parent)/.test(s) && /(?:cnic|nicno|nicnum|nic_no|_nic$|_nic_)/.test(s))) return 'father_cnic';
+
+  // Father/guardian email: skip if ANY signal (name, id, label, placeholder, aria-label) reveals
+  // both a guardian/father token AND an email token. Covers type="text" variants where the field
+  // name alone (e.g. "email") is generic but the label says "Father's Email" or "Guardian E-mail".
+  // The type="email" fast path near line 1505 handles type=email; this covers all other types.
+  if (allSignals.some(s => /(?:fath|guardian|parent|gard)/.test(s) && /e[\-_.]?mail/.test(s))) return null;
+
+  // Organization / employer / company: never student's personal name → skip.
+  if (primarySignals.some(s => s.includes('organization') || s.includes('employer') || s.includes('company'))) return 'organization_name';
 
   // ── Heuristic table scan ────────────────────────────────────────
   // After the scan, context-aware keys (edu_*) are resolved to their
@@ -3406,21 +3501,29 @@ function injectSidebar(university) {
 
   toggle.addEventListener('click', e => {
     e.stopPropagation();
+    if (!isExtensionValid()) {
+      showRefreshNeeded(document.getElementById('unimatch-content'));
+      sidebar.classList.remove('collapsed');
+      return;
+    }
     const isNowCollapsed = sidebar.classList.toggle('collapsed');
     toggle.classList.toggle('sidebar-open', !isNowCollapsed);
-    // Persist state across page navigations
-    chrome.storage.local.set({ unimatch_sidebar_open: !isNowCollapsed }).catch(() => { });
+    try {
+      chrome.storage.local.set({ unimatch_sidebar_open: !isNowCollapsed }).catch(() => { });
+    } catch { /* extension context invalidated — ignore */ }
   });
 
   sidebarInstance = sidebar;
 
   // Restore saved open/closed state
-  chrome.storage.local.get('unimatch_sidebar_open').then(stored => {
-    if (stored.unimatch_sidebar_open === true) {
-      sidebar.classList.remove('collapsed');
-      toggle.classList.add('sidebar-open');
-    }
-  }).catch(() => { });
+  try {
+    chrome.storage.local.get('unimatch_sidebar_open').then(stored => {
+      if (stored.unimatch_sidebar_open === true) {
+        sidebar.classList.remove('collapsed');
+        toggle.classList.add('sidebar-open');
+      }
+    }).catch(() => { });
+  } catch { /* extension context invalidated — ignore */ }
 
   initSidebarState(university);
 }
@@ -7708,6 +7811,730 @@ async function fillIBAEducationPage(profile, onFilled, onManual) {
   }
 }
 
+// ─── AIR University (portals.au.edu.pk) PersonalInfo handler ──
+
+function isAirUniPersonalInfoPage() {
+  return window.location.hostname === 'portals.au.edu.pk' &&
+    window.location.pathname.toLowerCase().includes('studentpersonalinfo');
+}
+
+// Split a Pakistani mobile number (03XXXXXXXXX or +923XXXXXXXXX) into
+// the network code (3 digits: 300-370) and the 7-digit subscriber number.
+function _airSplitPhone(raw) {
+  const d = String(raw || '').replace(/\D/g, '');
+  let local;
+  if (d.startsWith('92') && d.length >= 12) local = '0' + d.slice(2);
+  else if (d.startsWith('0') && d.length >= 10) local = d;
+  else local = '0' + d;
+  return { code: local.slice(1, 4), number: local.slice(4, 11) };
+}
+
+async function fillAirUniPersonalInfoPage(profile, onFilled, onManual) {
+  // Father/guardian email — no profile key exists; mark as manual
+  const fatherEmailEl = document.querySelector('[name="FathGardEmail"]');
+  if (fatherEmailEl) onManual(fatherEmailEl);
+
+  // Landline, Next of Kin, Guardian relation — no profile fields; skip silently
+  const skipNames = ['LandlineCode', 'LandlineNumber', 'Phonehome', 'NextOfKinName', 'GuardianRelation'];
+  for (const n of skipNames) {
+    const el = document.querySelector(`[name="${n}"]`);
+    if (el) onManual(el);
+  }
+
+  async function fillPhoneComposite(codeName, numName, rawPhone) {
+    if (!rawPhone) return;
+    const { code, number } = _airSplitPhone(rawPhone);
+    const codeEl = document.querySelector(`[name="${codeName}"]`);
+    const numEl  = document.querySelector(`[name="${numName}"]`);
+    if (codeEl && code) { await fillInput(codeEl, code); onFilled(codeEl); }
+    if (numEl  && number) { await fillInput(numEl, number); onFilled(numEl); }
+  }
+
+  // Student mobile: MobileCode (select 300-370) + MobileNumber (7 digits)
+  await fillPhoneComposite('MobileCode', 'MobileNumber', profile.phone);
+
+  // Father/guardian mobile: GCode + GNumber
+  await fillPhoneComposite('GCode', 'GNumber', profile.guardian_phone || profile.phone);
+
+  // Emergency contact: EmrgcCode + EmrgcNumber (use guardian phone as best proxy)
+  await fillPhoneComposite('EmrgcCode', 'EmrgcNumber', profile.guardian_phone || profile.phone);
+}
+
+// ─── AIR University: Academic Information Page ─────────────────
+// URL: /admissions/StudentAcademics/Create
+// Repeating-entry form (one POST per qualification). On each page load, detect what
+// is already saved in the table and fill the NEXT pending qualification automatically.
+// The user still clicks Save — we never auto-submit a POST form.
+
+// ─── NUST UG Admissions Form — Targeted Fix-ups ────────────────────────────
+// Does NOT return early — Tier 1/2/3 continues after this runs.
+// Fixes only the fields that the generic tier gets wrong:
+//   • Split 3-part mobile fields (Candidate, Guardian)
+//   • Emergency contact number (single field, guardian phone)
+//   • Residency/Possession dropdowns (no profile field — mark manual)
+//   • Academic Background section (UpdatePanel cascade + full-page postback)
+
+function isNustFormPage() {
+  return window.location.hostname.includes('ugadmissions.nust.edu.pk') &&
+    /netappform/i.test(window.location.pathname);
+}
+
+async function fixNustSpecificFields(profile, onFilled, onManual) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  // Split a Pakistani mobile "03001234567" / "+923001234567" into
+  // { country:"92", area:"300", number:"1234567" } or null.
+  function splitPakMobile(raw) {
+    if (!raw) return null;
+    const d = String(raw).replace(/\D/g, '');
+    let local = d;
+    if (d.startsWith('92') && d.length === 12) local = '0' + d.slice(2);
+    if (local.startsWith('0') && local.length === 11)
+      return { country: '92', area: local.slice(1, 4), number: local.slice(4) };
+    return null;
+  }
+
+  // Fill NUST's 3-part phone group (idPrefix + "Country" / "Code" / "No").
+  async function fillSplitMobile(idPrefix, rawPhone) {
+    const elC = document.getElementById(`Body_Body_${idPrefix}Country`);
+    const elA = document.getElementById(`Body_Body_${idPrefix}Code`);
+    const elN = document.getElementById(`Body_Body_${idPrefix}No`);
+    const parts = splitPakMobile(rawPhone);
+    if (!parts) {
+      if (elC) onManual(elC);
+      if (elA) onManual(elA);
+      if (elN) onManual(elN);
+      return;
+    }
+    if (elC) { await fillInput(elC, parts.country); onFilled(elC); }
+    if (elA) { await fillInput(elA, parts.area);    onFilled(elA); }
+    if (elN) { await fillInput(elN, parts.number);  onFilled(elN); }
+  }
+
+  // ── Candidate mobile ──────────────────────────────────────────────────────
+  await fillSplitMobile('txtMobileOne', profile.phone);
+
+  // ── Guardian mobile ───────────────────────────────────────────────────────
+  await fillSplitMobile('txtMobileTwo', profile.guardian_phone || profile.father_phone || null);
+
+  // ── Emergency contact — single field, guardian phone with dashes ──────────
+  const emergEl = document.getElementById('Body_Body_txtOtherPhone');
+  if (emergEl) {
+    const raw = profile.guardian_phone || profile.father_phone;
+    if (raw) {
+      const p = splitPakMobile(raw);
+      await fillInput(emergEl, p ? `${p.country}-${p.area}-${p.number}` : raw);
+      onFilled(emergEl);
+    } else {
+      onManual(emergEl);
+    }
+  }
+
+  // ── Residency/Possession dropdowns — no profile equivalent, leave blank ───
+  for (const id of ['Body_Body_ddPostalPossession', 'Body_Body_ddPermenantPossession']) {
+    const el = document.getElementById(id);
+    if (el) onManual(el);
+  }
+
+  // ── Academic Background — UpdatePanel cascade with full-postback guard ─────
+  await fillNustAcademicSection(profile, onFilled, onManual, delay);
+}
+
+async function fillNustAcademicSection(profile, onFilled, onManual, delay) {
+  // ── Detect which qualification radio is selected ──────────────────────────
+  const qualRadios = document.querySelectorAll('input[type=radio][name*="rblQualification"]');
+  const selected   = Array.from(qualRadios).find(r => r.checked);
+
+  if (!selected) {
+    // Tier 2.7 will click the right radio — but that triggers a full-page
+    // ASP.NET postback. Nothing more we can do in this run; the user clicks
+    // Autofill again after the page reloads.
+    console.log('[Anqa] NUST: qualification radio not selected — academic section deferred');
+    return;
+  }
+
+  const qualValue = selected.value; // "FSC" | "ALEVEL" | "DAE"
+
+  // ── Qualification Group dropdown ──────────────────────────────────────────
+  const groupEl = document.getElementById('Body_Body_ddQualificationGroups');
+  if (!groupEl) return; // UpdatePanel hasn't rendered yet on this run
+
+  // Determine target group patterns from profile
+  const interType = (profile.inter_type  || '').toLowerCase();
+  const fscStream = (profile.fsc_stream  || '').toLowerCase();
+  const educSys   = (profile.education_system || '').toLowerCase();
+  const isALevel  = interType === 'a_level' || /a.?level/i.test(educSys);
+  const isDae     = /\bdae\b|diploma/i.test(interType);
+
+  const groupPatterns = isALevel  ? ['o/a level', 'a level', 'a-level', 'home economics', 'equivalent'] :
+                        isDae     ? ['dae', 'diploma of associate', 'diploma'] :
+    fscStream === 'pre_medical'   ? ['pre-medical', 'pre medical', 'pre-med'] :
+    fscStream === 'pre_engineering' ? ['pre-engineering', 'pre engineering', 'pre eng'] :
+    (fscStream === 'computer_science' || interType === 'ics')
+                                  ? ['computer science', 'mathematics, physics and computer', 'mpc'] :
+    interType === 'icom'          ? ['accounting', 'accountancy', 'commerce'] :
+    interType === 'fa'            ? ['fa or equivalent', 'humanities', 'without mathematics'] :
+                                    ['pre-engineering', 'pre engineering', 'pre-eng'];
+
+  // Pick option whose text matches any pattern
+  const targetOpt = Array.from(groupEl.options).find(o =>
+    o.value && o.value !== '-1' &&
+    groupPatterns.some(p => o.text.toLowerCase().includes(p))
+  );
+
+  if (!targetOpt) { onManual(groupEl); return; }
+
+  // If group already has the right value and marks table is present → fill directly
+  const marksAlreadyVisible = !!document.getElementById('Body_Body_txtMatricTotalMarks') ||
+    !!document.querySelector('[id*="txtMatric"],[id*="txtHSSC"],[id*="txtInter"]');
+
+  if (groupEl.value !== targetOpt.value || !marksAlreadyVisible) {
+    groupEl.value = targetOpt.value;
+    groupEl.dispatchEvent(new Event('change', { bubbles: true }));
+    if (typeof window.__doPostBack === 'function')
+      window.__doPostBack('ctl00$ctl00$Body$Body$ddQualificationGroups', '');
+    onFilled(groupEl);
+    await delay(3500); // wait for UpdatePanel postback
+  } else {
+    onFilled(groupEl);
+  }
+
+  // ── Fill marks table rows ─────────────────────────────────────────────────
+  fillNustMarksRow(profile, false, onFilled, onManual); // SSC
+  fillNustMarksRow(profile, true,  onFilled, onManual); // HSSC
+}
+
+function fillNustMarksRow(profile, isHssc, onFilled, onManual) {
+  // Values from profile
+  const year  = isHssc ? (profile.fsc_year   ?? profile.alevel_year  ?? null)
+                       : (profile.matric_year ?? profile.olevel_year  ?? null);
+  const total = isHssc ? (profile.fsc_total   ?? profile.inter_total  ?? profile.ibcc_alevel_total ?? null)
+                       : (profile.matric_total ?? profile.ibcc_olevel_total ?? null);
+  const marks = isHssc ? (profile.fsc_marks   ?? profile.inter_marks  ?? profile.ibcc_alevel_marks ?? null)
+                       : (profile.matric_marks ?? profile.ibcc_olevel_marks ?? null);
+
+  // ── Try IDs by naming pattern first ──────────────────────────────────────
+  // Known: DDMatricYOP, txtMatricTotalMarks. Guesses for the rest follow the same pattern.
+  const pfx = isHssc ? 'HSSC' : 'Matric';
+  function byId(...candidates) {
+    for (const id of candidates) {
+      const el = document.getElementById(`Body_Body_${id}`);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  const yopEl   = byId(`DD${pfx}YOP`, `DD${pfx}Year`, `DD${pfx}Yop`);
+  const totalEl = byId(`txt${pfx}TotalMarks`, `txt${pfx}Total`, `txt${pfx}Marks`);
+  const obtEl   = byId(`txt${pfx}ObtMarks`, `txt${pfx}ObtainedMarks`, `txt${pfx}Obtained`);
+
+  if (yopEl  && year)  { yopEl.value = String(year);   yopEl.dispatchEvent(new Event('change',{bubbles:true})); onFilled(yopEl);  }
+  if (totalEl && total){ fillInput(totalEl, String(total));  onFilled(totalEl); }
+  if (obtEl  && marks) { fillInput(obtEl,   String(marks));  onFilled(obtEl);   }
+
+  // ── Table scan fallback for any fields not found by ID ────────────────────
+  const rowPat = isHssc
+    ? /\bhssc\b|intermediate|12th|higher secondary|a[\s-]?level|f\.?sc\b/i
+    : /\bssc\b|matriculat|10th|secondary school|o[\s-]?level/i;
+
+  for (const tr of document.querySelectorAll('table tr')) {
+    const cells = Array.from(tr.querySelectorAll('td'));
+    if (!cells.length || !rowPat.test(cells[0]?.textContent || '')) continue;
+
+    // Walk sibling <th> in the header row to learn column semantics
+    const tbl   = tr.closest('table');
+    const hdrRow = tbl?.querySelector('tr:first-child');
+    const headers = hdrRow ? Array.from(hdrRow.querySelectorAll('th,td')).map(h => h.textContent.toLowerCase()) : [];
+
+    cells.forEach((td, i) => {
+      const hdr   = headers[i] || '';
+      const input = td.querySelector('input[type=text],input:not([type])');
+      const sel   = td.querySelector('select');
+
+      if (sel && !yopEl && year && /year|yop|passing/i.test(hdr)) {
+        sel.value = String(year);
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(sel);
+      }
+      if (input && !totalEl && total && /total|maximum|max/i.test(hdr)) {
+        fillInput(input, String(total)); onFilled(input);
+      }
+      if (input && !obtEl && marks && /obtain|secured|got/i.test(hdr)) {
+        fillInput(input, String(marks)); onFilled(input);
+      }
+    });
+    break;
+  }
+}
+
+function isAirUniAcademicsPage() {
+  return window.location.hostname === 'portals.au.edu.pk' &&
+    window.location.pathname.toLowerCase().includes('studentacademics');
+}
+
+async function fillAirUniAcademicsPage(profile, onFilled, onManual) {
+  await new Promise(r => setTimeout(r, 700));
+
+  // ── jQuery-aware change trigger for Select2 selects ───────────────────────
+  function jqTrigger(el, value) {
+    el.value = value;
+    if (window.jQuery) window.jQuery(el).val(value).trigger('change');
+    else el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  // ── Find a form control by its visible label text ─────────────────────────
+  // Walks all <label> elements; matches any of the given terms (case-insensitive
+  // substring). Returns the associated input/select/textarea, or null.
+  // Caller provides an #id fallback: findByLabel('roll no','roll number') || querySelector('#rollnumber')
+  function findByLabel(...terms) {
+    const low = terms.map(t => t.toLowerCase());
+    for (const lbl of document.querySelectorAll('label')) {
+      const text = lbl.textContent.toLowerCase().replace(/[*:​]/g, '').trim();
+      if (!low.some(t => text.includes(t))) continue;
+      if (lbl.htmlFor) {
+        const ctrl = document.getElementById(lbl.htmlFor);
+        if (ctrl) return ctrl;
+      }
+      const inner = lbl.querySelector('input,select,textarea');
+      if (inner) return inner;
+      const grp = lbl.closest('.form-group,.field,.input-wrap,.col-md-9,.col-sm-9');
+      const sib = grp?.querySelector('input,select,textarea');
+      if (sib && sib !== lbl) return sib;
+    }
+    return null;
+  }
+
+  // ── Select a <select> option by visible text (substring or RegExp) ────────
+  function selectByText(el, patterns) {
+    if (!el) return null;
+    const pats = [].concat(patterns);
+    for (const opt of el.options) {
+      if (!opt.value) continue;
+      const txt = opt.text.toLowerCase().trim();
+      if (pats.some(p => p instanceof RegExp ? p.test(txt) : txt.includes(p.toLowerCase()))) {
+        jqTrigger(el, opt.value);
+        return opt.value;
+      }
+    }
+    return null;
+  }
+
+  // ── Wait for AJAX-loaded SELECT options (Select2 cascade) ────────────────
+  // 250 ms initial pause lets any AJAX-triggered option-clear fire first.
+  async function waitForOptions(el, timeoutMs = 4500) {
+    if (!el) return false;
+    await new Promise(r => setTimeout(r, 250));
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeoutMs) {
+      if (Array.from(el.options).some(o => o.value)) return true;
+      await new Promise(r => setTimeout(r, 200));
+    }
+    return false;
+  }
+
+  // ── Click a radio by name+value (internal fallback only) ─────────────────
+  function clickRadioByValue(name, value) {
+    for (const r of document.querySelectorAll(`input[type=radio][name="${name}"]`)) {
+      if (r.value === value) { r.click(); return true; }
+    }
+    return false;
+  }
+
+  // ── Click a radio by visible label text ───────────────────────────────────
+  // groupTerms: text near the radio group heading (narrows the container).
+  // optionTerms: text on the label of the specific radio to click.
+  // fbName/fbValue: name+value fallback used when label lookup fails.
+  function clickRadioByLabel(groupTerms, optionTerms, fbName, fbValue) {
+    const gArr = [].concat(groupTerms).map(t => t.toLowerCase());
+    const oArr = [].concat(optionTerms).map(t => t.toLowerCase());
+    for (const heading of document.querySelectorAll('label,legend,.control-label,span,p')) {
+      const ht = heading.textContent.toLowerCase().replace(/[*:​]/g, '').trim();
+      if (ht.length > 70 || !gArr.some(g => ht.includes(g))) continue;
+      const container = heading.closest('.form-group,fieldset,.panel,.well,.row')
+        || heading.parentElement;
+      if (!container) continue;
+      for (const r of container.querySelectorAll('input[type=radio]')) {
+        const rl = document.querySelector(`label[for="${r.id}"]`) || r.closest('label');
+        const rt = (rl?.textContent || r.value || '').toLowerCase().trim();
+        if (oArr.some(o => rt.includes(o))) { r.click(); return true; }
+      }
+    }
+    if (fbName && fbValue) return clickRadioByValue(fbName, fbValue);
+    return false;
+  }
+
+  // ── Get the visible label text associated with a checkbox ─────────────────
+  function getCheckboxLabel(cb) {
+    const lbl = (cb.id && document.querySelector(`label[for="${cb.id}"]`)) || cb.closest('label');
+    if (lbl) return lbl.textContent.replace(/\s+/g, ' ').trim().toLowerCase();
+    const sib = cb.nextSibling;
+    if (sib?.nodeType === Node.TEXT_NODE) return sib.textContent.trim().toLowerCase();
+    return (cb.parentElement?.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  // ── Find the subject checkbox container by heading text ───────────────────
+  // Looks for a section with a "Subjects" heading that contains checkboxes.
+  // Falls back to any container with 4+ checkboxes, then the known #id.
+  function findSubjectContainer() {
+    for (const el of document.querySelectorAll('div,section,fieldset')) {
+      const h = el.querySelector('h3,h4,h5,legend,.panel-heading,.section-title');
+      if (h && /subject/i.test(h.textContent) &&
+          el.querySelectorAll('input[type=checkbox]').length >= 2) return el;
+    }
+    for (const lbl of document.querySelectorAll('label,span,p')) {
+      if (!/subject/i.test(lbl.textContent) || lbl.textContent.length > 50) continue;
+      const grp = lbl.closest('.form-group,.panel,.well') || lbl.parentElement;
+      if (grp?.querySelectorAll('input[type=checkbox]').length >= 2) return grp;
+    }
+    for (const el of document.querySelectorAll('div,section,fieldset')) {
+      if (el.querySelectorAll('input[type=checkbox]').length >= 4) return el;
+    }
+    return document.querySelector('#MainHsscGroupsAndSubjects');
+  }
+
+  // ── Detect qualifications already saved in the results table ─────────────
+  const savedLevels = new Set();
+  for (const row of document.querySelectorAll('table tbody tr')) {
+    const t = row.textContent.toLowerCase();
+    if (/\bssc\b|matriculation|o[\s-]?level/.test(t)) savedLevels.add('ssc');
+    if (/\bhssc\b|intermediate|a[\s-]?level|f\.?sc/.test(t)) savedLevels.add('hssc');
+  }
+
+  const isCambridge = profile.education_system === 'cambridge' ||
+    profile.inter_type === 'a_level' ||
+    /cambridge|o[\s-]?level|a[\s-]?level/i.test(profile.education_system || '') ||
+    /cambridge|ibcc/i.test(
+      profile.board_name || profile.fsc_board || profile.alevel_board ||
+      profile.matric_board || profile.olevel_board || ''
+    );
+
+  const doSsc  = !savedLevels.has('ssc');
+  const doHssc = !doSsc && !savedLevels.has('hssc');
+
+  if (!doSsc && !doHssc) {
+    console.log('[Anqa] AIR Academics: SSC + HSSC already saved — nothing to fill');
+    return;
+  }
+
+  // ── Board resolution: profile string → partial text for selectByText ──────
+  const BOARD_PATTERNS = [
+    [/federal|fbise/i,                   'Federal Board'],
+    [/lahore/i,                          'Lahore Board'],
+    [/rawalpindi/i,                      'Rawalpindi Board'],
+    [/faisalabad/i,                      'Faisalabad Board'],
+    [/gujranwala/i,                      'Gujranwala Board'],
+    [/sargodha/i,                        'Sargodha Board'],
+    [/multan/i,                          'Multan Board'],
+    [/bahawalpur/i,                      'Bahawalpur Board'],
+    [/karachi|bsek/i,                    'Karachi Board'],
+    [/hyderabad/i,                       'Hyderabad Board'],
+    [/sukkur/i,                          'Sukkur Board'],
+    [/larkana/i,                         'Larkana Board'],
+    [/peshawar/i,                        'Peshawar Board'],
+    [/mardan/i,                          'Mardan Board'],
+    [/swat/i,                            'Swat Board'],
+    [/abbottabad/i,                      'Abbottabad Board'],
+    [/kohat/i,                           'Kohat Board'],
+    [/malakand/i,                        'Malakand Board'],
+    [/bannu/i,                           'Bannu Board'],
+    [/dera ismail|d\.?i\.?k\b/i,        'Dera Ismail Khan Board'],
+    [/dera ghazi|d\.?g\.?k\b/i,         'Dera Gazi Khan Board'],
+    [/quetta/i,                          'Quetta Board'],
+    [/sahiwal/i,                         'Sahiwal Board'],
+    [/aga khan/i,                        'Aga Khan Board'],
+    [/azad kashmir|ajk|mirpur/i,        'Azad Jammu and Kashmir Board Mirpur'],
+    [/cambridge|ibcc|o[\s-]?level|a[\s-]?level/i, 'Inter Board Committee of Chairmen'],
+    [/zhob/i,                            'Zhob Board'],
+    [/turbat/i,                          'Turbat Board'],
+    [/punjab.*tech|tech.*punjab/i,       'Punjab Board of Technical Education'],
+    [/kpk.*tech|khyber.*tech/i,          'Khyber Pakhtoonkhwa Board of Technical Education'],
+    [/sindh.*tech/i,                     'Sindh Board of Technical Education'],
+    [/ziauddin/i,                        'Ziauddin University Examination Board'],
+    [/shaheed benazir|sba|nawabshah/i,   'Shaheed Benazir Abad'],
+  ];
+
+  function resolveBoardPattern(raw) {
+    if (isCambridge) return 'ibcc';
+    if (!raw) return null;
+    for (const [pat, text] of BOARD_PATTERNS) {
+      if (pat.test(raw)) return text.toLowerCase();
+    }
+    return raw.toLowerCase();
+  }
+
+  // ── Discipline helpers — all params passed explicitly ─────────────────────
+
+  function getHsscPdPatterns(isALevelType, isIcs, isIcom, isDcom, isDae, isHumL, disc) {
+    if (isALevelType || isCambridge) return ['a level', 'a-level', 'a levels'];
+    if (isIcs)   return ['ics', 'i.c.s'];
+    if (isIcom)  return ['icom', 'i.com', 'i com'];
+    if (isDcom)  return ['d.com', 'd com', 'dcom'];
+    if (isDae)   return ['dae', 'diploma'];
+    if (isHumL || /\bfa\b|^arts?$|^humanities?$/.test(disc))
+      return [/^fa$/i, 'f.a', 'arts', 'faculty of arts'];
+    return [/f\.?sc/i, 'fsc', 'f.sc', 'pre-engineering', 'pre-medical', 'general science', 'intermediate'];
+  }
+
+  // SSC options: "Science" / "Humanities" / "Others"
+  // HSSC options: "Pre-Medical" / "Pre-Engineering" / "Science General" / "Humanities"
+  // ICS: "Computer Science" — ICom/DCom: "Commerce" — FA: "Humanities"
+  function getMajorPatterns(isHsscEntry, isIcs, isIcom, isDcom, isDae, isMedL, isEngL, isHumL) {
+    if (!isHsscEntry) return isHumL ? ['humanities'] : ['science'];
+    if (isIcs)            return ['computer science', 'computer'];
+    if (isIcom || isDcom) return ['commerce'];
+    if (isDae)            return ['computer information', 'computer technology', 'electrical', 'mechanical'];
+    if (isHumL)           return ['humanities', 'arts', 'fa'];
+    if (isMedL)           return ['pre-medical', 'pre medical', 'medical'];
+    if (isEngL)           return ['pre-engineering', 'pre engineering', 'engineering'];
+    return ['science general', 'general science'];
+  }
+
+  // Subject strings matched against checkbox LABEL TEXT (not value attr — more stable).
+  // cambridge passed explicitly so no outer-scope closure.
+  function getSubjectsStr(isIcs, isIcom, isDcom, isMedL, isEngL, isHumL, cambridge) {
+    if (cambridge) return null;
+    if (isIcs)  return 'Physics,Mathematics,Computer';
+    if (isIcom) return 'Accounting,Economics,Commerce';
+    if (isDcom) return 'Accounting,Economics,Commerce,Mathematics';
+    if (isHumL) return 'Islamiat,Pak Studies,English Literature';
+    if (isMedL) return 'Physics,Chemistry,Biology';
+    if (isEngL) return 'Physics,Chemistry,Mathematics';
+    return 'Physics,Chemistry,Mathematics';
+  }
+
+  // ── Fill one qualification entry ─────────────────────────────────────────
+  async function fillEntry(isHssc) {
+    const interType     = (profile.inter_type     || '').toLowerCase();
+    const interStatus   = (profile.inter_status   || 'complete').toLowerCase();
+    const fscStream     = (profile.fsc_stream     || '').toLowerCase();
+    const secondaryType = (profile.secondary_type || 'matric').toLowerCase();
+
+    const disc = ((isHssc
+      ? (profile.inter_discipline || profile.fsc_discipline || profile.specialization || profile.discipline)
+      : (profile.matric_discipline || profile.ssc_discipline || profile.discipline)
+    ) || '').toLowerCase();
+
+    const isALevelType = isHssc && (interType === 'a_level' || isCambridge);
+    const isIcsType    = isHssc && interType === 'ics';
+    const isIcomType   = isHssc && interType === 'icom';
+    const isFaType     = isHssc && interType === 'fa';
+
+    // A-Level stream from alevel_subjects JSONB — Biology>CS>Math priority
+    const aLevelStream = (() => {
+      if (!isALevelType || !Array.isArray(profile.alevel_subjects)) return null;
+      const subs = profile.alevel_subjects.map(s => (s.subject || '')).join(',').toLowerCase();
+      if (/biol/.test(subs))                                    return 'pre_medical';
+      if (/computer.?sci|computing/.test(subs))                 return 'ics';
+      if (/account|commerce/.test(subs))                        return 'icom';
+      if (/\bmath/.test(subs))                                  return 'pre_engineering';
+      if (/english.?lit|history|islamiat|sociology/.test(subs)) return 'arts';
+      return null;
+    })();
+
+    // O-Level stream from olevel_subjects JSONB — STEM takes priority over humanities
+    const oLevelStream = (() => {
+      if (isHssc || !Array.isArray(profile.olevel_subjects)) return null;
+      const subs = profile.olevel_subjects.map(s => (s.subject || '')).join(',').toLowerCase();
+      if (/biol|chem|physic|\bmath|computer.?sci/.test(subs))                        return 'science';
+      if (/history|urdu|islamiat|literature|sociology|civics|political|geography/.test(subs)) return 'arts';
+      return null;
+    })();
+
+    const isMedL = fscStream === 'pre_medical'     || aLevelStream === 'pre_medical'     || /pre.?med|medic|biol/.test(disc);
+    const isEngL = fscStream === 'pre_engineering' || aLevelStream === 'pre_engineering' || /pre.?eng|engineer/.test(disc);
+    const isIcs  = isIcsType  || fscStream === 'computer_science' || aLevelStream === 'ics'  || /\bics\b|computer.?sci/.test(disc);
+    const isIcom = isIcomType || fscStream === 'commerce'         || aLevelStream === 'icom' || /\bicom\b|i\.com/.test(disc);
+    const isDcom = /d\.?com\b/.test(disc);
+    const isHumL = isFaType   || fscStream === 'arts' || aLevelStream === 'arts' || oLevelStream === 'arts' || /human|^arts?$|^fa$|litera|social/.test(disc);
+    const isDae  = /\bdae\b|diploma.?assoc/.test(disc);
+
+    const boardRaw = isHssc
+      ? (profile.fsc_board || profile.alevel_board || profile.board_name)
+      : (profile.matric_board || profile.olevel_board || profile.board_name);
+    const boardPattern = resolveBoardPattern(boardRaw);
+
+    // 1. Institution type radio → Education Boards
+    clickRadioByLabel(
+      ['institution type', 'institution', 'edu board', 'school type'],
+      ['education board', 'edu board', 'board'],
+      'EduBoard', 'eduboard'
+    );
+
+    // 2. Board SELECT
+    const boardEl = findByLabel('examination board', 'board of') || document.querySelector('#ddl_board');
+    if (boardEl) {
+      const picked = boardPattern ? selectByText(boardEl, [boardPattern]) : null;
+      if (picked) onFilled(boardEl); else onManual(boardEl);
+    }
+
+    // 3. Degree Level SELECT → triggers AJAX load of Passeddegree options
+    const degreeLevelEl = findByLabel('degree level', 'level of degree', 'qualification level')
+      || document.querySelector('#DegreeLevel');
+    const passeddegreeEl = findByLabel('passed degree', 'certificate name', 'degree name', 'passed certificate')
+      || document.querySelector('#Passeddegree');
+    if (degreeLevelEl) {
+      const dlPat = isHssc
+        ? ['hssc', 'intermediate', 'higher secondary', 'h.s.s.c', 'inter']
+        : ['ssc', 'matriculation', 'secondary school', 's.s.c', 'matric'];
+      const dlPicked = selectByText(degreeLevelEl, dlPat);
+      if (dlPicked) onFilled(degreeLevelEl); else onManual(degreeLevelEl);
+      await waitForOptions(passeddegreeEl);
+    }
+
+    // 4. Passeddegree SELECT → triggers AJAX load of Majors options
+    const majorsEl = findByLabel('majors', 'major', 'specialization')
+      || document.querySelector('#Majors');
+    if (passeddegreeEl) {
+      const pdPats = isHssc
+        ? getHsscPdPatterns(isALevelType, isIcs, isIcom, isDcom, isDae, isHumL, disc)
+        : (secondaryType === 'o_level'
+          ? ['o level', 'o-level', 'o levels', 'olevel']
+          : ['matriculation', 'matric', 'secondary school certificate', 's.s.c']);
+      const pdPicked = selectByText(passeddegreeEl, pdPats);
+      if (pdPicked) onFilled(passeddegreeEl); else onManual(passeddegreeEl);
+      await waitForOptions(majorsEl);
+    }
+
+    // 5. Majors SELECT
+    if (majorsEl) {
+      const majorPicked = selectByText(
+        majorsEl, getMajorPatterns(isHssc, isIcs, isIcom, isDcom, isDae, isMedL, isEngL, isHumL)
+      );
+      if (majorPicked) {
+        onFilled(majorsEl);
+      } else {
+        const majorsTb = majorsEl.closest('.form-group')?.querySelector('input[type=text]')
+          || document.querySelector('#Majors_tb');
+        if (majorsTb && majorsTb.offsetParent !== null) {
+          if (disc) { await fillInput(majorsTb, disc); onFilled(majorsTb); }
+          else onManual(majorsTb);
+        } else {
+          onManual(majorsEl);
+        }
+      }
+    }
+
+    // 6. Subject checkboxes (HSSC only) — matched by visible label text, not value attr
+    if (isHssc) {
+      const container = findSubjectContainer();
+      const subjectsTextEl = container?.querySelector('input[type=text]')
+        || container?.parentElement?.querySelector('input[type=text]')
+        || document.querySelector('#IcsSubjects');
+      if (container && subjectsTextEl && subjectsTextEl.offsetParent !== null) {
+        const subStr = (isALevelType && Array.isArray(profile.alevel_subjects))
+          ? profile.alevel_subjects.map(s => (s.subject || '').trim()).filter(Boolean).join(',')
+          : getSubjectsStr(isIcs, isIcom, isDcom, isMedL, isEngL, isHumL, isCambridge);
+        if (subStr) {
+          const desired = new Set(subStr.split(',').map(s => s.trim().toLowerCase()));
+          let clicked = 0;
+          for (const cb of container.querySelectorAll('input[type=checkbox]')) {
+            const cbLbl = getCheckboxLabel(cb);
+            if (desired.has(cbLbl) && !cb.checked) {
+              cb.click();
+              clicked++;
+              await new Promise(r => setTimeout(r, 30));
+            }
+          }
+          if (clicked > 0 || subjectsTextEl.value) onFilled(subjectsTextEl);
+          else onManual(subjectsTextEl);
+        } else {
+          onManual(subjectsTextEl); // A-Level student with no alevel_subjects stored
+        }
+      }
+    }
+
+    // 7. Roll Number
+    const rollEl = findByLabel('roll no', 'roll number', 'seat no', 'registration no')
+      || document.querySelector('#rollnumber');
+    if (rollEl) {
+      const rollVal = isHssc
+        ? (profile.fsc_roll_no || profile.inter_roll_no || profile.alevel_roll_no || profile.roll_number)
+        : (profile.matric_roll_no || profile.ssc_roll_no || profile.olevel_roll_no || profile.roll_number);
+      if (rollVal) { await fillInput(rollEl, String(rollVal)); onFilled(rollEl); }
+      else onManual(rollEl);
+    }
+
+    // 8. School / College Name
+    const schoolEl = findByLabel('school name', 'college name', 'institution name', 'institute name')
+      || document.querySelector('#schoolcollege');
+    if (schoolEl) {
+      const schoolVal = isHssc
+        ? (profile.fsc_school || profile.alevel_school || profile.college_name || profile.school_name)
+        : (profile.matric_school || profile.olevel_school || profile.school_name);
+      if (schoolVal) { await fillInput(schoolEl, schoolVal); onFilled(schoolEl); }
+      else onManual(schoolEl);
+    }
+
+    // 9. Year To
+    const toEl = findByLabel('year to', 'passing year', 'to year', 'completion year')
+      || document.querySelector('#ddl_to');
+    const toYear = isHssc
+      ? (profile.alevel_year ?? profile.fsc_year ?? profile.passing_year ?? null)
+      : (profile.olevel_year ?? profile.matric_year ?? profile.passing_year ?? null);
+    if (toEl) {
+      if (toYear != null) {
+        toEl.value = String(toYear);
+        toEl.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(toEl);
+      } else onManual(toEl);
+    }
+
+    // 10. Year From — SSC and HSSC are both 2-year programmes
+    const fromEl = findByLabel('year from', 'start year', 'from year', 'joining year')
+      || document.querySelector('#ddl_from');
+    if (fromEl) {
+      const fromYear = isHssc
+        ? (profile.fsc_start_year || profile.alevel_start_year || (toYear != null ? Number(toYear) - 2 : null))
+        : (profile.matric_start_year || profile.olevel_start_year || (toYear != null ? Number(toYear) - 2 : null));
+      if (fromYear != null) {
+        fromEl.value = String(fromYear);
+        fromEl.dispatchEvent(new Event('change', { bubbles: true }));
+        onFilled(fromEl);
+      }
+    }
+
+    // 11. Result Awaiting radio
+    // inter_status: 'not_started'|'part1_only'|'appearing'|'result_awaited'|'complete'
+    const isAwaiting = isHssc && ['part1_only', 'appearing', 'result_awaited'].includes(interStatus);
+    clickRadioByLabel(
+      ['result awaiting', 'awaiting result', 'result await'],
+      isAwaiting ? ['yes'] : ['no'],
+      'ResAwaiting', isAwaiting ? 'resAw_yes' : 'resAw_no'
+    );
+
+    // 12. Grading system + marks
+    const obtMarks = isHssc
+      ? (profile.ibcc_alevel_marks ?? profile.fsc_marks ?? profile.inter_marks ?? null)
+      : (profile.ibcc_olevel_marks ?? profile.matric_marks ?? null);
+    const totMarks = isHssc
+      ? (profile.ibcc_alevel_total ?? profile.fsc_total ?? profile.inter_total ?? null)
+      : (profile.ibcc_olevel_total ?? profile.matric_total ?? null);
+    if (obtMarks != null || totMarks != null) {
+      clickRadioByLabel(
+        ['grading', 'grading system', 'marks type', 'grade system'],
+        ['percentage', 'percent'],
+        'gradingSystem', 'percentage'
+      );
+      await new Promise(r => setTimeout(r, 120));
+      const obtEl = document.querySelector('#tb_obtained')
+        || findByLabel('marks obtained', 'obtained marks');
+      const totEl = document.querySelector('#tb_totalmarks')
+        || findByLabel('total marks', 'maximum marks');
+      if (obtEl && obtMarks != null) { await fillInput(obtEl, String(obtMarks)); onFilled(obtEl); }
+      if (totEl && totMarks != null) { await fillInput(totEl, String(totMarks)); onFilled(totEl); }
+    }
+
+    // 13. File upload → cannot autofill; mark manual
+    const scanEl = document.querySelector('input[type=file]')
+      || document.querySelector('#IScanCertificateInput');
+    if (scanEl) onManual(scanEl);
+
+    console.log(`[Anqa] AIR Academics: ${isHssc ? 'HSSC' : 'SSC'} entry filled`);
+  }
+
+  await fillEntry(doHssc);
+}
+
 // ─── Core Autofill Logic ───────────────────────────────────────
 
 async function handleAutofill() {
@@ -7910,6 +8737,46 @@ async function handleAutofill() {
       console.log(`[Anqa] IBA Edu handler done: ${filledCount} filled, ${manualCount} manual`);
     }
 
+    // ─── SPECIAL: AIR University PersonalInfo Page ───────────────
+    // Handles composite phone fields and skips unmappable fields (father email, landline, next of kin).
+    // Does NOT return early — Tier 3 heuristics fill all remaining fields.
+    if (isAirUniPersonalInfoPage()) {
+      console.log('[Anqa] AIR Uni PersonalInfo page detected — running composite-phone handler');
+      await fillAirUniPersonalInfoPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      console.log(`[Anqa] AIR handler done: ${filledCount} filled so far, ${manualCount} manual`);
+    }
+
+    // ─── SPECIAL: AIR University Academics Page ──────────────────
+    // Repeating-entry form (one qualification per Save/POST). Detects what is already
+    // saved in the table and fills the next pending entry (SSC first, then HSSC).
+    // Returns early — Select2 + AJAX cascade leaves no meaningful work for Tier 3.
+    if (isAirUniAcademicsPage()) {
+      console.log('[Anqa] AIR Uni Academics page detected — running qualification handler');
+      await fillAirUniAcademicsPage(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      console.log(`[Anqa] AIR Academics done: ${filledCount} filled, ${manualCount} manual`);
+      renderState(contentEl, 'filled', { filled: filledCount, manual: manualCount, conflicts: conflictCount });
+      return;
+    }
+
+    // ─── NUST UG Form: fix split phone, residency, academic cascade ─────────
+    if (isNustFormPage()) {
+      console.log('[Anqa] NUST form detected — running targeted fix-ups');
+      await fixNustSpecificFields(
+        ctx.profile,
+        (el) => { filledCount++; alreadyHandled.add(el); tickProgress(); },
+        (el) => { manualCount++; alreadyHandled.add(el); tickProgress(); }
+      );
+      // Do NOT return — Tier 1/2/3 continues for all remaining fields
+    }
+
     // ─── TIER 1: Deterministic per-university config ───────────
     // Uses verified CSS selectors from extension/universities/index.js
     const hostname = window.location.hostname;
@@ -7940,6 +8807,9 @@ async function handleAutofill() {
           // Safety: skip non-form elements (avoids "Illegal invocation" from fillInput on divs/spans)
           const elTag = el.tagName;
           if (elTag !== 'INPUT' && elTag !== 'SELECT' && elTag !== 'TEXTAREA') continue;
+          // Skip fields already handled by a dedicated pre-handler (AIR, IBA, GIKI, etc.)
+          // so their decisions (skip father/guardian email, etc.) are not overwritten here.
+          if (alreadyHandled.has(el)) { skippedCount++; continue; }
           tickProgress();
           // Resolve value — use profileValueFor helper for computed/derived keys
           let rawValue;

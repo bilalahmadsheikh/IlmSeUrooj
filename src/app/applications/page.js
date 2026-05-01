@@ -1,10 +1,18 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
+import { useTheme } from '@/context/ThemeContext';
 import { universities as uniData } from '@/data/universities';
 import { loadSavedFromStorage } from '@/utils/savedStorage';
+
+const THEME_LOGOS = {
+  dark:     '/darkgreen_logo.png',
+  light:    '/lightlogo.png',
+  treasure: '/maplogo.png',
+};
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -581,13 +589,18 @@ function DeadlineChip({ days, date }) {
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
 function AppNav() {
+  const { theme } = useTheme();
   return (
     <nav style={s.nav}>
       <Link href="/" style={s.brand}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-          <path d="M6 12v5c6 3 10 3 16 0v-5" />
-        </svg>
+        <Image
+          src={THEME_LOGOS[theme] || THEME_LOGOS.dark}
+          alt="Anqa logo"
+          width={40}
+          height={40}
+          style={{ objectFit: 'contain', borderRadius: 6 }}
+          priority
+        />
         Anqa
       </Link>
       <div style={s.navLinks}>

@@ -36,8 +36,8 @@
 }
 
 .logoIcon {
-    width: 42px;
-    height: 42px;
+    width: 54px;
+    height: 54px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,6 +56,21 @@
 .capSvg {
     width: 100%;
     height: 100%;
+}
+
+/* Theme-aware logo image */
+.logoImg {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 6px;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    display: block;
+}
+
+.logo:hover .logoImg {
+    transform: scale(1.06);
 }
 
 .capTop {
@@ -341,8 +356,8 @@
     }
 
     .logoIcon {
-        width: 30px;
-        height: 30px;
+        width: 36px;
+        height: 36px;
     }
 
     .logoUrdu {
@@ -442,8 +457,8 @@
     }
 
     .logoIcon {
-        width: 26px;
-        height: 26px;
+        width: 32px;
+        height: 32px;
     }
 
     .logoPk {

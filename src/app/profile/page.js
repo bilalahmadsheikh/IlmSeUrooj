@@ -1,8 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
+import { useTheme } from '@/context/ThemeContext';
+
+const THEME_LOGOS = {
+    dark:     '/darkgreen_logo.png',
+    light:    '/lightlogo.png',
+    treasure: '/maplogo.png',
+};
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -879,13 +887,18 @@ export default function ProfilePage() {
 
 // ─── Nav Component ────────────────────────────────────────────
 function Nav({ user, onSignOut }) {
+    const { theme } = useTheme();
     return (
         <nav className="pf-nav">
             <Link href="/" className="pf-brand">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c6 3 10 3 16 0v-5" />
-                </svg>
+                <Image
+                    src={THEME_LOGOS[theme] || THEME_LOGOS.dark}
+                    alt="Anqa logo"
+                    width={40}
+                    height={40}
+                    style={{ objectFit: 'contain', borderRadius: 6 }}
+                    priority
+                />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span>Anqa</span>
                     <span style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Urdu Typesetting', Arial, sans-serif", fontSize: 13, color: '#a1a1aa', lineHeight: 1, marginTop: -2 }}>عنقا</span>

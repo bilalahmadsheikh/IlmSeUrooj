@@ -1,14 +1,23 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import styles from './Header.module.css';
 import Link from 'next/link';
 import { getBrowserClient } from '@/lib/supabase-browser';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import { ProfileRing } from './ProfileRing';
 import { IconBookmark, IconScholarship } from '@/components/Icons/Icons';
+import { useTheme } from '@/context/ThemeContext';
+
+const THEME_LOGOS = {
+    dark:     '/darkgreen_logo.png',
+    light:    '/lightlogo.png',
+    treasure: '/maplogo.png',
+};
 
 export default function Header({ savedCount = 0, onShowSaved, onShowScholarships }) {
+    const { theme } = useTheme();
     const safeShowSaved = typeof onShowSaved === 'function' ? onShowSaved : () => {};
     const safeShowScholarships = typeof onShowScholarships === 'function' ? onShowScholarships : () => {};
     const [user, setUser] = useState(null);
@@ -82,28 +91,14 @@ export default function Header({ savedCount = 0, onShowSaved, onShowScholarships
             <div className={styles.container}>
                 <Link href="/" className={styles.logo}>
                     <div className={styles.logoIcon}>
-                        <svg viewBox="0 0 36 36" fill="none" className={styles.capSvg} aria-hidden="true">
-                            <defs>
-                                <linearGradient id="anqaHdrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style={{ stopColor: 'var(--logo-grad-start)' }} />
-                                    <stop offset="60%" style={{ stopColor: 'var(--logo-grad-mid)' }} />
-                                    <stop offset="100%" style={{ stopColor: 'var(--logo-grad-end)' }} />
-                                </linearGradient>
-                                <radialGradient id="anqaGlow" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" style={{ stopColor: 'var(--logo-glow-radial)' }} />
-                                    <stop offset="100%" stopColor="transparent" />
-                                </radialGradient>
-                            </defs>
-                            <circle cx="18" cy="18" r="17" fill="url(#anqaGlow)" />
-                            <circle cx="18" cy="18" r="15" stroke="url(#anqaHdrGrad)" strokeWidth="1" fill="none" opacity="0.4" className={styles.compassRing} />
-                            <circle cx="18" cy="18" r="12" stroke="url(#anqaHdrGrad)" strokeWidth="0.4" fill="none" opacity="0.2" className={styles.compassRing} />
-                            <path d="M18 4 L20.5 13.5 L18 15.5 L15.5 13.5 Z" fill="url(#anqaHdrGrad)" className={styles.compassN} />
-                            <path d="M18 32 L20.5 22.5 L18 20.5 L15.5 22.5 Z" fill="url(#anqaHdrGrad)" opacity="0.4" />
-                            <path d="M4 18 L13.5 15.5 L15.5 18 L13.5 20.5 Z" fill="url(#anqaHdrGrad)" opacity="0.4" />
-                            <path d="M32 18 L22.5 15.5 L20.5 18 L22.5 20.5 Z" fill="url(#anqaHdrGrad)" opacity="0.4" />
-                            <circle cx="18" cy="18" r="2.5" fill="url(#anqaHdrGrad)" />
-                            <circle cx="18" cy="18" r="1" fill="white" opacity="0.6" />
-                        </svg>
+                        <Image
+                            src={THEME_LOGOS[theme] || THEME_LOGOS.dark}
+                            alt="IlmSeUrooj logo"
+                            width={64}
+                            height={82}
+                            className={styles.logoImg}
+                            priority
+                        />
                     </div>
                     <div className={styles.logoTextWrapper}>
                         <span className={styles.logoUrdu}>عنقا</span>

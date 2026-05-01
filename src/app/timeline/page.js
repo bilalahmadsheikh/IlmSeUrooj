@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import styles from './page.module.css';
 import TimelineGantt from '@/components/TimelineGantt/TimelineGantt';
 import StrategyPanel from '@/components/StrategyPanel/StrategyPanel';
 import ConflictAlert from '@/components/ConflictAlert/ConflictAlert';
 import ThemeToggle from '@/components/ThemeToggle/ThemeToggle';
+import { useTheme } from '@/context/ThemeContext';
 import { getBrowserClient } from '@/lib/supabase-browser';
 import { universities as allUniversities, filterOptions } from '@/data/universities';
 import {
@@ -19,7 +21,14 @@ import { computeMatchScore } from '@/data/meritFormulas';
 import { loadSavedFromStorage } from '@/utils/savedStorage';
 import { findUniversityByApplication } from '@/utils/universityHelpers';
 
+const THEME_LOGOS = {
+    dark:     '/darkgreen_logo.png',
+    light:    '/lightlogo.png',
+    treasure: '/maplogo.png',
+};
+
 export default function TimelinePage() {
+    const { theme } = useTheme();
     const [timeline, setTimeline] = useState([]);
     const [conflicts, setConflicts] = useState([]);
     const [strategy, setStrategy] = useState([]);
@@ -194,7 +203,14 @@ export default function TimelinePage() {
                 <div className={styles.headerInner}>
                     <div className={styles.headerLeft}>
                         <Link href="/" className={styles.logoLink}>
-                            <span className={styles.logoIcon}>&#x1F393;</span>
+                            <Image
+                                src={THEME_LOGOS[theme] || THEME_LOGOS.dark}
+                                alt="Anqa logo"
+                                width={44}
+                                height={44}
+                                style={{ objectFit: 'contain', borderRadius: 6 }}
+                                priority
+                            />
                             <span className={styles.logoText}>Anqa</span>
                         </Link>
                         <div className={styles.headerDivider} />
