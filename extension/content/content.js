@@ -7941,98 +7941,281 @@ async function fixNustSpecificFields(profile, onFilled, onManual) {
 }
 
 async function fillNustAcademicSection(profile, onFilled, onManual, delay) {
-  // ── Detect which qualification radio is selected ──────────────────────────
-  const qualRadios = document.querySelectorAll('input[type=radio][name*="rblQualification"]');
-  const selected   = Array.from(qualRadios).find(r => r.checked);
-
-  if (!selected) {
-    // Tier 2.7 will click the right radio — but that triggers a full-page
-    // ASP.NET postback. Nothing more we can do in this run; the user clicks
-    // Autofill again after the page reloads.
-    console.log('[Anqa] NUST: qualification radio not selected — academic section deferred');
-    return;
+  // Poll until fn() returns a truthy value or maxMs elapses.
+  async function waitFor(fn, maxMs) {
+    maxMs = maxMs || 6000;
+    let w = 0;
+    while (w < maxMs) {
+      const r = fn();
+      if (r) return r;
+      await delay(250);
+      w += 250;
+    }
+    return null;
   }
 
-  const qualValue = selected.value; // "FSC" | "ALEVEL" | "DAE"
+  const interType  = (profile.inter_type       || '').toLowerCase();
+  const fscStream  = (profile.fsc_stream        || '').toLowerCase();
+  const educSys    = (profile.education_system  || '').toLowerCase();
+  // SSC and HSSC are tracked independently — a student can have O-Level (SSC) + FSC (HSSC).
+  // isOLevel: did the student do Cambridge/O-Level for SSC?
+  const isOLevel = educSys === 'cambridge' || /cambridge/i.test(educSys) ||
+                   /o.?level/i.test(educSys) || interType === 'olevel';
+  // isALevel: did the student do A-Level for HSSC?
+  const isALevel = interType === 'a_level' || /a.?level/i.test(interType);
+  const isCambridge = isOLevel || isALevel;
+  const isDae       = /\bdae\b|diploma/i.test(interType);
 
-  // ── Qualification Group dropdown ──────────────────────────────────────────
-  const groupEl = document.getElementById('Body_Body_ddQualificationGroups');
-  if (!groupEl) return; // UpdatePanel hasn't rendered yet on this run
+  // Returns true if subjects value (string, array of strings, or array of {subject:...} objects) contains science subjects.
+  function subjectIsScience(raw) {
+    if (!raw) return true; // default to science when unknown
+    let str;
+    if (Array.isArray(raw)) {
+      str = raw.map(s => (s && typeof s === 'object') ? (s.subject || '') : String(s)).join(' ');
+    } else {
+      str = String(raw);
+    }
+    const l = str.toLowerCase();
+    return ['physics', 'chemistry', 'biology', 'mathemat', 'computer', 'statistic'].some(s => l.includes(s));
+  }
 
-  // Determine target group patterns from profile
-  const interType = (profile.inter_type  || '').toLowerCase();
-  const fscStream = (profile.fsc_stream  || '').toLowerCase();
-  const educSys   = (profile.education_system || '').toLowerCase();
-  const isALevel  = interType === 'a_level' || /a.?level/i.test(educSys);
-  const isDae     = /\bdae\b|diploma/i.test(interType);
+  const olevelSci = subjectIsScience(profile.olevel_subjects || profile.subjects);
+  const alevelSci = subjectIsScience(profile.alevel_subjects || profile.subjects);
+  // For local-board SSC (Matric), infer Science vs Arts from the HSSC stream
+  const matricSci = !!(fscStream.match(/pre_med|pre_eng|computer/) || interType === 'ics');
 
-  const groupPatterns = isALevel  ? ['o/a level', 'a level', 'a-level', 'home economics', 'equivalent'] :
-                        isDae     ? ['dae', 'diploma of associate', 'diploma'] :
-    fscStream === 'pre_medical'   ? ['pre-medical', 'pre medical', 'pre-med'] :
-    fscStream === 'pre_engineering' ? ['pre-engineering', 'pre engineering', 'pre eng'] :
-    (fscStream === 'computer_science' || interType === 'ics')
-                                  ? ['computer science', 'mathematics, physics and computer', 'mpc'] :
-    interType === 'icom'          ? ['accounting', 'accountancy', 'commerce'] :
-    interType === 'fa'            ? ['fa or equivalent', 'humanities', 'without mathematics'] :
-                                    ['pre-engineering', 'pre engineering', 'pre-eng'];
+  // ── Step 1: Click the right qualification radio if not yet selected ────────
+  const qualSel = [
+    'input[type=radio][name*="rblQualification"]',
+    'input[type=radio][id*="rblQual"]',
+    'input[type=radio][id*="rdoQual"]',
+    'input[type=radio][id*="rblPrev"]',
+  ].join(',');
+  const qualRadios = Array.from(document.querySelectorAll(qualSel));
+  let selectedRadio = qualRadios.find(r => r.checked);
 
-  // Pick option whose text matches any pattern
-  const targetOpt = Array.from(groupEl.options).find(o =>
-    o.value && o.value !== '-1' &&
-    groupPatterns.some(p => o.text.toLowerCase().includes(p))
+  // Override isOLevel/isALevel/isDae from the actual checked radio label
+  // so missing profile fields don't cause wrong dropdown selection.
+  if (selectedRadio) {
+    const rl = document.querySelector(`label[for="${selectedRadio.id}"]`) || selectedRadio.closest('label');
+    const rt = (rl?.textContent || selectedRadio.value || '').toLowerCase();
+    if (/o.?a|o.?level|cambridge|equivalent|home econ/i.test(rt)) {
+      // "O/A Level / Home Economics / Equivalent" radio — treat as O-Level student
+      // isOLevel already derived from profile; also force it true from DOM
+      if (!isOLevel) { console.log('[Anqa] NUST: overriding isOLevel=true from selected radio label'); }
+      Object.defineProperty(this || {}, '_nustIsOLevelOverride', { value: true });
+    }
+  }
+  // Re-derive after possible DOM override
+  const domSelectedLabel = (() => {
+    const r = qualRadios.find(r => r.checked);
+    const l = r && (document.querySelector(`label[for="${r.id}"]`) || r.closest('label'));
+    return (l?.textContent || r?.value || '').toLowerCase();
+  })();
+  const radioIsOA  = /o.?a|o.?level|cambridge|equivalent|home econ/i.test(domSelectedLabel);
+  const radioIsFsc = /fsc|fa|intermediate|matric|hssc/i.test(domSelectedLabel) && !radioIsOA;
+  const radioIsDae = /dae|diploma/i.test(domSelectedLabel);
+  // Final flags: profile takes precedence; DOM label confirms when profile is ambiguous
+  const effIsOLevel = isOLevel || radioIsOA;
+  const effIsALevel = isALevel || (radioIsOA && interType === 'a_level');
+  const effIsDae    = isDae    || radioIsDae;
+
+  if (!selectedRadio && qualRadios.length) {
+    const cambTerms  = ['o/a', 'o level', 'a level', 'cambridge', 'equivalent', 'foreign', 'overseas'];
+    const daeTerms   = ['dae', 'diploma'];
+    const localTerms = ['fsc', 'hssc', 'intermediate', 'matric', 'local', 'pakistan'];
+    const wantedTerms = isCambridge ? cambTerms : isDae ? daeTerms : localTerms;
+
+    const toClick = qualRadios.find(r => {
+      const lbl = document.querySelector(`label[for="${r.id}"]`) || r.closest('label');
+      return wantedTerms.some(t => (lbl?.textContent || r.value || '').toLowerCase().includes(t));
+    }) || (isOLevel ? qualRadios[qualRadios.length - 1] : qualRadios[0]);
+
+    toClick.click();
+    if (typeof toClick.onchange === 'function') toClick.onchange();
+    onFilled(toClick);
+    console.log('[Anqa] NUST: qualification radio clicked, waiting for postback');
+
+    // Distinguish UpdatePanel (partial — any new select appears) vs full-page postback (page unloads).
+    // Wait up to 6s for any select with 2+ options to appear that has relevant option text.
+    const allCertTerms = ['o level', 'o-level', 'matric', 'ssc', 'a level', 'a-level',
+                          'fsc', 'hssc', 'intermediate', 'equivalent', 'cambridge', 'dae', 'diploma'];
+    const appeared = await waitFor(
+      () => {
+        for (const s of document.querySelectorAll('select')) {
+          if (s.options.length < 2) continue;
+          const opts = Array.from(s.options).map(o => o.text.toLowerCase());
+          if (allCertTerms.some(t => opts.some(o => o.includes(t)))) return s;
+        }
+        return null;
+      },
+      6000
+    );
+    if (!appeared) {
+      // Full-page postback — page is reloading. User must click Autofill again.
+      console.log('[Anqa] NUST: full-page postback — re-run Autofill after page reloads');
+      return;
+    }
+    await delay(500); // let UpdatePanel fully settle before filling
+  }
+
+  // Track which selects have been handled THIS run (in-memory, resets each autofill invocation).
+  // Never use DOM attributes (data-anqa-done) — those persist across runs on the same page.
+  const handled = new Set();
+
+  // ── Helper: find and fill a cascade dropdown ──────────────────────────────
+  // discPats: OR logic — any option matching any pattern identifies the right element.
+  // selPats:  AND-first — all patterns must appear in one option (most specific match);
+  //           falls back to OR if no AND match exists.
+  async function fillGroupDd(idCandidates, discPats, selPats, label, timeoutMs) {
+    timeoutMs = timeoutMs || 5000;
+    const el = await waitFor(() => {
+      // Try known IDs first
+      for (const id of idCandidates) {
+        const found = document.getElementById(`Body_Body_${id}`) ||
+                      document.querySelector(`select[id$="${id}"]`);
+        if (found && found.options.length > 1 && !handled.has(found)) return found;
+      }
+      // Option-content scan as fallback
+      for (const s of document.querySelectorAll('select')) {
+        if (handled.has(s) || s.options.length < 2) continue;
+        if (Array.from(s.options).some(o =>
+          discPats.some(p => o.text.toLowerCase().includes(p))
+        )) return s;
+      }
+      return null;
+    }, timeoutMs);
+
+    if (!el) { console.log(`[Anqa] NUST: ${label} not found`); return null; }
+
+    const valid = Array.from(el.options).filter(o =>
+      o.value && !['', '-1', '0'].includes(String(o.value))
+    );
+    // AND-first: all selPats must appear in the chosen option text
+    const opt =
+      valid.find(o => selPats.every(p => o.text.toLowerCase().includes(p))) ||
+      valid.find(o => selPats.some(p => o.text.toLowerCase().includes(p)));
+
+    handled.add(el); // mark before returning so next step skips it
+    if (!opt) { onManual(el); return null; }
+
+    if (el.value !== opt.value) {
+      el.value = opt.value;
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      if (typeof el.onchange === 'function') el.onchange();
+    }
+    onFilled(el);
+    return el;
+  }
+
+  // ── Step 2: SSC combined dropdown (cert + group in one option) ────────────
+  // Both dropdowns appear simultaneously after the radio postback — no cascading wait needed.
+  const sscDiscPats = effIsOLevel
+    ? ['o level', 'o-level', 'olevel']
+    : ['matric', 'ssc', 'secondary school'];
+  const sscSelPats = effIsOLevel
+    ? (olevelSci ? ['o level', 'science'] : ['o level', 'art', 'humanities'])
+    : (matricSci ? ['science']            : ['art', 'arts', 'humanities', 'general']);
+
+  const sscEl = await fillGroupDd(
+    ['ddSSCCertification', 'ddSSCType', 'ddSSCQual', 'ddSSCCert', 'ddSscType',
+     'ddSscCert', 'ddSSC', 'ddSsc', 'ddSSCGroup', 'ddMatricGroup'],
+    sscDiscPats, sscSelPats, 'SSC', 2500
   );
+  if (sscEl) await delay(1500);
 
-  if (!targetOpt) { onManual(groupEl); return; }
+  // ── Step 3: HSSC combined dropdown (cert + group in one option) ───────────
+  // For O/A Level radio: the HSSC dropdown shows A-Level options (Science/Arts/Commerce).
+  // For FSC radio: shows Pre-Medical, Pre-Engineering, ICS, I.Com, FA.
+  // discPats must cover all realistic option texts for this radio type.
+  const hsscDiscPats = effIsOLevel || effIsALevel
+    // O/A Level radio selected → HSSC dropdown will have A-Level type options
+    ? ['a level', 'a-level', 'alevel', 'fsc', 'pre-medical', 'pre-engineering', 'hssc', 'home econ']
+    : effIsDae ? ['dae', 'diploma']
+    // FSC radio selected → HSSC dropdown has FSC stream options
+    :            ['fsc', 'f.sc', 'pre-medical', 'pre-engineering', 'hssc', 'intermediate'];
+  const hsscSelPats = effIsALevel
+    ? (alevelSci ? ['a level', 'science'] : ['a level', 'art', 'humanities'])
+    : effIsDae ? ['dae', 'diploma']
+    : fscStream === 'pre_medical'      ? ['pre-medical', 'pre medical']
+    : fscStream === 'pre_engineering'  ? ['pre-engineering', 'pre engineering']
+    : fscStream === 'computer_science' || interType === 'ics' ? ['computer', 'ics']
+    : interType === 'icom'             ? ['icom', 'commerce', 'account']
+    : interType === 'fa'               ? ['fa', 'art', 'humanities']
+    : effIsOLevel                      ? ['a level', 'science']  // O-Level without explicit HSSC info: default A-Level Science
+    :                                    ['pre-engineering', 'pre engineering'];
 
-  // If group already has the right value and marks table is present → fill directly
-  const marksAlreadyVisible = !!document.getElementById('Body_Body_txtMatricTotalMarks') ||
-    !!document.querySelector('[id*="txtMatric"],[id*="txtHSSC"],[id*="txtInter"]');
+  const hsscEl = await fillGroupDd(
+    ['ddHSSCCertification', 'ddHSSCType', 'ddHSSCQual', 'ddFSCType', 'ddHsscType',
+     'ddHSSCCert', 'ddHsscCert', 'ddHSSC', 'ddHssc', 'ddQualificationGroups',
+     'ddHSSCGroup', 'ddFSCGroup', 'ddHsscGroup'],
+    hsscDiscPats, hsscSelPats, 'HSSC', 2500
+  );
+  if (hsscEl) await delay(3500);
 
-  if (groupEl.value !== targetOpt.value || !marksAlreadyVisible) {
-    groupEl.value = targetOpt.value;
-    groupEl.dispatchEvent(new Event('change', { bubbles: true }));
-    if (typeof window.__doPostBack === 'function')
-      window.__doPostBack('ctl00$ctl00$Body$Body$ddQualificationGroups', '');
-    onFilled(groupEl);
-    await delay(3500); // wait for UpdatePanel postback
-  } else {
-    onFilled(groupEl);
-  }
-
-  // ── Fill marks table rows ─────────────────────────────────────────────────
-  fillNustMarksRow(profile, false, onFilled, onManual); // SSC
-  fillNustMarksRow(profile, true,  onFilled, onManual); // HSSC
+  // ── Step 4: Marks rows ────────────────────────────────────────────────────
+  await fillNustMarksRow(profile, false, effIsOLevel, onFilled, onManual, waitFor); // SSC / O-Level
+  await fillNustMarksRow(profile, true,  effIsALevel, onFilled, onManual, waitFor); // HSSC / A-Level
 }
 
-function fillNustMarksRow(profile, isHssc, onFilled, onManual) {
-  // Values from profile
-  const year  = isHssc ? (profile.fsc_year   ?? profile.alevel_year  ?? null)
-                       : (profile.matric_year ?? profile.olevel_year  ?? null);
-  const total = isHssc ? (profile.fsc_total   ?? profile.inter_total  ?? profile.ibcc_alevel_total ?? null)
-                       : (profile.matric_total ?? profile.ibcc_olevel_total ?? null);
-  const marks = isHssc ? (profile.fsc_marks   ?? profile.inter_marks  ?? profile.ibcc_alevel_marks ?? null)
-                       : (profile.matric_marks ?? profile.ibcc_olevel_marks ?? null);
+async function fillNustMarksRow(profile, isHssc, isCambridge, onFilled, onManual, waitFor) {
+  // Cambridge students: IBCC equivalence marks. Local board: direct Matric/FSC marks.
+  const year = isHssc
+    ? (isCambridge ? (profile.alevel_year  ?? null) : (profile.fsc_year   ?? profile.inter_year  ?? null))
+    : (isCambridge ? (profile.olevel_year  ?? null) : (profile.matric_year ?? null));
+  const total = isHssc
+    ? (isCambridge ? (profile.ibcc_alevel_total ?? null) : (profile.fsc_total ?? profile.inter_total ?? null))
+    : (isCambridge ? (profile.ibcc_olevel_total ?? null) : (profile.matric_total ?? null));
+  const marks = isHssc
+    ? (isCambridge ? (profile.ibcc_alevel_marks ?? null) : (profile.fsc_marks ?? profile.inter_marks ?? null))
+    : (isCambridge ? (profile.ibcc_olevel_marks ?? null) : (profile.matric_marks ?? null));
 
-  // ── Try IDs by naming pattern first ──────────────────────────────────────
-  // Known: DDMatricYOP, txtMatricTotalMarks. Guesses for the rest follow the same pattern.
+  if (!year && !total && !marks) return; // nothing to fill for this row
+
   const pfx = isHssc ? 'HSSC' : 'Matric';
-  function byId(...candidates) {
-    for (const id of candidates) {
+  function byId(...ids) {
+    for (const id of ids) {
       const el = document.getElementById(`Body_Body_${id}`);
       if (el) return el;
     }
     return null;
   }
 
-  const yopEl   = byId(`DD${pfx}YOP`, `DD${pfx}Year`, `DD${pfx}Yop`);
-  const totalEl = byId(`txt${pfx}TotalMarks`, `txt${pfx}Total`, `txt${pfx}Marks`);
-  const obtEl   = byId(`txt${pfx}ObtMarks`, `txt${pfx}ObtainedMarks`, `txt${pfx}Obtained`);
+  // Wait up to 3s for at least one marks field to appear in the DOM
+  await waitFor(
+    () => byId(`txt${pfx}TotalMarks`, `txt${pfx}Total`, `txt${pfx}MaxMarks`,
+               `txt${pfx}ObtMarks`, `txt${pfx}ObtainedMarks`, `txt${pfx}Obtained`) ||
+          document.querySelector(`input[id*="Body_${pfx}"][id*="Mark"], input[id*="Body_${pfx}"][id*="Obt"]`),
+    3000
+  );
 
-  if (yopEl  && year)  { yopEl.value = String(year);   yopEl.dispatchEvent(new Event('change',{bubbles:true})); onFilled(yopEl);  }
-  if (totalEl && total){ fillInput(totalEl, String(total));  onFilled(totalEl); }
-  if (obtEl  && marks) { fillInput(obtEl,   String(marks));  onFilled(obtEl);   }
+  // Now try to resolve each field by ID (multiple naming guesses)
+  const yopEl   = byId(`DD${pfx}YOP`, `DD${pfx}Year`, `DD${pfx}Yop`, `dd${pfx}YOP`,
+                        `ddl${pfx}YOP`, `ddl${pfx}Year`, `Ddl${pfx}Yop`);
+  const totalEl = byId(`txt${pfx}TotalMarks`, `txt${pfx}Total`, `txt${pfx}MaxMarks`,
+                        `txt${pfx}TotalMark`, `txtTotal${pfx}`);
+  const obtEl   = byId(`txt${pfx}ObtMarks`, `txt${pfx}ObtainedMarks`, `txt${pfx}Obtained`,
+                        `txt${pfx}ObtMark`, `txtObt${pfx}`);
 
-  // ── Table scan fallback for any fields not found by ID ────────────────────
+  if (yopEl   && year)  { yopEl.value = String(year);  yopEl.dispatchEvent(new Event('change',{bubbles:true})); onFilled(yopEl);   }
+  if (totalEl && total) { fillInput(totalEl, String(total)); onFilled(totalEl); }
+  if (obtEl   && marks) { fillInput(obtEl,   String(marks)); onFilled(obtEl);   }
+
+  // Generic scan: find inputs whose id contains the prefix + a marks-related keyword
+  const pfxLow = pfx.toLowerCase();
+  if (!totalEl || !obtEl || !yopEl) {
+    for (const inp of document.querySelectorAll('input[type=text],input:not([type]),select')) {
+      const id = (inp.id || '').toLowerCase();
+      if (!id.includes(pfxLow) && !id.includes(pfxLow === 'hssc' ? 'hssc' : 'matric')) continue;
+      if (!totalEl && total && /total|max|maximum/.test(id)) { fillInput(inp, String(total)); onFilled(inp); }
+      if (!obtEl   && marks && /obt|obtained|secure/.test(id)) { fillInput(inp, String(marks)); onFilled(inp); }
+      if (!yopEl   && year  && inp.tagName === 'SELECT' && /year|yop|passing/.test(id)) {
+        inp.value = String(year); inp.dispatchEvent(new Event('change',{bubbles:true})); onFilled(inp);
+      }
+    }
+  }
+
+  // Table-scan fallback for any fields still not found
   const rowPat = isHssc
     ? /\bhssc\b|intermediate|12th|higher secondary|a[\s-]?level|f\.?sc\b/i
     : /\bssc\b|matriculat|10th|secondary school|o[\s-]?level/i;
@@ -8040,28 +8223,18 @@ function fillNustMarksRow(profile, isHssc, onFilled, onManual) {
   for (const tr of document.querySelectorAll('table tr')) {
     const cells = Array.from(tr.querySelectorAll('td'));
     if (!cells.length || !rowPat.test(cells[0]?.textContent || '')) continue;
-
-    // Walk sibling <th> in the header row to learn column semantics
-    const tbl   = tr.closest('table');
+    const tbl    = tr.closest('table');
     const hdrRow = tbl?.querySelector('tr:first-child');
     const headers = hdrRow ? Array.from(hdrRow.querySelectorAll('th,td')).map(h => h.textContent.toLowerCase()) : [];
-
     cells.forEach((td, i) => {
-      const hdr   = headers[i] || '';
-      const input = td.querySelector('input[type=text],input:not([type])');
-      const sel   = td.querySelector('select');
-
-      if (sel && !yopEl && year && /year|yop|passing/i.test(hdr)) {
-        sel.value = String(year);
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-        onFilled(sel);
+      const hdr = headers[i] || '';
+      const inp = td.querySelector('input[type=text],input:not([type])');
+      const sel = td.querySelector('select');
+      if (sel && !yopEl && year  && /year|yop|passing/i.test(hdr)) {
+        sel.value = String(year); sel.dispatchEvent(new Event('change',{bubbles:true})); onFilled(sel);
       }
-      if (input && !totalEl && total && /total|maximum|max/i.test(hdr)) {
-        fillInput(input, String(total)); onFilled(input);
-      }
-      if (input && !obtEl && marks && /obtain|secured|got/i.test(hdr)) {
-        fillInput(input, String(marks)); onFilled(input);
-      }
+      if (inp && !totalEl && total && /total|maximum|max/i.test(hdr))  { fillInput(inp, String(total)); onFilled(inp); }
+      if (inp && !obtEl   && marks  && /obtain|secured|got/i.test(hdr)) { fillInput(inp, String(marks)); onFilled(inp); }
     });
     break;
   }
