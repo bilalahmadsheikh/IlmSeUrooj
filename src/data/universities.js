@@ -46,7 +46,7 @@ export const universities = [
         { series: "Series I",   deadline: null, testDate: "2025-10-05" }
       ],
       applyUrl: "https://ugadmissions.nust.edu.pk",
-      lastVerified: "2026-06-21"
+      lastVerified: "2026-07-01"
     }
   },
 
@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2026-04-11" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-06-21"
+      lastVerified: "2026-07-01"
     }
   },
 
@@ -124,11 +124,11 @@ export const universities = [
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     facilities: ["Library", "CS & AI Labs", "Cafeteria", "Prayer Area", "Sports Ground", "Parking"],
     admissions: {
-      deadline: "2026-06-26",
+      deadline: "2026-06-30",
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
   {
@@ -158,11 +158,11 @@ export const universities = [
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     facilities: ["Library", "Computer Labs", "Student Hostel (Boys & Girls)", "Cafeteria", "Prayer Area", "Sports Area"],
     admissions: {
-      deadline: "2026-06-26",
+      deadline: "2026-06-30",
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
   {
@@ -192,11 +192,11 @@ export const universities = [
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     facilities: ["Library", "Computer Labs", "Cafeteria", "Prayer Area", "Sports Area"],
     admissions: {
-      deadline: "2026-06-26",
+      deadline: "2026-06-30",
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
   {
@@ -224,11 +224,11 @@ export const universities = [
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     facilities: ["Library", "Computer Labs", "Student Hostel", "Cafeteria", "Prayer Area", "Sports Ground"],
     admissions: {
-      deadline: "2026-06-26",
+      deadline: "2026-06-30",
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
   {
@@ -260,11 +260,11 @@ export const universities = [
     avgFee: "PKR 176,000 per semester (Rs. 11,000/CH)",
     facilities: ["Library", "Computer Labs", "Student Hostel", "Cafeteria", "Prayer Area", "Sports Area"],
     admissions: {
-      deadline: "2026-06-26",
+      deadline: "2026-06-30",
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
 
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
 
@@ -708,7 +708,7 @@ export const universities = [
       testName: "GIKI Entry Test",
       testDate: "2026-07-06",
       applyUrl: "https://giki.edu.pk/admissions/admissions-undergraduates/",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
 
@@ -741,15 +741,15 @@ export const universities = [
     avgFee: "PKR 63,000 - 100,000 per semester (heavily subsidized)",
     facilities: ["Research Library", "Sports Facilities", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Center", "Nuclear Research Labs", "High Security Campus"],
     admissions: {
-      deadline: "2026-06-25",
+      deadline: "2026-07-06",
       testName: "PIEAS Written Test",
-      testDate: "2026-06-25",
+      testDate: "2026-07-12",
       testSeries: [
         { series: "Test I",   deadline: "2026-03-05", testDate: "2026-04-12" },
-        { series: "Test II",   deadline: "2026-06-25", testDate: "2026-06-25" }
+        { series: "Test II",   deadline: "2026-07-06", testDate: "2026-07-12" }
       ],
       applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
 
@@ -794,7 +794,7 @@ export const universities = [
         { series: "BUET II",   deadline: null, testDate: "2026-07-25" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-06-21"
+      lastVerified: "2026-07-01"
     }
   },
   {
@@ -831,7 +831,7 @@ export const universities = [
         { series: "BUET",   deadline: null, testDate: "2026-06-20" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-06-21"
+      lastVerified: "2026-07-01"
     }
   },
   {
@@ -870,7 +870,7 @@ export const universities = [
         { series: "BUET",   deadline: null, testDate: "2026-06-04" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-06-21"
+      lastVerified: "2026-07-01"
     }
   },
 
@@ -915,7 +915,7 @@ export const universities = [
         { series: "Mar",   deadline: "2026-02-20", testDate: "2026-02-27" }
       ],
       applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
-      lastVerified: "2026-06-21"
+      lastVerified: "2026-07-01"
     }
   },
   {
@@ -952,7 +952,7 @@ export const universities = [
         { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2026-07-04" }
       ],
       applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-06-21"
+    lastVerified: "2026-07-01"
   }
   },
   {
@@ -1064,7 +1064,7 @@ export const universities = [
         { series: "Fall 2026 R2 LLB",   deadline: "2026-07-22", testDate: null }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
-      lastVerified: "2026-06-21"
+      lastVerified: "2026-07-01"
     }
   },
   {
@@ -1096,15 +1096,15 @@ export const universities = [
     avgFee: "PKR 80,000 - 175,000 per semester (Rs. 6,000/CH)",
     facilities: ["Digital Library", "Innovation Hub", "Computer Labs", "Cafeteria", "Prayer Area", "Startup Incubator", "Seminar Halls"],
     admissions: {
-      deadline: "2026-06-23",
+      deadline: "2026-07-07",
       testName: "ITU Admission Test",
-      testDate: "2026-07-04",
+      testDate: "2026-07-11",
       testSeries: [
-        { series: "BSEDS/BSM&T/BS FinTech",   deadline: null, testDate: "2026-07-04" },
-        { series: "BSCS/BSAI/BSSE/BSCE/BSEE",   deadline: null, testDate: "2026-07-05" }
+        { series: "BSCS/BSAI/BSSE/BSCE/BSEE",   deadline: null, testDate: "2026-07-11" },
+        { series: "BSEDS/BSM&T/BSFT",   deadline: null, testDate: "2026-07-12" }
       ],
       applyUrl: "https://itu.edu.pk/admissions",
-    lastVerified: "2026-06-01"
+    lastVerified: "2026-07-01"
   }
   }
 ];
@@ -1269,4 +1269,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-06-21";
+export const lastScraperRun = "2026-07-01";
