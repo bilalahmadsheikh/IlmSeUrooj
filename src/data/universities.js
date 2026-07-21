@@ -46,7 +46,7 @@ export const universities = [
         { series: "Series I",   deadline: null, testDate: "2025-10-05" }
       ],
       applyUrl: "https://ugadmissions.nust.edu.pk",
-      lastVerified: "2026-07-01"
+      lastVerified: "2026-07-21"
     }
   },
 
@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2026-04-11" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-07-01"
+      lastVerified: "2026-07-21"
     }
   },
 
@@ -128,7 +128,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
   {
@@ -162,7 +162,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
   {
@@ -196,7 +196,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
   {
@@ -228,7 +228,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
   {
@@ -264,7 +264,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
 
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
 
@@ -704,11 +704,11 @@ export const universities = [
     avgFee: "PKR 427,500 per semester (tuition + accommodation)",
     facilities: ["Library", "Sports Complex", "Residential Hostels (mandatory for all students)", "Cafeteria", "Prayer Area", "Medical Center", "Swimming Pool", "Cricket Ground", "Basketball Courts"],
     admissions: {
-      deadline: "2026-07-06",
+      deadline: "2026-07-21",
       testName: "GIKI Entry Test",
-      testDate: "2026-07-06",
+      testDate: "2026-07-21",
       applyUrl: "https://giki.edu.pk/admissions/admissions-undergraduates/",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
 
@@ -741,15 +741,15 @@ export const universities = [
     avgFee: "PKR 63,000 - 100,000 per semester (heavily subsidized)",
     facilities: ["Research Library", "Sports Facilities", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Center", "Nuclear Research Labs", "High Security Campus"],
     admissions: {
-      deadline: "2026-07-06",
+      deadline: "2026-06-12",
       testName: "PIEAS Written Test",
-      testDate: "2026-07-12",
+      testDate: "2026-06-12",
       testSeries: [
         { series: "Test I",   deadline: "2026-03-05", testDate: "2026-04-12" },
-        { series: "Test II",   deadline: "2026-07-06", testDate: "2026-07-12" }
+        { series: "Test II",   deadline: "2026-06-12", testDate: "2026-06-12" }
       ],
       applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
 
@@ -794,7 +794,7 @@ export const universities = [
         { series: "BUET II",   deadline: null, testDate: "2026-07-25" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-07-01"
+      lastVerified: "2026-07-21"
     }
   },
   {
@@ -826,12 +826,14 @@ export const universities = [
     admissions: {
       deadline: "2026-09-03",
       testName: "BUET (Bahria Entry Test)",
-      testDate: "2026-06-20",
+      testDate: "2026-08-01",
       testSeries: [
-        { series: "BUET",   deadline: null, testDate: "2026-06-20" }
+        { series: "BUET I",   deadline: null, testDate: "2026-06-20" },
+        { series: "BUET II",   deadline: null, testDate: "2026-08-01" },
+        { series: "BUET III",   deadline: null, testDate: "2026-09-05" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-07-01"
+      lastVerified: "2026-07-21"
     }
   },
   {
@@ -863,14 +865,14 @@ export const universities = [
     avgFee: "PKR 85,000 - 145,000 per semester",
     facilities: ["Library", "Sports Area", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Faculty Building"],
     admissions: {
-      deadline: "2026-06-02",
+      deadline: "2026-07-23",
       testName: "BUET (Bahria Entry Test)",
-      testDate: "2026-06-04",
+      testDate: "2026-07-27",
       testSeries: [
-        { series: "BUET",   deadline: null, testDate: "2026-06-04" }
+        { series: "BUET II",   deadline: null, testDate: "2026-07-27" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-07-01"
+      lastVerified: "2026-07-21"
     }
   },
 
@@ -915,7 +917,7 @@ export const universities = [
         { series: "Mar",   deadline: "2026-02-20", testDate: "2026-02-27" }
       ],
       applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
-      lastVerified: "2026-07-01"
+      lastVerified: "2026-07-21"
     }
   },
   {
@@ -952,7 +954,7 @@ export const universities = [
         { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2026-07-04" }
       ],
       applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-07-01"
+    lastVerified: "2026-07-21"
   }
   },
   {
@@ -1269,4 +1271,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-07-01";
+export const lastScraperRun = "2026-07-21";
