@@ -46,7 +46,7 @@ export const universities = [
         { series: "Series I",   deadline: null, testDate: "2025-10-05" }
       ],
       applyUrl: "https://ugadmissions.nust.edu.pk",
-      lastVerified: "2026-08-01"
+      lastVerified: "2026-08-21"
     }
   },
 
@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2026-04-11" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-08-01"
+      lastVerified: "2026-08-21"
     }
   },
 
@@ -128,7 +128,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
   {
@@ -162,7 +162,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
   {
@@ -196,7 +196,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
   {
@@ -228,7 +228,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
   {
@@ -264,7 +264,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
 
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
 
@@ -708,7 +708,7 @@ export const universities = [
       testName: "GIKI Entry Test",
       testDate: "2026-08-31",
       applyUrl: "https://giki.edu.pk/admissions/admissions-undergraduates/",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
 
@@ -749,7 +749,7 @@ export const universities = [
         { series: "Test II",   deadline: "2026-06-12", testDate: "2026-06-12" }
       ],
       applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
 
@@ -865,14 +865,14 @@ export const universities = [
     avgFee: "PKR 85,000 - 145,000 per semester",
     facilities: ["Library", "Sports Area", "Student Hostel", "Cafeteria", "Prayer Area", "Medical Faculty Building"],
     admissions: {
-      deadline: "2026-07-23",
+      deadline: "2026-09-02",
       testName: "BUET (Bahria Entry Test)",
-      testDate: "2026-07-27",
+      testDate: "2026-09-04",
       testSeries: [
-        { series: "BUET II",   deadline: null, testDate: "2026-07-27" }
+        { series: "BUET",   deadline: null, testDate: "2026-09-04" }
       ],
       applyUrl: "https://cms.bahria.edu.pk/Logins/candidate/Login.aspx",
-      lastVerified: "2026-08-01"
+      lastVerified: "2026-08-21"
     }
   },
 
@@ -917,7 +917,7 @@ export const universities = [
         { series: "Mar",   deadline: "2026-02-20", testDate: "2026-02-27" }
       ],
       applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
-      lastVerified: "2026-08-01"
+      lastVerified: "2026-08-21"
     }
   },
   {
@@ -954,7 +954,7 @@ export const universities = [
         { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2026-07-04" }
       ],
       applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
   {
@@ -1023,11 +1023,11 @@ export const universities = [
     avgFee: "PKR 86,000 - 115,000 per semester (per credit hour)",
     facilities: ["Library", "Aerospace Labs", "Sports Grounds", "Student Hostel", "Cafeteria", "Prayer Area", "Auditorium", "Air Force Affiliated Facilities"],
     admissions: {
-      deadline: "2026-08-06",
+      deadline: "2026-08-27",
       testName: "Air University Entry Test",
       testDate: "2026-07-05",
       applyUrl: "https://portals.au.edu.pk/admissions",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-08-21"
   }
   },
   {
@@ -1067,7 +1067,7 @@ export const universities = [
         { series: "Fall 2026 R2 LLB",   deadline: "2026-07-22", testDate: null }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
-      lastVerified: "2026-08-01"
+      lastVerified: "2026-08-21"
     }
   },
   {
@@ -1272,4 +1272,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-08-01";
+export const lastScraperRun = "2026-08-21";
