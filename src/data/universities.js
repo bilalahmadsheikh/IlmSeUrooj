@@ -46,7 +46,7 @@ export const universities = [
         { series: "Series I",   deadline: null, testDate: "2025-10-05" }
       ],
       applyUrl: "https://ugadmissions.nust.edu.pk",
-      lastVerified: "2026-08-21"
+      lastVerified: "2026-09-01"
     }
   },
 
@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2026-04-11" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-08-21"
+      lastVerified: "2026-09-01"
     }
   },
 
@@ -128,7 +128,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-01"
   }
   },
   {
@@ -162,7 +162,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-01"
   }
   },
   {
@@ -196,7 +196,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-01"
   }
   },
   {
@@ -228,7 +228,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-01"
   }
   },
   {
@@ -264,7 +264,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-01"
   }
   },
 
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-01"
   }
   },
 
@@ -1067,7 +1067,7 @@ export const universities = [
         { series: "Fall 2026 R2 LLB",   deadline: "2026-07-22", testDate: null }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
-      lastVerified: "2026-08-21"
+      lastVerified: "2026-09-01"
     }
   },
   {
@@ -1107,7 +1107,7 @@ export const universities = [
         { series: "BSEDS/BSM&T/BSFT",   deadline: null, testDate: "2026-07-12" }
       ],
       applyUrl: "https://itu.edu.pk/admissions",
-    lastVerified: "2026-08-01"
+    lastVerified: "2026-09-01"
   }
   }
 ];
@@ -1272,4 +1272,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-08-21";
+export const lastScraperRun = "2026-09-01";
