@@ -40,10 +40,10 @@ export const universities = [
       testName: "NET",
       testDate: "2025-10-05",
       testSeries: [
-        { series: "Series II",   deadline: "2026-02-25", testDate: "2026-01-31" },
-        { series: "Series III",   deadline: "2026-04-05", testDate: "2026-04-04" },
-        { series: "Series IV",   deadline: "2026-06-18", testDate: "2026-06-13" },
-        { series: "Series I",   deadline: null, testDate: "2025-10-05" }
+        { series: "Series I",   deadline: null, testDate: "2026-10-04" },
+        { series: "Series II",   deadline: null, testDate: null },
+        { series: "Series III",   deadline: null, testDate: null },
+        { series: "Series IV",   deadline: null, testDate: null }
       ],
       applyUrl: "https://ugadmissions.nust.edu.pk",
       lastVerified: "2026-09-01"
@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2026-04-11" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-09-01"
+      lastVerified: "2026-09-21"
     }
   },
 
@@ -128,7 +128,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-09-01"
+    lastVerified: "2026-09-21"
   }
   },
   {
@@ -162,7 +162,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-09-01"
+    lastVerified: "2026-09-21"
   }
   },
   {
@@ -196,7 +196,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-09-01"
+    lastVerified: "2026-09-21"
   }
   },
   {
@@ -228,7 +228,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-09-01"
+    lastVerified: "2026-09-21"
   }
   },
   {
@@ -264,7 +264,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-09-01"
+    lastVerified: "2026-09-21"
   }
   },
 
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-09-01"
+    lastVerified: "2026-09-21"
   }
   },
 
@@ -749,7 +749,7 @@ export const universities = [
         { series: "Test II",   deadline: "2026-06-12", testDate: "2026-06-12" }
       ],
       applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-21"
   }
   },
 
@@ -917,7 +917,7 @@ export const universities = [
         { series: "Mar",   deadline: "2026-02-20", testDate: "2026-02-27" }
       ],
       applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
-      lastVerified: "2026-08-21"
+      lastVerified: "2026-09-21"
     }
   },
   {
@@ -947,14 +947,14 @@ export const universities = [
     admissions: {
       deadline: "2026-05-13",
       testName: "AKU Entry Test",
-      testDate: "2026-07-04",
+      testDate: "2026-12-17",
       testSeries: [
-        { series: "BSc Arts and Sciences",   deadline: "2025-10-05", testDate: "2026-03-28" },
-        { series: "BEd",   deadline: "2026-02-10", testDate: "2026-03-28" },
-        { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2026-07-04" }
+        { series: "BSc Arts and Sciences",   deadline: "2025-10-05", testDate: "2026-12-17" },
+        { series: "BEd",   deadline: "2026-02-10", testDate: "2026-12-17" },
+        { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2026-12-17" }
       ],
       applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-08-21"
+    lastVerified: "2026-09-21"
   }
   },
   {
@@ -1067,7 +1067,7 @@ export const universities = [
         { series: "Fall 2026 R2 LLB",   deadline: "2026-07-22", testDate: null }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
-      lastVerified: "2026-09-01"
+      lastVerified: "2026-09-21"
     }
   },
   {
@@ -1107,7 +1107,7 @@ export const universities = [
         { series: "BSEDS/BSM&T/BSFT",   deadline: null, testDate: "2026-07-12" }
       ],
       applyUrl: "https://itu.edu.pk/admissions",
-    lastVerified: "2026-09-01"
+    lastVerified: "2026-09-21"
   }
   }
 ];
@@ -1272,4 +1272,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-09-01";
+export const lastScraperRun = "2026-09-21";
