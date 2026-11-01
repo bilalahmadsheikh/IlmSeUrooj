@@ -81,7 +81,7 @@ export const universities = [
     avgFee: "PKR 850,000 - 1,200,000 per semester (Rs. 41,700/CH)",
     facilities: ["Syed Babar Ali Library", "Sports Complex", "Swimming Pool", "Student Hostels", "Multiple Restaurants & Cafés", "Prayer Areas", "Health Center", "Amphitheater", "Business Incubator"],
     admissions: {
-      deadline: "2027-01-20",
+      deadline: "2027-01-27",
       testName: "LCAT",
       testDate: "2027-03-21",
       testSeries: [
@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2027-04-06" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-10-21"
+      lastVerified: "2026-11-01"
     }
   },
 
@@ -128,7 +128,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
   {
@@ -162,7 +162,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
   {
@@ -196,7 +196,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
   {
@@ -228,7 +228,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
   {
@@ -264,7 +264,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
 
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
 
@@ -749,7 +749,7 @@ export const universities = [
         { series: "Test II",   deadline: "2026-06-12", testDate: "2026-06-12" }
       ],
       applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
 
@@ -953,7 +953,7 @@ export const universities = [
         { series: "MBBS / BScN / ASDH",   deadline: "2026-05-13", testDate: "2027-01-05" }
       ],
       applyUrl: "https://akuross.aku.edu/psc/csonadm/EMPLOYEE/SA/c/AKU_OA_MENU.AKU_OA_LOGIN_CMP.GBL",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   },
   {
@@ -1058,15 +1058,16 @@ export const universities = [
     avgFee: "PKR 120,000 - 165,000 per semester",
     facilities: ["Library", "Media Production Studios", "Computer Labs", "Cafeteria", "Prayer Area", "Seminar Rooms", "Sports Area"],
     admissions: {
-      deadline: "2026-07-22",
+      deadline: "2027-01-05",
       testName: "SZABIST Admission Test",
-      testDate: "2026-02-14",
+      testDate: "2027-01-06",
       testSeries: [
         { series: "Fall 2026 R1",   deadline: "2026-02-12", testDate: "2026-02-14" },
-        { series: "Fall 2026 R2 LLB",   deadline: "2026-07-22", testDate: null }
+        { series: "Fall 2026 R2",   deadline: "2026-07-22", testDate: null },
+        { series: "Spring 2027 R2 LLB",   deadline: "2027-01-05", testDate: "2027-01-06" }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
-      lastVerified: "2026-10-21"
+      lastVerified: "2026-11-01"
     }
   },
   {
@@ -1106,7 +1107,7 @@ export const universities = [
         { series: "BSEDS/BSM&T/BSFT",   deadline: null, testDate: "2026-07-12" }
       ],
       applyUrl: "https://itu.edu.pk/admissions",
-    lastVerified: "2026-10-21"
+    lastVerified: "2026-11-01"
   }
   }
 ];
@@ -1271,4 +1272,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-10-21";
+export const lastScraperRun = "2026-11-01";
