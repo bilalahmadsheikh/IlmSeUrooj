@@ -90,7 +90,7 @@ export const universities = [
         { series: "ACT",   deadline: null, testDate: "2027-04-06" }
       ],
       applyUrl: "https://admissions.lums.edu.pk",
-      lastVerified: "2026-11-01"
+      lastVerified: "2026-11-21"
     }
   },
 
@@ -128,7 +128,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   },
   {
@@ -162,7 +162,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   },
   {
@@ -196,7 +196,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   },
   {
@@ -228,7 +228,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   },
   {
@@ -264,7 +264,7 @@ export const universities = [
       testName: "FAST NU Test",
       testDate: "2026-06-29",
       applyUrl: "https://admissions.nu.edu.pk",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   },
 
@@ -600,7 +600,7 @@ export const universities = [
         { series: "BBA",   deadline: "2026-06-10", testDate: "2026-06-21" }
       ],
       applyUrl: "https://onlineadmission.iba.edu.pk",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   },
 
@@ -749,7 +749,7 @@ export const universities = [
         { series: "Test II",   deadline: "2026-06-12", testDate: "2026-06-12" }
       ],
       applyUrl: "https://red.pieas.edu.pk/pieasadmission/lgn.aspx",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   },
 
@@ -906,9 +906,9 @@ export const universities = [
     avgFee: "PKR 335,000 - 395,000 per semester (Engineering)",
     facilities: ["Habib University Library", "Innovation Labs", "Cafeteria", "Prayer Area", "Sports Area", "Maker Space", "Seminar Halls"],
     admissions: {
-      deadline: "2026-10-21",
+      deadline: "2026-11-20",
       testName: "Habib Entrance Exam",
-      testDate: "2026-10-26",
+      testDate: "2026-11-25",
       testSeries: [
         { series: "Nov",   deadline: "2026-10-21", testDate: "2026-10-26" },
         { series: "Dec",   deadline: "2026-11-20", testDate: "2026-11-25" },
@@ -916,7 +916,7 @@ export const universities = [
         { series: "Feb",   deadline: "2027-01-21", testDate: "2027-01-27" }
       ],
       applyUrl: "https://eapplication.habib.edu.pk/login.aspx",
-      lastVerified: "2026-10-21"
+      lastVerified: "2026-11-21"
     }
   },
   {
@@ -1067,7 +1067,7 @@ export const universities = [
         { series: "Spring 2027 R2 LLB",   deadline: "2027-01-05", testDate: "2027-01-06" }
       ],
       applyUrl: "https://admissions.szabist.edu.pk",
-      lastVerified: "2026-11-01"
+      lastVerified: "2026-11-21"
     }
   },
   {
@@ -1107,7 +1107,7 @@ export const universities = [
         { series: "BSEDS/BSM&T/BSFT",   deadline: null, testDate: "2026-07-12" }
       ],
       applyUrl: "https://itu.edu.pk/admissions",
-    lastVerified: "2026-11-01"
+    lastVerified: "2026-11-21"
   }
   }
 ];
@@ -1272,4 +1272,4 @@ export const filterOptions = {
 };
 
 // Auto-updated by CI/CD pipeline — do not edit manually
-export const lastScraperRun = "2026-11-01";
+export const lastScraperRun = "2026-11-21";
